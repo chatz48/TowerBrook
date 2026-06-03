@@ -9,7 +9,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit --pretty false",
     "ingest:validate": "node scripts/validate-ingest.mjs",
-    "db:seed": "node scripts/seed-supabase.mjs"
+    "db:seed": "node scripts/seed-supabase.mjs",
+    "db:seed:graph": "node scripts/seed-people-graph.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.100.1",

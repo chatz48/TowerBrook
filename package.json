@@ -11,6 +11,7 @@
     "typecheck": "pnpm --dir apps/web typecheck",
     "ingest:validate": "pnpm --dir apps/web ingest:validate",
     "db:seed": "pnpm --dir apps/web db:seed",
+    "db:seed:graph": "pnpm --dir apps/web db:seed:graph",
     "api:dev": "cd apps/intelligence-api && PY=$([ -x .venv/bin/python ] && echo .venv/bin/python || echo python3) && $PY -m uvicorn app.main:app --reload --port 8000",
     "api:test": "cd apps/intelligence-api && PY=$([ -x .venv/bin/python ] && echo .venv/bin/python || echo python3) && $PY -m pytest",
     "api:evaluate": "cd apps/intelligence-api && PY=$([ -x .venv/bin/python ] && echo .venv/bin/python || echo python3) && $PY -m app.cli.evaluate",
