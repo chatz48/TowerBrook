@@ -1,9 +1,15 @@
 import { extractDealWithModel } from "@/lib/deal-ai";
 import { hasDealDatabase, persistDealIngestion } from "@/lib/deal-db";
 import { runDealEnrichment } from "@/lib/deal-enrichment";
+import { callIntelligenceApi, hasIntelligenceApi } from "@/lib/intelligence-api";
 
 export async function POST(request: Request) {
   try {
+    if (hasIntelligenceApi()) {
+      const graphResult = await forwardToIntelligenceApi(request.clone());
+      if (graphResult) return Response.json(graphResult);
+    }
+
     const body = await readIngestRequest(request);
 
     if (!body.text?.trim()) {
@@ -54,6 +60,29 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+}
+
+async function forwardToIntelligenceApi(request: Request) {
+  const contentType = request.headers.get("content-type") ?? "";
+  if (contentType.includes("multipart/form-data")) {
+    const form = await request.formData();
+    return callIntelligenceApi("/ingest/source", {
+      method: "POST",
+      body: form,
+    });
+  }
+  const body = await request.json();
+  return callIntelligenceApi("/ingest/json", {
+    method: "POST",
+    body: JSON.stringify({
+      url: body.url,
+      title: body.title,
+      text: body.text,
+      source_type: "user_upload",
+      theme_id: body.themeId,
+      metadata: { enrich: body.enrich },
+    }),
+  });
 }
 
 async function readIngestRequest(request: Request): Promise<{

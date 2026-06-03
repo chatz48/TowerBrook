@@ -26,11 +26,30 @@ interface DraftDeal {
 }
 
 interface IngestResult {
-  deal: DraftDeal;
-  facts: DraftFact[];
-  reviewCandidates: DraftFact[];
-  relationshipCandidates: string[];
-  note: string;
+  deal?: DraftDeal;
+  facts?: DraftFact[];
+  reviewCandidates?: DraftFact[];
+  relationshipCandidates?: string[];
+  note?: string;
+  source?: {
+    title: string;
+    url?: string;
+    source_type?: string;
+  };
+  extraction?: {
+    people?: unknown[];
+    companies?: unknown[];
+    relationships?: unknown[];
+    facts?: unknown[];
+    citations?: unknown[];
+  };
+  persisted?: {
+    people_created?: number;
+    companies_created?: number;
+    relationships_created?: number;
+    facts_created?: number;
+    chunks_created?: number;
+  };
 }
 
 const SAMPLE_TEXT =
@@ -71,11 +90,11 @@ export default function IngestPage() {
   return (
     <div className="ee-shell grid lg:grid-cols-[390px_minmax(0,1fr)]">
       <aside className="border-b border-line bg-white p-5 lg:border-b-0 lg:border-r">
-        <div className="ee-label text-ink">User deal ingestion</div>
-        <h1 className="mt-2 text-[24px] font-semibold tracking-tight">Extract a deal rubric</h1>
+        <div className="ee-label text-ink">Graph source ingestion</div>
+        <h1 className="mt-2 text-[24px] font-semibold tracking-tight">Add source evidence</h1>
         <p className="mt-2 text-[13px] leading-relaxed text-ink-soft">
-          Paste a press release, advisor page, company statement or extracted PDF text.
-          The draft output stays review-gated until a user approves facts.
+          Paste a press release, advisor page, company statement, call note or extracted PDF text.
+          The source is parsed, embedded, extracted and sorted into the graph automatically.
         </p>
 
         <label className="mt-5 block text-[12px] font-medium text-ink-soft">
@@ -137,7 +156,7 @@ export default function IngestPage() {
           disabled={loading}
           className="ee-button ee-button-primary mt-4 w-full disabled:opacity-50"
         >
-        {loading ? "Extracting..." : "Extract and persist deal facts"}
+        {loading ? "Extracting..." : "Extract and persist graph facts"}
         </button>
 
         <div className="mt-4 grid grid-cols-2 gap-2">
@@ -145,7 +164,7 @@ export default function IngestPage() {
             Open deals
           </Link>
           <Link href="/discover" className="ee-button ee-button-secondary">
-            Review queue
+            Research jobs
           </Link>
         </div>
       </aside>
@@ -175,7 +194,7 @@ export default function IngestPage() {
               ))}
             </div>
           </section>
-        ) : (
+        ) : result.deal ? (
           <div className="space-y-5">
             <section className="ee-panel rounded-lg p-5">
               <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
@@ -191,7 +210,7 @@ export default function IngestPage() {
                   <DraftMetric label="Completeness" value={`${Math.round(result.deal.completionScore * 100)}%`} />
                   <DraftMetric label="Confidence" value={`${(result.deal.confidence * 100).toFixed(0)}%`} />
                   <DraftMetric label="Missing" value={String(result.deal.missingFacts.length)} />
-                  <DraftMetric label="Review facts" value={String(result.reviewCandidates.length)} />
+                  <DraftMetric label="Facts" value={String(result.reviewCandidates?.length ?? 0)} />
                 </div>
               </div>
             </section>
@@ -212,7 +231,7 @@ export default function IngestPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {result.facts.map((fact) => (
+                    {(result.facts ?? []).map((fact) => (
                       <tr key={fact.id}>
                         <td>{fact.factType.replaceAll("_", " ")}</td>
                         <td>{fact.factValue}</td>
@@ -234,7 +253,50 @@ export default function IngestPage() {
             <section className="grid gap-5 lg:grid-cols-3">
               <Checklist title="Missing facts" items={result.deal.missingFacts.map((item) => item.replaceAll("_", " "))} />
               <Checklist title="Follow-up searches" items={result.deal.followUpSearches} />
-              <Checklist title="Relationship candidates" items={result.relationshipCandidates} />
+              <Checklist title="Relationship candidates" items={result.relationshipCandidates ?? []} />
+            </section>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            <section className="ee-panel rounded-lg p-5">
+              <div className="ee-label text-ink">Graph ingestion result</div>
+              <h2 className="mt-2 text-[22px] font-semibold">
+                {result.source?.title ?? "Submitted source"}
+              </h2>
+              {result.source?.url ? (
+                <a
+                  href={result.source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ee-link mt-2 inline-flex text-[13px]"
+                >
+                  {result.source.url}
+                </a>
+              ) : null}
+              <div className="mt-5 grid gap-3 md:grid-cols-5">
+                <DraftMetric label="People" value={String(result.persisted?.people_created ?? 0)} />
+                <DraftMetric label="Companies" value={String(result.persisted?.companies_created ?? 0)} />
+                <DraftMetric label="Relationships" value={String(result.persisted?.relationships_created ?? 0)} />
+                <DraftMetric label="Facts" value={String(result.persisted?.facts_created ?? 0)} />
+                <DraftMetric label="Chunks" value={String(result.persisted?.chunks_created ?? 0)} />
+              </div>
+            </section>
+
+            <section className="ee-panel rounded-lg p-5">
+              <div className="ee-label text-ink">Extracted graph objects</div>
+              <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                {[
+                  ["People", result.extraction?.people?.length ?? 0],
+                  ["Companies", result.extraction?.companies?.length ?? 0],
+                  ["Relationships", result.extraction?.relationships?.length ?? 0],
+                  ["Citations", result.extraction?.citations?.length ?? 0],
+                ].map(([label, value]) => (
+                  <div key={String(label)} className="rounded-md border border-line bg-paper p-4">
+                    <div className="text-[11px] uppercase tracking-[0.12em] text-ink-faint">{label}</div>
+                    <div className="mt-2 text-[22px] font-semibold tabular-nums">{value}</div>
+                  </div>
+                ))}
+              </div>
             </section>
           </div>
         )}

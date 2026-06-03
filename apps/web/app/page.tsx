@@ -71,7 +71,7 @@ export default function Home() {
                 Ask copilot
               </Link>
               <Link href="/discover" className="ee-button ee-button-secondary flex-1">
-                Review queue
+                Research jobs
               </Link>
             </div>
           </section>

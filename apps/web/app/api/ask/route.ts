@@ -6,6 +6,7 @@ import { COMPANY_CATEGORY_LABEL, EXPERT_TYPE_LABEL } from "@/lib/labels";
 import { complete, hasModel, MODEL } from "@/lib/llm";
 import { rankExperts } from "@/lib/score";
 import { getTheme, THEMES } from "@/lib/themes";
+import { callIntelligenceApi, hasIntelligenceApi } from "@/lib/intelligence-api";
 import type { Company, Deal, Expert, ExpertType, Source, ThemeId } from "@/lib/types";
 
 type SourceRecord = {
@@ -92,6 +93,8 @@ type AskResponse = {
   }[];
   grounded: boolean;
   model: string;
+  agentic_answer?: string;
+  tool_calls?: unknown[];
 };
 
 type AskRequest = {
@@ -129,18 +132,51 @@ export async function POST(request: Request) {
     }
 
     const baseline = await buildStructuredAnswer(question, body.filters ?? {});
+    const agentic = await maybeAskIntelligenceApi(question, body.filters ?? {});
+    const enrichedBaseline = agentic
+      ? {
+          ...baseline,
+          agentic_answer: agentic.answer,
+          tool_calls: agentic.tool_calls,
+          grounded: true,
+          model: `${baseline.model} + intelligence-api`,
+        }
+      : baseline;
 
     if (!hasModel()) {
-      return Response.json({ ...baseline, grounded: false, model: "deterministic-fallback" });
+      return Response.json({
+        ...enrichedBaseline,
+        grounded: Boolean(agentic),
+        model: agentic ? "deterministic-fallback + intelligence-api" : "deterministic-fallback",
+      });
     }
 
-    const refined = await refineWithModel(baseline);
-    return Response.json(refined);
+    const refined = await refineWithModel(enrichedBaseline);
+    return Response.json({ ...refined, agentic_answer: agentic?.answer, tool_calls: agentic?.tool_calls });
   } catch (e) {
     return Response.json(
       { error: e instanceof Error ? e.message : "Failed to answer" },
       { status: 400 },
     );
+  }
+}
+
+async function maybeAskIntelligenceApi(
+  question: string,
+  filters: NonNullable<AskRequest["filters"]>,
+): Promise<{ answer: string; tool_calls: unknown[] } | null> {
+  if (!hasIntelligenceApi()) return null;
+  try {
+    return await callIntelligenceApi<{ answer: string; tool_calls: unknown[] }>("/chat", {
+      method: "POST",
+      body: JSON.stringify({
+        message: question,
+        theme_id: filters.theme,
+        tools: ["rag_search_sources", "rag_search_entities"],
+      }),
+    });
+  } catch {
+    return null;
   }
 }
 

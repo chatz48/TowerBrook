@@ -45,7 +45,7 @@ export default function SourcesPage() {
               Registered sources ({sourceRegister.sources.length})
             </h2>
             <span className="text-[12px] text-ink-faint">
-              Review queue: /discover
+              Research jobs: /discover
             </span>
           </div>
           <div className="overflow-x-auto">

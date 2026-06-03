@@ -19,7 +19,7 @@ export default function PointOfView({ brief }: { brief: ThemeBrief }) {
     return [
       narrative,
       `${brief.stats.targets} independent companies remain actionable; ${brief.stats.advisers} advisors and service providers provide deal-process context.`,
-      `${topCluster} is the densest coverage area, but undercovered specialties should feed the discovery review queue.`,
+      `${topCluster} is the densest coverage area, but undercovered specialties should feed the discovery job queue.`,
       `Start with ${topCall} and sequence calls across operators, founders, investors, bankers and lawyers to avoid a single-perspective thesis.`,
       exitText,
     ];
