@@ -11,8 +11,15 @@
     "typecheck": "pnpm --dir apps/web typecheck",
     "ingest:validate": "pnpm --dir apps/web ingest:validate",
     "db:seed": "pnpm --dir apps/web db:seed",
-    "api:dev": "cd apps/intelligence-api && uvicorn app.main:app --reload --port 8000",
-    "api:test": "cd apps/intelligence-api && pytest",
-    "discovery:dry-run": "cd apps/intelligence-api && python -m app.cli.discovery --theme grid-infrastructure --dry-run"
+    "api:dev": "cd apps/intelligence-api && PY=$([ -x .venv/bin/python ] && echo .venv/bin/python || echo python3) && $PY -m uvicorn app.main:app --reload --port 8000",
+    "api:test": "cd apps/intelligence-api && PY=$([ -x .venv/bin/python ] && echo .venv/bin/python || echo python3) && $PY -m pytest",
+    "api:evaluate": "cd apps/intelligence-api && PY=$([ -x .venv/bin/python ] && echo .venv/bin/python || echo python3) && $PY -m app.cli.evaluate",
+    "discovery:dry-run": "cd apps/intelligence-api && PY=$([ -x .venv/bin/python ] && echo .venv/bin/python || echo python3) && $PY -m app.cli.discovery --theme grid-infrastructure --dry-run"
+  },
+  "devDependencies": {
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "next": "16.2.6",
+    "typescript": "^5"
   }
 }
