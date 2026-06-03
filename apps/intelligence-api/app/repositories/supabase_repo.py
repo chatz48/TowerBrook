@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 from uuid import uuid4
+import hashlib
 
 from supabase import Client, create_client
 
@@ -91,7 +92,11 @@ class SupabaseRepository:
             self.memory_jobs[job_id].update(values)
 
     def upsert_source(self, source: dict[str, Any]) -> SourceRecord:
+        external_id = source.get("external_id") or _stable_id(
+            source.get("url") or source.get("title") or source.get("raw_text") or str(uuid4())
+        )
         payload = {
+            "external_id": external_id,
             "title": source.get("title") or source.get("url") or "Untitled source",
             "url": source.get("url"),
             "publisher": source.get("publisher"),
@@ -101,7 +106,7 @@ class SupabaseRepository:
             "metadata": source.get("metadata", {}),
         }
         if self.client:
-            rows = self.client.table("sources").upsert(payload, on_conflict="url").execute().data
+            rows = self.client.table("sources").upsert(payload, on_conflict="external_id").execute().data
             return SourceRecord(**rows[0])
 
         source_id = str(uuid4())
@@ -190,3 +195,7 @@ class SupabaseRepository:
 
 
 repo = SupabaseRepository()
+
+
+def _stable_id(value: str) -> str:
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
