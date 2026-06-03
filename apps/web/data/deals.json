@@ -1,0 +1,502 @@
+[
+  {
+    "id": "bp-lightsource-bp-remaining-stake",
+    "name": "bp acquires remaining stake in Lightsource bp",
+    "theme": "clean-energy-advisory",
+    "geography": "UK / Europe",
+    "status": "completed",
+    "dealType": "acquisition",
+    "announcementDate": "2023",
+    "targetCompanyId": "lightsource-bp",
+    "buyerCompanyId": "bp",
+    "parties": [
+      {
+        "role": "target",
+        "name": "Lightsource bp",
+        "companyId": "lightsource-bp",
+        "sourceId": "bp-lsbp-1"
+      },
+      {
+        "role": "buyer",
+        "name": "bp",
+        "companyId": "bp",
+        "sourceId": "bp-lsbp-1"
+      }
+    ],
+    "advisors": [],
+    "facts": [
+      {
+        "id": "bp-lsbp-f1",
+        "dealId": "bp-lightsource-bp-remaining-stake",
+        "factType": "target_company",
+        "factValue": "Lightsource bp",
+        "normalizedValue": "lightsource-bp",
+        "sourceId": "bp-lsbp-1",
+        "evidenceChunkId": "bp-lsbp-e1",
+        "evidenceText": "bp acquired the remaining 50.03% of Lightsource bp.",
+        "confidence": 0.9,
+        "extractionMethod": "curated",
+        "reviewStatus": "verified"
+      },
+      {
+        "id": "bp-lsbp-f2",
+        "dealId": "bp-lightsource-bp-remaining-stake",
+        "factType": "buyer",
+        "factValue": "bp",
+        "normalizedValue": "bp",
+        "sourceId": "bp-lsbp-1",
+        "evidenceChunkId": "bp-lsbp-e1",
+        "evidenceText": "bp took full ownership of Lightsource bp.",
+        "confidence": 0.88,
+        "extractionMethod": "curated",
+        "reviewStatus": "verified"
+      },
+      {
+        "id": "bp-lsbp-f3",
+        "dealId": "bp-lightsource-bp-remaining-stake",
+        "factType": "stake_acquired",
+        "factValue": "Remaining 50.03%",
+        "normalizedValue": "50.03",
+        "sourceId": "bp-lsbp-1",
+        "evidenceChunkId": "bp-lsbp-e2",
+        "evidenceText": "The remaining stake was 50.03%.",
+        "confidence": 0.86,
+        "extractionMethod": "curated",
+        "reviewStatus": "verified"
+      },
+      {
+        "id": "bp-lsbp-f4",
+        "dealId": "bp-lightsource-bp-remaining-stake",
+        "factType": "equity_value",
+        "factValue": "£254m",
+        "normalizedValue": "254000000 GBP",
+        "sourceId": "bp-lsbp-1",
+        "evidenceChunkId": "bp-lsbp-e2",
+        "evidenceText": "The reported consideration for the remaining stake was £254m.",
+        "confidence": 0.84,
+        "extractionMethod": "curated",
+        "reviewStatus": "verified"
+      },
+      {
+        "id": "bp-lsbp-f5",
+        "dealId": "bp-lightsource-bp-remaining-stake",
+        "factType": "financial_advisor",
+        "factValue": "not_disclosed",
+        "confidence": 0.7,
+        "extractionMethod": "curated",
+        "reviewStatus": "not_disclosed"
+      }
+    ],
+    "sourceIds": ["bp-lsbp-1"],
+    "sources": [
+      {
+        "title": "bp takes full ownership of Lightsource bp",
+        "url": "https://taiyangnews.info/people/lightsource-bp-new-ceo-joaquin-oliveira",
+        "publisher": "TaiyangNews"
+      }
+    ],
+    "investmentRelevance": "Solar-development platform exit comparable showing how a strategic acquirer values scaled renewables origination, development and operating capability.",
+    "strategicRationale": "bp moved from joint ownership to full control of a solar development platform.",
+    "companiesSurfaced": ["lightsource-bp", "bp"],
+    "expertsSurfaced": ["nick-boyle"],
+    "comparableDealIds": ["mizuho-augusta-co-acquisition"],
+    "missingFacts": [
+      "completion_date",
+      "financial_advisor_to_buyer",
+      "financial_advisor_to_seller",
+      "legal_counsel_to_buyer",
+      "legal_counsel_to_seller",
+      "debt_financing"
+    ],
+    "followUpSearches": [
+      "\"Lightsource bp\" bp acquisition financial advisor",
+      "\"Lightsource bp\" bp legal counsel transaction",
+      "\"Lightsource bp\" bp completion date"
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "mizuho-augusta-co-acquisition",
+    "name": "Mizuho acquires Augusta & Co",
+    "theme": "clean-energy-advisory",
+    "geography": "UK / Europe",
+    "status": "completed",
+    "dealType": "acquisition",
+    "completionDate": "2025-07-01",
+    "targetCompanyId": "augusta-co",
+    "parties": [
+      {
+        "role": "target",
+        "name": "Augusta & Co",
+        "companyId": "augusta-co",
+        "sourceId": "mizuho-augusta-1"
+      },
+      {
+        "role": "buyer",
+        "name": "Mizuho",
+        "sourceId": "mizuho-augusta-1"
+      },
+      {
+        "role": "management",
+        "name": "Mortimer Menzel",
+        "personId": "mortimer-menzel",
+        "note": "Co-founder and managing partner linked to Augusta & Co."
+      },
+      {
+        "role": "management",
+        "name": "James Knight",
+        "personId": "james-knight",
+        "note": "Co-founder and managing partner linked to Augusta & Co."
+      }
+    ],
+    "advisors": [],
+    "facts": [
+      {
+        "id": "mizuho-augusta-f1",
+        "dealId": "mizuho-augusta-co-acquisition",
+        "factType": "target_company",
+        "factValue": "Augusta & Co",
+        "normalizedValue": "augusta-co",
+        "sourceId": "mizuho-augusta-1",
+        "evidenceChunkId": "mizuho-augusta-e1",
+        "evidenceText": "Mizuho completed its acquisition of Augusta & Co.",
+        "confidence": 0.9,
+        "extractionMethod": "curated",
+        "reviewStatus": "verified"
+      },
+      {
+        "id": "mizuho-augusta-f2",
+        "dealId": "mizuho-augusta-co-acquisition",
+        "factType": "buyer",
+        "factValue": "Mizuho",
+        "sourceId": "mizuho-augusta-1",
+        "evidenceChunkId": "mizuho-augusta-e1",
+        "evidenceText": "Mizuho completed the acquisition.",
+        "confidence": 0.9,
+        "extractionMethod": "curated",
+        "reviewStatus": "verified"
+      },
+      {
+        "id": "mizuho-augusta-f3",
+        "dealId": "mizuho-augusta-co-acquisition",
+        "factType": "completion_date",
+        "factValue": "2025-07-01",
+        "normalizedValue": "2025-07-01",
+        "sourceId": "mizuho-augusta-1",
+        "evidenceChunkId": "mizuho-augusta-e2",
+        "evidenceText": "The completion source is dated July 2025.",
+        "confidence": 0.82,
+        "extractionMethod": "curated",
+        "reviewStatus": "verified"
+      },
+      {
+        "id": "mizuho-augusta-f4",
+        "dealId": "mizuho-augusta-co-acquisition",
+        "factType": "enterprise_value",
+        "factValue": "not_disclosed",
+        "confidence": 0.72,
+        "extractionMethod": "curated",
+        "reviewStatus": "not_disclosed"
+      }
+    ],
+    "sourceIds": ["mizuho-augusta-1", "mizuho-augusta-2"],
+    "sources": [
+      {
+        "title": "Mizuho completes acquisition of Augusta & Co",
+        "url": "https://www.mizuhogroup.com/emea/news/2025/mizuho-completes-acquisition-of-augusta--co.html",
+        "publisher": "Mizuho"
+      },
+      {
+        "title": "Augusta & Co advisory team",
+        "url": "https://augustaco.com/advisory-team/",
+        "publisher": "Augusta & Co"
+      }
+    ],
+    "investmentRelevance": "Strategic acquisition of a specialist energy-transition advisory boutique, useful for mapping banker access and renewables transaction flow.",
+    "strategicRationale": "Mizuho added a specialist renewables advisory franchise to broaden energy-transition M&A coverage.",
+    "companiesSurfaced": ["augusta-co"],
+    "expertsSurfaced": ["mortimer-menzel", "james-knight"],
+    "comparableDealIds": ["bp-lightsource-bp-remaining-stake"],
+    "missingFacts": [
+      "announcement_date",
+      "enterprise_value",
+      "financial_advisor_to_seller",
+      "legal_counsel_to_buyer",
+      "legal_counsel_to_seller"
+    ],
+    "followUpSearches": [
+      "\"Mizuho\" \"Augusta & Co\" financial advisor",
+      "\"Mizuho\" \"Augusta & Co\" legal counsel",
+      "\"Mizuho\" \"Augusta & Co\" valuation"
+    ],
+    "confidence": 0.86
+  },
+  {
+    "id": "badger-meter-smartcover-acquisition",
+    "name": "Badger Meter acquires SmartCover Systems",
+    "theme": "smart-water",
+    "geography": "United States",
+    "status": "completed",
+    "dealType": "acquisition",
+    "announcementDate": "2025-01-31",
+    "completionDate": "2025-01-31",
+    "targetCompanyId": "smartcover",
+    "buyerCompanyId": "badger-meter",
+    "sellerCompanyId": "xpv-water-partners",
+    "parties": [
+      {
+        "role": "target",
+        "name": "SmartCover Systems",
+        "companyId": "smartcover",
+        "sourceId": "smartcover-1"
+      },
+      {
+        "role": "buyer",
+        "name": "Badger Meter",
+        "companyId": "badger-meter",
+        "sourceId": "smartcover-1"
+      },
+      {
+        "role": "seller",
+        "name": "XPV Water Partners",
+        "companyId": "xpv-water-partners",
+        "sourceId": "smartcover-2"
+      }
+    ],
+    "advisors": [
+      {
+        "role": "financial-advisor-seller",
+        "name": "Houlihan Lokey",
+        "companyId": "houlihan-lokey",
+        "sourceId": "smartcover-3"
+      }
+    ],
+    "facts": [
+      {
+        "id": "smartcover-f1",
+        "dealId": "badger-meter-smartcover-acquisition",
+        "factType": "target_company",
+        "factValue": "SmartCover Systems",
+        "normalizedValue": "smartcover",
+        "sourceId": "smartcover-1",
+        "evidenceChunkId": "smartcover-e1",
+        "evidenceText": "Badger Meter acquired SmartCover Systems.",
+        "confidence": 0.94,
+        "extractionMethod": "curated",
+        "reviewStatus": "verified"
+      },
+      {
+        "id": "smartcover-f2",
+        "dealId": "badger-meter-smartcover-acquisition",
+        "factType": "buyer",
+        "factValue": "Badger Meter",
+        "normalizedValue": "badger-meter",
+        "sourceId": "smartcover-1",
+        "evidenceChunkId": "smartcover-e1",
+        "evidenceText": "Badger Meter was the buyer.",
+        "confidence": 0.92,
+        "extractionMethod": "curated",
+        "reviewStatus": "verified"
+      },
+      {
+        "id": "smartcover-f3",
+        "dealId": "badger-meter-smartcover-acquisition",
+        "factType": "seller",
+        "factValue": "XPV Water Partners",
+        "normalizedValue": "xpv-water-partners",
+        "sourceId": "smartcover-2",
+        "evidenceChunkId": "smartcover-e2",
+        "evidenceText": "XPV Water Partners announced the sale of SmartCover to Badger Meter.",
+        "confidence": 0.88,
+        "extractionMethod": "curated",
+        "reviewStatus": "verified"
+      },
+      {
+        "id": "smartcover-f4",
+        "dealId": "badger-meter-smartcover-acquisition",
+        "factType": "enterprise_value",
+        "factValue": "$185m",
+        "normalizedValue": "185000000 USD",
+        "sourceId": "smartcover-1",
+        "evidenceChunkId": "smartcover-e3",
+        "evidenceText": "Badger Meter acquired SmartCover Systems for $185m.",
+        "confidence": 0.9,
+        "extractionMethod": "curated",
+        "reviewStatus": "verified"
+      },
+      {
+        "id": "smartcover-f5",
+        "dealId": "badger-meter-smartcover-acquisition",
+        "factType": "revenue",
+        "factValue": "Approximately $35m annual revenue",
+        "normalizedValue": "35000000 USD",
+        "sourceId": "smartcover-1",
+        "evidenceChunkId": "smartcover-e4",
+        "evidenceText": "The company had approximately $35m of annual revenue at acquisition.",
+        "confidence": 0.86,
+        "extractionMethod": "curated",
+        "reviewStatus": "verified"
+      },
+      {
+        "id": "smartcover-f6",
+        "dealId": "badger-meter-smartcover-acquisition",
+        "factType": "financial_advisor_to_seller",
+        "factValue": "Houlihan Lokey",
+        "normalizedValue": "houlihan-lokey",
+        "sourceId": "smartcover-3",
+        "evidenceChunkId": "smartcover-e5",
+        "evidenceText": "Houlihan Lokey advised SmartCover Systems.",
+        "confidence": 0.84,
+        "extractionMethod": "curated",
+        "reviewStatus": "verified"
+      }
+    ],
+    "sourceIds": ["smartcover-1", "smartcover-2", "smartcover-3"],
+    "sources": [
+      {
+        "title": "Badger Meter Extends BlueEdge Suite with Acquisition of SmartCover Systems",
+        "url": "https://www.badgermeter.com/newsroom/smartcover/",
+        "publisher": "Badger Meter"
+      },
+      {
+        "title": "XPV Water Partners Announces Sale of SmartCover to Badger Meter",
+        "url": "https://xpvwaterpartners.com/insights/news/2025/01/31/xpv-water-partners-announces-sale-of-smartcover-to-badger-meter",
+        "publisher": "XPV Water Partners"
+      },
+      {
+        "title": "Houlihan Lokey Advises SmartCover Systems",
+        "url": "https://hl.com/about-us/transactions/smartcover-xpv-water-partners-badger-meter/",
+        "publisher": "Houlihan Lokey"
+      }
+    ],
+    "investmentRelevance": "Strong smart-water precedent with named buyer, seller, banker, revenue scale and transaction value, giving TowerBrook a compact comp for wastewater monitoring and analytics.",
+    "strategicRationale": "Badger Meter extended its BlueEdge suite into collection-system monitoring, sewer, lift-station and stormwater analytics.",
+    "companiesSurfaced": ["smartcover", "badger-meter", "xpv-water-partners", "houlihan-lokey"],
+    "expertsSurfaced": ["corey-williams", "sam-saintonge"],
+    "comparableDealIds": ["autodesk-innovyze-acquisition"],
+    "missingFacts": [
+      "legal_counsel_to_buyer",
+      "legal_counsel_to_seller",
+      "debt_financing",
+      "valuation_multiple"
+    ],
+    "followUpSearches": [
+      "\"SmartCover\" \"Badger Meter\" legal counsel",
+      "\"SmartCover\" \"Badger Meter\" debt financing",
+      "\"SmartCover\" \"Badger Meter\" valuation multiple"
+    ],
+    "confidence": 0.91
+  },
+  {
+    "id": "enverus-pearl-street-acquisition",
+    "name": "Enverus acquires Pearl Street Technologies",
+    "theme": "grid-infrastructure",
+    "geography": "United States",
+    "status": "completed",
+    "dealType": "acquisition",
+    "announcementDate": "2025-03-13",
+    "targetCompanyId": "pearl-street-technologies",
+    "buyerCompanyId": "enverus",
+    "parties": [
+      {
+        "role": "target",
+        "name": "Pearl Street Technologies",
+        "companyId": "pearl-street-technologies",
+        "sourceId": "pearl-1"
+      },
+      {
+        "role": "buyer",
+        "name": "Enverus",
+        "companyId": "enverus",
+        "sourceId": "pearl-1"
+      },
+      {
+        "role": "management",
+        "name": "David Bromberg",
+        "personId": "david-bromberg",
+        "note": "Co-founder and CEO surfaced through the target company record."
+      }
+    ],
+    "advisors": [],
+    "facts": [
+      {
+        "id": "pearl-f1",
+        "dealId": "enverus-pearl-street-acquisition",
+        "factType": "target_company",
+        "factValue": "Pearl Street Technologies",
+        "normalizedValue": "pearl-street-technologies",
+        "sourceId": "pearl-1",
+        "evidenceChunkId": "pearl-e1",
+        "evidenceText": "Enverus acquired Pearl Street Technologies.",
+        "confidence": 0.92,
+        "extractionMethod": "curated",
+        "reviewStatus": "verified"
+      },
+      {
+        "id": "pearl-f2",
+        "dealId": "enverus-pearl-street-acquisition",
+        "factType": "buyer",
+        "factValue": "Enverus",
+        "normalizedValue": "enverus",
+        "sourceId": "pearl-1",
+        "evidenceChunkId": "pearl-e1",
+        "evidenceText": "Enverus was the buyer.",
+        "confidence": 0.9,
+        "extractionMethod": "curated",
+        "reviewStatus": "verified"
+      },
+      {
+        "id": "pearl-f3",
+        "dealId": "enverus-pearl-street-acquisition",
+        "factType": "market_thesis",
+        "factValue": "Interconnection queue bottlenecks and transmission study automation",
+        "sourceId": "pearl-1",
+        "evidenceChunkId": "pearl-e2",
+        "evidenceText": "Enverus cited grid reliability and queue bottlenecks as acquisition rationale.",
+        "confidence": 0.84,
+        "extractionMethod": "curated",
+        "reviewStatus": "verified"
+      },
+      {
+        "id": "pearl-f4",
+        "dealId": "enverus-pearl-street-acquisition",
+        "factType": "enterprise_value",
+        "factValue": "not_disclosed",
+        "confidence": 0.7,
+        "extractionMethod": "curated",
+        "reviewStatus": "not_disclosed"
+      }
+    ],
+    "sourceIds": ["pearl-1", "pearl-2"],
+    "sources": [
+      {
+        "title": "Enverus Acquires Pearl Street Technologies",
+        "url": "https://www.enverus.com/newsroom/undo-the-queue-enverus-acquires-pearl-street-technologies-to-solve-for-a-more-reliable-resilient-grid/",
+        "publisher": "Enverus"
+      },
+      {
+        "title": "Pearl Street Technologies About Us",
+        "url": "https://pearlstreettechnologies.com/about-us/",
+        "publisher": "Pearl Street Technologies"
+      }
+    ],
+    "investmentRelevance": "Direct grid-connection software precedent: a strategic data platform acquired interconnection automation capability to address a core bottleneck for renewables developers.",
+    "strategicRationale": "Enverus added tools for queue, transmission-provider and developer studies.",
+    "companiesSurfaced": ["pearl-street-technologies", "enverus"],
+    "expertsSurfaced": ["david-bromberg"],
+    "missingFacts": [
+      "completion_date",
+      "enterprise_value",
+      "financial_advisor_to_buyer",
+      "financial_advisor_to_seller",
+      "legal_counsel_to_buyer",
+      "legal_counsel_to_seller"
+    ],
+    "followUpSearches": [
+      "\"Pearl Street Technologies\" Enverus financial advisor",
+      "\"Pearl Street Technologies\" Enverus legal counsel",
+      "\"Pearl Street Technologies\" Enverus valuation"
+    ],
+    "confidence": 0.86
+  }
+]

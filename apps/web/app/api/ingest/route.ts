@@ -1,0 +1,115 @@
+import { extractDealWithModel } from "@/lib/deal-ai";
+import { hasDealDatabase, persistDealIngestion } from "@/lib/deal-db";
+import { runDealEnrichment } from "@/lib/deal-enrichment";
+
+export async function POST(request: Request) {
+  try {
+    const body = await readIngestRequest(request);
+
+    if (!body.text?.trim()) {
+      return Response.json(
+        { error: "Paste deal text or extracted source content before ingestion." },
+        { status: 400 },
+      );
+    }
+
+    const extraction = await extractDealWithModel({
+      text: body.text,
+      title: body.title,
+      url: body.url,
+    });
+
+    if (!hasDealDatabase()) {
+      return Response.json({
+        ...extraction,
+        mutation: false,
+        note:
+          "Draft extraction only. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to persist into the deal intelligence database.",
+      });
+    }
+
+    const persisted = await persistDealIngestion({
+      text: body.text,
+      title: body.title,
+      url: body.url,
+      extraction,
+    });
+
+    const enrichment =
+      body.enrich && process.env.ANTHROPIC_API_KEY
+        ? await runDealEnrichment(persisted.dealId)
+        : null;
+
+    return Response.json({
+      ...persisted,
+      enrichment,
+      mutation: true,
+      note: enrichment
+        ? "Persisted and enriched. Review low-confidence facts before using in IC material."
+        : "Persisted. Run enrichment to fetch missing facts from follow-up sources.",
+    });
+  } catch (error) {
+    return Response.json(
+      { error: error instanceof Error ? error.message : "Ingestion failed" },
+      { status: 500 },
+    );
+  }
+}
+
+async function readIngestRequest(request: Request): Promise<{
+  url?: string;
+  title?: string;
+  text: string;
+  enrich?: boolean;
+}> {
+  const contentType = request.headers.get("content-type") ?? "";
+  if (!contentType.includes("multipart/form-data")) {
+    const body = (await request.json()) as {
+      url?: string;
+      title?: string;
+      text?: string;
+      enrich?: boolean;
+    };
+    return { ...body, text: body.text ?? "" };
+  }
+
+  const form = await request.formData();
+  const file = form.get("file");
+  const rawText = String(form.get("text") ?? "");
+  const title = String(form.get("title") ?? "");
+  const url = String(form.get("url") ?? "");
+  const enrich = String(form.get("enrich") ?? "") === "true";
+
+  if (file instanceof File) {
+    const fileText = await readUploadedFile(file);
+    return {
+      text: [rawText, fileText].filter(Boolean).join("\n\n"),
+      title: title || file.name,
+      url: url || undefined,
+      enrich,
+    };
+  }
+
+  return {
+    text: rawText,
+    title: title || undefined,
+    url: url || undefined,
+    enrich,
+  };
+}
+
+async function readUploadedFile(file: File): Promise<string> {
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const name = file.name.toLowerCase();
+  if (name.endsWith(".pdf") || file.type === "application/pdf") {
+    const { PDFParse } = await import("pdf-parse");
+    const parser = new PDFParse({ data: buffer });
+    try {
+      const result = await parser.getText();
+      return result.text ?? "";
+    } finally {
+      await parser.destroy();
+    }
+  }
+  return buffer.toString("utf8");
+}

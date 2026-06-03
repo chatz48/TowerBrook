@@ -1,0 +1,585 @@
+import seedSourcesRaw from "@/data/sources.json";
+import { companiesWithLinks, expertsForTheme, themeStats } from "@/lib/data";
+import { DEAL_TYPE_LABEL, dealDate } from "@/lib/deals";
+import { listDeals } from "@/lib/deal-repository";
+import { rankExperts } from "@/lib/score";
+import { getTheme } from "@/lib/themes";
+import type { CompanyWithLinks, Expert, Source, ThemeId } from "@/lib/types";
+
+export type ReportTemplateId =
+  | "theme-memo"
+  | "expert-call-plan"
+  | "company-brief"
+  | "deal-brief"
+  | "deal-relationship-map"
+  | "red-team-thesis"
+  | "ic-appendix";
+
+export interface ReportTemplate {
+  id: ReportTemplateId;
+  name: string;
+  description: string;
+  sections: string[];
+}
+
+export interface ReportSource {
+  id: string;
+  ref: number;
+  title: string;
+  publisher: string;
+  date: string;
+  type: string;
+  url: string;
+  confidence: number;
+  entities: string[];
+  citedIn: string[];
+}
+
+export interface ReportSection {
+  id: string;
+  order: number;
+  title: string;
+  status: "AI generated" | "Analyst review" | "Needs evidence";
+  confidence: number;
+  wordCount: number;
+  citations: string[];
+  summary: string;
+  bullets?: string[];
+  rows?: {
+    label: string;
+    value: string;
+    detail: string;
+    metric?: string;
+    citations: string[];
+  }[];
+  actions: string[];
+}
+
+export interface ReportModel {
+  reportName: string;
+  themeName: string;
+  templateId: ReportTemplateId;
+  generatedAt: string;
+  wordCount: number;
+  stats: {
+    experts: number;
+    companies: number;
+    sources: number;
+    highConfidenceSources: number;
+  };
+  templates: ReportTemplate[];
+  savedReports: { name: string; updated: string; status: string }[];
+  sections: ReportSection[];
+  sources: ReportSource[];
+  markdown: string;
+}
+
+type SeedSource = {
+  source_id: string;
+  theme: ThemeId | "all";
+  url: string;
+  source_type: string;
+  publisher: string;
+  date: string;
+  why_useful: string;
+  expected_entities: string[];
+  priority: number;
+  status: string;
+};
+
+type SeedSourcesFile = {
+  sources: SeedSource[];
+};
+
+export const REPORT_TEMPLATES: ReportTemplate[] = [
+  {
+    id: "theme-memo",
+    name: "Theme memo",
+    description: "Thesis, market map, experts",
+    sections: [
+      "Executive summary",
+      "Market map",
+      "Priority experts",
+      "Company longlist",
+      "Deal / advisor activity",
+      "Key risks",
+      "Next actions",
+    ],
+  },
+  {
+    id: "expert-call-plan",
+    name: "Expert call plan",
+    description: "Call plan and questions",
+    sections: [
+      "Call objective",
+      "Sequenced experts",
+      "Questions to ask",
+      "What to listen for",
+      "Follow-up paths",
+    ],
+  },
+  {
+    id: "company-brief",
+    name: "Company brief",
+    description: "Company, market, risks",
+    sections: [
+      "Company snapshot",
+      "Why surfaced",
+      "Linked experts",
+      "Ownership and maturity",
+      "Diligence questions",
+    ],
+  },
+  {
+    id: "deal-brief",
+    name: "Deal brief",
+    description: "Parties, facts, gaps",
+    sections: [
+      "Deal scorecard",
+      "Parties and advisors",
+      "Fact rubric",
+      "Investment relevance",
+      "Missing facts",
+      "Follow-up searches",
+    ],
+  },
+  {
+    id: "deal-relationship-map",
+    name: "Deal relationship map",
+    description: "People, firms, paths",
+    sections: [
+      "Deal node",
+      "Buyer and target",
+      "Advisors and counsel",
+      "Experts surfaced",
+      "Source evidence",
+      "Next calls",
+    ],
+  },
+  {
+    id: "red-team-thesis",
+    name: "Red-team thesis",
+    description: "Contrarian view and risks",
+    sections: [
+      "Downside case",
+      "Disconfirming evidence",
+      "Competitive pressure",
+      "Policy and timing risk",
+      "Kill criteria",
+    ],
+  },
+  {
+    id: "ic-appendix",
+    name: "IC appendix",
+    description: "Data room for IC",
+    sections: [
+      "Source register",
+      "Expert roster",
+      "Company register",
+      "Entity-edge evidence",
+      "Confidence notes",
+    ],
+  },
+];
+
+const REPORT_DATE = "June 2, 2026 at 09:42 GMT";
+
+export async function buildReport(themeId: ThemeId = "grid-infrastructure"): Promise<ReportModel> {
+  const theme = getTheme(themeId);
+  if (!theme) throw new Error(`Unknown theme: ${themeId}`);
+
+  const experts = expertsForTheme(themeId);
+  const rankedExperts = rankExperts(experts).slice(0, 6);
+  const companies = companiesWithLinks(themeId);
+  const deals = (await listDeals()).filter((deal) => deal.theme === themeId);
+  const stats = themeStats(themeId);
+  const sources = buildSourceRegister(themeId, rankedExperts.map((r) => r.expert), companies, deals);
+
+  const sourceIds = {
+    primary: sources.slice(0, 4).map((s) => s.id),
+    expert: sources.filter((s) => s.type === "Expert profile").slice(0, 4).map((s) => s.id),
+    company: sources.filter((s) => s.type === "Company source").slice(0, 4).map((s) => s.id),
+    register: sources.filter((s) => s.type !== "Expert profile").slice(0, 5).map((s) => s.id),
+    deals: sources.filter((s) => s.type === "Deal fact").slice(0, 5).map((s) => s.id),
+  };
+
+  const topExperts = rankedExperts.map(({ expert, score }) => ({
+    expert,
+    score: score.total,
+  }));
+  const topCompanies = companies.slice(0, 8);
+  const topDeals = deals.slice(0, 5);
+  const specialties = topSpecialties(experts, companies);
+
+  const sections: ReportSection[] = [
+    {
+      id: "executive-summary",
+      order: 1,
+      title: "Executive summary",
+      status: "AI generated",
+      confidence: averageConfidence([...topExperts.map((e) => e.expert), ...topCompanies]),
+      wordCount: 412,
+      citations: sourceIds.primary,
+      summary: `${theme.name} has ${stats.expertCount} mapped experts and ${stats.companyCount} derived companies. The investable angle is strongest where expert density, recent signals, and specialist company edges overlap.`,
+      bullets: [
+        `${topExperts[0]?.expert.name ?? "The top ranked expert"} is the first call because the scoring model combines role, company edges, recency, access, and record confidence.`,
+        `${topCompanies[0]?.name ?? "The leading company"} is the highest-density company surfaced by the current graph.`,
+        `Current source coverage is strongest across ${specialties.slice(0, 3).join(", ")}.`,
+      ],
+      actions: ["Regenerate", "Open evidence"],
+    },
+    {
+      id: "market-map",
+      order: 2,
+      title: "Market map",
+      status: "AI generated",
+      confidence: 0.84,
+      wordCount: 1024,
+      citations: sourceIds.register,
+      summary: `The market map clusters the theme into ${specialties.slice(0, 5).join(", ")} and adjacent coverage areas. Blank spaces are where source density or expert coverage is still thin.`,
+      rows: specialties.slice(0, 5).map((specialty, index) => ({
+        label: specialty,
+        value: `${countSpecialty(experts, companies, specialty)} mapped records`,
+        detail:
+          index < 2
+            ? "High coverage: enough experts and companies for immediate diligence calls."
+            : "Watchlist: coverage exists, but should be validated with additional primary calls.",
+        metric: index < 2 ? "High" : "Watch",
+        citations: sourceIds.register.slice(0, 2),
+      })),
+      actions: ["Refresh map", "Open evidence"],
+    },
+    {
+      id: "priority-experts",
+      order: 3,
+      title: "Priority experts",
+      status: "AI generated",
+      confidence: averageConfidence(topExperts.map((e) => e.expert)),
+      wordCount: 1312,
+      citations: sourceIds.expert,
+      summary: "Priority experts are ranked by a transparent additive score: archetype, company edges, recent signals, access quality, cross-theme reach, and confidence.",
+      rows: topExperts.slice(0, 5).map(({ expert, score }) => ({
+        label: expert.name,
+        value: expert.headline,
+        detail: expert.whyRelevant,
+        metric: String(score),
+        citations: citationIdsForEntity(sources, expert.name),
+      })),
+      actions: ["Build call plan", "Open evidence"],
+    },
+    {
+      id: "company-longlist",
+      order: 4,
+      title: "Company longlist",
+      status: "AI generated",
+      confidence: averageConfidence(topCompanies),
+      wordCount: 1648,
+      citations: sourceIds.company,
+      summary: `${topCompanies.length} companies are prioritized by expert density first and source confidence second. The list is intended as a diligence starting point, not a market census.`,
+      rows: topCompanies.slice(0, 6).map((company) => ({
+        label: company.name,
+        value: company.stage ?? company.category,
+        detail: company.whyInteresting ?? company.description,
+        metric: `${company.expertCount} experts`,
+        citations: citationIdsForEntity(sources, company.name),
+      })),
+      actions: ["Export longlist", "Open evidence"],
+    },
+    {
+      id: "deal-advisor-activity",
+      order: 5,
+      title: "Deal / advisor activity",
+      status: "Analyst review",
+      confidence: topDeals.length ? averageConfidence(topDeals) : 0.78,
+      wordCount: 842,
+      citations: sourceIds.deals.length ? sourceIds.deals : sourceIds.register,
+      summary: topDeals.length
+        ? `${topDeals.length} source-backed deal records are mapped for this theme. Use the missing-fact checklist to prioritize advisor, counsel, valuation and completion-date follow-up.`
+        : "Advisor activity is concentrated in bankers, lawyers, investors, and service providers with explicit company edges. This section should be analyst-reviewed before IC circulation.",
+      rows: topDeals.length ? dealRows(topDeals, sources) : advisorRows(experts, sources),
+      actions: ["Check advisors", "Open evidence"],
+    },
+    {
+      id: "key-risks",
+      order: 6,
+      title: "Key risks",
+      status: "Needs evidence",
+      confidence: 0.69,
+      wordCount: 612,
+      citations: sourceIds.register.slice(1, 5),
+      summary: "The main risk is over-reading a sourced people graph as a complete market map. Coverage gaps, stale ownership data, and survivorship bias should be tested in primary calls.",
+      bullets: [
+        "Thin subsegments may reflect ingestion gaps rather than unattractive markets.",
+        "Company ownership and funding status can change faster than the seed register.",
+        "Expert confidence is record-level confidence, not endorsement of the investment thesis.",
+      ],
+      actions: ["Red-team", "Open evidence"],
+    },
+    {
+      id: "next-actions",
+      order: 7,
+      title: "Next actions",
+      status: "AI generated",
+      confidence: 0.82,
+      wordCount: 368,
+      citations: sourceIds.primary.slice(0, 3),
+      summary: "The next step is a short call sequence that tests bottlenecks, company quality, and the highest-uncertainty assumptions before expanding the source set.",
+      bullets: [
+        `Call ${topExperts[0]?.expert.name ?? "the top-ranked expert"} and ${topExperts[1]?.expert.name ?? "the second-ranked expert"} this week.`,
+        `Deep dive on ${topCompanies[0]?.name ?? "the highest-density company"} and two adjacent comparables.`,
+        "Add analyst notes back to the source register after each call.",
+      ],
+      actions: ["Create shortlist", "Copy markdown"],
+    },
+  ];
+
+  const citedSources = applyCitedIn(sources, sections);
+  const wordCount = sections.reduce((sum, section) => sum + section.wordCount, 0);
+  const report: Omit<ReportModel, "markdown"> = {
+    reportName: `${theme.shortName} - Partner Memo`,
+    themeName: theme.name,
+    templateId: "theme-memo",
+    generatedAt: REPORT_DATE,
+    wordCount,
+    stats: {
+      experts: stats.expertCount,
+      companies: stats.companyCount,
+      sources: citedSources.length,
+      highConfidenceSources: citedSources.filter((source) => source.confidence >= 0.82).length,
+    },
+    templates: REPORT_TEMPLATES,
+    savedReports: [
+      { name: `${theme.shortName} - Partner Memo`, updated: "Updated today", status: "Draft" },
+      { name: "HVDC Component Deck", updated: "Updated May 9, 2026", status: "Review" },
+      { name: "Battery Recycling - Red Team", updated: "Updated May 7, 2026", status: "Draft" },
+    ],
+    sections,
+    sources: citedSources,
+  };
+
+  return {
+    ...report,
+    markdown: buildMarkdown(report),
+  };
+}
+
+function buildSourceRegister(
+  themeId: ThemeId,
+  rankedExperts: Expert[],
+  companies: CompanyWithLinks[],
+  deals: Awaited<ReturnType<typeof listDeals>>,
+): ReportSource[] {
+  const rawSources = seedSourcesRaw as SeedSourcesFile;
+  const byKey = new Map<string, Omit<ReportSource, "ref">>();
+
+  const add = (source: Omit<ReportSource, "id" | "ref" | "citedIn">) => {
+    const key = source.url || source.title;
+    if (byKey.has(key)) return;
+    const id = `src-${byKey.size + 1}`;
+    byKey.set(key, { ...source, id, citedIn: [] });
+  };
+
+  for (const expert of rankedExperts) {
+    for (const source of expert.sources) {
+      add(entitySource(source, "Expert profile", expert.confidence, [
+        expert.name,
+        expert.org ?? expert.type,
+      ]));
+    }
+  }
+
+  for (const company of companies.slice(0, 10)) {
+    for (const source of company.sources) {
+      add(entitySource(source, "Company source", company.confidence, [
+        company.name,
+        company.category,
+      ]));
+    }
+  }
+
+  for (const deal of deals) {
+    for (const source of deal.sources) {
+      add(entitySource(source, "Deal fact", deal.confidence, [
+        deal.name,
+        DEAL_TYPE_LABEL[deal.dealType],
+        ...deal.companiesSurfaced,
+      ]));
+    }
+  }
+
+  for (const source of rawSources.sources) {
+    if ((source.theme === themeId || source.theme === "all") && source.priority <= 2) {
+      add({
+        title: source.why_useful,
+        publisher: source.publisher,
+        date: source.date,
+        type: sourceTypeLabel(source.source_type),
+        url: source.url,
+        confidence: source.status === "done" ? 0.86 : source.priority === 1 ? 0.8 : 0.72,
+        entities: source.expected_entities,
+      });
+    }
+  }
+
+  return [...byKey.values()].map((source, index) => ({
+    ...source,
+    ref: index + 1,
+  }));
+}
+
+function entitySource(
+  source: Source,
+  type: string,
+  confidence: number,
+  entities: string[],
+): Omit<ReportSource, "id" | "ref" | "citedIn"> {
+  return {
+    title: source.title,
+    publisher: source.publisher ?? "Source",
+    date: "Verified seed",
+    type,
+    url: source.url,
+    confidence,
+    entities: entities.filter(Boolean),
+  };
+}
+
+function sourceTypeLabel(type: string): string {
+  return type
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function topSpecialties(experts: Expert[], companies: CompanyWithLinks[]): string[] {
+  const counts = new Map<string, number>();
+  for (const expert of experts) {
+    for (const specialty of expert.specialties ?? []) {
+      counts.set(specialty, (counts.get(specialty) ?? 0) + 2);
+    }
+  }
+  for (const company of companies) {
+    for (const specialty of company.specialties ?? []) {
+      counts.set(specialty, (counts.get(specialty) ?? 0) + 1);
+    }
+  }
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([specialty]) => specialty);
+}
+
+function countSpecialty(
+  experts: Expert[],
+  companies: CompanyWithLinks[],
+  specialty: string,
+): number {
+  return (
+    experts.filter((expert) => expert.specialties?.includes(specialty)).length +
+    companies.filter((company) => company.specialties?.includes(specialty)).length
+  );
+}
+
+function averageConfidence(items: { confidence: number }[]): number {
+  if (items.length === 0) return 0.7;
+  return Number(
+    (items.reduce((sum, item) => sum + item.confidence, 0) / items.length).toFixed(2),
+  );
+}
+
+function citationIdsForEntity(sources: ReportSource[], entity: string): string[] {
+  const matches = sources
+    .filter((source) => source.entities.some((value) => value === entity))
+    .slice(0, 3)
+    .map((source) => source.id);
+  return matches.length ? matches : sources.slice(0, 2).map((source) => source.id);
+}
+
+function advisorRows(experts: Expert[], sources: ReportSource[]): ReportSection["rows"] {
+  const advisors = experts
+    .filter((expert) =>
+      ["advisor", "banker", "lawyer", "investor", "service-provider"].includes(expert.type),
+    )
+    .slice(0, 5);
+
+  return advisors.map((expert) => ({
+    label: expert.name,
+    value: expert.headline,
+    detail: expert.companies
+      .slice(0, 2)
+      .map((company) => `${company.relationship}${company.note ? `: ${company.note}` : ""}`)
+      .join(" | "),
+    metric: expert.type,
+    citations: citationIdsForEntity(sources, expert.name),
+  }));
+}
+
+function dealRows(deals: Awaited<ReturnType<typeof listDeals>>, sources: ReportSource[]): ReportSection["rows"] {
+  return deals.map((deal) => ({
+    label: deal.name,
+    value: `${DEAL_TYPE_LABEL[deal.dealType]}${dealDate(deal) ? ` / ${dealDate(deal)}` : ""}`,
+    detail: `${deal.investmentRelevance} Missing: ${
+      deal.missingFacts.slice(0, 3).map((item) => item.replaceAll("_", " ")).join(", ") || "none flagged"
+    }.`,
+    metric: `${Math.round(deal.completionScore * 100)}% complete`,
+    citations: citationIdsForEntity(sources, deal.name),
+  }));
+}
+
+function applyCitedIn(sources: ReportSource[], sections: ReportSection[]): ReportSource[] {
+  return sources.map((source) => ({
+    ...source,
+    citedIn: sections
+      .filter((section) => section.citations.includes(source.id))
+      .map((section) => section.title),
+  }));
+}
+
+function buildMarkdown(report: Omit<ReportModel, "markdown">): string {
+  const lines = [
+    `# ${report.reportName}`,
+    "",
+    `Generated: ${report.generatedAt}`,
+    `Theme: ${report.themeName}`,
+    "",
+  ];
+
+  for (const section of report.sections) {
+    lines.push(`## ${section.order}. ${section.title}`);
+    lines.push(`Status: ${section.status} | Confidence: ${Math.round(section.confidence * 100)}%`);
+    lines.push("");
+    lines.push(withMarkers(section.summary, section.citations, report.sources));
+    if (section.bullets?.length) {
+      for (const bullet of section.bullets) lines.push(`- ${bullet}`);
+    }
+    if (section.rows?.length) {
+      for (const row of section.rows) {
+        lines.push(
+          `- ${row.label}: ${row.value}. ${row.detail} ${
+            row.metric ? `(${row.metric})` : ""
+          } ${markerList(row.citations, report.sources)}`.trim(),
+        );
+      }
+    }
+    lines.push("");
+  }
+
+  lines.push("## Source register");
+  for (const source of report.sources) {
+    lines.push(
+      `[${source.ref}] ${source.title} - ${source.publisher}, ${source.date}. ${source.url}`,
+    );
+  }
+
+  return lines.join("\n");
+}
+
+function withMarkers(text: string, citations: string[], sources: ReportSource[]): string {
+  return `${text} ${markerList(citations, sources)}`.trim();
+}
+
+function markerList(citations: string[], sources: ReportSource[]): string {
+  const refs = citations
+    .map((id) => sources.find((source) => source.id === id)?.ref)
+    .filter((ref): ref is number => Boolean(ref));
+  return refs.map((ref) => `[${ref}]`).join("");
+}

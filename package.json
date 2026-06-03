@@ -1,0 +1,18 @@
+{
+  "name": "towerbrook-people-expert-engine",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "dev": "pnpm --dir apps/web dev",
+    "build": "pnpm --dir apps/web build",
+    "start": "pnpm --dir apps/web start",
+    "lint": "pnpm --dir apps/web lint",
+    "typecheck": "pnpm --dir apps/web typecheck",
+    "ingest:validate": "pnpm --dir apps/web ingest:validate",
+    "db:seed": "pnpm --dir apps/web db:seed",
+    "api:dev": "cd apps/intelligence-api && uvicorn app.main:app --reload --port 8000",
+    "api:test": "cd apps/intelligence-api && pytest",
+    "discovery:dry-run": "cd apps/intelligence-api && python -m app.cli.discovery --theme grid-infrastructure --dry-run"
+  }
+}
