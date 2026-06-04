@@ -4,6 +4,7 @@ export type CopilotFilters = {
   geography: string;
   archetypes: string[];
   sourceScope: string;
+  includeTowerBrookEmployees: boolean;
 };
 
 export type PageContext = {

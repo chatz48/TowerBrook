@@ -6,6 +6,7 @@ import { rankExperts } from "@/lib/score";
 import { getTheme } from "@/lib/themes";
 import type { CompanyWithLinks, Expert, Source, ThemeId } from "@/lib/types";
 import type { ThemeFocus } from "@/lib/theme-focus";
+import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 
 export type ReportTemplateId =
   | "theme-memo"
@@ -189,7 +190,10 @@ const REPORT_DATE = new Intl.DateTimeFormat("en-GB", {
   timeZone: "Europe/London",
 }).format(new Date());
 
-export async function buildReport(themeId: ThemeFocus = "all"): Promise<ReportModel> {
+export async function buildReport(
+  themeId: ThemeFocus = "all",
+  includeTowerBrookEmployees = false,
+): Promise<ReportModel> {
   const theme =
     themeId === "all"
       ? {
@@ -199,14 +203,20 @@ export async function buildReport(themeId: ThemeFocus = "all"): Promise<ReportMo
       : getTheme(themeId);
   if (!theme) throw new Error(`Unknown theme: ${themeId}`);
 
-  const experts = themeId === "all" ? getExperts() : expertsForTheme(themeId);
+  const experts = filterTowerBrookEmployees(
+    themeId === "all" ? getExperts() : expertsForTheme(themeId),
+    includeTowerBrookEmployees,
+  );
   const rankedExperts = rankExperts(experts).slice(0, 6);
-  const companies = companiesWithLinks(themeId === "all" ? undefined : themeId);
+  const companies = companiesWithLinks(
+    themeId === "all" ? undefined : themeId,
+    includeTowerBrookEmployees,
+  );
   const deals = (await listDeals()).filter((deal) => themeId === "all" || deal.theme === themeId);
   const stats =
     themeId === "all"
       ? { expertCount: experts.length, companyCount: companies.length }
-      : themeStats(themeId);
+      : themeStats(themeId, includeTowerBrookEmployees);
   const sources = buildSourceRegister(themeId, rankedExperts.map((r) => r.expert), companies, deals);
 
   const sourceIds = {

@@ -12,10 +12,17 @@ import {
 import { Badge, ConfidenceBars } from "@/app/components/ui";
 import { getThemeFocus } from "@/lib/theme-focus-server";
 import { matchesThemeFocus } from "@/lib/theme-focus";
+import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
 
 export default async function CompaniesPage() {
-  const themeFocus = await getThemeFocus();
-  const companies = companiesWithLinks(themeFocus === "all" ? undefined : themeFocus);
+  const [themeFocus, includeTowerBrookEmployees] = await Promise.all([
+    getThemeFocus(),
+    getIncludeTowerBrookEmployees(),
+  ]);
+  const companies = companiesWithLinks(
+    themeFocus === "all" ? undefined : themeFocus,
+    includeTowerBrookEmployees,
+  );
   const actionableTargets = companies
     .filter(
       (company) =>

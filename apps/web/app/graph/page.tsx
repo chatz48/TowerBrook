@@ -9,6 +9,8 @@ import {
 import { THEMES } from "@/lib/themes";
 import { matchesThemeFocus } from "@/lib/theme-focus";
 import { getThemeFocus } from "@/lib/theme-focus-server";
+import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
+import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 import type { Company, Deal, Expert, RelationshipType, Source } from "@/lib/types";
 import GraphExplorer, {
   type ExplorerCompanyNode,
@@ -62,8 +64,11 @@ function buildSourceRegister(experts: Expert[], companies: Company[], deals: Dea
 }
 
 export default async function GraphPage() {
-  const themeFocus = await getThemeFocus();
-  const experts = getExperts();
+  const [themeFocus, includeTowerBrookEmployees] = await Promise.all([
+    getThemeFocus(),
+    getIncludeTowerBrookEmployees(),
+  ]);
+  const experts = filterTowerBrookEmployees(getExperts(), includeTowerBrookEmployees);
   const companies = getCompanies();
   const deals = await listDeals();
   const companyById = new Map(companies.map((company) => [company.id, company]));

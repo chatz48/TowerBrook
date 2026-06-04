@@ -23,6 +23,7 @@ import {
   ThemeTag,
 } from "@/app/components/ui";
 import { CallPrepChecklist } from "@/app/components/InvestorWorkflow";
+import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
 
 export function generateStaticParams() {
   return getCompanies().map((c) => ({ id: c.id }));
@@ -34,7 +35,8 @@ export default async function CompanyPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const company = companyWithLinks(id);
+  const includeTowerBrookEmployees = await getIncludeTowerBrookEmployees();
+  const company = companyWithLinks(id, includeTowerBrookEmployees);
   if (!company) notFound();
   const towerBrook = towerBrookCompanyScore(company, company.expertCount);
   const relatedDeals = await listDealsForCompany(company.id);

@@ -5,6 +5,7 @@ import {
   expertsForTheme,
 } from "./data";
 import { rankExperts } from "./score";
+import { filterTowerBrookEmployees } from "./employee-scope";
 
 /**
  * The Theme Point-of-View brief: the one-screen synthesis a partner wants
@@ -48,9 +49,15 @@ function whyNow(e: Expert): string {
   return e.signals?.[0] ?? "Long-standing authority on the theme";
 }
 
-export function buildBrief(themeId: ThemeId): ThemeBrief {
+export function buildBrief(
+  themeId: ThemeId,
+  includeTowerBrookEmployees = false,
+): ThemeBrief {
   const theme = THEME_BY_ID[themeId];
-  const experts = expertsForTheme(themeId);
+  const experts = filterTowerBrookEmployees(
+    expertsForTheme(themeId),
+    includeTowerBrookEmployees,
+  );
   const companies = companiesForTheme(themeId);
 
   const targets = companies.filter((c) => c.ownershipStatus === "independent");

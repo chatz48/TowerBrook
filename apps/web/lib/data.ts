@@ -7,6 +7,7 @@ import type {
   ExpertWithCompanies,
   ThemeId,
 } from "./types";
+import { filterTowerBrookEmployees } from "./employee-scope";
 
 // JSON is the single source of truth; it's produced by the discovery pipeline
 // (scripts/) and hand-verified. We cast once here and build all derived views
@@ -62,10 +63,14 @@ export function resolveExpert(expert: Expert): ExpertWithCompanies {
  * a company multiple discovered experts founded / advised / banked is, by
  * construction, where the deal-relevant knowledge concentrates.
  */
-export function companiesWithLinks(theme?: ThemeId): CompanyWithLinks[] {
+export function companiesWithLinks(
+  theme?: ThemeId,
+  includeTowerBrookEmployees = false,
+): CompanyWithLinks[] {
   const pool = theme ? companiesForTheme(theme) : COMPANIES;
+  const visibleExperts = filterTowerBrookEmployees(EXPERTS, includeTowerBrookEmployees);
   const result = pool.map((company) => {
-    const linkedExperts = EXPERTS.flatMap((expert) =>
+    const linkedExperts = visibleExperts.flatMap((expert) =>
       expert.companies
         .filter((l) => l.companyId === company.id)
         .filter(() => !theme || expert.themes.includes(theme))
@@ -79,10 +84,13 @@ export function companiesWithLinks(theme?: ThemeId): CompanyWithLinks[] {
   );
 }
 
-export function companyWithLinks(id: string): CompanyWithLinks | undefined {
+export function companyWithLinks(
+  id: string,
+  includeTowerBrookEmployees = false,
+): CompanyWithLinks | undefined {
   const company = COMPANY_BY_ID.get(id);
   if (!company) return undefined;
-  const linkedExperts = EXPERTS.flatMap((expert) =>
+  const linkedExperts = filterTowerBrookEmployees(EXPERTS, includeTowerBrookEmployees).flatMap((expert) =>
     expert.companies
       .filter((l) => l.companyId === id)
       .map((l) => ({ expert, relationship: l.relationship, note: l.note })),
@@ -96,8 +104,8 @@ export interface ThemeStats {
   byType: Record<string, number>;
 }
 
-export function themeStats(theme: ThemeId): ThemeStats {
-  const experts = expertsForTheme(theme);
+export function themeStats(theme: ThemeId, includeTowerBrookEmployees = false): ThemeStats {
+  const experts = filterTowerBrookEmployees(expertsForTheme(theme), includeTowerBrookEmployees);
   const byType: Record<string, number> = {};
   for (const e of experts) byType[e.type] = (byType[e.type] ?? 0) + 1;
   return {

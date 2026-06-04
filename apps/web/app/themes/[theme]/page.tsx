@@ -15,6 +15,8 @@ import ExpertList from "@/app/components/ExpertList";
 import ThemeGraph from "@/app/components/ThemeGraph";
 import { buildBrief } from "@/lib/brief";
 import { Badge, BackLink, ConfidenceBars } from "@/app/components/ui";
+import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
+import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 
 export function generateStaticParams() {
   return THEMES.map((t) => ({ theme: t.id }));
@@ -30,17 +32,21 @@ export default async function ThemePage({
   if (!theme) notFound();
 
   const id = theme.id as ThemeId;
-  const stats = themeStats(id);
-  const themeExperts = expertsForTheme(id);
+  const includeTowerBrookEmployees = await getIncludeTowerBrookEmployees();
+  const stats = themeStats(id, includeTowerBrookEmployees);
+  const themeExperts = filterTowerBrookEmployees(
+    expertsForTheme(id),
+    includeTowerBrookEmployees,
+  );
   const ranked = rankExperts(themeExperts).map(({ expert, score }) => ({
     expert,
     score: score.total,
   }));
-  const companies = companiesWithLinks(id);
+  const companies = companiesWithLinks(id, includeTowerBrookEmployees);
   const allCompanies = getCompanies();
   const companyNames = Object.fromEntries(allCompanies.map((c) => [c.id, c.name]));
   const companiesById = new Map(allCompanies.map((c) => [c.id, c]));
-  const brief = buildBrief(id);
+  const brief = buildBrief(id, includeTowerBrookEmployees);
   const towerBrookLens = buildTowerBrookLens(themeExperts, companies);
   const topExperts = brief.callList;
   const leadTarget =
