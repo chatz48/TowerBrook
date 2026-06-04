@@ -13,9 +13,6 @@ import { COMPANY_CATEGORY_LABEL, COMPANY_CATEGORY_STYLE } from "@/lib/labels";
 import type { ThemeId } from "@/lib/types";
 import ExpertList from "@/app/components/ExpertList";
 import ThemeGraph from "@/app/components/ThemeGraph";
-import PointOfView from "@/app/components/PointOfView";
-import TowerBrookFocus from "@/app/components/TowerBrookFocus";
-import { NextActionPanel, WorkflowRail } from "@/app/components/InvestorWorkflow";
 import { buildBrief } from "@/lib/brief";
 import { Badge, BackLink, ConfidenceBars } from "@/app/components/ui";
 
@@ -45,7 +42,23 @@ export default async function ThemePage({
   const companiesById = new Map(allCompanies.map((c) => [c.id, c]));
   const brief = buildBrief(id);
   const towerBrookLens = buildTowerBrookLens(themeExperts, companies);
-  const topExperts = ranked.slice(0, 5);
+  const topExperts = brief.callList;
+  const leadTarget =
+    companies.find(
+      (company) =>
+        company.category === "target" &&
+        company.ownershipStatus === "independent",
+    ) ?? companies[0];
+  const evidenceSources = new Set([
+    ...themeExperts.flatMap((expert) => expert.sources.map((source) => source.url)),
+    ...companies.flatMap((company) => company.sources.map((source) => source.url)),
+  ]).size;
+  const externalRelationshipExpert = towerBrookLens.workedWithExperts.find(
+    (expert) => !expert.headline.toLowerCase().includes("towerbrook"),
+  );
+  const externalRelationshipCompany = towerBrookLens.workedWithCompanies.find(
+    (company) => company.id !== "towerbrook",
+  );
   const specialtyCounts = new Map<string, number>();
   for (const { expert } of ranked) {
     for (const specialty of expert.specialties ?? []) {
@@ -82,130 +95,91 @@ export default async function ThemePage({
 
         <header className="mt-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-[28px] font-semibold tracking-tight">
-                {theme.name}
-              </h1>
-              <span className="text-muted" aria-hidden="true">
-                ☆
-              </span>
-            </div>
+            <h1 className="text-[28px] font-semibold tracking-tight">
+              {theme.name}
+            </h1>
             <p className="mt-3 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
               {theme.description}
             </p>
             <div className="mt-4 flex flex-wrap gap-4 text-[12px] text-ink-faint">
               <span>Global</span>
               <span>Infrastructure</span>
-              <span>Updated June 2, 2026</span>
+              <span>{evidenceSources} unique source records</span>
             </div>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/reports" className="ee-button ee-button-primary">
-              Build call plan
+            <Link href="#experts" className="ee-button ee-button-primary">
+              Review all experts
             </Link>
-            <Link href="/reports" className="ee-button ee-button-secondary">
-              Expert memo
+            <Link href="#companies" className="ee-button ee-button-secondary">
+              Review targets
             </Link>
             <Link href="/discover" className="ee-button ee-button-secondary">
-              Discovery queue
+              Fill coverage gaps
             </Link>
           </div>
         </header>
 
-        <section className="ee-panel mt-6 grid rounded-lg sm:grid-cols-2 lg:grid-cols-6">
+        <section className="ee-panel mt-6 grid rounded-lg sm:grid-cols-2 lg:grid-cols-4">
           <ThemeMetric label="Experts mapped" value={stats.expertCount} sub="Across archetypes" />
           <ThemeMetric label="Actionable targets" value={brief.stats.targets} sub="Independent companies" />
-          <ThemeMetric label="Recent exits (3Y)" value={brief.stats.exits} sub="Sourced exit comps" />
-          <ThemeMetric label="Advisors" value={brief.stats.advisers} sub="Active on this theme" />
-          <ThemeMetric label="Companies mapped" value={stats.companyCount} sub={`${companies[0]?.expertCount ?? 0} on top company`} />
-          <ThemeMetric label="TowerBrook score" value={towerBrookLens.score} sub="Relationship lens" />
+          <ThemeMetric label="Companies mapped" value={stats.companyCount} sub={`${brief.stats.exits} acquired comparables`} />
+          <ThemeMetric label="Coverage gaps" value={blankSpaces.length} sub="Taxonomy specialties without an expert" />
         </section>
 
-        <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
-          <div className="ee-panel rounded-lg p-5">
-            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-              <div>
-                <h2 className="ee-label text-ink">Theme command sequence</h2>
-                <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
-                  A practical sequence for converting this theme from market
-                  map to named people, target companies and sourced next steps.
-                </p>
-              </div>
-              <Link href="/reports" className="ee-button ee-button-secondary">
-                Export sequence
-              </Link>
-            </div>
-            <div className="mt-4">
-              <WorkflowRail
-                steps={[
-                  {
-                    label: "First call",
-                    title: topExperts[0]?.expert.name ?? "Rank experts",
-                    body: topExperts[0]
-                      ? `Validate the thesis with ${topExperts[0].expert.headline}.`
-                      : "Find the strongest operator, founder or advisor in this theme.",
-                    href: topExperts[0] ? `/experts/${topExperts[0].expert.id}` : "/experts",
-                  },
-                  {
-                    label: "Target lead",
-                    title: companies[0]?.name ?? "Review targets",
-                    body: companies[0]
-                      ? `Review why ${companies[0].name} surfaced from ${companies[0].expertCount} expert link${companies[0].expertCount === 1 ? "" : "s"}.`
-                      : "Use the expert graph to derive companies before a memo is built.",
-                    href: companies[0] ? `/companies/${companies[0].id}` : "/companies",
-                  },
-                  {
-                    label: "Gap fill",
-                    title: blankSpaces[0] ?? "Fill blank spaces",
-                    body: "Run discovery for the most under-covered specialty before relying on the map.",
-                    href: "/discover",
-                  },
-                  {
-                    label: "Meeting output",
-                    title: "Build the sourced memo",
-                    body: "Package expert rationale, company trail, questions and evidence into an IC-ready appendix.",
-                    href: "/reports",
-                  },
-                ]}
-              />
-            </div>
-          </div>
-
-          <NextActionPanel
-            title="Recommended actions"
-            description="Designed for a 30-minute team review: decide what to call, what to verify, and what to map next."
-            actions={[
-              {
-                title: "Prepare top expert call",
-                body: topExperts[0]
-                  ? `Open ${topExperts[0].expert.name}'s call-prep workspace and ask for named company referrals.`
-                  : "Open the ranked expert list and select the best first call.",
-                href: topExperts[0] ? `/experts/${topExperts[0].expert.id}` : "/experts",
-                action: "Prep",
-                tone: "primary",
-              },
-              {
-                title: "Pressure-test target evidence",
-                body: companies[0]
-                  ? `Check ${companies[0].name}'s expert links, ownership and source trail.`
-                  : "Review company evidence once the graph has mapped target candidates.",
-                href: companies[0] ? `/companies/${companies[0].id}` : "/companies",
-                action: "Check",
-              },
-              {
-                title: "Fill named advisor gaps",
-                body: "Launch live discovery for bankers, lawyers and diligence providers around relevant PE deals.",
-                href: "/discover",
-                action: "Discover",
-              },
-            ]}
+        <section className="mt-5 grid gap-5 lg:grid-cols-2 xl:grid-cols-4">
+          <DecisionCard
+            label="First call"
+            title={topExperts[0]?.expert.name ?? "No expert mapped"}
+            body={topExperts[0]?.whyNow ?? "Build expert coverage for this theme."}
+            href={topExperts[0] ? `/experts/${topExperts[0].expert.id}` : "/discover"}
+            action="Prepare call"
+          />
+          <DecisionCard
+            label="Lead target"
+            title={leadTarget?.name ?? "No target mapped"}
+            body={
+              leadTarget?.whyInteresting ??
+              leadTarget?.description ??
+              "Derive a target from expert evidence."
+            }
+            href={leadTarget ? `/companies/${leadTarget.id}` : "/companies"}
+            action="Review evidence"
+          />
+          <DecisionCard
+            label="Critical coverage gap"
+            title={blankSpaces[0] ?? "No taxonomy gap identified"}
+            body={
+              blankSpaces[0]
+                ? "No mapped expert currently covers this specialty."
+                : "Review source freshness and relationship depth."
+            }
+            href="/discover"
+            action="Run discovery"
+          />
+          <DecisionCard
+            label="Existing relationship path"
+            title={
+              externalRelationshipExpert?.name ??
+              externalRelationshipCompany?.name ??
+              "No direct path mapped"
+            }
+            body={
+              externalRelationshipExpert?.headline ??
+              externalRelationshipCompany?.description ??
+              "No TowerBrook relationship is evidenced in this theme."
+            }
+            href={
+              externalRelationshipExpert?.href ??
+              externalRelationshipCompany?.href ??
+              "/graph"
+            }
+            action="Open path"
           />
         </section>
 
         <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_520px]">
           <div className="space-y-5">
-            <PointOfView brief={brief} />
-
             <section className="ee-panel overflow-hidden rounded-lg">
               <div className="flex items-center justify-between border-b border-line px-4 py-3">
                 <h2 className="ee-label text-ink">Call this week</h2>
@@ -218,14 +192,20 @@ export default async function ThemePage({
                   <tr>
                     <th className="w-14">#</th>
                     <th>Expert</th>
-                    <th>Relevance</th>
-                    <th>Momentum</th>
-                    <th>Access</th>
+                    <th>Why call now</th>
+                    <th>Companies they can unlock</th>
+                    <th>Relationship path</th>
+                    <th>Evidence</th>
                     <th />
                   </tr>
                 </thead>
                 <tbody>
-                  {topExperts.map(({ expert, score }, index) => (
+                  {topExperts.map(({ expert, whyNow }, index) => {
+                    const towerBrook = towerBrookExpertScore(expert, companiesById);
+                    const linkedCompanyNames = expert.companies
+                      .map((link) => companyNames[link.companyId] ?? link.companyId)
+                      .slice(0, 3);
+                    return (
                     <tr key={expert.id}>
                       <td>
                         <span className="inline-grid h-8 w-8 place-items-center rounded bg-[#f1f4f9] text-[16px] font-semibold text-accent">
@@ -240,27 +220,28 @@ export default async function ThemePage({
                           {expert.headline}
                         </div>
                       </td>
-                      <td>
-                        <span className="font-semibold tabular-nums text-success">
-                          {score}
-                        </span>
-                        <div className="mt-1">
-                          <ConfidenceBars value={Math.min(1, score / 120)} />
-                        </div>
+                      <td className="max-w-[300px] text-[11px] leading-relaxed text-ink-soft">
+                        <span className="line-clamp-3">{whyNow}</span>
                       </td>
-                      <td className="text-success">
-                        {expert.news?.length || expert.signals?.length ? "High" : "Medium"}
+                      <td className="max-w-[230px] text-[11px] text-ink-soft">
+                        <span className="line-clamp-3">
+                          {linkedCompanyNames.join(", ") || "No company edge mapped"}
+                        </span>
                       </td>
                       <td>
                         <Badge
                           className={
-                            expert.access === "proprietary"
+                            towerBrook.isDirect
                               ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                               : "border-line bg-white text-ink-soft"
                           }
                         >
-                          {expert.access === "proprietary" ? "Warm" : "Known"}
+                          {towerBrook.isDirect ? towerBrook.label : "No internal path mapped"}
                         </Badge>
+                      </td>
+                      <td className="whitespace-nowrap text-[11px] text-ink-soft">
+                        {expert.sources.length} source{expert.sources.length === 1 ? "" : "s"}
+                        {expert.news?.length ? ` · ${expert.news.length} dated signal${expert.news.length === 1 ? "" : "s"}` : ""}
                       </td>
                       <td>
                         <Link
@@ -271,7 +252,8 @@ export default async function ThemePage({
                         </Link>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </section>
@@ -328,7 +310,7 @@ export default async function ThemePage({
                   </tr>
                 </thead>
                 <tbody>
-                  {(blankSpaces.length ? blankSpaces : THEME_SPECIALTIES[id].slice(-5)).map((space, index) => (
+                  {blankSpaces.map((space, index) => (
                     <tr key={space}>
                       <td>{space}</td>
                       <td>{index % 2 === 0 ? "UK / Europe" : "North America"}</td>
@@ -337,6 +319,13 @@ export default async function ThemePage({
                       </td>
                     </tr>
                   ))}
+                  {blankSpaces.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="text-ink-faint">
+                        No taxonomy-level gaps identified. Review source freshness and relationship depth next.
+                      </td>
+                    </tr>
+                  ) : null}
                 </tbody>
               </table>
               <p className="border-t border-line px-4 py-3 text-[12px] text-ink-faint">
@@ -346,10 +335,6 @@ export default async function ThemePage({
             </section>
           </aside>
         </div>
-
-        <section className="mt-6">
-          <TowerBrookFocus lens={towerBrookLens} scopeLabel={theme.name} />
-        </section>
 
         <section id="experts" className="mt-6">
           <ExpertList
@@ -372,7 +357,7 @@ export default async function ThemePage({
           />
         </section>
 
-        <section className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_520px]">
+        <section id="companies" className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_520px]">
           <div className="ee-panel overflow-hidden rounded-lg">
             <div className="flex items-center justify-between border-b border-line px-4 py-3">
               <h2 className="ee-label text-ink">Companies derived</h2>
@@ -456,6 +441,33 @@ export default async function ThemePage({
         </section>
       </div>
     </div>
+  );
+}
+
+function DecisionCard({
+  label,
+  title,
+  body,
+  href,
+  action,
+}: {
+  label: string;
+  title: string;
+  body: string;
+  href: string;
+  action: string;
+}) {
+  return (
+    <Link href={href} className="ee-panel rounded-lg p-5 hover:border-line-strong">
+      <div className="ee-label text-ink-faint">{label}</div>
+      <h2 className="mt-2 text-[15px] font-semibold text-ink">{title}</h2>
+      <p className="mt-2 line-clamp-3 text-[12px] leading-relaxed text-ink-soft">
+        {body}
+      </p>
+      <span className="mt-4 inline-flex text-[12px] font-semibold text-accent">
+        {action} →
+      </span>
+    </Link>
   );
 }
 

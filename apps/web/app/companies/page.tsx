@@ -9,11 +9,17 @@ import {
   OWNERSHIP_LABEL,
   OWNERSHIP_STYLE,
 } from "@/lib/labels";
-import { NextActionPanel, WorkflowRail } from "@/app/components/InvestorWorkflow";
 import { Badge, ConfidenceBars } from "@/app/components/ui";
 
 export default async function CompaniesPage() {
   const companies = companiesWithLinks();
+  const actionableTargets = companies
+    .filter(
+      (company) =>
+        company.category === "target" &&
+        company.ownershipStatus === "independent",
+    )
+    .slice(0, 12);
   const derivedCandidates = getDerivedCompanyCandidates();
   const dealCounts = await dealCoverage();
 
@@ -32,77 +38,72 @@ export default async function CompaniesPage() {
             <Link href="/graph" className="ee-button ee-button-secondary">
               Explain path
             </Link>
-            <Link href="/reports" className="ee-button ee-button-primary">
-              Build company memo
+            <Link href="/deals" className="ee-button ee-button-primary">
+              Review related deals
             </Link>
           </div>
         </header>
 
-        <section className="mb-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
-          <div className="ee-panel rounded-lg p-5">
-            <div className="ee-label text-ink">Target triage workflow</div>
-            <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
-              Companies appear here because named experts, PE deals or
-              TowerBrook relationships made them worth a closer look. Use the
-              first pass to separate target, advisor and comparable company
-              roles.
-            </p>
-            <div className="mt-4">
-              <WorkflowRail
-                steps={[
-                  {
-                    label: "Lead target",
-                    title: derivedCandidates[0]?.name ?? companies[0]?.name ?? "Open a candidate",
-                    body: derivedCandidates[0]
-                      ? derivedCandidates[0].why_interesting
-                      : "Start with the company with the highest expert density.",
-                    href: derivedCandidates[0]?.canonical_match.company_id
-                      ? `/companies/${derivedCandidates[0].canonical_match.company_id}`
-                      : companies[0]
-                        ? `/companies/${companies[0].id}`
-                        : "/companies",
-                  },
-                  {
-                    label: "Expert proof",
-                    title: "Check who knows it",
-                    body: "Confirm which founders, operators, bankers, lawyers or service providers created the signal.",
-                    href: "/experts",
-                  },
-                  {
-                    label: "Ownership",
-                    title: "Sort actionable from taken",
-                    body: "Prioritize independent or sponsor-owned companies differently from acquired and public comparables.",
-                    href: "/companies",
-                  },
-                ]}
-              />
+        <section className="ee-panel mb-5 overflow-hidden rounded-lg">
+          <div className="flex items-start justify-between gap-4 border-b border-line px-4 py-3">
+            <div>
+              <h2 className="ee-label text-ink">Actionable targets</h2>
+              <p className="mt-1 text-[11px] text-ink-faint">
+                Independent target companies with named expert links and source evidence.
+              </p>
             </div>
+            <Link href="/graph" className="ee-link text-[12px]">
+              Explain relationship paths
+            </Link>
           </div>
-          <NextActionPanel
-            title="Triage prompts"
-            description="Use these before a company reaches an IC memo."
-            actions={[
-              {
-                title: "Open lead candidate",
-                body: derivedCandidates[0]
-                  ? `Review ${derivedCandidates[0].name}'s expert links and why it surfaced.`
-                  : "Review the highest-density company profile.",
-                href: derivedCandidates[0]?.canonical_match.company_id
-                  ? `/companies/${derivedCandidates[0].canonical_match.company_id}`
-                  : companies[0]
-                    ? `/companies/${companies[0].id}`
-                    : "/companies",
-                action: "Open",
-                tone: "primary",
-              },
-              {
-                title: "Build expert-backed memo",
-                body: "Use only companies with named people and source-backed relationship paths.",
-                href: "/reports",
-                action: "Memo",
-              },
-            ]}
-          />
+          <div className="overflow-x-auto">
+            <table className="ee-table min-w-[1080px]">
+              <thead>
+                <tr>
+                  <th>Company</th>
+                  <th>Why investigate</th>
+                  <th>Named experts</th>
+                  <th>Evidence</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {actionableTargets.map((company) => (
+                  <tr key={company.id}>
+                    <td className="min-w-[220px]">
+                      <Link href={`/companies/${company.id}`} className="ee-link">
+                        {company.name}
+                      </Link>
+                      <div className="mt-0.5 text-[11px] text-ink-soft">
+                        {company.hq ?? company.sizeBand ?? "Independent target"}
+                      </div>
+                    </td>
+                    <td className="max-w-[420px] text-[11px] leading-relaxed text-ink-soft">
+                      <span className="line-clamp-3">
+                        {company.whyInteresting ?? company.description}
+                      </span>
+                    </td>
+                    <td className="max-w-[300px] text-[11px] text-ink-soft">
+                      <span className="line-clamp-3">
+                        {company.linkedExperts
+                          .map((link) => link.expert.name)
+                          .slice(0, 5)
+                          .join(", ") || "No named expert yet"}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap text-[11px] text-ink-soft">
+                      {company.expertCount} expert link{company.expertCount === 1 ? "" : "s"} · {company.sources.length} source{company.sources.length === 1 ? "" : "s"}
+                    </td>
+                    <td>
+                      <Link href={`/companies/${company.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
+                        Open
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
 
         <section className="ee-panel mb-5 overflow-hidden rounded-lg">

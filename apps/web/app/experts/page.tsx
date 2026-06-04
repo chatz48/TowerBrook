@@ -10,8 +10,7 @@ import { rankExperts } from "@/lib/score";
 import { getTargetedExpertExpansion } from "@/lib/targeted-expansion";
 import { towerBrookExpertScore } from "@/lib/towerbrook";
 import { EXPERT_TYPE_LABEL } from "@/lib/labels";
-import { NextActionPanel, WorkflowRail } from "@/app/components/InvestorWorkflow";
-import { ConfidenceBars } from "@/app/components/ui";
+import { Badge, ConfidenceBars } from "@/app/components/ui";
 
 export default function ExpertsPage() {
   const companies = getCompanies();
@@ -39,99 +38,95 @@ export default function ExpertsPage() {
             <Link href="/ask" className="ee-button ee-button-secondary">
               Ask over experts
             </Link>
-            <Link href="/reports" className="ee-button ee-button-primary">
-              Build call plan
+            <Link href="/discover" className="ee-button ee-button-primary">
+              Review coverage gaps
             </Link>
           </div>
         </header>
 
-        <section className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
-          <DiscoveryMetric label="Founder opportunity jobs" value={origination.coverage.founder_origination} />
-          <DiscoveryMetric label="PE expert candidates" value={discovery.coverage.expert_candidates} />
-          <DiscoveryMetric label="TowerBrook-connected" value={discovery.coverage.towerbrook_connected_experts} />
-          <DiscoveryMetric label="Canonical matches" value={discovery.coverage.canonical_expert_matches} />
-          <DiscoveryMetric label="Advisor-person gaps" value={discovery.coverage.advisor_expert_gaps} />
-          <DiscoveryMetric label="Identity jobs" value={origination.coverage.identity_resolution} />
-        </section>
-
-        <section className="mb-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
-          <div className="ee-panel rounded-lg p-5">
-            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-              <div>
-                <h2 className="ee-label text-ink">Call-planning workflow</h2>
-                <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
-                  Move from a long people list to a practical sequence: the
-                  person to call, the reason to call them, and the companies or
-                  gaps they should help unlock.
-                </p>
-              </div>
-              <Link href="/reports" className="ee-button ee-button-secondary">
-                Build call plan
-              </Link>
+        <section className="ee-panel mb-5 overflow-hidden rounded-lg">
+          <div className="flex items-start justify-between gap-4 border-b border-line px-4 py-3">
+            <div>
+              <h2 className="ee-label text-ink">Call list</h2>
+              <p className="mt-1 text-[11px] text-ink-faint">
+                Canonical experts prioritized for a call, referral ask, or company lead.
+              </p>
             </div>
-            <div className="mt-4">
-              <WorkflowRail
-                steps={[
-                  {
-                    label: "Warm access",
-                    title: ranked[0]?.expert.name ?? "Find first expert",
-                    body: ranked[0]
-                      ? `Start with ${ranked[0].expert.headline} and ask for investable companies and skeptical follow-up names.`
-                      : "Rank experts by objective, role, access and evidence confidence.",
-                    href: ranked[0] ? `/experts/${ranked[0].expert.id}` : "/experts",
-                  },
-                  {
-                    label: "Founder origination",
-                    title: origination.queues.founder_origination[0]?.metadata.target_name ?? "Review founder jobs",
-                    body: "Use previously funded founders to surface new boards, investments, referrals and post-exit ventures.",
-                    href: "/discover",
-                  },
-                  {
-                    label: "Deal evidence",
-                    title: expertCandidates[0]?.name ?? "Review PE-derived candidates",
-                    body: "Prioritize named people tied to PE deals before relying on organization-level advisor names.",
-                    href: expertCandidates[0]?.canonical_match.expert_id
-                      ? `/experts/${expertCandidates[0].canonical_match.expert_id}`
-                      : "/experts",
-                  },
-                  {
-                    label: "Coverage gap",
-                    title: advisorGaps[0]?.organization ?? "Find missing named advisors",
-                    body: "Convert banker, lawyer and diligence-firm mentions into specific people the team can call.",
-                    href: "/discover",
-                  },
-                ]}
-              />
-            </div>
+            <Link href="/discover" className="ee-link text-[12px]">
+              Review research pipeline
+            </Link>
           </div>
-
-          <NextActionPanel
-            title="Use this page for"
-            description="Keep the list work-oriented: every row should support a call, a referral ask, or a target-company lead."
-            actions={[
-              {
-                title: "Generate first-call prep",
-                body: ranked[0]
-                  ? `Open ${ranked[0].expert.name} and generate a sourced call brief.`
-                  : "Open the highest-ranked expert and generate a sourced call brief.",
-                href: ranked[0] ? `/experts/${ranked[0].expert.id}` : "/experts",
-                action: "Prep",
-                tone: "primary",
-              },
-              {
-                title: "Find company leads",
-                body: "Scan connected companies before the call so the expert can confirm, refute or extend the list.",
-                href: "/companies",
-                action: "Targets",
-              },
-              {
-                title: "Run live discovery",
-                body: "Create a job when the row has an organization-level gap or stale identity evidence.",
-                href: "/discover",
-                action: "Run",
-              },
-            ]}
-          />
+          <div className="overflow-x-auto">
+            <table className="ee-table min-w-[1180px]">
+              <thead>
+                <tr>
+                  <th className="w-14">#</th>
+                  <th>Expert</th>
+                  <th>Why call</th>
+                  <th>Companies they can unlock</th>
+                  <th>Relationship path</th>
+                  <th>Evidence</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {ranked.slice(0, 10).map(({ expert }, index) => {
+                  const towerBrook = towerBrookExpertScore(expert, companiesById);
+                  const latestNews = expert.news
+                    ?.slice()
+                    .sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+                  return (
+                    <tr key={expert.id}>
+                      <td>
+                        <span className="inline-grid h-8 w-8 place-items-center rounded bg-[#f1f4f9] text-[16px] font-semibold text-accent">
+                          {index + 1}
+                        </span>
+                      </td>
+                      <td className="min-w-[230px]">
+                        <Link href={`/experts/${expert.id}`} className="ee-link">
+                          {expert.name}
+                        </Link>
+                        <div className="mt-0.5 text-[11px] text-ink-soft">{expert.headline}</div>
+                      </td>
+                      <td className="max-w-[340px] text-[11px] leading-relaxed text-ink-soft">
+                        <span className="line-clamp-3">
+                          {latestNews?.headline ?? expert.signals?.[0] ?? expert.whyRelevant}
+                        </span>
+                      </td>
+                      <td className="max-w-[260px] text-[11px] text-ink-soft">
+                        <span className="line-clamp-3">
+                          {expert.companies
+                            .map((link) => companyNames[link.companyId] ?? link.companyId)
+                            .slice(0, 4)
+                            .join(", ") || "No company edge mapped"}
+                        </span>
+                      </td>
+                      <td>
+                        <Badge
+                          className={
+                            towerBrook.isDirect
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                              : "border-line bg-white text-ink-soft"
+                          }
+                        >
+                          {towerBrook.isDirect ? towerBrook.label : "No internal path mapped"}
+                        </Badge>
+                      </td>
+                      <td className="whitespace-nowrap text-[11px] text-ink-soft">
+                        {expert.sources.length} source{expert.sources.length === 1 ? "" : "s"}
+                        {expert.news?.length ? ` · ${expert.news.length} dated signal${expert.news.length === 1 ? "" : "s"}` : ""}
+                      </td>
+                      <td>
+                        <Link href={`/experts/${expert.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
+                          Open
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </section>
 
         <section className="ee-panel mb-5 overflow-hidden rounded-lg">

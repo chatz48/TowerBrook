@@ -39,7 +39,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               </span>
             </Link>
             <AppShellNav />
-            <div className="ml-auto hidden min-w-[280px] max-w-[460px] flex-1 items-center rounded-md border border-line-strong bg-white px-3 py-2 xl:flex">
+            <Link
+              href="/ask"
+              className="ml-auto hidden min-w-[280px] max-w-[460px] flex-1 items-center rounded-md border border-line-strong bg-white px-3 py-2 hover:border-line-dark hover:bg-[#fbfcff] xl:flex"
+            >
               <span className="text-muted" aria-hidden="true">
                 <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
                   <path d="m17 17-3.4-3.4m1.8-4.1a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
@@ -51,19 +54,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <span className="rounded border border-line bg-paper px-1.5 py-0.5 text-[11px] text-ink-faint">
                 ⌘ K
               </span>
-            </div>
-            <div className="hidden items-center gap-3 text-ink-soft sm:flex">
-              <span className="grid h-8 w-8 place-items-center rounded-full hover:bg-paper" aria-label="Notifications">
-                <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
-                  <path d="M14.5 7.6a4.5 4.5 0 0 0-9 0c0 5-2 5.3-2 6.4h13c0-1.1-2-.4-2-6.4Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-                  <path d="M8.4 16a1.8 1.8 0 0 0 3.2 0" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-                </svg>
-              </span>
-              <span className="grid h-8 w-8 place-items-center rounded-full border border-line bg-paper text-[12px] font-semibold text-ink">
-                AB
-              </span>
-            </div>
+            </Link>
+            <span
+              className="hidden h-8 w-8 place-items-center rounded-full border border-line bg-paper text-[12px] font-semibold text-ink sm:grid"
+              title="TowerBrook workspace"
+            >
+              TB
+            </span>
           </div>
+          <AppShellNav mobile />
         </header>
         <main>{children}</main>
         <PageAwareChat />
