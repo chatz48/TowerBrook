@@ -122,7 +122,7 @@ const NODE_KIND_LABEL = {
 };
 
 function confidenceText(confidence: number) {
-  return `${(confidence * 5).toFixed(1)} / 5.0`;
+  return `${Math.round(confidence * 100)}%`;
 }
 
 function confidenceBand(confidence: number) {
@@ -365,19 +365,6 @@ export default function GraphExplorer({
 
   return (
     <div className={styles.shell}>
-      <div className={styles.commandBar}>
-        <div className={styles.command}>
-          <span aria-hidden="true">⌕</span>
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search or ask anything..."
-            aria-label="Search graph records"
-          />
-          <kbd>⌘ K</kbd>
-        </div>
-      </div>
-
       <div className={styles.workspace}>
         <aside className={styles.queryPanel}>
           <PanelHeader title="Graph Explorer" caption="Build queries, explore relationships, surface insights." />
@@ -407,6 +394,16 @@ export default function GraphExplorer({
                 </option>
               ))}
             </select>
+            <label className={styles.fieldLabel} htmlFor="graph-query">
+              Find node or relationship
+            </label>
+            <input
+              id="graph-query"
+              className={styles.select}
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="e.g. JSM, founder, grid connection"
+            />
           </section>
 
           <section className={styles.panelSection}>
@@ -521,7 +518,6 @@ export default function GraphExplorer({
         <main className={styles.canvasColumn}>
           <div className={styles.graphToolbar}>
             <div className={styles.toolbarButtons}>
-              <button type="button">Layout ▾</button>
               <button type="button" onClick={() => selectNode(selectedNode?.key ?? selectedKey)}>
                 Fit to view
               </button>
@@ -578,7 +574,7 @@ export default function GraphExplorer({
               items={metrics.repeatedAdvisors.map(({ relationship, label, count }) => ({
                 id: relationship,
                 label,
-                sub: `${count} source-backed edge${count === 1 ? "" : "s"}`,
+                sub: `${count} mapped edge${count === 1 ? "" : "s"}`,
                 value: count,
               }))}
             />
@@ -597,7 +593,7 @@ export default function GraphExplorer({
               items={(metrics.weakCoverage.length ? metrics.weakCoverage : ["Unmapped buyer interviews", "Recent exits", "Advisor overlap"]).map((label, index) => ({
                 id: label,
                 label,
-                sub: index === 0 ? "Needs another source-backed path" : "Limited visible coverage",
+                sub: index === 0 ? "Needs another verified relationship" : "Limited visible coverage",
                 value: index === 0 ? 1 : 0,
               }))}
             />
@@ -625,14 +621,14 @@ export default function GraphExplorer({
               </div>
 
               <section className={styles.confidenceBox}>
-                <span>Confidence</span>
+                <span>Record confidence</span>
                 <strong>{confidenceText(selectedNode.confidence)}</strong>
                 <em>{confidenceBand(selectedNode.confidence)}</em>
               </section>
 
               <section className={styles.inspectSection}>
                 <div className={styles.sectionLine}>
-                  <strong>Source-backed relationships ({selectedEdges.length})</strong>
+                  <strong>Mapped relationships ({selectedEdges.length})</strong>
                   <button type="button" onClick={() => setPathView(false)}>
                     View all
                   </button>
@@ -653,7 +649,7 @@ export default function GraphExplorer({
                           <strong>{edge.relationshipLabel}</strong>
                           <small>{neighbor?.name ?? "Unknown node"}</small>
                         </button>
-                        <em>{edge.sourceIds.length}</em>
+                        <em>{edge.sourceIds.length} related</em>
                       </li>
                     );
                   })}
@@ -662,8 +658,7 @@ export default function GraphExplorer({
 
               <section className={styles.inspectSection}>
                 <div className={styles.sectionLine}>
-                  <strong>Evidence snapshots</strong>
-                  <button type="button">View all</button>
+                  <strong>Related evidence snapshots</strong>
                 </div>
                 <ul className={styles.evidenceList}>
                   <li>
@@ -701,13 +696,10 @@ export default function GraphExplorer({
                 <Link href={selectedNode.href} className={styles.primaryButton}>
                   Open {selectedNode.kind} profile
                 </Link>
-                <button type="button" className={styles.secondaryButton}>
-                  Add to shortlist
-                </button>
               </div>
             </>
           ) : (
-            <div className={styles.emptyInspector}>No source-backed node matches this query.</div>
+            <div className={styles.emptyInspector}>No mapped node matches this query.</div>
           )}
         </aside>
       </div>
@@ -802,7 +794,7 @@ function GraphCanvas({
   });
 
   return (
-    <svg className={styles.graphSvg} viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Evidence-backed relationship graph">
+    <svg className={styles.graphSvg} viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Mapped relationship graph">
       <defs>
         {RELATIONSHIP_ORDER.map((relationship) => (
           <marker
@@ -925,7 +917,7 @@ function PathStrip({
     <div className={styles.pathStrip}>
       <div>
         <strong>Selected path ({Math.max(path.length - 1, 0)} hops)</strong>
-        <span>Path confidence: {selectedNode ? confidenceBand(selectedNode.confidence) : "Indicative"}</span>
+        <span>Selected-node evidence: {selectedNode ? confidenceBand(selectedNode.confidence) : "Indicative"}</span>
       </div>
       <ol>
         {path.map((node, index) => (
@@ -953,7 +945,6 @@ function InsightCard({
     <article className={styles.insightCard}>
       <div className={styles.sectionLine}>
         <strong>{title}</strong>
-        <button type="button">View all</button>
       </div>
       <ul>
         {items.slice(0, 3).map((item) => {

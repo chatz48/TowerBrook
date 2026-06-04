@@ -10,7 +10,7 @@ import { rankExperts } from "@/lib/score";
 import { getTargetedExpertExpansion } from "@/lib/targeted-expansion";
 import { towerBrookExpertScore } from "@/lib/towerbrook";
 import { EXPERT_TYPE_LABEL } from "@/lib/labels";
-import { Badge, ConfidenceBars } from "@/app/components/ui";
+import { Badge } from "@/app/components/ui";
 
 export default function ExpertsPage() {
   const companies = getCompanies();
@@ -212,7 +212,6 @@ export default function ExpertsPage() {
             <table className="ee-table min-w-[1120px]">
               <thead>
                 <tr>
-                  <th>Priority</th>
                   <th>Founder / ex-founder</th>
                   <th>Previously funded companies</th>
                   <th>Theme</th>
@@ -223,7 +222,6 @@ export default function ExpertsPage() {
               <tbody>
                 {origination.queues.founder_origination.slice(0, 30).map((job) => (
                   <tr key={job.external_job_id} className="hover:bg-[#fbfcff]">
-                    <td className="font-semibold tabular-nums">{job.priority}</td>
                     <td className="font-semibold">{job.metadata.target_name}</td>
                     <td className="max-w-[260px] text-[11px] text-ink-soft">
                       {(job.metadata.target_organizations ?? []).join(", ")}
@@ -256,7 +254,6 @@ export default function ExpertsPage() {
             <table className="ee-table min-w-[1260px]">
               <thead>
                 <tr>
-                  <th>Priority</th>
                   <th>Expert candidate</th>
                   <th>Archetype</th>
                   <th>Access path</th>
@@ -269,7 +266,6 @@ export default function ExpertsPage() {
               <tbody>
                 {expertCandidates.map((candidate) => (
                   <tr key={candidate.candidate_id} className="hover:bg-[#fbfcff]">
-                    <td className="font-semibold tabular-nums">{candidate.scores.research_priority}</td>
                     <td className="min-w-[230px]">
                       {candidate.canonical_match.expert_id ? (
                         <Link href={`/experts/${candidate.canonical_match.expert_id}`} className="ee-link">
@@ -324,7 +320,7 @@ export default function ExpertsPage() {
         <section className="ee-panel mb-5 overflow-hidden rounded-lg">
           <div className="flex items-center justify-between border-b border-line px-4 py-3">
             <div>
-              <h2 className="ee-label text-ink">Highest-priority named-expert gaps</h2>
+              <h2 className="ee-label text-ink">Named-expert coverage gaps</h2>
               <p className="mt-1 text-[11px] text-ink-faint">
                 Advisor and service-provider organizations evidenced on PE deals where the individual professionals still need to be identified.
               </p>
@@ -337,7 +333,6 @@ export default function ExpertsPage() {
             <table className="ee-table min-w-[1080px]">
               <thead>
                 <tr>
-                  <th>Priority</th>
                   <th>Organization</th>
                   <th>Expert sought</th>
                   <th>Deal role</th>
@@ -349,7 +344,6 @@ export default function ExpertsPage() {
               <tbody>
                 {advisorGaps.slice(0, 24).map((gap) => (
                   <tr key={gap.gap_id} className="hover:bg-[#fbfcff]">
-                    <td className="font-semibold tabular-nums">{gap.search_priority}</td>
                     <td className="font-semibold">{gap.organization}</td>
                     <td>{EXPERT_TYPE_LABEL[gap.expert_type_sought]}</td>
                     <td className="text-[11px] text-ink-soft">{gap.advisor_role.replaceAll("-", " ")}</td>
@@ -370,26 +364,24 @@ export default function ExpertsPage() {
         <section className="ee-panel overflow-hidden rounded-lg">
           <div className="flex items-center justify-between border-b border-line px-4 py-3">
             <h2 className="ee-label text-ink">All experts ({ranked.length})</h2>
-            <span className="text-[12px] text-ink-faint">Sorted by base priority</span>
+            <span className="text-[12px] text-ink-faint">Canonical expert directory</span>
           </div>
           <div className="overflow-x-auto">
             <table className="ee-table min-w-[1120px]">
               <thead>
                 <tr>
-                  <th>Priority</th>
+                  <th>Rank</th>
                   <th>Expert</th>
                   <th>Archetype</th>
                   <th>Themes</th>
-                  <th>Score</th>
-                  <th>TowerBrook</th>
-                  <th>Momentum</th>
-                  <th>Access</th>
+                  <th>Why relevant</th>
+                  <th>Relationship path</th>
                   <th>Connected companies</th>
-                  <th>Sources</th>
+                  <th>Evidence</th>
                 </tr>
               </thead>
               <tbody>
-                {ranked.map(({ expert, score }, index) => {
+                {ranked.map(({ expert }, index) => {
                   const towerBrook = towerBrookExpertScore(expert, companiesById);
                   return (
                     <tr key={expert.id} className="hover:bg-[#fbfcff]">
@@ -410,44 +402,20 @@ export default function ExpertsPage() {
                       <td className="text-[11px] text-ink-soft">
                         {expert.themes.join(", ")}
                       </td>
-                      <td>
-                        <div className="font-semibold tabular-nums">{score.total}</div>
-                        <ConfidenceBars value={Math.min(1, score.total / 120)} />
+                      <td className="max-w-[340px] text-[11px] leading-relaxed text-ink-soft">
+                        <span className="line-clamp-3">{expert.whyRelevant}</span>
                       </td>
-                      <td>
-                        <div
-                          className={`font-semibold tabular-nums ${
-                            towerBrook.isDirect ? "text-success" : "text-ink"
-                          }`}
-                        >
-                          {towerBrook.score}
-                        </div>
-                        <div className="mt-0.5 text-[11px] text-ink-faint">
-                          {towerBrook.label}
-                        </div>
-                        <ConfidenceBars value={towerBrook.score / 100} />
+                      <td className={towerBrook.isDirect ? "text-success" : "text-ink-faint"}>
+                        {towerBrook.isDirect ? towerBrook.label : "No internal path mapped"}
                       </td>
-                      <td className={score.recency || score.signals ? "text-success" : "text-warning"}>
-                        {score.recency || score.signals ? "High" : "Medium"}
-                      </td>
-                      <td>{expert.access === "proprietary" ? "Warm" : "Known"}</td>
                       <td className="max-w-[260px]">
                         <span className="line-clamp-2">
                           {expert.companies.map((link) => companyNames[link.companyId] ?? link.companyId).join(", ")}
                         </span>
                       </td>
-                      <td>
-                        {expert.sources.slice(0, 4).map((source, i) => (
-                          <a
-                            key={`${source.url}-${i}`}
-                            href={source.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="ee-link mr-1"
-                          >
-                            [{i + 1}]
-                          </a>
-                        ))}
+                      <td className="whitespace-nowrap text-[11px] text-ink-soft">
+                        {expert.sources.length} source{expert.sources.length === 1 ? "" : "s"}
+                        {expert.news?.length ? ` · ${expert.news.length} dated signal${expert.news.length === 1 ? "" : "s"}` : ""}
                       </td>
                     </tr>
                   );

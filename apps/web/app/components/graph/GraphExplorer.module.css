@@ -6,14 +6,6 @@
   font-size: 13px;
 }
 
-.commandBar {
-  display: flex;
-  justify-content: flex-end;
-  border-bottom: 1px solid #dfe5ee;
-  background: #fff;
-  padding: 10px 14px;
-}
-
 .topbar {
   display: grid;
   grid-template-columns: 260px 1fr minmax(280px, 430px);
@@ -85,39 +77,10 @@
   border-bottom-color: #075fe4;
 }
 
-.command {
-  height: 38px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid #dce3ec;
-  border-radius: 7px;
-  background: #fff;
-  padding: 0 10px;
-  color: #64748b;
-}
-
-.command input {
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  color: #172033;
-  background: transparent;
-}
-
-.command kbd {
-  border: 1px solid #d9e0ea;
-  border-radius: 4px;
-  background: #f6f8fb;
-  padding: 1px 5px;
-  font-size: 11px;
-}
-
 .workspace {
   display: grid;
   grid-template-columns: 292px minmax(640px, 1fr) 334px;
-  min-height: calc(100vh - 112px);
+  min-height: calc(100vh - 56px);
 }
 
 .queryPanel,

@@ -4,6 +4,14 @@ import { useState } from "react";
 
 type Mode = "call-prep" | "outreach";
 
+const CALL_GOALS = [
+  ["Market orientation", "Trends, size, growth, cycles"],
+  ["Customer validation", "Customer needs, budgets, pain"],
+  ["Deal process intelligence", "Sourcing, diligence, deal terms"],
+  ["Target referrals", "Introductions to companies, operators or founders"],
+  ["Skeptical thesis testing", "Challenge assumptions, risks"],
+] as const;
+
 export default function ExpertActions({
   expertId,
   expertName,
@@ -17,6 +25,9 @@ export default function ExpertActions({
   const [output, setOutput] = useState("");
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [goals, setGoals] = useState<string[]>(
+    CALL_GOALS.slice(0, 4).map(([label]) => label),
+  );
 
   async function run(which: Mode) {
     setMode(which);
@@ -28,7 +39,15 @@ export default function ExpertActions({
       const res = await fetch(`/api/${which}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ expertId, context }),
+        body: JSON.stringify({
+          expertId,
+          context: [
+            goals.length ? `Call objectives: ${goals.join("; ")}.` : "",
+            context,
+          ]
+            .filter(Boolean)
+            .join(" "),
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Request failed");
@@ -60,6 +79,7 @@ export default function ExpertActions({
             setOutput("");
             setError("");
             setContext("");
+            setGoals(CALL_GOALS.slice(0, 4).map(([label]) => label));
           }}
           className="text-[12px] text-accent"
         >
@@ -70,17 +90,18 @@ export default function ExpertActions({
       <div className="mt-5">
         <div className="text-[13px] font-semibold">What should this call produce?</div>
         <div className="mt-3 space-y-3 text-[12px] text-ink-soft">
-          {[
-            ["Market orientation", "Trends, size, growth, cycles"],
-            ["Customer validation", "Customer needs, budgets, pain"],
-            ["Deal process intelligence", "Sourcing, diligence, deal terms"],
-            ["Target referrals", "Introductions to companies, operators or founders"],
-            ["Skeptical thesis testing", "Challenge assumptions, risks"],
-          ].map(([label, description], index) => (
+          {CALL_GOALS.map(([label, description]) => (
             <label key={label} className="flex gap-3">
               <input
                 type="checkbox"
-                defaultChecked={index < 4}
+                checked={goals.includes(label)}
+                onChange={() =>
+                  setGoals((current) =>
+                    current.includes(label)
+                      ? current.filter((goal) => goal !== label)
+                      : [...current, label],
+                  )
+                }
                 className="mt-0.5 h-4 w-4 accent-[var(--accent)]"
               />
               <span>
@@ -102,12 +123,6 @@ export default function ExpertActions({
         />
       </label>
 
-      <div className="mt-5 rounded-lg border border-accent bg-[#f7fbff] p-4">
-        <div className="text-[12px] text-accent">Session-specific priority rank</div>
-        <div className="mt-2 text-4xl font-semibold tracking-tight">#2</div>
-        <div className="mt-1 text-[12px] text-success">Up vs. default ranking</div>
-      </div>
-
       <div className="mt-4 space-y-2">
         <button
           onClick={() => run("call-prep")}
@@ -122,9 +137,6 @@ export default function ExpertActions({
           className="ee-button ee-button-secondary w-full disabled:opacity-50"
         >
           {loading && mode === "outreach" ? "Drafting..." : "Draft outreach"}
-        </button>
-        <button className="ee-button ee-button-secondary w-full">
-          Add to origination plan
         </button>
       </div>
 

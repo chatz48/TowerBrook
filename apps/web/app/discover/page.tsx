@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { THEMES } from "@/lib/themes";
-import { NextActionPanel, WorkflowRail } from "@/app/components/InvestorWorkflow";
 
 interface ResearchJob {
   id: string;
@@ -182,100 +181,16 @@ export default function DiscoverPage() {
           </div>
         ) : null}
 
-        <section className="mb-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
-          <div className="ee-panel rounded-lg p-5">
-            <div className="ee-label text-ink">Start from the business question</div>
-            <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
-              Discovery should fill a decision gap: who to call, what company
-              to investigate, or which named service providers are hidden behind
-              organization-level deal evidence.
-            </p>
-            <div className="mt-4">
-              <WorkflowRail
-                steps={[
-                  {
-                    label: "Frame",
-                    title: "Write the missing answer",
-                    body: "Describe the expert, company or deal signal the team needs before a sourcing conversation.",
-                  },
-                  {
-                    label: "Run",
-                    title: "Launch a focused job",
-                    body: "Pick the closest research mode and keep the prompt narrow enough to review quickly.",
-                  },
-                  {
-                    label: "Review",
-                    title: "Approve before graphing",
-                    body: "Check sources, role evidence and identity matches before candidates become canonical.",
-                  },
-                ]}
-              />
-            </div>
-            <div className="mt-4 grid gap-2 md:grid-cols-3">
-              {DISCOVERY_PRESETS.map((preset) => (
-                <button
-                  key={preset.label}
-                  type="button"
-                  onClick={() => {
-                    setThemeId(preset.themeId);
-                    setJobType(preset.jobType);
-                    setQuery(preset.query);
-                  }}
-                  className="rounded-md border border-line bg-white px-3 py-2 text-left text-[12px] font-semibold text-ink-soft hover:border-line-strong hover:text-ink"
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <NextActionPanel
-            title="When to run discovery"
-            description="Use live discovery for gaps, not for rows that already have enough sourced evidence."
-            actions={[
-              {
-                title: "No named person",
-                body: "Run advisor-person gap search when a deal only names a bank, law firm or diligence provider.",
-                action: "Gap",
-              },
-              {
-                title: "Founder has moved on",
-                body: "Run founder origination to find new ventures, boards, investments and referrals.",
-                action: "Founder",
-              },
-              {
-                title: "Theme coverage is thin",
-                body: "Run deep discovery for a specialty blank space before the team relies on a theme map.",
-                action: "Theme",
-              },
-            ]}
-          />
-        </section>
-
-        <section className="ee-panel rounded-lg p-5">
-          <div className="ee-label text-ink">What a completed job gives TowerBrook</div>
-          <div className="mt-4 grid gap-3 md:grid-cols-3">
-            {[
-              ["People to call", "Named founders, operators, advisors, lawyers, lenders and dealmakers tied to the selected theme or transaction."],
-              ["Targets to investigate", "Companies, boards, investments, advisory clients and referrals surfaced through those people."],
-              ["Evidence to trust", "Source chunks, role evidence, confidence and identity-match suggestions before anything reaches the canonical graph."],
-            ].map(([title, body]) => (
-              <div key={title} className="rounded-md border border-line bg-paper p-4">
-                <div className="text-[13px] font-semibold">{title}</div>
-                <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">{body}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {job ? (
-          <section className="ee-panel mt-5 rounded-lg p-5">
+          <section className="ee-panel rounded-lg p-5">
             <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
               <div>
-                <div className="ee-label text-ink">Latest job</div>
-                <h2 className="mt-2 text-[20px] font-semibold">{job.id}</h2>
+                <div className="ee-label text-ink">Active discovery job</div>
+                <h2 className="mt-2 text-[18px] font-semibold">
+                  {job.job_type.replaceAll("_", " ")}
+                </h2>
                 <p className="mt-1 text-[12px] text-ink-faint">
-                  {job.job_type.replaceAll("_", " ")} · {job.theme_id ?? "all themes"}
+                  {job.theme_id ?? "all themes"} · {job.id}
                 </p>
               </div>
               <button onClick={refreshJob} className="ee-button ee-button-secondary">
@@ -295,7 +210,73 @@ export default function DiscoverPage() {
               </div>
             ) : null}
           </section>
-        ) : null}
+        ) : (
+          <section className="ee-panel rounded-lg p-5">
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div>
+                <div className="ee-label text-ink">Discovery queue</div>
+                <h2 className="mt-2 text-[18px] font-semibold">No active job in this session</h2>
+                <p className="mt-2 max-w-3xl text-[12px] leading-relaxed text-ink-soft">
+                  Launch discovery only when a live investment decision is blocked by a missing person,
+                  company, or piece of transaction evidence.
+                </p>
+              </div>
+              <Link href="/experts" className="ee-button ee-button-secondary">
+                Return to call list
+              </Link>
+            </div>
+          </section>
+        )}
+
+        <section className="mt-5">
+          <div className="mb-3">
+            <h2 className="text-[16px] font-semibold">Common research gaps</h2>
+            <p className="mt-1 text-[12px] text-ink-faint">
+              Select a focused preset, review the question in the left panel, then create the job.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {DISCOVERY_PRESETS.map((preset) => (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => {
+                  setThemeId(preset.themeId);
+                  setJobType(preset.jobType);
+                  setQuery(preset.query);
+                }}
+                className="ee-panel rounded-lg p-5 text-left hover:border-line-strong"
+              >
+                <div className="ee-label text-ink-faint">
+                  {preset.jobType.replaceAll("_", " ")}
+                </div>
+                <div className="mt-2 text-[14px] font-semibold text-ink">{preset.label}</div>
+                <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">{preset.query}</p>
+                <span className="mt-4 inline-flex text-[12px] font-semibold text-accent">
+                  Load question →
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="ee-panel mt-5 overflow-hidden rounded-lg">
+          <div className="border-b border-line px-4 py-3">
+            <h2 className="ee-label text-ink">Review standard</h2>
+          </div>
+          <div className="grid md:grid-cols-3">
+            {[
+              ["Named person", "A specific individual and current role, not an organization-only lead."],
+              ["Decision relevance", "A clear reason this person or company changes the next investment step."],
+              ["Source evidence", "A reviewable source that supports the role, relationship, or company claim."],
+            ].map(([title, body]) => (
+              <div key={title} className="border-b border-line p-5 last:border-b-0 md:border-b-0 md:border-r md:last:border-r-0">
+                <div className="text-[13px] font-semibold">{title}</div>
+                <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">{body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
     </div>
   );

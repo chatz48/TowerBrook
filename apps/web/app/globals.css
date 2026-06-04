@@ -190,61 +190,6 @@ textarea {
   flex: 1;
 }
 
-.ee-workflow-grid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-
-.ee-workflow-step {
-  align-items: flex-start;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  color: inherit;
-  display: flex;
-  gap: 12px;
-  min-height: 126px;
-  padding: 14px;
-  transition: border-color 140ms ease, background 140ms ease;
-}
-
-.ee-workflow-step:hover {
-  background: #fbfcff;
-  border-color: var(--line-strong);
-}
-
-.ee-workflow-index {
-  background: #eef4ff;
-  border-radius: 6px;
-  color: var(--accent);
-  display: grid;
-  flex: 0 0 auto;
-  font-size: 15px;
-  font-weight: 700;
-  height: 30px;
-  place-items: center;
-  width: 30px;
-}
-
-.ee-action-row {
-  align-items: center;
-  background: #fbfcff;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  color: inherit;
-  display: flex;
-  gap: 14px;
-  justify-content: space-between;
-  padding: 12px;
-  transition: border-color 140ms ease, background 140ms ease;
-}
-
-.ee-action-row:hover {
-  background: #fff;
-  border-color: var(--line-strong);
-}
-
 .ee-insight-strip {
   background: var(--card);
   border: 1px solid var(--line);

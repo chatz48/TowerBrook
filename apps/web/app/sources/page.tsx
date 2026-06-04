@@ -94,7 +94,7 @@ export default function SourcesPage() {
                         {candidate ? (
                           <>
                             <div className="font-semibold tabular-nums">
-                              {(candidate.confidence * 5).toFixed(1)}
+                              {Math.round(candidate.confidence * 100)}%
                             </div>
                             <ConfidenceBars value={candidate.confidence} />
                           </>

@@ -182,7 +182,11 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
   },
 ];
 
-const REPORT_DATE = "June 2, 2026 at 09:42 GMT";
+const REPORT_DATE = new Intl.DateTimeFormat("en-GB", {
+  dateStyle: "medium",
+  timeStyle: "short",
+  timeZone: "Europe/London",
+}).format(new Date());
 
 export async function buildReport(themeId: ThemeId = "grid-infrastructure"): Promise<ReportModel> {
   const theme = getTheme(themeId);
@@ -203,10 +207,7 @@ export async function buildReport(themeId: ThemeId = "grid-infrastructure"): Pro
     deals: sources.filter((s) => s.type === "Deal fact").slice(0, 5).map((s) => s.id),
   };
 
-  const topExperts = rankedExperts.map(({ expert, score }) => ({
-    expert,
-    score: score.total,
-  }));
+  const topExperts = rankedExperts.map(({ expert }) => ({ expert }));
   const topCompanies = companies.slice(0, 8);
   const topDeals = deals.slice(0, 5);
   const specialties = topSpecialties(experts, companies);
@@ -222,7 +223,7 @@ export async function buildReport(themeId: ThemeId = "grid-infrastructure"): Pro
       citations: sourceIds.primary,
       summary: `${theme.name} has ${stats.expertCount} mapped experts and ${stats.companyCount} derived companies. The investable angle is strongest where expert density, recent signals, and specialist company edges overlap.`,
       bullets: [
-        `${topExperts[0]?.expert.name ?? "The top ranked expert"} is the first call because the scoring model combines role, company edges, recency, access, and record confidence.`,
+        `${topExperts[0]?.expert.name ?? "The first expert"} is the first call because their role and mapped company relationships directly address the theme.`,
         `${topCompanies[0]?.name ?? "The leading company"} is the highest-density company surfaced by the current graph.`,
         `Current source coverage is strongest across ${specialties.slice(0, 3).join(", ")}.`,
       ],
@@ -257,12 +258,12 @@ export async function buildReport(themeId: ThemeId = "grid-infrastructure"): Pro
       confidence: averageConfidence(topExperts.map((e) => e.expert)),
       wordCount: 1312,
       citations: sourceIds.expert,
-      summary: "Priority experts are ranked by a transparent additive score: archetype, company edges, recent signals, access quality, cross-theme reach, and confidence.",
-      rows: topExperts.slice(0, 5).map(({ expert, score }) => ({
+      summary: "Priority experts are sequenced for a first diligence pass. Open each profile to verify the relationship path and supporting sources before outreach.",
+      rows: topExperts.slice(0, 5).map(({ expert }) => ({
         label: expert.name,
         value: expert.headline,
         detail: expert.whyRelevant,
-        metric: String(score),
+        metric: `${expert.sources.length} source${expert.sources.length === 1 ? "" : "s"}`,
         citations: citationIdsForEntity(sources, expert.name),
       })),
       actions: ["Build call plan", "Open evidence"],
@@ -348,11 +349,7 @@ export async function buildReport(themeId: ThemeId = "grid-infrastructure"): Pro
       highConfidenceSources: citedSources.filter((source) => source.confidence >= 0.82).length,
     },
     templates: REPORT_TEMPLATES,
-    savedReports: [
-      { name: `${theme.shortName} - Partner Memo`, updated: "Updated today", status: "Draft" },
-      { name: "HVDC Component Deck", updated: "Updated May 9, 2026", status: "Review" },
-      { name: "Battery Recycling - Red Team", updated: "Updated May 7, 2026", status: "Draft" },
-    ],
+    savedReports: [],
     sections,
     sources: citedSources,
   };

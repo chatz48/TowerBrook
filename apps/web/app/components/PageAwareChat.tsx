@@ -169,7 +169,9 @@ function PageAnswer({
                     <div className="text-sm font-semibold text-accent">{expert.name}</div>
                     <div className="mt-0.5 text-[11px] text-ink-faint">{expert.archetype}</div>
                   </div>
-                  <span className="font-mono text-xs font-semibold">{expert.relevance}</span>
+                  <span className="shrink-0 text-[11px] text-ink-faint">
+                    {expert.citations.length} source{expert.citations.length === 1 ? "" : "s"}
+                  </span>
                 </div>
                 <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-ink-soft">
                   {expert.why}
