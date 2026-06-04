@@ -15,6 +15,7 @@ import ExpertList from "@/app/components/ExpertList";
 import ThemeGraph from "@/app/components/ThemeGraph";
 import PointOfView from "@/app/components/PointOfView";
 import TowerBrookFocus from "@/app/components/TowerBrookFocus";
+import { NextActionPanel, WorkflowRail } from "@/app/components/InvestorWorkflow";
 import { buildBrief } from "@/lib/brief";
 import { Badge, BackLink, ConfidenceBars } from "@/app/components/ui";
 
@@ -118,6 +119,87 @@ export default async function ThemePage({
           <ThemeMetric label="Advisors" value={brief.stats.advisers} sub="Active on this theme" />
           <ThemeMetric label="Companies mapped" value={stats.companyCount} sub={`${companies[0]?.expertCount ?? 0} on top company`} />
           <ThemeMetric label="TowerBrook score" value={towerBrookLens.score} sub="Relationship lens" />
+        </section>
+
+        <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
+          <div className="ee-panel rounded-lg p-5">
+            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+              <div>
+                <h2 className="ee-label text-ink">Theme command sequence</h2>
+                <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
+                  A practical sequence for converting this theme from market
+                  map to named people, target companies and sourced next steps.
+                </p>
+              </div>
+              <Link href="/reports" className="ee-button ee-button-secondary">
+                Export sequence
+              </Link>
+            </div>
+            <div className="mt-4">
+              <WorkflowRail
+                steps={[
+                  {
+                    label: "First call",
+                    title: topExperts[0]?.expert.name ?? "Rank experts",
+                    body: topExperts[0]
+                      ? `Validate the thesis with ${topExperts[0].expert.headline}.`
+                      : "Find the strongest operator, founder or advisor in this theme.",
+                    href: topExperts[0] ? `/experts/${topExperts[0].expert.id}` : "/experts",
+                  },
+                  {
+                    label: "Target lead",
+                    title: companies[0]?.name ?? "Review targets",
+                    body: companies[0]
+                      ? `Review why ${companies[0].name} surfaced from ${companies[0].expertCount} expert link${companies[0].expertCount === 1 ? "" : "s"}.`
+                      : "Use the expert graph to derive companies before a memo is built.",
+                    href: companies[0] ? `/companies/${companies[0].id}` : "/companies",
+                  },
+                  {
+                    label: "Gap fill",
+                    title: blankSpaces[0] ?? "Fill blank spaces",
+                    body: "Run discovery for the most under-covered specialty before relying on the map.",
+                    href: "/discover",
+                  },
+                  {
+                    label: "Meeting output",
+                    title: "Build the sourced memo",
+                    body: "Package expert rationale, company trail, questions and evidence into an IC-ready appendix.",
+                    href: "/reports",
+                  },
+                ]}
+              />
+            </div>
+          </div>
+
+          <NextActionPanel
+            title="Recommended actions"
+            description="Designed for a 30-minute team review: decide what to call, what to verify, and what to map next."
+            actions={[
+              {
+                title: "Prepare top expert call",
+                body: topExperts[0]
+                  ? `Open ${topExperts[0].expert.name}'s call-prep workspace and ask for named company referrals.`
+                  : "Open the ranked expert list and select the best first call.",
+                href: topExperts[0] ? `/experts/${topExperts[0].expert.id}` : "/experts",
+                action: "Prep",
+                tone: "primary",
+              },
+              {
+                title: "Pressure-test target evidence",
+                body: companies[0]
+                  ? `Check ${companies[0].name}'s expert links, ownership and source trail.`
+                  : "Review company evidence once the graph has mapped target candidates.",
+                href: companies[0] ? `/companies/${companies[0].id}` : "/companies",
+                action: "Check",
+              },
+              {
+                title: "Fill named advisor gaps",
+                body: "Launch live discovery for bankers, lawyers and diligence providers around relevant PE deals.",
+                href: "/discover",
+                action: "Discover",
+              },
+            ]}
+          />
         </section>
 
         <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_520px]">

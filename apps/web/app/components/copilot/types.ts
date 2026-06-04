@@ -6,6 +6,15 @@ export type CopilotFilters = {
   sourceScope: string;
 };
 
+export type PageContext = {
+  title?: string;
+  pathname?: string;
+  url?: string;
+  headings?: string[];
+  selectedText?: string;
+  visibleText?: string;
+};
+
 export type SourceRecord = {
   source_id: string;
   title: string;
@@ -28,6 +37,11 @@ export type AskResponse = {
     geography: string;
     archetypes: string[];
     source_scope: string;
+    page_context?: {
+      title: string;
+      pathname: string;
+      headings: string[];
+    };
   };
   ranked_experts: {
     expert_id: string;
@@ -86,4 +100,6 @@ export type AskResponse = {
   }[];
   grounded: boolean;
   model: string;
+  agentic_answer?: string;
+  tool_calls?: unknown[];
 };

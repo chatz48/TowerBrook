@@ -11,6 +11,7 @@ import { rankExperts } from "@/lib/score";
 import { buildTowerBrookLens } from "@/lib/towerbrook";
 import SearchBox, { type SearchItem } from "./components/SearchBox";
 import TowerBrookFocus from "./components/TowerBrookFocus";
+import { NextActionPanel, WorkflowRail } from "./components/InvestorWorkflow";
 import { ConfidenceBars } from "./components/ui";
 
 export default function Home() {
@@ -45,12 +46,12 @@ export default function Home() {
             <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
               <div>
                 <h1 className="text-[28px] font-semibold tracking-tight">
-                  Theme command center
+                  People-led deal origination
                 </h1>
                 <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
-                  Move from investment theme to ranked experts, surfaced
-                  companies, relationship paths, call prep and memo outputs.
-                  The graph is the database; sources are the evidence.
+                  Start with TowerBrook&apos;s three themes, identify the people
+                  most likely to reveal investable companies, prepare the call,
+                  and trace each opportunity back to sourced expert evidence.
                 </p>
               </div>
               <div className="min-w-[360px] max-xl:min-w-0">
@@ -60,18 +61,18 @@ export default function Home() {
           </section>
 
           <section className="ee-panel rounded-lg p-5">
-            <div className="ee-label text-ink">Workflow status</div>
+            <div className="ee-label text-ink">Origination coverage</div>
             <div className="mt-4 grid grid-cols-3 gap-3">
-              <StatusMetric value={experts.length} label="experts" />
-              <StatusMetric value={companies.length} label="companies" />
-              <StatusMetric value={THEMES.length} label="themes" />
+              <StatusMetric value={experts.length} label="canonical experts" />
+              <StatusMetric value={companies.length} label="expert-derived companies" />
+              <StatusMetric value={THEMES.length} label="priority themes" />
             </div>
             <div className="mt-4 flex gap-2">
-              <Link href="/ask" className="ee-button ee-button-primary flex-1">
-                Ask copilot
+              <Link href="/experts" className="ee-button ee-button-primary flex-1">
+                Find experts
               </Link>
               <Link href="/discover" className="ee-button ee-button-secondary flex-1">
-                Research jobs
+                Review live discovery
               </Link>
             </div>
           </section>
@@ -79,6 +80,52 @@ export default function Home() {
 
         <section className="mb-5">
           <TowerBrookFocus lens={towerBrookLens} />
+        </section>
+
+        <section className="ee-panel mb-5 rounded-lg p-5">
+          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="ee-label text-ink">Investor workflow</h2>
+              <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
+                Use the engine as a short-cycle sourcing desk: pick one theme,
+                call the right people, pull out named companies, and turn the
+                evidence into a call plan or memo.
+              </p>
+            </div>
+            <Link href="/companies" className="ee-button ee-button-secondary">
+              View derived targets
+            </Link>
+          </div>
+          <div className="mt-4">
+            <WorkflowRail
+              steps={[
+                {
+                  label: "Pick a theme",
+                  title: "Start from the taxonomy",
+                  body: "Open one of the three priority themes and see coverage, blank spaces and the first people worth calling.",
+                  href: "/themes/grid-infrastructure",
+                },
+                {
+                  label: "Prioritize calls",
+                  title: "Use the expert pool",
+                  body: "Rank founders, operators, advisors, lawyers, bankers and peer-fund dealmakers by call objective and access path.",
+                  href: "/experts",
+                },
+                {
+                  label: "Derive targets",
+                  title: "Turn people into companies",
+                  body: "Follow expert relationships to companies, boards, advisory clients, service providers and PE-backed comparables.",
+                  href: "/companies",
+                },
+                {
+                  label: "Act on evidence",
+                  title: "Prepare outreach and memos",
+                  body: "Generate sourced call prep, outreach drafts and memo-ready evidence trails for the next diligence step.",
+                  href: "/reports",
+                },
+              ]}
+            />
+          </div>
         </section>
 
         <section className="ee-panel overflow-hidden rounded-lg">
@@ -148,11 +195,12 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mt-5 grid gap-5 lg:grid-cols-3">
+        <section className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_420px]">
+          <div className="grid gap-5 md:grid-cols-3">
           {[
-            ["Research Copilot", "Structured answers with ranked experts, companies, call sequence, risks and evidence.", "/ask"],
-            ["Graph Explorer", "Traverse expert-to-company paths and inspect source-backed edge metadata.", "/graph"],
-            ["Reports / Memo Builder", "Assemble sectioned, cited outputs with source register and export controls.", "/reports"],
+            ["Expert Origination", "Start with founders, ex-founders and PE deal participants who can reveal new companies.", "/experts"],
+            ["Research Copilot", "Ask for a ranked call sequence, diligence questions, risks and companies to investigate.", "/ask"],
+            ["Reports / Memo Builder", "Turn sourced expert and company evidence into call plans, briefs and IC-ready appendices.", "/reports"],
           ].map(([title, body, href]) => (
             <Link key={title} href={href} className="ee-panel rounded-lg p-5 hover:border-line-strong">
               <div className="ee-label text-ink">{title}</div>
@@ -162,6 +210,32 @@ export default function Home() {
               </span>
             </Link>
           ))}
+          </div>
+          <NextActionPanel
+            title="Best first hour"
+            description="A compact path for a busy deal professional opening the product cold."
+            actions={[
+              {
+                title: "Open Grid Infrastructure",
+                body: "Highest-density path to TowerBrook-linked portfolio operators, advisors and connection-service targets.",
+                href: "/themes/grid-infrastructure",
+                action: "Start",
+                tone: "primary",
+              },
+              {
+                title: "Call the first five experts",
+                body: "Use the theme call list to validate bottlenecks, budgets and names of companies to map next.",
+                href: "/experts",
+                action: "Rank",
+              },
+              {
+                title: "Review new company candidates",
+                body: "Scan companies reverse-derived from named expert and PE-deal evidence before building a memo.",
+                href: "/companies",
+                action: "Review",
+              },
+            ]}
+          />
         </section>
       </div>
     </div>

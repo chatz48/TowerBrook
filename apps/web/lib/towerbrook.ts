@@ -222,7 +222,17 @@ export function towerBrookExpertScore(
     if (themeOverlap > 0) reasons.push(`${themeOverlap} focus theme${themeOverlap > 1 ? "s" : ""}`);
 
     if (expert.type === "investor") score += 12;
+    if (expert.type === "lender-credit") score += 11;
     if (expert.type === "banker" || expert.type === "lawyer") score += 10;
+    if (
+      expert.type === "strategy-consultant" ||
+      expert.type === "commercial-dd" ||
+      expert.type === "technical-dd" ||
+      expert.type === "engineering-consultant" ||
+      expert.type === "regulatory-policy"
+    ) {
+      score += 9;
+    }
     if (expert.type === "operator" || expert.type === "ex-founder") score += 8;
 
     score += Math.round((expert.confidence ?? 0.7) * 9);

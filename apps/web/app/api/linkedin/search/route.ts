@@ -1,15 +1,15 @@
-import { callIntelligenceApi } from "@/lib/intelligence-api";
+import { callBackendApi } from "@/lib/backend-api";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const response = await callIntelligenceApi("/linkedin/search", {
+    const response = await callBackendApi("/linkedin/search", {
       method: "POST",
       body: JSON.stringify(body),
     });
     if (!response) {
       return Response.json(
-        { error: "Set INTELLIGENCE_API_URL to enable LinkedIn link search." },
+        { error: "Set BACKEND_API_URL to enable LinkedIn link search." },
         { status: 503 },
       );
     }

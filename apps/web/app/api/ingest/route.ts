@@ -1,11 +1,11 @@
 import { extractDealWithModel } from "@/lib/deal-ai";
 import { hasDealDatabase, persistDealIngestion } from "@/lib/deal-db";
 import { runDealEnrichment } from "@/lib/deal-enrichment";
-import { callIntelligenceApi, hasIntelligenceApi } from "@/lib/intelligence-api";
+import { callBackendApi, hasBackendApi } from "@/lib/backend-api";
 
 export async function POST(request: Request) {
   try {
-    if (hasIntelligenceApi()) {
+    if (hasBackendApi()) {
       const graphResult = await forwardToIntelligenceApi(request.clone());
       if (graphResult) return Response.json(graphResult);
     }
@@ -66,13 +66,13 @@ async function forwardToIntelligenceApi(request: Request) {
   const contentType = request.headers.get("content-type") ?? "";
   if (contentType.includes("multipart/form-data")) {
     const form = await request.formData();
-    return callIntelligenceApi("/ingest/source", {
+    return callBackendApi("/ingest/source", {
       method: "POST",
       body: form,
     });
   }
   const body = await request.json();
-  return callIntelligenceApi("/ingest/json", {
+  return callBackendApi("/ingest/json", {
     method: "POST",
     body: JSON.stringify({
       url: body.url,

@@ -1,5 +1,5 @@
 [project]
-name = "towerbrook-intelligence-api"
+name = "towerbrook-backend-api"
 version = "0.1.0"
 description = "FastAPI intelligence backend for TowerBrook people expert engine"
 requires-python = ">=3.12"

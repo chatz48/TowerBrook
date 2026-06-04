@@ -50,9 +50,9 @@ export default function ExpertActions({
     <div className="ee-panel rounded-lg p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-[16px] font-semibold">Build call prep for this expert</h2>
+          <h2 className="text-[16px] font-semibold">Turn this expert into a sourcing call</h2>
           <p className="mt-1 text-[12px] text-ink-faint">
-            Grounded in {expertName}&apos;s sourced background.
+            Grounded in {expertName}&apos;s sourced background, company links and deal evidence.
           </p>
         </div>
         <button
@@ -68,13 +68,13 @@ export default function ExpertActions({
       </div>
 
       <div className="mt-5">
-        <div className="text-[13px] font-semibold">What do you need from this expert?</div>
+        <div className="text-[13px] font-semibold">What should this call produce?</div>
         <div className="mt-3 space-y-3 text-[12px] text-ink-soft">
           {[
             ["Market orientation", "Trends, size, growth, cycles"],
             ["Customer validation", "Customer needs, budgets, pain"],
             ["Deal process intelligence", "Sourcing, diligence, deal terms"],
-            ["Founder referrals", "Introductions to operators/founders"],
+            ["Target referrals", "Introductions to companies, operators or founders"],
             ["Skeptical thesis testing", "Challenge assumptions, risks"],
           ].map(([label, description], index) => (
             <label key={label} className="flex gap-3">
@@ -97,7 +97,7 @@ export default function ExpertActions({
         <input
           value={context}
           onChange={(e) => setContext(e.target.value)}
-          placeholder="e.g. validate buyer pull in grid software"
+          placeholder="e.g. find founder-led grid services targets with PE readiness"
           className="mt-1 w-full rounded-md border border-line-strong px-3 py-2 text-[13px] outline-none focus:border-accent"
         />
       </label>
@@ -114,7 +114,7 @@ export default function ExpertActions({
           disabled={loading}
           className="ee-button ee-button-primary w-full disabled:opacity-50"
         >
-          {loading && mode === "call-prep" ? "Preparing..." : "Generate call prep"}
+          {loading && mode === "call-prep" ? "Preparing..." : "Generate sourcing call prep"}
         </button>
         <button
           onClick={() => run("outreach")}
@@ -124,7 +124,7 @@ export default function ExpertActions({
           {loading && mode === "outreach" ? "Drafting..." : "Draft outreach"}
         </button>
         <button className="ee-button ee-button-secondary w-full">
-          Add to call plan
+          Add to origination plan
         </button>
       </div>
 

@@ -7,8 +7,10 @@ import {
 } from "@/lib/expert-discovery";
 import { getOriginationResearchJobs } from "@/lib/origination";
 import { rankExperts } from "@/lib/score";
+import { getTargetedExpertExpansion } from "@/lib/targeted-expansion";
 import { towerBrookExpertScore } from "@/lib/towerbrook";
 import { EXPERT_TYPE_LABEL } from "@/lib/labels";
+import { NextActionPanel, WorkflowRail } from "@/app/components/InvestorWorkflow";
 import { ConfidenceBars } from "@/app/components/ui";
 
 export default function ExpertsPage() {
@@ -20,6 +22,7 @@ export default function ExpertsPage() {
   const expertCandidates = getExpertDiscoveryCandidates();
   const advisorGaps = getAdvisorExpertGaps();
   const origination = getOriginationResearchJobs();
+  const targetedExpansion = getTargetedExpertExpansion();
 
   return (
     <div className="ee-shell px-3 py-5 sm:px-5">
@@ -49,6 +52,153 @@ export default function ExpertsPage() {
           <DiscoveryMetric label="Canonical matches" value={discovery.coverage.canonical_expert_matches} />
           <DiscoveryMetric label="Advisor-person gaps" value={discovery.coverage.advisor_expert_gaps} />
           <DiscoveryMetric label="Identity jobs" value={origination.coverage.identity_resolution} />
+        </section>
+
+        <section className="mb-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
+          <div className="ee-panel rounded-lg p-5">
+            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+              <div>
+                <h2 className="ee-label text-ink">Call-planning workflow</h2>
+                <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
+                  Move from a long people list to a practical sequence: the
+                  person to call, the reason to call them, and the companies or
+                  gaps they should help unlock.
+                </p>
+              </div>
+              <Link href="/reports" className="ee-button ee-button-secondary">
+                Build call plan
+              </Link>
+            </div>
+            <div className="mt-4">
+              <WorkflowRail
+                steps={[
+                  {
+                    label: "Warm access",
+                    title: ranked[0]?.expert.name ?? "Find first expert",
+                    body: ranked[0]
+                      ? `Start with ${ranked[0].expert.headline} and ask for investable companies and skeptical follow-up names.`
+                      : "Rank experts by objective, role, access and evidence confidence.",
+                    href: ranked[0] ? `/experts/${ranked[0].expert.id}` : "/experts",
+                  },
+                  {
+                    label: "Founder origination",
+                    title: origination.queues.founder_origination[0]?.metadata.target_name ?? "Review founder jobs",
+                    body: "Use previously funded founders to surface new boards, investments, referrals and post-exit ventures.",
+                    href: "/discover",
+                  },
+                  {
+                    label: "Deal evidence",
+                    title: expertCandidates[0]?.name ?? "Review PE-derived candidates",
+                    body: "Prioritize named people tied to PE deals before relying on organization-level advisor names.",
+                    href: expertCandidates[0]?.canonical_match.expert_id
+                      ? `/experts/${expertCandidates[0].canonical_match.expert_id}`
+                      : "/experts",
+                  },
+                  {
+                    label: "Coverage gap",
+                    title: advisorGaps[0]?.organization ?? "Find missing named advisors",
+                    body: "Convert banker, lawyer and diligence-firm mentions into specific people the team can call.",
+                    href: "/discover",
+                  },
+                ]}
+              />
+            </div>
+          </div>
+
+          <NextActionPanel
+            title="Use this page for"
+            description="Keep the list work-oriented: every row should support a call, a referral ask, or a target-company lead."
+            actions={[
+              {
+                title: "Generate first-call prep",
+                body: ranked[0]
+                  ? `Open ${ranked[0].expert.name} and generate a sourced call brief.`
+                  : "Open the highest-ranked expert and generate a sourced call brief.",
+                href: ranked[0] ? `/experts/${ranked[0].expert.id}` : "/experts",
+                action: "Prep",
+                tone: "primary",
+              },
+              {
+                title: "Find company leads",
+                body: "Scan connected companies before the call so the expert can confirm, refute or extend the list.",
+                href: "/companies",
+                action: "Targets",
+              },
+              {
+                title: "Run live discovery",
+                body: "Create a job when the row has an organization-level gap or stale identity evidence.",
+                href: "/discover",
+                action: "Run",
+              },
+            ]}
+          />
+        </section>
+
+        <section className="ee-panel mb-5 overflow-hidden rounded-lg">
+          <div className="flex flex-col gap-2 border-b border-line px-4 py-3 md:flex-row md:items-start md:justify-between">
+            <div>
+              <h2 className="ee-label text-ink">Targeted expansion from recent PE tombstones</h2>
+              <p className="mt-1 max-w-4xl text-[11px] leading-relaxed text-ink-faint">
+                Targeted search pass for named dealmakers, lender-credit professionals, lawyers and
+                diligence specialists from recent grid, clean-energy and smart-water transactions.
+                These are review-gated leads, not canonical experts yet.
+              </p>
+            </div>
+            <div className="grid min-w-[300px] grid-cols-3 gap-2 text-right">
+              <DiscoveryMetric label="Candidates" value={targetedExpansion.coverage.expert_candidates} />
+              <DiscoveryMetric label="PE deals" value={targetedExpansion.coverage.recent_pe_deals_covered} />
+              <DiscoveryMetric label="Publications" value={targetedExpansion.coverage.specialist_publications} />
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="ee-table min-w-[1260px]">
+              <thead>
+                <tr>
+                  <th>Candidate</th>
+                  <th>Type</th>
+                  <th>Organization</th>
+                  <th>Theme</th>
+                  <th>Deal / source</th>
+                  <th>Why useful for origination</th>
+                  <th>Evidence</th>
+                </tr>
+              </thead>
+              <tbody>
+                {targetedExpansion.expert_candidates.slice(0, 24).map((candidate) => (
+                  <tr key={candidate.candidate_id} className="hover:bg-[#fbfcff]">
+                    <td className="min-w-[190px]">
+                      <div className="font-semibold">{candidate.name}</div>
+                      <div className="mt-0.5 text-[11px] text-ink-soft">{candidate.role}</div>
+                    </td>
+                    <td>{EXPERT_TYPE_LABEL[candidate.expert_type]}</td>
+                    <td className="max-w-[210px] text-[11px] text-ink-soft">{candidate.organization}</td>
+                    <td className="max-w-[190px] text-[11px] text-ink-soft">
+                      {candidate.themes.map((theme) => theme.replaceAll("-", " ")).join(", ")}
+                    </td>
+                    <td className="max-w-[250px] text-[11px] text-ink-soft">
+                      <span className="line-clamp-2">{candidate.deal_or_source}</span>
+                    </td>
+                    <td className="max-w-[390px] text-[11px] leading-relaxed text-ink-soft">
+                      <span className="line-clamp-3">{candidate.why_useful}</span>
+                    </td>
+                    <td>
+                      <a
+                        href={candidate.source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ee-link"
+                      >
+                        Source
+                      </a>
+                      <div className="mt-0.5 text-[11px] text-ink-faint">
+                        {Math.round(candidate.confidence * 100)}% · {candidate.review_status.replaceAll("_", " ")}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
 
         <section className="ee-panel mb-5 overflow-hidden rounded-lg">

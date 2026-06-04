@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { THEMES } from "@/lib/themes";
+import { NextActionPanel, WorkflowRail } from "@/app/components/InvestorWorkflow";
 
 interface ResearchJob {
   id: string;
@@ -38,6 +39,27 @@ const RESEARCH_MODES = [
     id: "deep_discovery",
     label: "Theme-wide PE discovery",
     description: "Find named experts and companies from relevant private-equity activity.",
+  },
+] as const;
+
+const DISCOVERY_PRESETS = [
+  {
+    label: "Find founder-led targets",
+    themeId: "grid-infrastructure",
+    jobType: "founder_origination",
+    query: "ex-founders and operators in grid connection services with new companies, board roles, investments or referrals",
+  },
+  {
+    label: "Name the deal advisors",
+    themeId: "clean-energy-advisory",
+    jobType: "advisor_expert_gap",
+    query: "identify named bankers, lawyers and commercial diligence professionals on renewable energy advisory and development deals",
+  },
+  {
+    label: "Map smart-water experts",
+    themeId: "smart-water",
+    jobType: "deep_discovery",
+    query: "smart water analytics leak detection AMI utility software founders operators investors advisors",
   },
 ] as const;
 
@@ -81,12 +103,12 @@ export default function DiscoverPage() {
   return (
     <div className="ee-shell grid lg:grid-cols-[330px_minmax(0,1fr)]">
       <aside className="border-b border-line bg-white p-5 lg:border-b-0 lg:border-r">
-        <div className="ee-label text-ink">Research jobs</div>
-        <h1 className="mt-2 text-[24px] font-semibold tracking-tight">Deep discovery queue</h1>
+        <div className="ee-label text-ink">Live origination</div>
+        <h1 className="mt-2 text-[24px] font-semibold tracking-tight">Expert discovery queue</h1>
         <p className="mt-2 text-[13px] leading-relaxed text-ink-soft">
-          Start expert-led origination research. Keiro finds and fetches sources,
-          DeepSeek extracts named experts and opportunity signals, and Supabase
-          stores review-gated candidates and identity matches.
+          Ask the system to find people or companies missing from the current
+          map. Use plain-English targets such as a founder, advisor firm, PE
+          deal or coverage gap.
         </p>
 
         <label className="mt-5 block text-[12px] font-medium text-ink-soft">
@@ -125,12 +147,12 @@ export default function DiscoverPage() {
         </label>
 
         <label className="mt-3 block text-[12px] font-medium text-ink-soft">
-          Focused query or target
+          Focused investor question
           <textarea
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             rows={4}
-            placeholder='e.g. "Nick Boyle" new company investments board advisor'
+            placeholder='e.g. "Who can tell us which grid connection service companies are investable now?"'
             className="mt-1 w-full resize-y rounded-md border border-line-strong bg-white px-3 py-2 text-[13px] outline-none focus:border-accent"
           />
         </label>
@@ -160,13 +182,83 @@ export default function DiscoverPage() {
           </div>
         ) : null}
 
+        <section className="mb-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
+          <div className="ee-panel rounded-lg p-5">
+            <div className="ee-label text-ink">Start from the business question</div>
+            <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
+              Discovery should fill a decision gap: who to call, what company
+              to investigate, or which named service providers are hidden behind
+              organization-level deal evidence.
+            </p>
+            <div className="mt-4">
+              <WorkflowRail
+                steps={[
+                  {
+                    label: "Frame",
+                    title: "Write the missing answer",
+                    body: "Describe the expert, company or deal signal the team needs before a sourcing conversation.",
+                  },
+                  {
+                    label: "Run",
+                    title: "Launch a focused job",
+                    body: "Pick the closest research mode and keep the prompt narrow enough to review quickly.",
+                  },
+                  {
+                    label: "Review",
+                    title: "Approve before graphing",
+                    body: "Check sources, role evidence and identity matches before candidates become canonical.",
+                  },
+                ]}
+              />
+            </div>
+            <div className="mt-4 grid gap-2 md:grid-cols-3">
+              {DISCOVERY_PRESETS.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => {
+                    setThemeId(preset.themeId);
+                    setJobType(preset.jobType);
+                    setQuery(preset.query);
+                  }}
+                  className="rounded-md border border-line bg-white px-3 py-2 text-left text-[12px] font-semibold text-ink-soft hover:border-line-strong hover:text-ink"
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <NextActionPanel
+            title="When to run discovery"
+            description="Use live discovery for gaps, not for rows that already have enough sourced evidence."
+            actions={[
+              {
+                title: "No named person",
+                body: "Run advisor-person gap search when a deal only names a bank, law firm or diligence provider.",
+                action: "Gap",
+              },
+              {
+                title: "Founder has moved on",
+                body: "Run founder origination to find new ventures, boards, investments and referrals.",
+                action: "Founder",
+              },
+              {
+                title: "Theme coverage is thin",
+                body: "Run deep discovery for a specialty blank space before the team relies on a theme map.",
+                action: "Theme",
+              },
+            ]}
+          />
+        </section>
+
         <section className="ee-panel rounded-lg p-5">
-          <div className="ee-label text-ink">Automatic graph enrichment</div>
+          <div className="ee-label text-ink">What a completed job gives TowerBrook</div>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             {[
-              ["Keiro search", "KeiroLabs searches and fetches founder, advisor, identity and new-opportunity sources."],
-              ["DeepSeek extraction", "DeepSeek + Pydantic extracts named experts, exact roles, relationships and opportunity signals."],
-              ["Supabase review gate", "Candidates, source chunks and identity-match suggestions persist without mutating canonical experts."],
+              ["People to call", "Named founders, operators, advisors, lawyers, lenders and dealmakers tied to the selected theme or transaction."],
+              ["Targets to investigate", "Companies, boards, investments, advisory clients and referrals surfaced through those people."],
+              ["Evidence to trust", "Source chunks, role evidence, confidence and identity-match suggestions before anything reaches the canonical graph."],
             ].map(([title, body]) => (
               <div key={title} className="rounded-md border border-line bg-paper p-4">
                 <div className="text-[13px] font-semibold">{title}</div>

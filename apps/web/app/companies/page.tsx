@@ -9,6 +9,7 @@ import {
   OWNERSHIP_LABEL,
   OWNERSHIP_STYLE,
 } from "@/lib/labels";
+import { NextActionPanel, WorkflowRail } from "@/app/components/InvestorWorkflow";
 import { Badge, ConfidenceBars } from "@/app/components/ui";
 
 export default async function CompaniesPage() {
@@ -36,6 +37,73 @@ export default async function CompaniesPage() {
             </Link>
           </div>
         </header>
+
+        <section className="mb-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
+          <div className="ee-panel rounded-lg p-5">
+            <div className="ee-label text-ink">Target triage workflow</div>
+            <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
+              Companies appear here because named experts, PE deals or
+              TowerBrook relationships made them worth a closer look. Use the
+              first pass to separate target, advisor and comparable company
+              roles.
+            </p>
+            <div className="mt-4">
+              <WorkflowRail
+                steps={[
+                  {
+                    label: "Lead target",
+                    title: derivedCandidates[0]?.name ?? companies[0]?.name ?? "Open a candidate",
+                    body: derivedCandidates[0]
+                      ? derivedCandidates[0].why_interesting
+                      : "Start with the company with the highest expert density.",
+                    href: derivedCandidates[0]?.canonical_match.company_id
+                      ? `/companies/${derivedCandidates[0].canonical_match.company_id}`
+                      : companies[0]
+                        ? `/companies/${companies[0].id}`
+                        : "/companies",
+                  },
+                  {
+                    label: "Expert proof",
+                    title: "Check who knows it",
+                    body: "Confirm which founders, operators, bankers, lawyers or service providers created the signal.",
+                    href: "/experts",
+                  },
+                  {
+                    label: "Ownership",
+                    title: "Sort actionable from taken",
+                    body: "Prioritize independent or sponsor-owned companies differently from acquired and public comparables.",
+                    href: "/companies",
+                  },
+                ]}
+              />
+            </div>
+          </div>
+          <NextActionPanel
+            title="Triage prompts"
+            description="Use these before a company reaches an IC memo."
+            actions={[
+              {
+                title: "Open lead candidate",
+                body: derivedCandidates[0]
+                  ? `Review ${derivedCandidates[0].name}'s expert links and why it surfaced.`
+                  : "Review the highest-density company profile.",
+                href: derivedCandidates[0]?.canonical_match.company_id
+                  ? `/companies/${derivedCandidates[0].canonical_match.company_id}`
+                  : companies[0]
+                    ? `/companies/${companies[0].id}`
+                    : "/companies",
+                action: "Open",
+                tone: "primary",
+              },
+              {
+                title: "Build expert-backed memo",
+                body: "Use only companies with named people and source-backed relationship paths.",
+                href: "/reports",
+                action: "Memo",
+              },
+            ]}
+          />
+        </section>
 
         <section className="ee-panel mb-5 overflow-hidden rounded-lg">
           <div className="flex items-center justify-between border-b border-line px-4 py-3">

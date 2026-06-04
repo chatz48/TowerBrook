@@ -15,8 +15,9 @@
       "investor": 29,
       "operator": 26,
       "advisor": 6,
-      "lawyer": 20,
-      "service-provider": 5
+      "lender-credit": 6,
+      "lawyer": 14,
+      "technical-dd": 5
     },
     "towerbrook_connected_experts": 46,
     "advisor_expert_gaps": 72,
@@ -1419,6 +1420,139 @@
       }
     },
     {
+      "candidate_id": "expert-candidate:francesco-de-micheli",
+      "name": "Francesco De Micheli",
+      "expert_type": "lender-credit",
+      "archetypes": [
+        "lender-credit"
+      ],
+      "themes": [
+        "grid-infrastructure",
+        "clean-energy-advisory"
+      ],
+      "organizations": [
+        "DLA Piper"
+      ],
+      "headline": "debt financing counsel lender connected to JSM Group",
+      "why_relevant": "Francesco De Micheli is evidenced as debt financing counsel lender across 1 priority PE transaction, connecting DLA Piper with JSM Group.",
+      "access_path": "towerbrook-deal-participant",
+      "canonical_match": {
+        "status": "unresolved",
+        "expert_id": null
+      },
+      "deal_roles": [
+        {
+          "deal_id": "pe-towerbrook-jsm-2024",
+          "deal_name": "TowerBrook makes majority investment in JSM",
+          "deal_lane": "towerbrook",
+          "deal_priority": 94,
+          "deal_date": "2024-07-29",
+          "role": "debt-financing-counsel-lender",
+          "organization": "DLA Piper",
+          "target": "JSM Group",
+          "archetype": "lender-credit",
+          "expert_type": "lender-credit",
+          "role_weight": 83,
+          "evidence_sources": [
+            {
+              "title": "TowerBrook Capital Partners Announces Investment in JSM",
+              "publisher": "TowerBrook",
+              "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
+              "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
+            },
+            {
+              "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
+              "publisher": "DLA Piper",
+              "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
+              "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
+            },
+            {
+              "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
+              "publisher": "Fried Frank",
+              "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
+              "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
+            },
+            {
+              "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
+              "publisher": "Eight Advisory",
+              "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
+              "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
+            }
+          ]
+        }
+      ],
+      "connected_companies": [
+        {
+          "name": "DLA Piper",
+          "relationship": "banked",
+          "evidence_deal_ids": [
+            "pe-towerbrook-jsm-2024"
+          ]
+        },
+        {
+          "name": "JSM Group",
+          "relationship": "banked",
+          "evidence_deal_ids": [
+            "pe-towerbrook-jsm-2024"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "TowerBrook Capital Partners Announces Investment in JSM",
+          "publisher": "TowerBrook",
+          "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
+          "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
+        },
+        {
+          "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
+          "publisher": "DLA Piper",
+          "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
+          "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
+        },
+        {
+          "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
+          "publisher": "Fried Frank",
+          "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
+          "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
+        },
+        {
+          "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
+          "publisher": "Eight Advisory",
+          "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
+          "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
+        }
+      ],
+      "scores": {
+        "deal_priority": 94,
+        "role_strength": 83,
+        "towerbrook_proximity": 85,
+        "recent_activity": 65,
+        "repeat_deal_activity": 35,
+        "evidence_strength": 100,
+        "research_priority": 81
+      },
+      "missing_profile_facts": [
+        "linkedin",
+        "location",
+        "current_role_and_employment_history",
+        "specific_theme_specialties",
+        "warm_relationship_path",
+        "availability_and_conflicts"
+      ],
+      "follow_up_searches": [
+        "\"Francesco De Micheli\" \"DLA Piper\"",
+        "\"Francesco De Micheli\" \"JSM Group\"",
+        "\"Francesco De Micheli\" LinkedIn",
+        "\"Francesco De Micheli\" \"grid-infrastructure\" OR \"clean-energy-advisory\""
+      ],
+      "review": {
+        "status": "needs_review",
+        "reviewer": null,
+        "notes": "Verify identity, current role, and exact deal role before promotion to the canonical expert graph."
+      }
+    },
+    {
       "candidate_id": "expert-candidate:glen-aitken",
       "name": "Glen Aitken",
       "expert_type": "operator",
@@ -1587,6 +1721,405 @@
         "\"Joshua Rauchwerger\" \"LiftWerx\"",
         "\"Joshua Rauchwerger\" LinkedIn",
         "\"Joshua Rauchwerger\" \"clean-energy-advisory\" OR \"grid-infrastructure\""
+      ],
+      "review": {
+        "status": "needs_review",
+        "reviewer": null,
+        "notes": "Verify identity, current role, and exact deal role before promotion to the canonical expert graph."
+      }
+    },
+    {
+      "candidate_id": "expert-candidate:kieran-teo",
+      "name": "Kieran Teo",
+      "expert_type": "lender-credit",
+      "archetypes": [
+        "lender-credit"
+      ],
+      "themes": [
+        "grid-infrastructure",
+        "clean-energy-advisory"
+      ],
+      "organizations": [
+        "DLA Piper"
+      ],
+      "headline": "debt financing counsel lender connected to JSM Group",
+      "why_relevant": "Kieran Teo is evidenced as debt financing counsel lender across 1 priority PE transaction, connecting DLA Piper with JSM Group.",
+      "access_path": "towerbrook-deal-participant",
+      "canonical_match": {
+        "status": "unresolved",
+        "expert_id": null
+      },
+      "deal_roles": [
+        {
+          "deal_id": "pe-towerbrook-jsm-2024",
+          "deal_name": "TowerBrook makes majority investment in JSM",
+          "deal_lane": "towerbrook",
+          "deal_priority": 94,
+          "deal_date": "2024-07-29",
+          "role": "debt-financing-counsel-lender",
+          "organization": "DLA Piper",
+          "target": "JSM Group",
+          "archetype": "lender-credit",
+          "expert_type": "lender-credit",
+          "role_weight": 83,
+          "evidence_sources": [
+            {
+              "title": "TowerBrook Capital Partners Announces Investment in JSM",
+              "publisher": "TowerBrook",
+              "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
+              "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
+            },
+            {
+              "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
+              "publisher": "DLA Piper",
+              "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
+              "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
+            },
+            {
+              "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
+              "publisher": "Fried Frank",
+              "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
+              "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
+            },
+            {
+              "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
+              "publisher": "Eight Advisory",
+              "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
+              "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
+            }
+          ]
+        }
+      ],
+      "connected_companies": [
+        {
+          "name": "DLA Piper",
+          "relationship": "banked",
+          "evidence_deal_ids": [
+            "pe-towerbrook-jsm-2024"
+          ]
+        },
+        {
+          "name": "JSM Group",
+          "relationship": "banked",
+          "evidence_deal_ids": [
+            "pe-towerbrook-jsm-2024"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "TowerBrook Capital Partners Announces Investment in JSM",
+          "publisher": "TowerBrook",
+          "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
+          "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
+        },
+        {
+          "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
+          "publisher": "DLA Piper",
+          "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
+          "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
+        },
+        {
+          "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
+          "publisher": "Fried Frank",
+          "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
+          "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
+        },
+        {
+          "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
+          "publisher": "Eight Advisory",
+          "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
+          "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
+        }
+      ],
+      "scores": {
+        "deal_priority": 94,
+        "role_strength": 83,
+        "towerbrook_proximity": 85,
+        "recent_activity": 65,
+        "repeat_deal_activity": 35,
+        "evidence_strength": 100,
+        "research_priority": 81
+      },
+      "missing_profile_facts": [
+        "linkedin",
+        "location",
+        "current_role_and_employment_history",
+        "specific_theme_specialties",
+        "warm_relationship_path",
+        "availability_and_conflicts"
+      ],
+      "follow_up_searches": [
+        "\"Kieran Teo\" \"DLA Piper\"",
+        "\"Kieran Teo\" \"JSM Group\"",
+        "\"Kieran Teo\" LinkedIn",
+        "\"Kieran Teo\" \"grid-infrastructure\" OR \"clean-energy-advisory\""
+      ],
+      "review": {
+        "status": "needs_review",
+        "reviewer": null,
+        "notes": "Verify identity, current role, and exact deal role before promotion to the canonical expert graph."
+      }
+    },
+    {
+      "candidate_id": "expert-candidate:neil-campbell",
+      "name": "Neil Campbell",
+      "expert_type": "lender-credit",
+      "archetypes": [
+        "lender-credit"
+      ],
+      "themes": [
+        "grid-infrastructure",
+        "clean-energy-advisory"
+      ],
+      "organizations": [
+        "DLA Piper"
+      ],
+      "headline": "debt financing counsel lender connected to JSM Group",
+      "why_relevant": "Neil Campbell is evidenced as debt financing counsel lender across 1 priority PE transaction, connecting DLA Piper with JSM Group.",
+      "access_path": "towerbrook-deal-participant",
+      "canonical_match": {
+        "status": "unresolved",
+        "expert_id": null
+      },
+      "deal_roles": [
+        {
+          "deal_id": "pe-towerbrook-jsm-2024",
+          "deal_name": "TowerBrook makes majority investment in JSM",
+          "deal_lane": "towerbrook",
+          "deal_priority": 94,
+          "deal_date": "2024-07-29",
+          "role": "debt-financing-counsel-lender",
+          "organization": "DLA Piper",
+          "target": "JSM Group",
+          "archetype": "lender-credit",
+          "expert_type": "lender-credit",
+          "role_weight": 83,
+          "evidence_sources": [
+            {
+              "title": "TowerBrook Capital Partners Announces Investment in JSM",
+              "publisher": "TowerBrook",
+              "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
+              "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
+            },
+            {
+              "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
+              "publisher": "DLA Piper",
+              "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
+              "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
+            },
+            {
+              "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
+              "publisher": "Fried Frank",
+              "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
+              "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
+            },
+            {
+              "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
+              "publisher": "Eight Advisory",
+              "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
+              "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
+            }
+          ]
+        }
+      ],
+      "connected_companies": [
+        {
+          "name": "DLA Piper",
+          "relationship": "banked",
+          "evidence_deal_ids": [
+            "pe-towerbrook-jsm-2024"
+          ]
+        },
+        {
+          "name": "JSM Group",
+          "relationship": "banked",
+          "evidence_deal_ids": [
+            "pe-towerbrook-jsm-2024"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "TowerBrook Capital Partners Announces Investment in JSM",
+          "publisher": "TowerBrook",
+          "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
+          "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
+        },
+        {
+          "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
+          "publisher": "DLA Piper",
+          "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
+          "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
+        },
+        {
+          "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
+          "publisher": "Fried Frank",
+          "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
+          "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
+        },
+        {
+          "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
+          "publisher": "Eight Advisory",
+          "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
+          "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
+        }
+      ],
+      "scores": {
+        "deal_priority": 94,
+        "role_strength": 83,
+        "towerbrook_proximity": 85,
+        "recent_activity": 65,
+        "repeat_deal_activity": 35,
+        "evidence_strength": 100,
+        "research_priority": 81
+      },
+      "missing_profile_facts": [
+        "linkedin",
+        "location",
+        "current_role_and_employment_history",
+        "specific_theme_specialties",
+        "warm_relationship_path",
+        "availability_and_conflicts"
+      ],
+      "follow_up_searches": [
+        "\"Neil Campbell\" \"DLA Piper\"",
+        "\"Neil Campbell\" \"JSM Group\"",
+        "\"Neil Campbell\" LinkedIn",
+        "\"Neil Campbell\" \"grid-infrastructure\" OR \"clean-energy-advisory\""
+      ],
+      "review": {
+        "status": "needs_review",
+        "reviewer": null,
+        "notes": "Verify identity, current role, and exact deal role before promotion to the canonical expert graph."
+      }
+    },
+    {
+      "candidate_id": "expert-candidate:radina-denkova",
+      "name": "Radina Denkova",
+      "expert_type": "lender-credit",
+      "archetypes": [
+        "lender-credit"
+      ],
+      "themes": [
+        "grid-infrastructure",
+        "clean-energy-advisory"
+      ],
+      "organizations": [
+        "DLA Piper"
+      ],
+      "headline": "debt financing counsel lender connected to JSM Group",
+      "why_relevant": "Radina Denkova is evidenced as debt financing counsel lender across 1 priority PE transaction, connecting DLA Piper with JSM Group.",
+      "access_path": "towerbrook-deal-participant",
+      "canonical_match": {
+        "status": "unresolved",
+        "expert_id": null
+      },
+      "deal_roles": [
+        {
+          "deal_id": "pe-towerbrook-jsm-2024",
+          "deal_name": "TowerBrook makes majority investment in JSM",
+          "deal_lane": "towerbrook",
+          "deal_priority": 94,
+          "deal_date": "2024-07-29",
+          "role": "debt-financing-counsel-lender",
+          "organization": "DLA Piper",
+          "target": "JSM Group",
+          "archetype": "lender-credit",
+          "expert_type": "lender-credit",
+          "role_weight": 83,
+          "evidence_sources": [
+            {
+              "title": "TowerBrook Capital Partners Announces Investment in JSM",
+              "publisher": "TowerBrook",
+              "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
+              "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
+            },
+            {
+              "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
+              "publisher": "DLA Piper",
+              "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
+              "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
+            },
+            {
+              "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
+              "publisher": "Fried Frank",
+              "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
+              "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
+            },
+            {
+              "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
+              "publisher": "Eight Advisory",
+              "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
+              "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
+            }
+          ]
+        }
+      ],
+      "connected_companies": [
+        {
+          "name": "DLA Piper",
+          "relationship": "banked",
+          "evidence_deal_ids": [
+            "pe-towerbrook-jsm-2024"
+          ]
+        },
+        {
+          "name": "JSM Group",
+          "relationship": "banked",
+          "evidence_deal_ids": [
+            "pe-towerbrook-jsm-2024"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "TowerBrook Capital Partners Announces Investment in JSM",
+          "publisher": "TowerBrook",
+          "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
+          "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
+        },
+        {
+          "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
+          "publisher": "DLA Piper",
+          "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
+          "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
+        },
+        {
+          "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
+          "publisher": "Fried Frank",
+          "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
+          "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
+        },
+        {
+          "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
+          "publisher": "Eight Advisory",
+          "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
+          "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
+        }
+      ],
+      "scores": {
+        "deal_priority": 94,
+        "role_strength": 83,
+        "towerbrook_proximity": 85,
+        "recent_activity": 65,
+        "repeat_deal_activity": 35,
+        "evidence_strength": 100,
+        "research_priority": 81
+      },
+      "missing_profile_facts": [
+        "linkedin",
+        "location",
+        "current_role_and_employment_history",
+        "specific_theme_specialties",
+        "warm_relationship_path",
+        "availability_and_conflicts"
+      ],
+      "follow_up_searches": [
+        "\"Radina Denkova\" \"DLA Piper\"",
+        "\"Radina Denkova\" \"JSM Group\"",
+        "\"Radina Denkova\" LinkedIn",
+        "\"Radina Denkova\" \"grid-infrastructure\" OR \"clean-energy-advisory\""
       ],
       "review": {
         "status": "needs_review",
@@ -1994,144 +2527,11 @@
       }
     },
     {
-      "candidate_id": "expert-candidate:francesco-de-micheli",
-      "name": "Francesco De Micheli",
-      "expert_type": "lawyer",
-      "archetypes": [
-        "lawyer"
-      ],
-      "themes": [
-        "grid-infrastructure",
-        "clean-energy-advisory"
-      ],
-      "organizations": [
-        "DLA Piper"
-      ],
-      "headline": "debt financing counsel lender connected to JSM Group",
-      "why_relevant": "Francesco De Micheli is evidenced as debt financing counsel lender across 1 priority PE transaction, connecting DLA Piper with JSM Group.",
-      "access_path": "towerbrook-deal-participant",
-      "canonical_match": {
-        "status": "unresolved",
-        "expert_id": null
-      },
-      "deal_roles": [
-        {
-          "deal_id": "pe-towerbrook-jsm-2024",
-          "deal_name": "TowerBrook makes majority investment in JSM",
-          "deal_lane": "towerbrook",
-          "deal_priority": 94,
-          "deal_date": "2024-07-29",
-          "role": "debt-financing-counsel-lender",
-          "organization": "DLA Piper",
-          "target": "JSM Group",
-          "archetype": "lawyer",
-          "expert_type": "lawyer",
-          "role_weight": 80,
-          "evidence_sources": [
-            {
-              "title": "TowerBrook Capital Partners Announces Investment in JSM",
-              "publisher": "TowerBrook",
-              "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
-              "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
-            },
-            {
-              "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
-              "publisher": "DLA Piper",
-              "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
-              "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
-            },
-            {
-              "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
-              "publisher": "Fried Frank",
-              "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
-              "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
-            },
-            {
-              "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
-              "publisher": "Eight Advisory",
-              "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
-              "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
-            }
-          ]
-        }
-      ],
-      "connected_companies": [
-        {
-          "name": "DLA Piper",
-          "relationship": "legal-counsel",
-          "evidence_deal_ids": [
-            "pe-towerbrook-jsm-2024"
-          ]
-        },
-        {
-          "name": "JSM Group",
-          "relationship": "legal-counsel",
-          "evidence_deal_ids": [
-            "pe-towerbrook-jsm-2024"
-          ]
-        }
-      ],
-      "sources": [
-        {
-          "title": "TowerBrook Capital Partners Announces Investment in JSM",
-          "publisher": "TowerBrook",
-          "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
-          "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
-        },
-        {
-          "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
-          "publisher": "DLA Piper",
-          "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
-          "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
-        },
-        {
-          "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
-          "publisher": "Fried Frank",
-          "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
-          "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
-        },
-        {
-          "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
-          "publisher": "Eight Advisory",
-          "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
-          "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
-        }
-      ],
-      "scores": {
-        "deal_priority": 94,
-        "role_strength": 80,
-        "towerbrook_proximity": 85,
-        "recent_activity": 65,
-        "repeat_deal_activity": 35,
-        "evidence_strength": 100,
-        "research_priority": 80
-      },
-      "missing_profile_facts": [
-        "linkedin",
-        "location",
-        "current_role_and_employment_history",
-        "specific_theme_specialties",
-        "warm_relationship_path",
-        "availability_and_conflicts"
-      ],
-      "follow_up_searches": [
-        "\"Francesco De Micheli\" \"DLA Piper\"",
-        "\"Francesco De Micheli\" \"JSM Group\"",
-        "\"Francesco De Micheli\" LinkedIn",
-        "\"Francesco De Micheli\" \"grid-infrastructure\" OR \"clean-energy-advisory\""
-      ],
-      "review": {
-        "status": "needs_review",
-        "reviewer": null,
-        "notes": "Verify identity, current role, and exact deal role before promotion to the canonical expert graph."
-      }
-    },
-    {
       "candidate_id": "expert-candidate:hebah-bibi",
       "name": "Hebah Bibi",
-      "expert_type": "service-provider",
+      "expert_type": "technical-dd",
       "archetypes": [
-        "service-provider"
+        "technical-diligence"
       ],
       "themes": [
         "grid-infrastructure",
@@ -2157,9 +2557,9 @@
           "role": "operational-and-technology-diligence-investor",
           "organization": "Eight Advisory",
           "target": "JSM Group",
-          "archetype": "service-provider",
-          "expert_type": "service-provider",
-          "role_weight": 78,
+          "archetype": "technical-diligence",
+          "expert_type": "technical-dd",
+          "role_weight": 79,
           "evidence_sources": [
             {
               "title": "TowerBrook Capital Partners Announces Investment in JSM",
@@ -2232,7 +2632,7 @@
       ],
       "scores": {
         "deal_priority": 94,
-        "role_strength": 78,
+        "role_strength": 79,
         "towerbrook_proximity": 85,
         "recent_activity": 65,
         "repeat_deal_activity": 35,
@@ -2262,9 +2662,9 @@
     {
       "candidate_id": "expert-candidate:himshikha-arya",
       "name": "Himshikha Arya",
-      "expert_type": "service-provider",
+      "expert_type": "technical-dd",
       "archetypes": [
-        "service-provider"
+        "technical-diligence"
       ],
       "themes": [
         "grid-infrastructure",
@@ -2290,9 +2690,9 @@
           "role": "operational-and-technology-diligence-investor",
           "organization": "Eight Advisory",
           "target": "JSM Group",
-          "archetype": "service-provider",
-          "expert_type": "service-provider",
-          "role_weight": 78,
+          "archetype": "technical-diligence",
+          "expert_type": "technical-dd",
+          "role_weight": 79,
           "evidence_sources": [
             {
               "title": "TowerBrook Capital Partners Announces Investment in JSM",
@@ -2365,7 +2765,7 @@
       ],
       "scores": {
         "deal_priority": 94,
-        "role_strength": 78,
+        "role_strength": 79,
         "towerbrook_proximity": 85,
         "recent_activity": 65,
         "repeat_deal_activity": 35,
@@ -2385,139 +2785,6 @@
         "\"Himshikha Arya\" \"JSM Group\"",
         "\"Himshikha Arya\" LinkedIn",
         "\"Himshikha Arya\" \"grid-infrastructure\" OR \"clean-energy-advisory\""
-      ],
-      "review": {
-        "status": "needs_review",
-        "reviewer": null,
-        "notes": "Verify identity, current role, and exact deal role before promotion to the canonical expert graph."
-      }
-    },
-    {
-      "candidate_id": "expert-candidate:kieran-teo",
-      "name": "Kieran Teo",
-      "expert_type": "lawyer",
-      "archetypes": [
-        "lawyer"
-      ],
-      "themes": [
-        "grid-infrastructure",
-        "clean-energy-advisory"
-      ],
-      "organizations": [
-        "DLA Piper"
-      ],
-      "headline": "debt financing counsel lender connected to JSM Group",
-      "why_relevant": "Kieran Teo is evidenced as debt financing counsel lender across 1 priority PE transaction, connecting DLA Piper with JSM Group.",
-      "access_path": "towerbrook-deal-participant",
-      "canonical_match": {
-        "status": "unresolved",
-        "expert_id": null
-      },
-      "deal_roles": [
-        {
-          "deal_id": "pe-towerbrook-jsm-2024",
-          "deal_name": "TowerBrook makes majority investment in JSM",
-          "deal_lane": "towerbrook",
-          "deal_priority": 94,
-          "deal_date": "2024-07-29",
-          "role": "debt-financing-counsel-lender",
-          "organization": "DLA Piper",
-          "target": "JSM Group",
-          "archetype": "lawyer",
-          "expert_type": "lawyer",
-          "role_weight": 80,
-          "evidence_sources": [
-            {
-              "title": "TowerBrook Capital Partners Announces Investment in JSM",
-              "publisher": "TowerBrook",
-              "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
-              "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
-            },
-            {
-              "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
-              "publisher": "DLA Piper",
-              "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
-              "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
-            },
-            {
-              "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
-              "publisher": "Fried Frank",
-              "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
-              "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
-            },
-            {
-              "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
-              "publisher": "Eight Advisory",
-              "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
-              "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
-            }
-          ]
-        }
-      ],
-      "connected_companies": [
-        {
-          "name": "DLA Piper",
-          "relationship": "legal-counsel",
-          "evidence_deal_ids": [
-            "pe-towerbrook-jsm-2024"
-          ]
-        },
-        {
-          "name": "JSM Group",
-          "relationship": "legal-counsel",
-          "evidence_deal_ids": [
-            "pe-towerbrook-jsm-2024"
-          ]
-        }
-      ],
-      "sources": [
-        {
-          "title": "TowerBrook Capital Partners Announces Investment in JSM",
-          "publisher": "TowerBrook",
-          "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
-          "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
-        },
-        {
-          "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
-          "publisher": "DLA Piper",
-          "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
-          "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
-        },
-        {
-          "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
-          "publisher": "Fried Frank",
-          "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
-          "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
-        },
-        {
-          "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
-          "publisher": "Eight Advisory",
-          "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
-          "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
-        }
-      ],
-      "scores": {
-        "deal_priority": 94,
-        "role_strength": 80,
-        "towerbrook_proximity": 85,
-        "recent_activity": 65,
-        "repeat_deal_activity": 35,
-        "evidence_strength": 100,
-        "research_priority": 80
-      },
-      "missing_profile_facts": [
-        "linkedin",
-        "location",
-        "current_role_and_employment_history",
-        "specific_theme_specialties",
-        "warm_relationship_path",
-        "availability_and_conflicts"
-      ],
-      "follow_up_searches": [
-        "\"Kieran Teo\" \"DLA Piper\"",
-        "\"Kieran Teo\" \"JSM Group\"",
-        "\"Kieran Teo\" LinkedIn",
-        "\"Kieran Teo\" \"grid-infrastructure\" OR \"clean-energy-advisory\""
       ],
       "review": {
         "status": "needs_review",
@@ -2661,9 +2928,9 @@
     {
       "candidate_id": "expert-candidate:mike-forrest",
       "name": "Mike Forrest",
-      "expert_type": "service-provider",
+      "expert_type": "technical-dd",
       "archetypes": [
-        "service-provider"
+        "technical-diligence"
       ],
       "themes": [
         "grid-infrastructure",
@@ -2689,9 +2956,9 @@
           "role": "operational-and-technology-diligence-investor",
           "organization": "Eight Advisory",
           "target": "JSM Group",
-          "archetype": "service-provider",
-          "expert_type": "service-provider",
-          "role_weight": 78,
+          "archetype": "technical-diligence",
+          "expert_type": "technical-dd",
+          "role_weight": 79,
           "evidence_sources": [
             {
               "title": "TowerBrook Capital Partners Announces Investment in JSM",
@@ -2764,7 +3031,7 @@
       ],
       "scores": {
         "deal_priority": 94,
-        "role_strength": 78,
+        "role_strength": 79,
         "towerbrook_proximity": 85,
         "recent_activity": 65,
         "repeat_deal_activity": 35,
@@ -2792,144 +3059,11 @@
       }
     },
     {
-      "candidate_id": "expert-candidate:neil-campbell",
-      "name": "Neil Campbell",
-      "expert_type": "lawyer",
-      "archetypes": [
-        "lawyer"
-      ],
-      "themes": [
-        "grid-infrastructure",
-        "clean-energy-advisory"
-      ],
-      "organizations": [
-        "DLA Piper"
-      ],
-      "headline": "debt financing counsel lender connected to JSM Group",
-      "why_relevant": "Neil Campbell is evidenced as debt financing counsel lender across 1 priority PE transaction, connecting DLA Piper with JSM Group.",
-      "access_path": "towerbrook-deal-participant",
-      "canonical_match": {
-        "status": "unresolved",
-        "expert_id": null
-      },
-      "deal_roles": [
-        {
-          "deal_id": "pe-towerbrook-jsm-2024",
-          "deal_name": "TowerBrook makes majority investment in JSM",
-          "deal_lane": "towerbrook",
-          "deal_priority": 94,
-          "deal_date": "2024-07-29",
-          "role": "debt-financing-counsel-lender",
-          "organization": "DLA Piper",
-          "target": "JSM Group",
-          "archetype": "lawyer",
-          "expert_type": "lawyer",
-          "role_weight": 80,
-          "evidence_sources": [
-            {
-              "title": "TowerBrook Capital Partners Announces Investment in JSM",
-              "publisher": "TowerBrook",
-              "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
-              "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
-            },
-            {
-              "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
-              "publisher": "DLA Piper",
-              "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
-              "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
-            },
-            {
-              "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
-              "publisher": "Fried Frank",
-              "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
-              "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
-            },
-            {
-              "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
-              "publisher": "Eight Advisory",
-              "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
-              "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
-            }
-          ]
-        }
-      ],
-      "connected_companies": [
-        {
-          "name": "DLA Piper",
-          "relationship": "legal-counsel",
-          "evidence_deal_ids": [
-            "pe-towerbrook-jsm-2024"
-          ]
-        },
-        {
-          "name": "JSM Group",
-          "relationship": "legal-counsel",
-          "evidence_deal_ids": [
-            "pe-towerbrook-jsm-2024"
-          ]
-        }
-      ],
-      "sources": [
-        {
-          "title": "TowerBrook Capital Partners Announces Investment in JSM",
-          "publisher": "TowerBrook",
-          "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
-          "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
-        },
-        {
-          "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
-          "publisher": "DLA Piper",
-          "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
-          "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
-        },
-        {
-          "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
-          "publisher": "Fried Frank",
-          "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
-          "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
-        },
-        {
-          "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
-          "publisher": "Eight Advisory",
-          "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
-          "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
-        }
-      ],
-      "scores": {
-        "deal_priority": 94,
-        "role_strength": 80,
-        "towerbrook_proximity": 85,
-        "recent_activity": 65,
-        "repeat_deal_activity": 35,
-        "evidence_strength": 100,
-        "research_priority": 80
-      },
-      "missing_profile_facts": [
-        "linkedin",
-        "location",
-        "current_role_and_employment_history",
-        "specific_theme_specialties",
-        "warm_relationship_path",
-        "availability_and_conflicts"
-      ],
-      "follow_up_searches": [
-        "\"Neil Campbell\" \"DLA Piper\"",
-        "\"Neil Campbell\" \"JSM Group\"",
-        "\"Neil Campbell\" LinkedIn",
-        "\"Neil Campbell\" \"grid-infrastructure\" OR \"clean-energy-advisory\""
-      ],
-      "review": {
-        "status": "needs_review",
-        "reviewer": null,
-        "notes": "Verify identity, current role, and exact deal role before promotion to the canonical expert graph."
-      }
-    },
-    {
       "candidate_id": "expert-candidate:nick-neil-boss",
       "name": "Nick Neil-Boss",
-      "expert_type": "service-provider",
+      "expert_type": "technical-dd",
       "archetypes": [
-        "service-provider"
+        "technical-diligence"
       ],
       "themes": [
         "grid-infrastructure",
@@ -2955,9 +3089,9 @@
           "role": "operational-and-technology-diligence-investor",
           "organization": "Eight Advisory",
           "target": "JSM Group",
-          "archetype": "service-provider",
-          "expert_type": "service-provider",
-          "role_weight": 78,
+          "archetype": "technical-diligence",
+          "expert_type": "technical-dd",
+          "role_weight": 79,
           "evidence_sources": [
             {
               "title": "TowerBrook Capital Partners Announces Investment in JSM",
@@ -3030,7 +3164,7 @@
       ],
       "scores": {
         "deal_priority": 94,
-        "role_strength": 78,
+        "role_strength": 79,
         "towerbrook_proximity": 85,
         "recent_activity": 65,
         "repeat_deal_activity": 35,
@@ -3191,144 +3325,11 @@
       }
     },
     {
-      "candidate_id": "expert-candidate:radina-denkova",
-      "name": "Radina Denkova",
-      "expert_type": "lawyer",
-      "archetypes": [
-        "lawyer"
-      ],
-      "themes": [
-        "grid-infrastructure",
-        "clean-energy-advisory"
-      ],
-      "organizations": [
-        "DLA Piper"
-      ],
-      "headline": "debt financing counsel lender connected to JSM Group",
-      "why_relevant": "Radina Denkova is evidenced as debt financing counsel lender across 1 priority PE transaction, connecting DLA Piper with JSM Group.",
-      "access_path": "towerbrook-deal-participant",
-      "canonical_match": {
-        "status": "unresolved",
-        "expert_id": null
-      },
-      "deal_roles": [
-        {
-          "deal_id": "pe-towerbrook-jsm-2024",
-          "deal_name": "TowerBrook makes majority investment in JSM",
-          "deal_lane": "towerbrook",
-          "deal_priority": 94,
-          "deal_date": "2024-07-29",
-          "role": "debt-financing-counsel-lender",
-          "organization": "DLA Piper",
-          "target": "JSM Group",
-          "archetype": "lawyer",
-          "expert_type": "lawyer",
-          "role_weight": 80,
-          "evidence_sources": [
-            {
-              "title": "TowerBrook Capital Partners Announces Investment in JSM",
-              "publisher": "TowerBrook",
-              "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
-              "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
-            },
-            {
-              "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
-              "publisher": "DLA Piper",
-              "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
-              "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
-            },
-            {
-              "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
-              "publisher": "Fried Frank",
-              "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
-              "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
-            },
-            {
-              "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
-              "publisher": "Eight Advisory",
-              "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
-              "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
-            }
-          ]
-        }
-      ],
-      "connected_companies": [
-        {
-          "name": "DLA Piper",
-          "relationship": "legal-counsel",
-          "evidence_deal_ids": [
-            "pe-towerbrook-jsm-2024"
-          ]
-        },
-        {
-          "name": "JSM Group",
-          "relationship": "legal-counsel",
-          "evidence_deal_ids": [
-            "pe-towerbrook-jsm-2024"
-          ]
-        }
-      ],
-      "sources": [
-        {
-          "title": "TowerBrook Capital Partners Announces Investment in JSM",
-          "publisher": "TowerBrook",
-          "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
-          "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
-        },
-        {
-          "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
-          "publisher": "DLA Piper",
-          "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
-          "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
-        },
-        {
-          "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
-          "publisher": "Fried Frank",
-          "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
-          "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
-        },
-        {
-          "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
-          "publisher": "Eight Advisory",
-          "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
-          "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
-        }
-      ],
-      "scores": {
-        "deal_priority": 94,
-        "role_strength": 80,
-        "towerbrook_proximity": 85,
-        "recent_activity": 65,
-        "repeat_deal_activity": 35,
-        "evidence_strength": 100,
-        "research_priority": 80
-      },
-      "missing_profile_facts": [
-        "linkedin",
-        "location",
-        "current_role_and_employment_history",
-        "specific_theme_specialties",
-        "warm_relationship_path",
-        "availability_and_conflicts"
-      ],
-      "follow_up_searches": [
-        "\"Radina Denkova\" \"DLA Piper\"",
-        "\"Radina Denkova\" \"JSM Group\"",
-        "\"Radina Denkova\" LinkedIn",
-        "\"Radina Denkova\" \"grid-infrastructure\" OR \"clean-energy-advisory\""
-      ],
-      "review": {
-        "status": "needs_review",
-        "reviewer": null,
-        "notes": "Verify identity, current role, and exact deal role before promotion to the canonical expert graph."
-      }
-    },
-    {
       "candidate_id": "expert-candidate:sam-chandrasekaran",
       "name": "Sam Chandrasekaran",
-      "expert_type": "service-provider",
+      "expert_type": "technical-dd",
       "archetypes": [
-        "service-provider"
+        "technical-diligence"
       ],
       "themes": [
         "grid-infrastructure",
@@ -3354,9 +3355,9 @@
           "role": "operational-and-technology-diligence-investor",
           "organization": "Eight Advisory",
           "target": "JSM Group",
-          "archetype": "service-provider",
-          "expert_type": "service-provider",
-          "role_weight": 78,
+          "archetype": "technical-diligence",
+          "expert_type": "technical-dd",
+          "role_weight": 79,
           "evidence_sources": [
             {
               "title": "TowerBrook Capital Partners Announces Investment in JSM",
@@ -3429,7 +3430,7 @@
       ],
       "scores": {
         "deal_priority": 94,
-        "role_strength": 78,
+        "role_strength": 79,
         "towerbrook_proximity": 85,
         "recent_activity": 65,
         "repeat_deal_activity": 35,
@@ -4044,6 +4045,250 @@
       }
     },
     {
+      "candidate_id": "expert-candidate:brett-novick",
+      "name": "Brett Novick",
+      "expert_type": "lender-credit",
+      "archetypes": [
+        "lender-credit"
+      ],
+      "themes": [
+        "clean-energy-advisory",
+        "grid-infrastructure",
+        "smart-water"
+      ],
+      "organizations": [
+        "Debevoise & Plimpton"
+      ],
+      "headline": "debt financing counsel investor connected to Berkeley Research Group",
+      "why_relevant": "Brett Novick is evidenced as debt financing counsel investor across 1 priority PE transaction, connecting Debevoise & Plimpton with Berkeley Research Group.",
+      "access_path": "towerbrook-deal-participant",
+      "canonical_match": {
+        "status": "unresolved",
+        "expert_id": null
+      },
+      "deal_roles": [
+        {
+          "deal_id": "pe-towerbrook-brg-2025",
+          "deal_name": "TowerBrook makes majority investment in Berkeley Research Group",
+          "deal_lane": "towerbrook",
+          "deal_priority": 87,
+          "deal_date": "2025-02-27",
+          "role": "debt-financing-counsel-investor",
+          "organization": "Debevoise & Plimpton",
+          "target": "Berkeley Research Group",
+          "archetype": "lender-credit",
+          "expert_type": "lender-credit",
+          "role_weight": 83,
+          "evidence_sources": [
+            {
+              "title": "TowerBrook Capital Partners Announces Strategic Investment in BRG",
+              "publisher": "TowerBrook",
+              "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-strategic-investment-in-brg/",
+              "evidence": "TowerBrook announced the majority investment and named the sponsor lead, target leaders, seller, financing providers, and transaction advisors."
+            },
+            {
+              "title": "Kirkland Advises Berkeley Research Group on Investment from TowerBrook",
+              "publisher": "Kirkland & Ellis",
+              "url": "https://www.kirkland.com/news/press-release/2025/02/kirkland-advises-berkeley-research-group-on-investment-from-towerbrook",
+              "evidence": "Kirkland identified its role and named the target legal team."
+            },
+            {
+              "title": "Debevoise Advised TowerBrook in the Debt Financing Aspects of Its Strategic Investment in BRG",
+              "publisher": "Debevoise & Plimpton",
+              "url": "https://www.debevoise.com/news/2025/03/debevoise-advised-towerbrook",
+              "evidence": "Debevoise identified its debt-financing role and named the partner team advising TowerBrook."
+            }
+          ]
+        }
+      ],
+      "connected_companies": [
+        {
+          "name": "Debevoise & Plimpton",
+          "relationship": "banked",
+          "evidence_deal_ids": [
+            "pe-towerbrook-brg-2025"
+          ]
+        },
+        {
+          "name": "Berkeley Research Group",
+          "relationship": "banked",
+          "evidence_deal_ids": [
+            "pe-towerbrook-brg-2025"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "TowerBrook Capital Partners Announces Strategic Investment in BRG",
+          "publisher": "TowerBrook",
+          "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-strategic-investment-in-brg/",
+          "evidence": "TowerBrook announced the majority investment and named the sponsor lead, target leaders, seller, financing providers, and transaction advisors."
+        },
+        {
+          "title": "Kirkland Advises Berkeley Research Group on Investment from TowerBrook",
+          "publisher": "Kirkland & Ellis",
+          "url": "https://www.kirkland.com/news/press-release/2025/02/kirkland-advises-berkeley-research-group-on-investment-from-towerbrook",
+          "evidence": "Kirkland identified its role and named the target legal team."
+        },
+        {
+          "title": "Debevoise Advised TowerBrook in the Debt Financing Aspects of Its Strategic Investment in BRG",
+          "publisher": "Debevoise & Plimpton",
+          "url": "https://www.debevoise.com/news/2025/03/debevoise-advised-towerbrook",
+          "evidence": "Debevoise identified its debt-financing role and named the partner team advising TowerBrook."
+        }
+      ],
+      "scores": {
+        "deal_priority": 87,
+        "role_strength": 83,
+        "towerbrook_proximity": 85,
+        "recent_activity": 65,
+        "repeat_deal_activity": 35,
+        "evidence_strength": 85,
+        "research_priority": 78
+      },
+      "missing_profile_facts": [
+        "linkedin",
+        "location",
+        "current_role_and_employment_history",
+        "specific_theme_specialties",
+        "warm_relationship_path",
+        "availability_and_conflicts"
+      ],
+      "follow_up_searches": [
+        "\"Brett Novick\" \"Debevoise & Plimpton\"",
+        "\"Brett Novick\" \"Berkeley Research Group\"",
+        "\"Brett Novick\" LinkedIn",
+        "\"Brett Novick\" \"clean-energy-advisory\" OR \"grid-infrastructure\" OR \"smart-water\""
+      ],
+      "review": {
+        "status": "needs_review",
+        "reviewer": null,
+        "notes": "Verify identity, current role, and exact deal role before promotion to the canonical expert graph."
+      }
+    },
+    {
+      "candidate_id": "expert-candidate:scott-selinger",
+      "name": "Scott Selinger",
+      "expert_type": "lender-credit",
+      "archetypes": [
+        "lender-credit"
+      ],
+      "themes": [
+        "clean-energy-advisory",
+        "grid-infrastructure",
+        "smart-water"
+      ],
+      "organizations": [
+        "Debevoise & Plimpton"
+      ],
+      "headline": "debt financing counsel investor connected to Berkeley Research Group",
+      "why_relevant": "Scott Selinger is evidenced as debt financing counsel investor across 1 priority PE transaction, connecting Debevoise & Plimpton with Berkeley Research Group.",
+      "access_path": "towerbrook-deal-participant",
+      "canonical_match": {
+        "status": "unresolved",
+        "expert_id": null
+      },
+      "deal_roles": [
+        {
+          "deal_id": "pe-towerbrook-brg-2025",
+          "deal_name": "TowerBrook makes majority investment in Berkeley Research Group",
+          "deal_lane": "towerbrook",
+          "deal_priority": 87,
+          "deal_date": "2025-02-27",
+          "role": "debt-financing-counsel-investor",
+          "organization": "Debevoise & Plimpton",
+          "target": "Berkeley Research Group",
+          "archetype": "lender-credit",
+          "expert_type": "lender-credit",
+          "role_weight": 83,
+          "evidence_sources": [
+            {
+              "title": "TowerBrook Capital Partners Announces Strategic Investment in BRG",
+              "publisher": "TowerBrook",
+              "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-strategic-investment-in-brg/",
+              "evidence": "TowerBrook announced the majority investment and named the sponsor lead, target leaders, seller, financing providers, and transaction advisors."
+            },
+            {
+              "title": "Kirkland Advises Berkeley Research Group on Investment from TowerBrook",
+              "publisher": "Kirkland & Ellis",
+              "url": "https://www.kirkland.com/news/press-release/2025/02/kirkland-advises-berkeley-research-group-on-investment-from-towerbrook",
+              "evidence": "Kirkland identified its role and named the target legal team."
+            },
+            {
+              "title": "Debevoise Advised TowerBrook in the Debt Financing Aspects of Its Strategic Investment in BRG",
+              "publisher": "Debevoise & Plimpton",
+              "url": "https://www.debevoise.com/news/2025/03/debevoise-advised-towerbrook",
+              "evidence": "Debevoise identified its debt-financing role and named the partner team advising TowerBrook."
+            }
+          ]
+        }
+      ],
+      "connected_companies": [
+        {
+          "name": "Debevoise & Plimpton",
+          "relationship": "banked",
+          "evidence_deal_ids": [
+            "pe-towerbrook-brg-2025"
+          ]
+        },
+        {
+          "name": "Berkeley Research Group",
+          "relationship": "banked",
+          "evidence_deal_ids": [
+            "pe-towerbrook-brg-2025"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "TowerBrook Capital Partners Announces Strategic Investment in BRG",
+          "publisher": "TowerBrook",
+          "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-strategic-investment-in-brg/",
+          "evidence": "TowerBrook announced the majority investment and named the sponsor lead, target leaders, seller, financing providers, and transaction advisors."
+        },
+        {
+          "title": "Kirkland Advises Berkeley Research Group on Investment from TowerBrook",
+          "publisher": "Kirkland & Ellis",
+          "url": "https://www.kirkland.com/news/press-release/2025/02/kirkland-advises-berkeley-research-group-on-investment-from-towerbrook",
+          "evidence": "Kirkland identified its role and named the target legal team."
+        },
+        {
+          "title": "Debevoise Advised TowerBrook in the Debt Financing Aspects of Its Strategic Investment in BRG",
+          "publisher": "Debevoise & Plimpton",
+          "url": "https://www.debevoise.com/news/2025/03/debevoise-advised-towerbrook",
+          "evidence": "Debevoise identified its debt-financing role and named the partner team advising TowerBrook."
+        }
+      ],
+      "scores": {
+        "deal_priority": 87,
+        "role_strength": 83,
+        "towerbrook_proximity": 85,
+        "recent_activity": 65,
+        "repeat_deal_activity": 35,
+        "evidence_strength": 85,
+        "research_priority": 78
+      },
+      "missing_profile_facts": [
+        "linkedin",
+        "location",
+        "current_role_and_employment_history",
+        "specific_theme_specialties",
+        "warm_relationship_path",
+        "availability_and_conflicts"
+      ],
+      "follow_up_searches": [
+        "\"Scott Selinger\" \"Debevoise & Plimpton\"",
+        "\"Scott Selinger\" \"Berkeley Research Group\"",
+        "\"Scott Selinger\" LinkedIn",
+        "\"Scott Selinger\" \"clean-energy-advisory\" OR \"grid-infrastructure\" OR \"smart-water\""
+      ],
+      "review": {
+        "status": "needs_review",
+        "reviewer": null,
+        "notes": "Verify identity, current role, and exact deal role before promotion to the canonical expert graph."
+      }
+    },
+    {
       "candidate_id": "expert-candidate:alice-billmire",
       "name": "Alice Billmire",
       "expert_type": "lawyer",
@@ -4266,128 +4511,6 @@
         "\"Arta Tabaee\" \"Qualus\"",
         "\"Arta Tabaee\" LinkedIn",
         "\"Arta Tabaee\" \"grid-infrastructure\""
-      ],
-      "review": {
-        "status": "needs_review",
-        "reviewer": null,
-        "notes": "Verify identity, current role, and exact deal role before promotion to the canonical expert graph."
-      }
-    },
-    {
-      "candidate_id": "expert-candidate:brett-novick",
-      "name": "Brett Novick",
-      "expert_type": "lawyer",
-      "archetypes": [
-        "lawyer"
-      ],
-      "themes": [
-        "clean-energy-advisory",
-        "grid-infrastructure",
-        "smart-water"
-      ],
-      "organizations": [
-        "Debevoise & Plimpton"
-      ],
-      "headline": "debt financing counsel investor connected to Berkeley Research Group",
-      "why_relevant": "Brett Novick is evidenced as debt financing counsel investor across 1 priority PE transaction, connecting Debevoise & Plimpton with Berkeley Research Group.",
-      "access_path": "towerbrook-deal-participant",
-      "canonical_match": {
-        "status": "unresolved",
-        "expert_id": null
-      },
-      "deal_roles": [
-        {
-          "deal_id": "pe-towerbrook-brg-2025",
-          "deal_name": "TowerBrook makes majority investment in Berkeley Research Group",
-          "deal_lane": "towerbrook",
-          "deal_priority": 87,
-          "deal_date": "2025-02-27",
-          "role": "debt-financing-counsel-investor",
-          "organization": "Debevoise & Plimpton",
-          "target": "Berkeley Research Group",
-          "archetype": "lawyer",
-          "expert_type": "lawyer",
-          "role_weight": 80,
-          "evidence_sources": [
-            {
-              "title": "TowerBrook Capital Partners Announces Strategic Investment in BRG",
-              "publisher": "TowerBrook",
-              "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-strategic-investment-in-brg/",
-              "evidence": "TowerBrook announced the majority investment and named the sponsor lead, target leaders, seller, financing providers, and transaction advisors."
-            },
-            {
-              "title": "Kirkland Advises Berkeley Research Group on Investment from TowerBrook",
-              "publisher": "Kirkland & Ellis",
-              "url": "https://www.kirkland.com/news/press-release/2025/02/kirkland-advises-berkeley-research-group-on-investment-from-towerbrook",
-              "evidence": "Kirkland identified its role and named the target legal team."
-            },
-            {
-              "title": "Debevoise Advised TowerBrook in the Debt Financing Aspects of Its Strategic Investment in BRG",
-              "publisher": "Debevoise & Plimpton",
-              "url": "https://www.debevoise.com/news/2025/03/debevoise-advised-towerbrook",
-              "evidence": "Debevoise identified its debt-financing role and named the partner team advising TowerBrook."
-            }
-          ]
-        }
-      ],
-      "connected_companies": [
-        {
-          "name": "Debevoise & Plimpton",
-          "relationship": "legal-counsel",
-          "evidence_deal_ids": [
-            "pe-towerbrook-brg-2025"
-          ]
-        },
-        {
-          "name": "Berkeley Research Group",
-          "relationship": "legal-counsel",
-          "evidence_deal_ids": [
-            "pe-towerbrook-brg-2025"
-          ]
-        }
-      ],
-      "sources": [
-        {
-          "title": "TowerBrook Capital Partners Announces Strategic Investment in BRG",
-          "publisher": "TowerBrook",
-          "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-strategic-investment-in-brg/",
-          "evidence": "TowerBrook announced the majority investment and named the sponsor lead, target leaders, seller, financing providers, and transaction advisors."
-        },
-        {
-          "title": "Kirkland Advises Berkeley Research Group on Investment from TowerBrook",
-          "publisher": "Kirkland & Ellis",
-          "url": "https://www.kirkland.com/news/press-release/2025/02/kirkland-advises-berkeley-research-group-on-investment-from-towerbrook",
-          "evidence": "Kirkland identified its role and named the target legal team."
-        },
-        {
-          "title": "Debevoise Advised TowerBrook in the Debt Financing Aspects of Its Strategic Investment in BRG",
-          "publisher": "Debevoise & Plimpton",
-          "url": "https://www.debevoise.com/news/2025/03/debevoise-advised-towerbrook",
-          "evidence": "Debevoise identified its debt-financing role and named the partner team advising TowerBrook."
-        }
-      ],
-      "scores": {
-        "deal_priority": 87,
-        "role_strength": 80,
-        "towerbrook_proximity": 85,
-        "recent_activity": 65,
-        "repeat_deal_activity": 35,
-        "evidence_strength": 85,
-        "research_priority": 77
-      },
-      "missing_profile_facts": [
-        "linkedin",
-        "location",
-        "current_role_and_employment_history",
-        "specific_theme_specialties",
-        "warm_relationship_path",
-        "availability_and_conflicts"
-      ],
-      "follow_up_searches": [
-        "\"Brett Novick\" \"Debevoise & Plimpton\"",
-        "\"Brett Novick\" \"Berkeley Research Group\"",
-        "\"Brett Novick\" LinkedIn",
-        "\"Brett Novick\" \"clean-energy-advisory\" OR \"grid-infrastructure\" OR \"smart-water\""
       ],
       "review": {
         "status": "needs_review",
@@ -5293,128 +5416,6 @@
         "\"Rex Hupy\" \"Berkeley Research Group\"",
         "\"Rex Hupy\" LinkedIn",
         "\"Rex Hupy\" \"clean-energy-advisory\" OR \"grid-infrastructure\" OR \"smart-water\""
-      ],
-      "review": {
-        "status": "needs_review",
-        "reviewer": null,
-        "notes": "Verify identity, current role, and exact deal role before promotion to the canonical expert graph."
-      }
-    },
-    {
-      "candidate_id": "expert-candidate:scott-selinger",
-      "name": "Scott Selinger",
-      "expert_type": "lawyer",
-      "archetypes": [
-        "lawyer"
-      ],
-      "themes": [
-        "clean-energy-advisory",
-        "grid-infrastructure",
-        "smart-water"
-      ],
-      "organizations": [
-        "Debevoise & Plimpton"
-      ],
-      "headline": "debt financing counsel investor connected to Berkeley Research Group",
-      "why_relevant": "Scott Selinger is evidenced as debt financing counsel investor across 1 priority PE transaction, connecting Debevoise & Plimpton with Berkeley Research Group.",
-      "access_path": "towerbrook-deal-participant",
-      "canonical_match": {
-        "status": "unresolved",
-        "expert_id": null
-      },
-      "deal_roles": [
-        {
-          "deal_id": "pe-towerbrook-brg-2025",
-          "deal_name": "TowerBrook makes majority investment in Berkeley Research Group",
-          "deal_lane": "towerbrook",
-          "deal_priority": 87,
-          "deal_date": "2025-02-27",
-          "role": "debt-financing-counsel-investor",
-          "organization": "Debevoise & Plimpton",
-          "target": "Berkeley Research Group",
-          "archetype": "lawyer",
-          "expert_type": "lawyer",
-          "role_weight": 80,
-          "evidence_sources": [
-            {
-              "title": "TowerBrook Capital Partners Announces Strategic Investment in BRG",
-              "publisher": "TowerBrook",
-              "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-strategic-investment-in-brg/",
-              "evidence": "TowerBrook announced the majority investment and named the sponsor lead, target leaders, seller, financing providers, and transaction advisors."
-            },
-            {
-              "title": "Kirkland Advises Berkeley Research Group on Investment from TowerBrook",
-              "publisher": "Kirkland & Ellis",
-              "url": "https://www.kirkland.com/news/press-release/2025/02/kirkland-advises-berkeley-research-group-on-investment-from-towerbrook",
-              "evidence": "Kirkland identified its role and named the target legal team."
-            },
-            {
-              "title": "Debevoise Advised TowerBrook in the Debt Financing Aspects of Its Strategic Investment in BRG",
-              "publisher": "Debevoise & Plimpton",
-              "url": "https://www.debevoise.com/news/2025/03/debevoise-advised-towerbrook",
-              "evidence": "Debevoise identified its debt-financing role and named the partner team advising TowerBrook."
-            }
-          ]
-        }
-      ],
-      "connected_companies": [
-        {
-          "name": "Debevoise & Plimpton",
-          "relationship": "legal-counsel",
-          "evidence_deal_ids": [
-            "pe-towerbrook-brg-2025"
-          ]
-        },
-        {
-          "name": "Berkeley Research Group",
-          "relationship": "legal-counsel",
-          "evidence_deal_ids": [
-            "pe-towerbrook-brg-2025"
-          ]
-        }
-      ],
-      "sources": [
-        {
-          "title": "TowerBrook Capital Partners Announces Strategic Investment in BRG",
-          "publisher": "TowerBrook",
-          "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-strategic-investment-in-brg/",
-          "evidence": "TowerBrook announced the majority investment and named the sponsor lead, target leaders, seller, financing providers, and transaction advisors."
-        },
-        {
-          "title": "Kirkland Advises Berkeley Research Group on Investment from TowerBrook",
-          "publisher": "Kirkland & Ellis",
-          "url": "https://www.kirkland.com/news/press-release/2025/02/kirkland-advises-berkeley-research-group-on-investment-from-towerbrook",
-          "evidence": "Kirkland identified its role and named the target legal team."
-        },
-        {
-          "title": "Debevoise Advised TowerBrook in the Debt Financing Aspects of Its Strategic Investment in BRG",
-          "publisher": "Debevoise & Plimpton",
-          "url": "https://www.debevoise.com/news/2025/03/debevoise-advised-towerbrook",
-          "evidence": "Debevoise identified its debt-financing role and named the partner team advising TowerBrook."
-        }
-      ],
-      "scores": {
-        "deal_priority": 87,
-        "role_strength": 80,
-        "towerbrook_proximity": 85,
-        "recent_activity": 65,
-        "repeat_deal_activity": 35,
-        "evidence_strength": 85,
-        "research_priority": 77
-      },
-      "missing_profile_facts": [
-        "linkedin",
-        "location",
-        "current_role_and_employment_history",
-        "specific_theme_specialties",
-        "warm_relationship_path",
-        "availability_and_conflicts"
-      ],
-      "follow_up_searches": [
-        "\"Scott Selinger\" \"Debevoise & Plimpton\"",
-        "\"Scott Selinger\" \"Berkeley Research Group\"",
-        "\"Scott Selinger\" LinkedIn",
-        "\"Scott Selinger\" \"clean-energy-advisory\" OR \"grid-infrastructure\" OR \"smart-water\""
       ],
       "review": {
         "status": "needs_review",
@@ -9864,7 +9865,7 @@
       "gap_id": "advisor-expert-gap:bridgepoint-credit:financing-provider",
       "organization": "Bridgepoint Credit",
       "advisor_role": "financing-provider",
-      "expert_type_sought": "banker",
+      "expert_type_sought": "lender-credit",
       "themes": [
         "grid-infrastructure",
         "clean-energy-advisory"
@@ -9910,7 +9911,7 @@
       "search_queries": [
         "\"JSM Group\" \"Bridgepoint Credit\" deal team",
         "\"Bridgepoint Credit\" \"JSM Group\" partner",
-        "\"Bridgepoint Credit\" \"JSM Group\" banker",
+        "\"Bridgepoint Credit\" \"JSM Group\" lender-credit",
         "\"Bridgepoint Credit\" \"grid-infrastructure\" OR \"clean-energy-advisory\" partner"
       ],
       "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
@@ -10101,10 +10102,70 @@
       }
     },
     {
+      "gap_id": "advisor-expert-gap:roland-berger:commercial-advisor-investor",
+      "organization": "Roland Berger",
+      "advisor_role": "commercial-advisor-investor",
+      "expert_type_sought": "commercial-dd",
+      "themes": [
+        "grid-infrastructure",
+        "clean-energy-advisory"
+      ],
+      "coverage_status": "no-named-expert",
+      "named_experts_found": [],
+      "deals": [
+        {
+          "deal_id": "pe-towerbrook-jsm-2024",
+          "deal_name": "TowerBrook makes majority investment in JSM",
+          "target": "JSM Group",
+          "lane": "towerbrook",
+          "priority": 94
+        }
+      ],
+      "sources": [
+        {
+          "title": "TowerBrook Capital Partners Announces Investment in JSM",
+          "publisher": "TowerBrook",
+          "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
+          "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
+        },
+        {
+          "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
+          "publisher": "DLA Piper",
+          "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
+          "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
+        },
+        {
+          "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
+          "publisher": "Fried Frank",
+          "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
+          "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
+        },
+        {
+          "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
+          "publisher": "Eight Advisory",
+          "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
+          "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
+        }
+      ],
+      "search_priority": 94,
+      "search_queries": [
+        "\"JSM Group\" \"Roland Berger\" deal team",
+        "\"Roland Berger\" \"JSM Group\" partner",
+        "\"Roland Berger\" \"JSM Group\" commercial-dd",
+        "\"Roland Berger\" \"grid-infrastructure\" OR \"clean-energy-advisory\" partner"
+      ],
+      "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
+      "review": {
+        "status": "needs_research",
+        "reviewer": null,
+        "notes": null
+      }
+    },
+    {
       "gap_id": "advisor-expert-gap:baringa:esg-advisor-investor",
       "organization": "Baringa",
       "advisor_role": "esg-advisor-investor",
-      "expert_type_sought": "service-provider",
+      "expert_type_sought": "technical-dd",
       "themes": [
         "grid-infrastructure",
         "clean-energy-advisory"
@@ -10150,68 +10211,8 @@
       "search_queries": [
         "\"JSM Group\" \"Baringa\" deal team",
         "\"Baringa\" \"JSM Group\" partner",
-        "\"Baringa\" \"JSM Group\" service-provider",
+        "\"Baringa\" \"JSM Group\" technical-dd",
         "\"Baringa\" \"grid-infrastructure\" OR \"clean-energy-advisory\" partner"
-      ],
-      "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
-      "review": {
-        "status": "needs_research",
-        "reviewer": null,
-        "notes": null
-      }
-    },
-    {
-      "gap_id": "advisor-expert-gap:roland-berger:commercial-advisor-investor",
-      "organization": "Roland Berger",
-      "advisor_role": "commercial-advisor-investor",
-      "expert_type_sought": "service-provider",
-      "themes": [
-        "grid-infrastructure",
-        "clean-energy-advisory"
-      ],
-      "coverage_status": "no-named-expert",
-      "named_experts_found": [],
-      "deals": [
-        {
-          "deal_id": "pe-towerbrook-jsm-2024",
-          "deal_name": "TowerBrook makes majority investment in JSM",
-          "target": "JSM Group",
-          "lane": "towerbrook",
-          "priority": 94
-        }
-      ],
-      "sources": [
-        {
-          "title": "TowerBrook Capital Partners Announces Investment in JSM",
-          "publisher": "TowerBrook",
-          "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
-          "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
-        },
-        {
-          "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
-          "publisher": "DLA Piper",
-          "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
-          "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
-        },
-        {
-          "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
-          "publisher": "Fried Frank",
-          "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
-          "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
-        },
-        {
-          "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
-          "publisher": "Eight Advisory",
-          "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
-          "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
-        }
-      ],
-      "search_priority": 93,
-      "search_queries": [
-        "\"JSM Group\" \"Roland Berger\" deal team",
-        "\"Roland Berger\" \"JSM Group\" partner",
-        "\"Roland Berger\" \"JSM Group\" service-provider",
-        "\"Roland Berger\" \"grid-infrastructure\" OR \"clean-energy-advisory\" partner"
       ],
       "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
       "review": {
@@ -10224,7 +10225,7 @@
       "gap_id": "advisor-expert-gap:vista-insurance:insurance-advisor-investor",
       "organization": "Vista Insurance",
       "advisor_role": "insurance-advisor-investor",
-      "expert_type_sought": "service-provider",
+      "expert_type_sought": "technical-dd",
       "themes": [
         "grid-infrastructure",
         "clean-energy-advisory"
@@ -10270,7 +10271,7 @@
       "search_queries": [
         "\"JSM Group\" \"Vista Insurance\" deal team",
         "\"Vista Insurance\" \"JSM Group\" partner",
-        "\"Vista Insurance\" \"JSM Group\" service-provider",
+        "\"Vista Insurance\" \"JSM Group\" technical-dd",
         "\"Vista Insurance\" \"grid-infrastructure\" OR \"clean-energy-advisory\" partner"
       ],
       "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
@@ -10449,7 +10450,7 @@
       "gap_id": "advisor-expert-gap:deutsche-bank:financing-provider",
       "organization": "Deutsche Bank",
       "advisor_role": "financing-provider",
-      "expert_type_sought": "banker",
+      "expert_type_sought": "lender-credit",
       "themes": [
         "clean-energy-advisory",
         "grid-infrastructure",
@@ -10490,7 +10491,7 @@
       "search_queries": [
         "\"Berkeley Research Group\" \"Deutsche Bank\" deal team",
         "\"Deutsche Bank\" \"Berkeley Research Group\" partner",
-        "\"Deutsche Bank\" \"Berkeley Research Group\" banker",
+        "\"Deutsche Bank\" \"Berkeley Research Group\" lender-credit",
         "\"Deutsche Bank\" \"clean-energy-advisory\" OR \"grid-infrastructure\" OR \"smart-water\" partner"
       ],
       "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
@@ -10559,7 +10560,7 @@
       "gap_id": "advisor-expert-gap:jefferies:financing-provider",
       "organization": "Jefferies",
       "advisor_role": "financing-provider",
-      "expert_type_sought": "banker",
+      "expert_type_sought": "lender-credit",
       "themes": [
         "clean-energy-advisory",
         "grid-infrastructure",
@@ -10600,7 +10601,7 @@
       "search_queries": [
         "\"Berkeley Research Group\" \"Jefferies\" deal team",
         "\"Jefferies\" \"Berkeley Research Group\" partner",
-        "\"Jefferies\" \"Berkeley Research Group\" banker",
+        "\"Jefferies\" \"Berkeley Research Group\" lender-credit",
         "\"Jefferies\" \"clean-energy-advisory\" OR \"grid-infrastructure\" OR \"smart-water\" partner"
       ],
       "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
@@ -10669,7 +10670,7 @@
       "gap_id": "advisor-expert-gap:royal-bank-of-canada:financing-provider",
       "organization": "Royal Bank of Canada",
       "advisor_role": "financing-provider",
-      "expert_type_sought": "banker",
+      "expert_type_sought": "lender-credit",
       "themes": [
         "clean-energy-advisory",
         "grid-infrastructure",
@@ -10710,7 +10711,7 @@
       "search_queries": [
         "\"Berkeley Research Group\" \"Royal Bank of Canada\" deal team",
         "\"Royal Bank of Canada\" \"Berkeley Research Group\" partner",
-        "\"Royal Bank of Canada\" \"Berkeley Research Group\" banker",
+        "\"Royal Bank of Canada\" \"Berkeley Research Group\" lender-credit",
         "\"Royal Bank of Canada\" \"clean-energy-advisory\" OR \"grid-infrastructure\" OR \"smart-water\" partner"
       ],
       "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
@@ -10724,7 +10725,7 @@
       "gap_id": "advisor-expert-gap:sumitomo-mitsui-banking-corporation:financing-provider",
       "organization": "Sumitomo Mitsui Banking Corporation",
       "advisor_role": "financing-provider",
-      "expert_type_sought": "banker",
+      "expert_type_sought": "lender-credit",
       "themes": [
         "clean-energy-advisory",
         "grid-infrastructure",
@@ -10765,7 +10766,7 @@
       "search_queries": [
         "\"Berkeley Research Group\" \"Sumitomo Mitsui Banking Corporation\" deal team",
         "\"Sumitomo Mitsui Banking Corporation\" \"Berkeley Research Group\" partner",
-        "\"Sumitomo Mitsui Banking Corporation\" \"Berkeley Research Group\" banker",
+        "\"Sumitomo Mitsui Banking Corporation\" \"Berkeley Research Group\" lender-credit",
         "\"Sumitomo Mitsui Banking Corporation\" \"clean-energy-advisory\" OR \"grid-infrastructure\" OR \"smart-water\" partner"
       ],
       "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
@@ -10779,7 +10780,7 @@
       "gap_id": "advisor-expert-gap:td:financing-provider",
       "organization": "TD",
       "advisor_role": "financing-provider",
-      "expert_type_sought": "banker",
+      "expert_type_sought": "lender-credit",
       "themes": [
         "clean-energy-advisory",
         "grid-infrastructure",
@@ -10820,7 +10821,7 @@
       "search_queries": [
         "\"Berkeley Research Group\" \"TD\" deal team",
         "\"TD\" \"Berkeley Research Group\" partner",
-        "\"TD\" \"Berkeley Research Group\" banker",
+        "\"TD\" \"Berkeley Research Group\" lender-credit",
         "\"TD\" \"clean-energy-advisory\" OR \"grid-infrastructure\" OR \"smart-water\" partner"
       ],
       "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
@@ -10834,7 +10835,7 @@
       "gap_id": "advisor-expert-gap:wells-fargo:financing-provider",
       "organization": "Wells Fargo",
       "advisor_role": "financing-provider",
-      "expert_type_sought": "banker",
+      "expert_type_sought": "lender-credit",
       "themes": [
         "clean-energy-advisory",
         "grid-infrastructure",
@@ -10875,7 +10876,7 @@
       "search_queries": [
         "\"Berkeley Research Group\" \"Wells Fargo\" deal team",
         "\"Wells Fargo\" \"Berkeley Research Group\" partner",
-        "\"Wells Fargo\" \"Berkeley Research Group\" banker",
+        "\"Wells Fargo\" \"Berkeley Research Group\" lender-credit",
         "\"Wells Fargo\" \"clean-energy-advisory\" OR \"grid-infrastructure\" OR \"smart-water\" partner"
       ],
       "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
@@ -11090,94 +11091,10 @@
       }
     },
     {
-      "gap_id": "advisor-expert-gap:blackstone-credit:financing-provider",
-      "organization": "Blackstone Credit",
-      "advisor_role": "financing-provider",
-      "expert_type_sought": "banker",
-      "themes": [
-        "clean-energy-advisory",
-        "grid-infrastructure"
-      ],
-      "coverage_status": "no-named-expert",
-      "named_experts_found": [],
-      "deals": [
-        {
-          "deal_id": "pe-towerbrook-langan-2023",
-          "deal_name": "TowerBrook makes minority investment in Langan",
-          "target": "Langan",
-          "lane": "towerbrook",
-          "priority": 79
-        }
-      ],
-      "sources": [
-        {
-          "title": "Langan announces partnership with TowerBrook Capital Partners",
-          "publisher": "TowerBrook",
-          "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
-          "evidence": "TowerBrook announced the minority investment and named the deal lead, target CEO, financing providers, and advisor firms."
-        }
-      ],
-      "search_priority": 88,
-      "search_queries": [
-        "\"Langan\" \"Blackstone Credit\" deal team",
-        "\"Blackstone Credit\" \"Langan\" partner",
-        "\"Blackstone Credit\" \"Langan\" banker",
-        "\"Blackstone Credit\" \"clean-energy-advisory\" OR \"grid-infrastructure\" partner"
-      ],
-      "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
-      "review": {
-        "status": "needs_research",
-        "reviewer": null,
-        "notes": null
-      }
-    },
-    {
-      "gap_id": "advisor-expert-gap:cpp-investments:financing-provider",
-      "organization": "CPP Investments",
-      "advisor_role": "financing-provider",
-      "expert_type_sought": "banker",
-      "themes": [
-        "clean-energy-advisory",
-        "grid-infrastructure"
-      ],
-      "coverage_status": "no-named-expert",
-      "named_experts_found": [],
-      "deals": [
-        {
-          "deal_id": "pe-towerbrook-langan-2023",
-          "deal_name": "TowerBrook makes minority investment in Langan",
-          "target": "Langan",
-          "lane": "towerbrook",
-          "priority": 79
-        }
-      ],
-      "sources": [
-        {
-          "title": "Langan announces partnership with TowerBrook Capital Partners",
-          "publisher": "TowerBrook",
-          "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
-          "evidence": "TowerBrook announced the minority investment and named the deal lead, target CEO, financing providers, and advisor firms."
-        }
-      ],
-      "search_priority": 88,
-      "search_queries": [
-        "\"Langan\" \"CPP Investments\" deal team",
-        "\"CPP Investments\" \"Langan\" partner",
-        "\"CPP Investments\" \"Langan\" banker",
-        "\"CPP Investments\" \"clean-energy-advisory\" OR \"grid-infrastructure\" partner"
-      ],
-      "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
-      "review": {
-        "status": "needs_research",
-        "reviewer": null,
-        "notes": null
-      }
-    },
-    {
       "gap_id": "advisor-expert-gap:eight-advisory:operational-diligence-investor",
       "organization": "Eight Advisory",
       "advisor_role": "operational-diligence-investor",
-      "expert_type_sought": "service-provider",
+      "expert_type_sought": "technical-dd",
       "themes": [
         "grid-infrastructure",
         "clean-energy-advisory"
@@ -11244,7 +11161,7 @@
       "search_queries": [
         "\"JSM Group\" \"Eight Advisory\" deal team",
         "\"Eight Advisory\" \"JSM Group\" partner",
-        "\"Eight Advisory\" \"JSM Group\" service-provider",
+        "\"Eight Advisory\" \"JSM Group\" technical-dd",
         "\"Eight Advisory\" \"grid-infrastructure\" OR \"clean-energy-advisory\" partner"
       ],
       "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
@@ -11297,10 +11214,10 @@
       }
     },
     {
-      "gap_id": "advisor-expert-gap:smbc:financing-provider",
-      "organization": "SMBC",
+      "gap_id": "advisor-expert-gap:blackstone-credit:financing-provider",
+      "organization": "Blackstone Credit",
       "advisor_role": "financing-provider",
-      "expert_type_sought": "banker",
+      "expert_type_sought": "lender-credit",
       "themes": [
         "clean-energy-advisory",
         "grid-infrastructure"
@@ -11324,12 +11241,12 @@
           "evidence": "TowerBrook announced the minority investment and named the deal lead, target CEO, financing providers, and advisor firms."
         }
       ],
-      "search_priority": 88,
+      "search_priority": 87,
       "search_queries": [
-        "\"Langan\" \"SMBC\" deal team",
-        "\"SMBC\" \"Langan\" partner",
-        "\"SMBC\" \"Langan\" banker",
-        "\"SMBC\" \"clean-energy-advisory\" OR \"grid-infrastructure\" partner"
+        "\"Langan\" \"Blackstone Credit\" deal team",
+        "\"Blackstone Credit\" \"Langan\" partner",
+        "\"Blackstone Credit\" \"Langan\" lender-credit",
+        "\"Blackstone Credit\" \"clean-energy-advisory\" OR \"grid-infrastructure\" partner"
       ],
       "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
       "review": {
@@ -11372,6 +11289,90 @@
         "\"Cleary Gottlieb\" \"Langan\" partner",
         "\"Cleary Gottlieb\" \"Langan\" lawyer",
         "\"Cleary Gottlieb\" \"clean-energy-advisory\" OR \"grid-infrastructure\" partner"
+      ],
+      "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
+      "review": {
+        "status": "needs_research",
+        "reviewer": null,
+        "notes": null
+      }
+    },
+    {
+      "gap_id": "advisor-expert-gap:cpp-investments:financing-provider",
+      "organization": "CPP Investments",
+      "advisor_role": "financing-provider",
+      "expert_type_sought": "lender-credit",
+      "themes": [
+        "clean-energy-advisory",
+        "grid-infrastructure"
+      ],
+      "coverage_status": "no-named-expert",
+      "named_experts_found": [],
+      "deals": [
+        {
+          "deal_id": "pe-towerbrook-langan-2023",
+          "deal_name": "TowerBrook makes minority investment in Langan",
+          "target": "Langan",
+          "lane": "towerbrook",
+          "priority": 79
+        }
+      ],
+      "sources": [
+        {
+          "title": "Langan announces partnership with TowerBrook Capital Partners",
+          "publisher": "TowerBrook",
+          "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+          "evidence": "TowerBrook announced the minority investment and named the deal lead, target CEO, financing providers, and advisor firms."
+        }
+      ],
+      "search_priority": 87,
+      "search_queries": [
+        "\"Langan\" \"CPP Investments\" deal team",
+        "\"CPP Investments\" \"Langan\" partner",
+        "\"CPP Investments\" \"Langan\" lender-credit",
+        "\"CPP Investments\" \"clean-energy-advisory\" OR \"grid-infrastructure\" partner"
+      ],
+      "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
+      "review": {
+        "status": "needs_research",
+        "reviewer": null,
+        "notes": null
+      }
+    },
+    {
+      "gap_id": "advisor-expert-gap:smbc:financing-provider",
+      "organization": "SMBC",
+      "advisor_role": "financing-provider",
+      "expert_type_sought": "lender-credit",
+      "themes": [
+        "clean-energy-advisory",
+        "grid-infrastructure"
+      ],
+      "coverage_status": "no-named-expert",
+      "named_experts_found": [],
+      "deals": [
+        {
+          "deal_id": "pe-towerbrook-langan-2023",
+          "deal_name": "TowerBrook makes minority investment in Langan",
+          "target": "Langan",
+          "lane": "towerbrook",
+          "priority": 79
+        }
+      ],
+      "sources": [
+        {
+          "title": "Langan announces partnership with TowerBrook Capital Partners",
+          "publisher": "TowerBrook",
+          "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+          "evidence": "TowerBrook announced the minority investment and named the deal lead, target CEO, financing providers, and advisor firms."
+        }
+      ],
+      "search_priority": 87,
+      "search_queries": [
+        "\"Langan\" \"SMBC\" deal team",
+        "\"SMBC\" \"Langan\" partner",
+        "\"SMBC\" \"Langan\" lender-credit",
+        "\"SMBC\" \"clean-energy-advisory\" OR \"grid-infrastructure\" partner"
       ],
       "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
       "review": {
@@ -11567,7 +11568,7 @@
       "gap_id": "advisor-expert-gap:apollo:financing-provider",
       "organization": "Apollo",
       "advisor_role": "financing-provider",
-      "expert_type_sought": "banker",
+      "expert_type_sought": "lender-credit",
       "themes": [
         "grid-infrastructure"
       ],
@@ -11600,7 +11601,7 @@
       "search_queries": [
         "\"Qualus\" \"Apollo\" deal team",
         "\"Apollo\" \"Qualus\" partner",
-        "\"Apollo\" \"Qualus\" banker",
+        "\"Apollo\" \"Qualus\" lender-credit",
         "\"Apollo\" \"grid-infrastructure\" partner"
       ],
       "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
@@ -11661,7 +11662,7 @@
       "gap_id": "advisor-expert-gap:goldman-sachs-alternatives:financing-provider",
       "organization": "Goldman Sachs Alternatives",
       "advisor_role": "financing-provider",
-      "expert_type_sought": "banker",
+      "expert_type_sought": "lender-credit",
       "themes": [
         "grid-infrastructure"
       ],
@@ -11694,7 +11695,7 @@
       "search_queries": [
         "\"Qualus\" \"Goldman Sachs Alternatives\" deal team",
         "\"Goldman Sachs Alternatives\" \"Qualus\" partner",
-        "\"Goldman Sachs Alternatives\" \"Qualus\" banker",
+        "\"Goldman Sachs Alternatives\" \"Qualus\" lender-credit",
         "\"Goldman Sachs Alternatives\" \"grid-infrastructure\" partner"
       ],
       "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
@@ -12230,7 +12231,7 @@
       "gap_id": "advisor-expert-gap:afry:commercial-diligence-buyer",
       "organization": "Afry",
       "advisor_role": "commercial-diligence-buyer",
-      "expert_type_sought": "service-provider",
+      "expert_type_sought": "commercial-dd",
       "themes": [
         "clean-energy-advisory",
         "grid-infrastructure"
@@ -12264,7 +12265,7 @@
       "search_queries": [
         "\"Energia Group\" \"Afry\" deal team",
         "\"Afry\" \"Energia Group\" partner",
-        "\"Afry\" \"Energia Group\" service-provider",
+        "\"Afry\" \"Energia Group\" commercial-dd",
         "\"Afry\" \"clean-energy-advisory\" OR \"grid-infrastructure\" partner"
       ],
       "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
@@ -12416,7 +12417,7 @@
       "gap_id": "advisor-expert-gap:nera:regulatory-diligence-buyer",
       "organization": "NERA",
       "advisor_role": "regulatory-diligence-buyer",
-      "expert_type_sought": "service-provider",
+      "expert_type_sought": "regulatory-policy",
       "themes": [
         "clean-energy-advisory",
         "grid-infrastructure"
@@ -12450,7 +12451,7 @@
       "search_queries": [
         "\"Energia Group\" \"NERA\" deal team",
         "\"NERA\" \"Energia Group\" partner",
-        "\"NERA\" \"Energia Group\" service-provider",
+        "\"NERA\" \"Energia Group\" regulatory-policy",
         "\"NERA\" \"clean-energy-advisory\" OR \"grid-infrastructure\" partner"
       ],
       "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
@@ -12512,7 +12513,7 @@
       "gap_id": "advisor-expert-gap:timera:commercial-diligence-buyer",
       "organization": "Timera",
       "advisor_role": "commercial-diligence-buyer",
-      "expert_type_sought": "service-provider",
+      "expert_type_sought": "commercial-dd",
       "themes": [
         "clean-energy-advisory",
         "grid-infrastructure"
@@ -12546,7 +12547,7 @@
       "search_queries": [
         "\"Energia Group\" \"Timera\" deal team",
         "\"Timera\" \"Energia Group\" partner",
-        "\"Timera\" \"Energia Group\" service-provider",
+        "\"Timera\" \"Energia Group\" commercial-dd",
         "\"Timera\" \"clean-energy-advisory\" OR \"grid-infrastructure\" partner"
       ],
       "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
@@ -13235,6 +13236,53 @@
       }
     },
     {
+      "gap_id": "advisor-expert-gap:kpmg:transaction-advisor-buyer",
+      "organization": "KPMG",
+      "advisor_role": "transaction-advisor-buyer",
+      "expert_type_sought": "strategy-consultant",
+      "themes": [
+        "smart-water"
+      ],
+      "coverage_status": "no-named-expert",
+      "named_experts_found": [],
+      "deals": [
+        {
+          "deal_id": "pe-wind-point-sigma-2025",
+          "deal_name": "Wind Point Partners acquires Sigma",
+          "target": "Sigma Companies International",
+          "lane": "peer-platform",
+          "priority": 87
+        }
+      ],
+      "sources": [
+        {
+          "title": "Wind Point Partners Acquires Sigma",
+          "publisher": "Wind Point Partners",
+          "url": "https://www.wppartners.com/wind-point-partners-acquires-sigma/",
+          "evidence": "Wind Point announced the platform acquisition and named management, its deal lead, incoming chair, and advisors."
+        },
+        {
+          "title": "SIGMA Acquires Masonry Supply",
+          "publisher": "Wind Point Partners",
+          "url": "https://www.wppartners.com/sigma-acquires-masonry-supply-inc/",
+          "evidence": "Wind Point documented Sigma's January 2026 add-on and the sponsor's acquisition-led value-creation thesis."
+        }
+      ],
+      "search_priority": 80,
+      "search_queries": [
+        "\"Sigma Companies International\" \"KPMG\" deal team",
+        "\"KPMG\" \"Sigma Companies International\" partner",
+        "\"KPMG\" \"Sigma Companies International\" strategy-consultant",
+        "\"KPMG\" \"smart-water\" partner"
+      ],
+      "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
+      "review": {
+        "status": "needs_research",
+        "reviewer": null,
+        "notes": null
+      }
+    },
+    {
       "gap_id": "advisor-expert-gap:harris-williams:financial-advisor-seller",
       "organization": "Harris Williams",
       "advisor_role": "financial-advisor-seller",
@@ -13273,53 +13321,6 @@
         "\"Harris Williams\" \"DMC Power\" partner",
         "\"Harris Williams\" \"DMC Power\" banker",
         "\"Harris Williams\" \"grid-infrastructure\" partner"
-      ],
-      "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
-      "review": {
-        "status": "needs_research",
-        "reviewer": null,
-        "notes": null
-      }
-    },
-    {
-      "gap_id": "advisor-expert-gap:kpmg:transaction-advisor-buyer",
-      "organization": "KPMG",
-      "advisor_role": "transaction-advisor-buyer",
-      "expert_type_sought": "advisor",
-      "themes": [
-        "smart-water"
-      ],
-      "coverage_status": "no-named-expert",
-      "named_experts_found": [],
-      "deals": [
-        {
-          "deal_id": "pe-wind-point-sigma-2025",
-          "deal_name": "Wind Point Partners acquires Sigma",
-          "target": "Sigma Companies International",
-          "lane": "peer-platform",
-          "priority": 87
-        }
-      ],
-      "sources": [
-        {
-          "title": "Wind Point Partners Acquires Sigma",
-          "publisher": "Wind Point Partners",
-          "url": "https://www.wppartners.com/wind-point-partners-acquires-sigma/",
-          "evidence": "Wind Point announced the platform acquisition and named management, its deal lead, incoming chair, and advisors."
-        },
-        {
-          "title": "SIGMA Acquires Masonry Supply",
-          "publisher": "Wind Point Partners",
-          "url": "https://www.wppartners.com/sigma-acquires-masonry-supply-inc/",
-          "evidence": "Wind Point documented Sigma's January 2026 add-on and the sponsor's acquisition-led value-creation thesis."
-        }
-      ],
-      "search_priority": 79,
-      "search_queries": [
-        "\"Sigma Companies International\" \"KPMG\" deal team",
-        "\"KPMG\" \"Sigma Companies International\" partner",
-        "\"KPMG\" \"Sigma Companies International\" advisor",
-        "\"KPMG\" \"smart-water\" partner"
       ],
       "success_condition": "Identify at least one named senior professional with source-grounded evidence of the exact transaction role.",
       "review": {
@@ -13701,6 +13702,30 @@
           "expert_priority": 82
         },
         {
+          "expert_candidate_id": "expert-candidate:francesco-de-micheli",
+          "name": "Francesco De Micheli",
+          "expert_type": "lender-credit",
+          "expert_priority": 81
+        },
+        {
+          "expert_candidate_id": "expert-candidate:kieran-teo",
+          "name": "Kieran Teo",
+          "expert_type": "lender-credit",
+          "expert_priority": 81
+        },
+        {
+          "expert_candidate_id": "expert-candidate:neil-campbell",
+          "name": "Neil Campbell",
+          "expert_type": "lender-credit",
+          "expert_priority": 81
+        },
+        {
+          "expert_candidate_id": "expert-candidate:radina-denkova",
+          "name": "Radina Denkova",
+          "expert_type": "lender-credit",
+          "expert_priority": 81
+        },
+        {
           "expert_candidate_id": "expert-candidate:alexander-goldsmith",
           "name": "Alexander Goldsmith",
           "expert_type": "lawyer",
@@ -13719,27 +13744,15 @@
           "expert_priority": 80
         },
         {
-          "expert_candidate_id": "expert-candidate:francesco-de-micheli",
-          "name": "Francesco De Micheli",
-          "expert_type": "lawyer",
-          "expert_priority": 80
-        },
-        {
           "expert_candidate_id": "expert-candidate:hebah-bibi",
           "name": "Hebah Bibi",
-          "expert_type": "service-provider",
+          "expert_type": "technical-dd",
           "expert_priority": 80
         },
         {
           "expert_candidate_id": "expert-candidate:himshikha-arya",
           "name": "Himshikha Arya",
-          "expert_type": "service-provider",
-          "expert_priority": 80
-        },
-        {
-          "expert_candidate_id": "expert-candidate:kieran-teo",
-          "name": "Kieran Teo",
-          "expert_type": "lawyer",
+          "expert_type": "technical-dd",
           "expert_priority": 80
         },
         {
@@ -13751,19 +13764,13 @@
         {
           "expert_candidate_id": "expert-candidate:mike-forrest",
           "name": "Mike Forrest",
-          "expert_type": "service-provider",
-          "expert_priority": 80
-        },
-        {
-          "expert_candidate_id": "expert-candidate:neil-campbell",
-          "name": "Neil Campbell",
-          "expert_type": "lawyer",
+          "expert_type": "technical-dd",
           "expert_priority": 80
         },
         {
           "expert_candidate_id": "expert-candidate:nick-neil-boss",
           "name": "Nick Neil-Boss",
-          "expert_type": "service-provider",
+          "expert_type": "technical-dd",
           "expert_priority": 80
         },
         {
@@ -13773,15 +13780,9 @@
           "expert_priority": 80
         },
         {
-          "expert_candidate_id": "expert-candidate:radina-denkova",
-          "name": "Radina Denkova",
-          "expert_type": "lawyer",
-          "expert_priority": 80
-        },
-        {
           "expert_candidate_id": "expert-candidate:sam-chandrasekaran",
           "name": "Sam Chandrasekaran",
-          "expert_type": "service-provider",
+          "expert_type": "technical-dd",
           "expert_priority": 80
         },
         {
@@ -13806,6 +13807,7 @@
         "invested-in",
         "founded",
         "board",
+        "banked",
         "legal-counsel",
         "served"
       ],
@@ -13909,14 +13911,20 @@
           "expert_priority": 79
         },
         {
-          "expert_candidate_id": "expert-candidate:alice-billmire",
-          "name": "Alice Billmire",
-          "expert_type": "lawyer",
-          "expert_priority": 77
-        },
-        {
           "expert_candidate_id": "expert-candidate:brett-novick",
           "name": "Brett Novick",
+          "expert_type": "lender-credit",
+          "expert_priority": 78
+        },
+        {
+          "expert_candidate_id": "expert-candidate:scott-selinger",
+          "name": "Scott Selinger",
+          "expert_type": "lender-credit",
+          "expert_priority": 78
+        },
+        {
+          "expert_candidate_id": "expert-candidate:alice-billmire",
+          "name": "Alice Billmire",
           "expert_type": "lawyer",
           "expert_priority": 77
         },
@@ -13937,12 +13945,6 @@
           "name": "Rex Hupy",
           "expert_type": "lawyer",
           "expert_priority": 77
-        },
-        {
-          "expert_candidate_id": "expert-candidate:scott-selinger",
-          "name": "Scott Selinger",
-          "expert_type": "lawyer",
-          "expert_priority": 77
         }
       ],
       "deal_connections": [
@@ -13960,6 +13962,7 @@
         "invested-in",
         "led",
         "board",
+        "banked",
         "legal-counsel"
       ],
       "sources": [
@@ -14941,31 +14944,31 @@
         {
           "expert_candidate_id": "expert-candidate:hebah-bibi",
           "name": "Hebah Bibi",
-          "expert_type": "service-provider",
+          "expert_type": "technical-dd",
           "expert_priority": 80
         },
         {
           "expert_candidate_id": "expert-candidate:himshikha-arya",
           "name": "Himshikha Arya",
-          "expert_type": "service-provider",
+          "expert_type": "technical-dd",
           "expert_priority": 80
         },
         {
           "expert_candidate_id": "expert-candidate:mike-forrest",
           "name": "Mike Forrest",
-          "expert_type": "service-provider",
+          "expert_type": "technical-dd",
           "expert_priority": 80
         },
         {
           "expert_candidate_id": "expert-candidate:nick-neil-boss",
           "name": "Nick Neil-Boss",
-          "expert_type": "service-provider",
+          "expert_type": "technical-dd",
           "expert_priority": 80
         },
         {
           "expert_candidate_id": "expert-candidate:sam-chandrasekaran",
           "name": "Sam Chandrasekaran",
-          "expert_type": "service-provider",
+          "expert_type": "technical-dd",
           "expert_priority": 80
         }
       ],
@@ -15354,106 +15357,6 @@
       }
     },
     {
-      "candidate_id": "company-candidate:dla-piper",
-      "name": "DLA Piper",
-      "category": "advisory",
-      "themes": [
-        "grid-infrastructure",
-        "clean-energy-advisory"
-      ],
-      "ownership_status": "unverified",
-      "owner": null,
-      "why_interesting": "DLA Piper is derived from 4 named expert connections across 1 priority PE transaction.",
-      "canonical_match": {
-        "status": "unresolved",
-        "company_id": null
-      },
-      "expert_connections": [
-        {
-          "expert_candidate_id": "expert-candidate:francesco-de-micheli",
-          "name": "Francesco De Micheli",
-          "expert_type": "lawyer",
-          "expert_priority": 80
-        },
-        {
-          "expert_candidate_id": "expert-candidate:kieran-teo",
-          "name": "Kieran Teo",
-          "expert_type": "lawyer",
-          "expert_priority": 80
-        },
-        {
-          "expert_candidate_id": "expert-candidate:neil-campbell",
-          "name": "Neil Campbell",
-          "expert_type": "lawyer",
-          "expert_priority": 80
-        },
-        {
-          "expert_candidate_id": "expert-candidate:radina-denkova",
-          "name": "Radina Denkova",
-          "expert_type": "lawyer",
-          "expert_priority": 80
-        }
-      ],
-      "deal_connections": [
-        {
-          "id": "pe-towerbrook-jsm-2024",
-          "name": "TowerBrook makes majority investment in JSM",
-          "lane": "towerbrook",
-          "theme": "grid-infrastructure",
-          "priority": 94,
-          "date": "2024-07-29"
-        }
-      ],
-      "roles": [
-        "debt-financing-counsel-lender",
-        "legal-counsel"
-      ],
-      "sources": [
-        {
-          "title": "TowerBrook Capital Partners Announces Investment in JSM",
-          "publisher": "TowerBrook",
-          "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
-          "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
-        },
-        {
-          "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
-          "publisher": "DLA Piper",
-          "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
-          "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
-        },
-        {
-          "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
-          "publisher": "Fried Frank",
-          "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
-          "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
-        },
-        {
-          "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
-          "publisher": "Eight Advisory",
-          "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
-          "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
-        }
-      ],
-      "scores": {
-        "expert_density": 72,
-        "expert_quality": 80,
-        "deal_priority": 94,
-        "role_diversity": 40,
-        "actionability": 75,
-        "research_priority": 76
-      },
-      "next_questions": [
-        "Which linked experts can provide the strongest introduction or diligence path?",
-        "What adjacent companies do the linked experts consider strongest?",
-        "What has changed since the most recent PE transaction?"
-      ],
-      "review": {
-        "status": "needs_review",
-        "reviewer": null,
-        "notes": "Derived from the expert graph. Verify category, ownership, and investment relevance before canonical promotion."
-      }
-    },
-    {
       "candidate_id": "company-candidate:gmc-group",
       "name": "GMC Group",
       "category": "target",
@@ -15641,6 +15544,106 @@
       },
       "next_questions": [
         "Is the company actionable despite its current ownership?",
+        "Which linked experts can provide the strongest introduction or diligence path?",
+        "What adjacent companies do the linked experts consider strongest?",
+        "What has changed since the most recent PE transaction?"
+      ],
+      "review": {
+        "status": "needs_review",
+        "reviewer": null,
+        "notes": "Derived from the expert graph. Verify category, ownership, and investment relevance before canonical promotion."
+      }
+    },
+    {
+      "candidate_id": "company-candidate:dla-piper",
+      "name": "DLA Piper",
+      "category": "investor",
+      "themes": [
+        "grid-infrastructure",
+        "clean-energy-advisory"
+      ],
+      "ownership_status": "unverified",
+      "owner": null,
+      "why_interesting": "DLA Piper is derived from 4 named expert connections across 1 priority PE transaction.",
+      "canonical_match": {
+        "status": "unresolved",
+        "company_id": null
+      },
+      "expert_connections": [
+        {
+          "expert_candidate_id": "expert-candidate:francesco-de-micheli",
+          "name": "Francesco De Micheli",
+          "expert_type": "lender-credit",
+          "expert_priority": 81
+        },
+        {
+          "expert_candidate_id": "expert-candidate:kieran-teo",
+          "name": "Kieran Teo",
+          "expert_type": "lender-credit",
+          "expert_priority": 81
+        },
+        {
+          "expert_candidate_id": "expert-candidate:neil-campbell",
+          "name": "Neil Campbell",
+          "expert_type": "lender-credit",
+          "expert_priority": 81
+        },
+        {
+          "expert_candidate_id": "expert-candidate:radina-denkova",
+          "name": "Radina Denkova",
+          "expert_type": "lender-credit",
+          "expert_priority": 81
+        }
+      ],
+      "deal_connections": [
+        {
+          "id": "pe-towerbrook-jsm-2024",
+          "name": "TowerBrook makes majority investment in JSM",
+          "lane": "towerbrook",
+          "theme": "grid-infrastructure",
+          "priority": 94,
+          "date": "2024-07-29"
+        }
+      ],
+      "roles": [
+        "debt-financing-counsel-lender",
+        "banked"
+      ],
+      "sources": [
+        {
+          "title": "TowerBrook Capital Partners Announces Investment in JSM",
+          "publisher": "TowerBrook",
+          "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
+          "evidence": "TowerBrook announced a majority investment and named the deal leads, founders, chair, and eight advisor firms."
+        },
+        {
+          "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
+          "publisher": "DLA Piper",
+          "url": "https://www.dlapiper.com/en-za/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
+          "evidence": "DLA Piper identified Bridgepoint Credit as a financing provider and named the lender-counsel team."
+        },
+        {
+          "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
+          "publisher": "Fried Frank",
+          "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
+          "evidence": "Fried Frank identified the partner, special-counsel, and associate team advising TowerBrook on JSM."
+        },
+        {
+          "title": "Eight Advisory supported TowerBrook on its majority investment in JSM",
+          "publisher": "Eight Advisory",
+          "url": "https://www.8advisory.com/2024/07/31/eight-advisory-a-accompagne-towerbrook-capital-partners-dans-le-cadre-de-son-investissement-majoritaire-dans-jsm/",
+          "evidence": "Eight Advisory identified the operational and technology diligence team supporting TowerBrook on JSM."
+        }
+      ],
+      "scores": {
+        "expert_density": 72,
+        "expert_quality": 81,
+        "deal_priority": 94,
+        "role_diversity": 40,
+        "actionability": 60,
+        "research_priority": 74
+      },
+      "next_questions": [
         "Which linked experts can provide the strongest introduction or diligence path?",
         "What adjacent companies do the linked experts consider strongest?",
         "What has changed since the most recent PE transaction?"
@@ -16520,89 +16523,6 @@
       }
     },
     {
-      "candidate_id": "company-candidate:debevoise-and-plimpton",
-      "name": "Debevoise & Plimpton",
-      "category": "advisory",
-      "themes": [
-        "clean-energy-advisory",
-        "grid-infrastructure",
-        "smart-water"
-      ],
-      "ownership_status": "independent",
-      "owner": null,
-      "why_interesting": "Debevoise & Plimpton is derived from 2 named expert connections across 1 priority PE transaction.",
-      "canonical_match": {
-        "status": "exact_name_match",
-        "company_id": "debevoise-plimpton"
-      },
-      "expert_connections": [
-        {
-          "expert_candidate_id": "expert-candidate:brett-novick",
-          "name": "Brett Novick",
-          "expert_type": "lawyer",
-          "expert_priority": 77
-        },
-        {
-          "expert_candidate_id": "expert-candidate:scott-selinger",
-          "name": "Scott Selinger",
-          "expert_type": "lawyer",
-          "expert_priority": 77
-        }
-      ],
-      "deal_connections": [
-        {
-          "id": "pe-towerbrook-brg-2025",
-          "name": "TowerBrook makes majority investment in Berkeley Research Group",
-          "lane": "towerbrook",
-          "theme": "clean-energy-advisory",
-          "priority": 87,
-          "date": "2025-02-27"
-        }
-      ],
-      "roles": [
-        "debt-financing-counsel-investor",
-        "legal-counsel"
-      ],
-      "sources": [
-        {
-          "title": "TowerBrook Capital Partners Announces Strategic Investment in BRG",
-          "publisher": "TowerBrook",
-          "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-strategic-investment-in-brg/",
-          "evidence": "TowerBrook announced the majority investment and named the sponsor lead, target leaders, seller, financing providers, and transaction advisors."
-        },
-        {
-          "title": "Kirkland Advises Berkeley Research Group on Investment from TowerBrook",
-          "publisher": "Kirkland & Ellis",
-          "url": "https://www.kirkland.com/news/press-release/2025/02/kirkland-advises-berkeley-research-group-on-investment-from-towerbrook",
-          "evidence": "Kirkland identified its role and named the target legal team."
-        },
-        {
-          "title": "Debevoise Advised TowerBrook in the Debt Financing Aspects of Its Strategic Investment in BRG",
-          "publisher": "Debevoise & Plimpton",
-          "url": "https://www.debevoise.com/news/2025/03/debevoise-advised-towerbrook",
-          "evidence": "Debevoise identified its debt-financing role and named the partner team advising TowerBrook."
-        }
-      ],
-      "scores": {
-        "expert_density": 36,
-        "expert_quality": 77,
-        "deal_priority": 87,
-        "role_diversity": 40,
-        "actionability": 75,
-        "research_priority": 61
-      },
-      "next_questions": [
-        "Which linked experts can provide the strongest introduction or diligence path?",
-        "What adjacent companies do the linked experts consider strongest?",
-        "What has changed since the most recent PE transaction?"
-      ],
-      "review": {
-        "status": "needs_review",
-        "reviewer": null,
-        "notes": "Derived from the expert graph. Verify category, ownership, and investment relevance before canonical promotion."
-      }
-    },
-    {
       "candidate_id": "company-candidate:new-mountain-capital",
       "name": "New Mountain Capital",
       "category": "investor",
@@ -16665,6 +16585,89 @@
         "role_diversity": 40,
         "actionability": 60,
         "research_priority": 61
+      },
+      "next_questions": [
+        "Which linked experts can provide the strongest introduction or diligence path?",
+        "What adjacent companies do the linked experts consider strongest?",
+        "What has changed since the most recent PE transaction?"
+      ],
+      "review": {
+        "status": "needs_review",
+        "reviewer": null,
+        "notes": "Derived from the expert graph. Verify category, ownership, and investment relevance before canonical promotion."
+      }
+    },
+    {
+      "candidate_id": "company-candidate:debevoise-and-plimpton",
+      "name": "Debevoise & Plimpton",
+      "category": "investor",
+      "themes": [
+        "clean-energy-advisory",
+        "grid-infrastructure",
+        "smart-water"
+      ],
+      "ownership_status": "independent",
+      "owner": null,
+      "why_interesting": "Debevoise & Plimpton is derived from 2 named expert connections across 1 priority PE transaction.",
+      "canonical_match": {
+        "status": "exact_name_match",
+        "company_id": "debevoise-plimpton"
+      },
+      "expert_connections": [
+        {
+          "expert_candidate_id": "expert-candidate:brett-novick",
+          "name": "Brett Novick",
+          "expert_type": "lender-credit",
+          "expert_priority": 78
+        },
+        {
+          "expert_candidate_id": "expert-candidate:scott-selinger",
+          "name": "Scott Selinger",
+          "expert_type": "lender-credit",
+          "expert_priority": 78
+        }
+      ],
+      "deal_connections": [
+        {
+          "id": "pe-towerbrook-brg-2025",
+          "name": "TowerBrook makes majority investment in Berkeley Research Group",
+          "lane": "towerbrook",
+          "theme": "clean-energy-advisory",
+          "priority": 87,
+          "date": "2025-02-27"
+        }
+      ],
+      "roles": [
+        "debt-financing-counsel-investor",
+        "banked"
+      ],
+      "sources": [
+        {
+          "title": "TowerBrook Capital Partners Announces Strategic Investment in BRG",
+          "publisher": "TowerBrook",
+          "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-strategic-investment-in-brg/",
+          "evidence": "TowerBrook announced the majority investment and named the sponsor lead, target leaders, seller, financing providers, and transaction advisors."
+        },
+        {
+          "title": "Kirkland Advises Berkeley Research Group on Investment from TowerBrook",
+          "publisher": "Kirkland & Ellis",
+          "url": "https://www.kirkland.com/news/press-release/2025/02/kirkland-advises-berkeley-research-group-on-investment-from-towerbrook",
+          "evidence": "Kirkland identified its role and named the target legal team."
+        },
+        {
+          "title": "Debevoise Advised TowerBrook in the Debt Financing Aspects of Its Strategic Investment in BRG",
+          "publisher": "Debevoise & Plimpton",
+          "url": "https://www.debevoise.com/news/2025/03/debevoise-advised-towerbrook",
+          "evidence": "Debevoise identified its debt-financing role and named the partner team advising TowerBrook."
+        }
+      ],
+      "scores": {
+        "expert_density": 36,
+        "expert_quality": 78,
+        "deal_priority": 87,
+        "role_diversity": 40,
+        "actionability": 60,
+        "research_priority": 60
       },
       "next_questions": [
         "Which linked experts can provide the strongest introduction or diligence path?",

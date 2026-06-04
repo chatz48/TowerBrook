@@ -497,7 +497,19 @@ function citationIdsForEntity(sources: ReportSource[], entity: string): string[]
 function advisorRows(experts: Expert[], sources: ReportSource[]): ReportSection["rows"] {
   const advisors = experts
     .filter((expert) =>
-      ["advisor", "banker", "lawyer", "investor", "service-provider"].includes(expert.type),
+      [
+        "advisor",
+        "strategy-consultant",
+        "commercial-dd",
+        "technical-dd",
+        "engineering-consultant",
+        "lender-credit",
+        "regulatory-policy",
+        "banker",
+        "lawyer",
+        "investor",
+        "service-provider",
+      ].includes(expert.type),
     )
     .slice(0, 5);
 

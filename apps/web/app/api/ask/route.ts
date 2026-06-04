@@ -6,7 +6,7 @@ import { COMPANY_CATEGORY_LABEL, EXPERT_TYPE_LABEL } from "@/lib/labels";
 import { complete, hasModel, MODEL } from "@/lib/llm";
 import { rankExperts } from "@/lib/score";
 import { getTheme, THEMES } from "@/lib/themes";
-import { callIntelligenceApi, hasIntelligenceApi } from "@/lib/intelligence-api";
+import { callBackendApi, hasBackendApi } from "@/lib/backend-api";
 import type { Company, Deal, Expert, ExpertType, Source, ThemeId } from "@/lib/types";
 
 type SourceRecord = {
@@ -57,6 +57,11 @@ type AskResponse = {
     geography: string;
     archetypes: string[];
     source_scope: string;
+    page_context?: {
+      title: string;
+      pathname: string;
+      headings: string[];
+    };
   };
   ranked_experts: RankedExpert[];
   ranked_companies: RankedCompany[];
@@ -106,6 +111,16 @@ type AskRequest = {
     archetypes?: string[];
     sourceScope?: string;
   };
+  pageContext?: PageContext;
+};
+
+type PageContext = {
+  title?: string;
+  pathname?: string;
+  url?: string;
+  headings?: string[];
+  selectedText?: string;
+  visibleText?: string;
 };
 
 const SYSTEM = `You are a research copilot for a private equity deal team.
@@ -117,6 +132,12 @@ const EXPERT_TYPES = new Set<ExpertType>([
   "ex-founder",
   "operator",
   "advisor",
+  "strategy-consultant",
+  "commercial-dd",
+  "technical-dd",
+  "engineering-consultant",
+  "lender-credit",
+  "regulatory-policy",
   "banker",
   "lawyer",
   "service-provider",
@@ -131,15 +152,16 @@ export async function POST(request: Request) {
       return Response.json({ error: "Ask a question first." }, { status: 400 });
     }
 
-    const baseline = await buildStructuredAnswer(question, body.filters ?? {});
-    const agentic = await maybeAskIntelligenceApi(question, body.filters ?? {});
+    const pageContext = normalizePageContext(body.pageContext);
+    const baseline = await buildStructuredAnswer(question, body.filters ?? {}, pageContext);
+    const agentic = await maybeAskIntelligenceApi(question, body.filters ?? {}, pageContext);
     const enrichedBaseline = agentic
       ? {
           ...baseline,
           agentic_answer: agentic.answer,
           tool_calls: agentic.tool_calls,
           grounded: true,
-          model: `${baseline.model} + intelligence-api`,
+          model: `${baseline.model} + backend-api`,
         }
       : baseline;
 
@@ -147,7 +169,7 @@ export async function POST(request: Request) {
       return Response.json({
         ...enrichedBaseline,
         grounded: Boolean(agentic),
-        model: agentic ? "deterministic-fallback + intelligence-api" : "deterministic-fallback",
+        model: agentic ? "deterministic-fallback + backend-api" : "deterministic-fallback",
       });
     }
 
@@ -164,20 +186,39 @@ export async function POST(request: Request) {
 async function maybeAskIntelligenceApi(
   question: string,
   filters: NonNullable<AskRequest["filters"]>,
+  pageContext?: PageContext,
 ): Promise<{ answer: string; tool_calls: unknown[] } | null> {
-  if (!hasIntelligenceApi()) return null;
+  if (!hasBackendApi()) return null;
   try {
-    return await callIntelligenceApi<{ answer: string; tool_calls: unknown[] }>("/chat", {
+    const contextBlock = pageContext
+      ? `\n\nCurrent page context:\nTitle: ${pageContext.title ?? "Untitled"}\nPath: ${pageContext.pathname ?? ""}\nHeadings: ${(pageContext.headings ?? []).join(" | ")}\nSelected text: ${pageContext.selectedText ?? ""}\nVisible text excerpt: ${pageContext.visibleText ?? ""}`
+      : "";
+    return await callBackendApi<{ answer: string; tool_calls: unknown[] }>("/chat", {
       method: "POST",
       body: JSON.stringify({
-        message: question,
-        theme_id: filters.theme,
-        tools: ["rag_search_sources", "rag_search_entities"],
+        message: `${question}${contextBlock}`,
+        theme_id: filters.theme && filters.theme !== "all" ? filters.theme : undefined,
+        tools: toolsForQuestion(question),
       }),
     });
   } catch {
     return null;
   }
+}
+
+function toolsForQuestion(question: string): string[] {
+  const lower = question.toLowerCase();
+  const tools = new Set(["rag_search_sources", "rag_search_entities"]);
+  if (lower.includes("search") || lower.includes("find more") || lower.includes("latest")) {
+    tools.add("web_search");
+  }
+  if (lower.includes("dig deeper") || lower.includes("deep discovery")) {
+    tools.add("run_deep_discovery");
+  }
+  if (lower.includes("path") || lower.includes("connection") || lower.includes("graph")) {
+    tools.add("graph_query");
+  }
+  return [...tools];
 }
 
 async function refineWithModel(baseline: AskResponse): Promise<AskResponse> {
@@ -199,9 +240,11 @@ Return a JSON object with the same top-level keys. Keep ranked_experts, ranked_c
 async function buildStructuredAnswer(
   question: string,
   filters: NonNullable<AskRequest["filters"]>,
+  pageContext?: PageContext,
 ): Promise<AskResponse> {
-  const words = tokenize(question);
-  const themeId = inferTheme(question, filters.theme);
+  const pageContextText = pageContextSearchText(pageContext);
+  const words = tokenize(`${question} ${pageContextText}`);
+  const themeId = inferTheme(`${question} ${pageContextText}`, filters.theme);
   const objective = filters.objective ?? inferObjective(question);
   const archetypes = normalizeArchetypes(filters.archetypes);
   const theme = themeId ? getTheme(themeId) : undefined;
@@ -251,6 +294,7 @@ async function buildStructuredAnswer(
     rankedCompanyInputs.map((x) => x.company),
     rankedDealInputs.map((x) => x.deal),
   );
+  const pageContextSourceId = addPageContextSource(sourceIndex, pageContext);
 
   if (hasDealDatabase()) {
     try {
@@ -320,8 +364,21 @@ async function buildStructuredAnswer(
 
   const topTheme = theme?.name ?? "the selected market";
   const primaryCitations = sourceIds.slice(0, 3);
+  const pageCitations = pageContextSourceId ? [pageContextSourceId] : [];
   const topDeal = rankedDealInputs[0]?.deal;
   const what_to_listen_for = [
+    ...(pageContext
+      ? [
+          {
+            claim: `The current page is about ${pageContext.title || pageContext.pathname || "the selected workflow"}, so this answer is tuned to that visible context.`,
+            raises_conviction_if:
+              "The cited page rows and source evidence point to the same experts, companies, or gaps the user is inspecting.",
+            reduces_conviction_if:
+              "The page is only a broad index and the user needs a specific theme, expert, company, or deal selected.",
+            citations: pageCitations,
+          },
+        ]
+      : []),
     {
       claim: `${topTheme} has actionable people with direct operator, advisor, or transaction visibility.`,
       raises_conviction_if:
@@ -353,6 +410,11 @@ async function buildStructuredAnswer(
   ];
 
   const gaps = [
+    ...(pageContext
+      ? [
+          `Current-page context is limited to visible text from ${pageContext.title || pageContext.pathname || "the page"}; open the relevant profile, deal, company, or source record for tighter grounding.`,
+        ]
+      : []),
     ...(topDeal
       ? topDeal.missingFacts
           .slice(0, 3)
@@ -400,6 +462,15 @@ async function buildStructuredAnswer(
       geography: filters.geography ?? "Global / Europe priority",
       archetypes: archetypes.map((type) => EXPERT_TYPE_LABEL[type]),
       source_scope: filters.sourceScope ?? "Local sourced directory",
+      ...(pageContext
+        ? {
+            page_context: {
+              title: pageContext.title ?? "Current page",
+              pathname: pageContext.pathname ?? "",
+              headings: pageContext.headings ?? [],
+            },
+          }
+        : {}),
     },
     ranked_experts,
     ranked_companies,
@@ -415,6 +486,11 @@ async function buildStructuredAnswer(
         "Calculated from the average confidence of ranked expert and company records, then tempered for directory coverage gaps.",
     },
     assumptions: [
+      ...(pageContext
+        ? [
+            "The answer uses the current page title, route, headings, selected text, and visible text excerpt as local context.",
+          ]
+        : []),
       "The answer uses only local expert, company, deal, relationship, and source records.",
       "Higher-ranked experts are prioritized for session fit, confidence, source coverage, access, and graph relevance.",
       "Company rank is directional and driven by linked expert density plus record confidence.",
@@ -449,6 +525,15 @@ async function buildStructuredAnswer(
           ? `Which experts can introduce us to ${ranked_companies[0].name}?`
           : "Where is the directory coverage weakest?",
       },
+      ...(pageContext
+        ? [
+            {
+              action: "search_more",
+              label: "Search around this page",
+              prompt: `Find more source-backed information related to ${pageContext.title || pageContext.pathname || "this page"}.`,
+            },
+          ]
+        : []),
     ],
     grounded: false,
     model: "deterministic-fallback",
@@ -601,12 +686,78 @@ function buildSourceIndex(experts: Expert[], companies: Company[], deals: Deal[]
   return sources;
 }
 
+function addPageContextSource(index: Map<string, SourceRecord>, pageContext?: PageContext): string | null {
+  if (!pageContext) return null;
+  const snippet = [
+    pageContext.selectedText ? `Selected text: ${pageContext.selectedText}` : "",
+    pageContext.visibleText ?? "",
+  ]
+    .filter(Boolean)
+    .join("\n")
+    .trim();
+  const sourceId = "P1";
+  index.set(sourceId, {
+    source_id: sourceId,
+    title: pageContext.title || "Current page",
+    publisher: "Current browser page",
+    url: pageContext.url ?? pageContext.pathname ?? "",
+    source_type: "Page context",
+    snippet: snippet || `Route: ${pageContext.pathname ?? "current page"}`,
+    entities: [
+      pageContext.title,
+      pageContext.pathname,
+      ...(pageContext.headings ?? []),
+    ].filter((item): item is string => Boolean(item)).slice(0, 8),
+    confidence: pageContext.selectedText ? 0.86 : 0.72,
+  });
+  return sourceId;
+}
+
 function citationsFor(sources: Source[], index: Map<string, SourceRecord>): string[] {
   const keys = new Set(sources.map((source) => `${source.title}|${source.url}`));
   return [...index.values()]
     .filter((item) => keys.has(`${item.title}|${item.url}`))
     .map((item) => item.source_id)
     .slice(0, 3);
+}
+
+function normalizePageContext(value: unknown): PageContext | undefined {
+  if (!isRecord(value)) return undefined;
+  const title = stringOr(value.title, "").slice(0, 180);
+  const pathname = stringOr(value.pathname, "").slice(0, 220);
+  const url = stringOr(value.url, "").slice(0, 500);
+  const headings = stringArray(value.headings, [])
+    .map((heading) => heading.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, 12);
+  const selectedText = stringOr(value.selectedText, "").replace(/\s+/g, " ").trim().slice(0, 1200);
+  const visibleText = stringOr(value.visibleText, "").replace(/\s+/g, " ").trim().slice(0, 6000);
+
+  if (!title && !pathname && !url && !headings.length && !selectedText && !visibleText) {
+    return undefined;
+  }
+
+  return {
+    title,
+    pathname,
+    url,
+    headings,
+    selectedText,
+    visibleText,
+  };
+}
+
+function pageContextSearchText(pageContext?: PageContext): string {
+  if (!pageContext) return "";
+  return [
+    pageContext.title,
+    pageContext.pathname,
+    ...(pageContext.headings ?? []),
+    pageContext.selectedText,
+    pageContext.visibleText,
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 
 function inferTheme(question: string, selected?: string): ThemeId | undefined {

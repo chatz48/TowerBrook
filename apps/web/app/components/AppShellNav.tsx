@@ -8,9 +8,10 @@ const NAV_ITEMS = [
   { href: "/experts", label: "Experts", match: "/experts" },
   { href: "/companies", label: "Companies", match: "/companies" },
   { href: "/deals", label: "Deals", match: "/deals" },
-  { href: "/graph", label: "Graph", match: "/graph" },
+  { href: "/discover", label: "Discover", match: "/discover" },
+  { href: "/graph", label: "Evidence", match: "/graph" },
   { href: "/reports", label: "Reports", match: "/reports" },
-  { href: "/ask", label: "Ask", match: "/ask" },
+  { href: "/ask", label: "Copilot", match: "/ask" },
 ];
 
 export default function AppShellNav() {

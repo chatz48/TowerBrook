@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import AppShellNav from "@/app/components/AppShellNav";
+import PageAwareChat from "@/app/components/PageAwareChat";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -38,7 +39,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               </span>
             </Link>
             <AppShellNav />
-            <div className="ml-auto hidden min-w-[280px] max-w-[460px] flex-1 items-center rounded-md border border-line-strong bg-white px-3 py-2 lg:flex">
+            <div className="ml-auto hidden min-w-[280px] max-w-[460px] flex-1 items-center rounded-md border border-line-strong bg-white px-3 py-2 xl:flex">
               <span className="text-muted" aria-hidden="true">
                 <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
                   <path d="m17 17-3.4-3.4m1.8-4.1a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
@@ -65,6 +66,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </div>
         </header>
         <main>{children}</main>
+        <PageAwareChat />
       </body>
     </html>
   );

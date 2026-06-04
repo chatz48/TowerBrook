@@ -1,11 +1,13 @@
-# Expert Engine
+# TowerBrook People Expert Engine
 
 TowerBrook Expert Engine is a graph-backed people intelligence workflow for
 thematic private equity sourcing.
 
-The product helps an investment professional move from a theme to a ranked
-expert pool, surfaced companies, relationship paths, call prep, structured
-research answers, evidence-backed memos, and a reviewable ingestion path.
+The product helps an investment professional move from a theme to the people
+most likely to reveal investable companies: founders, ex-founders, operators,
+bankers, lawyers, diligence providers, advisors, peer funds and dealmakers.
+Those expert relationships then drive target discovery, call prep, outreach,
+relationship paths, evidence-backed memos and review-gated live research.
 
 Core principle:
 
@@ -21,6 +23,66 @@ The demo covers three themes:
 - Grid Infrastructure & Connection
 - Smart Water Infrastructure & Analytics
 
+## What This Builds For TowerBrook
+
+This is a people-first expert engine for thematic private-equity sourcing. It is
+designed around the assignment brief:
+
+- identify experts across the three themes: founders, ex-founders, operators,
+  bankers, lawyers, diligence providers, advisors, peer funds and dealmakers;
+- use those experts to derive interesting companies and new investment targets;
+- give a time-constrained investment professional a usable interface for
+  expert discovery, call preparation, company exploration and evidence review.
+
+The key product decision is to make experts the primary object. Deals, sources,
+companies and research jobs are supporting evidence that help answer:
+
+```text
+Who should TowerBrook call, why are they credible, what companies can they lead
+us to, and what evidence supports that view?
+```
+
+The discovery method prioritizes private-equity transactions, especially
+TowerBrook and peer-fund deals. Large and recent deals are used as the spine for
+finding named founders, advisors, lenders, lawyers and service providers. A
+separate founder-origination lane follows previously funded founders into new
+companies, board roles, angel investments and referral paths.
+
+## How This Helps Find New Deals
+
+The product is deliberately built around the origination question:
+
+```text
+Which credible people should TowerBrook speak to this week, and what companies
+or referrals could those conversations produce?
+```
+
+Workflow:
+
+1. Start with one of the three themes.
+2. Use major and recent PE transactions as the discovery spine.
+3. Extract the named people around those transactions: founders, operators,
+   advisors, lenders, lawyers, consultants, peer-fund dealmakers and board
+   members.
+4. Rank experts by theme relevance, PE evidence, recency, TowerBrook
+   relationship path, access quality and source confidence.
+5. Reverse-derive companies from the expert graph: current companies, former
+   companies, portfolio companies, board seats, advisory clients, investments
+   and referrals.
+6. Generate call prep, outreach and memo outputs so the user can act on the
+   expert pool immediately.
+
+The strongest demo path is:
+
+```text
+/experts -> founder-led opportunity jobs -> expert profile -> call prep
+         -> linked companies -> graph path -> report
+```
+
+This makes the product more than a searchable database. It is an expert-led
+sourcing workflow where every new source, deal, expert call or review approval
+can compound into more people and more company targets.
+
 ## Run Locally
 
 ```bash
@@ -30,15 +92,102 @@ pnpm dev
 
 Open `http://localhost:3000`.
 
-Optional AI features use Anthropic server-side route handlers:
+The app can run as a static demo without credentials. Live discovery uses:
 
 ```bash
-cp .env.example .env.local
-# add ANTHROPIC_API_KEY=...
-pnpm dev
+cp .env.example .env
+# set SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, DATABASE_URL,
+# DEEPSEEK_API_KEY and KEIROLABS_API_KEY
+
+pnpm origination:jobs
+pnpm origination:dry-run:advisors
+pnpm origination:run:advisors
 ```
 
-The app remains functional without an API key through deterministic fallbacks.
+Live discovery is intentionally review-gated:
+
+```text
+Keiro search/fetch -> DeepSeek extraction -> Supabase discovery_candidates
+and entity_match_candidates -> human approval -> canonical people/company graph
+```
+
+The system does not mutate canonical experts from live web output until a
+candidate is approved.
+
+## Deploy To Vercel
+
+Deploy the repository as two separate Vercel projects:
+
+| Project | Root directory | Required production environment variables |
+|---|---|---|
+| Web | `apps/web` | `BACKEND_API_URL`, `BACKEND_API_TOKEN`; add Supabase, Anthropic, and OpenAI variables for the optional features that use them |
+| Backend API | `apps/backend-api` | `BACKEND_API_TOKEN`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DEEPSEEK_API_KEY`, `KEIROLABS_API_KEY`, `CRON_SECRET` |
+
+Deploy the Backend API first, then set its production URL as the web
+project's `BACKEND_API_URL`. Set the same random
+`BACKEND_API_TOKEN` on both projects so only the web project's server-side
+routes can call the API. The API project's existing `vercel.json` runs
+`/jobs/process-next` every 15 minutes. Vercel sends `CRON_SECRET` in the
+scheduled request's authorization header. The 15-minute cron schedule requires
+Vercel Pro or Enterprise; Hobby cron schedules can run only once per day.
+
+The FastAPI deployment runs as one Vercel Function, so each job must complete
+within the configured 300-second function duration. Supabase holds durable job
+and graph state; do not rely on in-memory fallback state in production.
+
+## AI Usage
+
+AI is used in three places:
+
+- DeepSeek extracts structured people, companies, relationships, facts and
+  citations from searched/fetched sources.
+- The research copilot and report surfaces synthesize graph-grounded call prep,
+  diligence questions and memo sections.
+- Deterministic scripts generate research queues and review artifacts from the
+  curated source/deal graph.
+
+AI output is never treated as final truth. It is stored as review-gated
+candidates with source metadata, confidence and auditability.
+
+## Generated Data And Scripts
+
+Important generated artifacts:
+
+- `apps/web/data/private-equity-deal-census-candidates.json`
+- `apps/web/data/expert-first-pe-discovery-candidates.json`
+- `apps/web/data/origination-research-jobs.json`
+- `apps/web/data/government-investment-census-candidates.json`
+
+Regeneration commands:
+
+```bash
+pnpm private-equity:census
+pnpm expert:census
+pnpm origination:jobs
+pnpm government-investment:census
+pnpm ingest:validate
+```
+
+The live advisor-gap and profile-completion passes produced review-gated
+Supabase candidates for
+Canaccord Genuity, Bridgepoint Credit, EY, PwC, Baringa, Roland Berger, Fried
+Frank and Eight Advisory. Only the candidates with enough source-backed identity
+evidence were promoted to the canonical graph; weaker leads remain in review.
+
+## More Time
+
+With more time, I would:
+
+- add paid/private datasets such as PitchBook, LinkedIn Sales Navigator,
+  MergerMarket and Preqin to improve completeness and identity resolution;
+- add CRM/email/calendar overlays so TowerBrook can rank experts by warmest
+  relationship path and prior internal interaction;
+- build a call-notes ingestion loop so every expert call creates new expert,
+  company and referral candidates;
+- add a reviewer UI for approving, merging and rejecting Supabase discovery
+  candidates directly from the product;
+- add scheduled monitors for new PE deals and founder/company activity in the
+  three themes.
 
 ## Product Flow
 
@@ -46,9 +195,9 @@ The app remains functional without an API key through deterministic fallbacks.
 |---|---|
 | `/` | Command landing page with theme rows, global search, workflow shortcuts, and the TowerBrook lens. |
 | `/themes/[theme]` | Theme Command Center: KPI strip, thesis, call list, clusters, blank spaces, TowerBrook score, session-aware expert ranking, companies, graph preview. |
-| `/experts` | Dense cross-theme expert explorer with base priority and TowerBrook score. |
-| `/experts/[id]` | Expert profile with evidence, company/deal links, TowerBrook score, session call-prep rail, generated call-prep sections. |
-| `/companies` | Company explorer ranked by expert density, evidence strength, and TowerBrook relationship fit. |
+| `/experts` | Main origination workspace: founder opportunity jobs, PE-derived expert candidates, advisor-person gaps, canonical expert ranking. |
+| `/experts/[id]` | Expert profile with evidence, company/deal links, TowerBrook score, session call-prep rail, outreach and sourcing-call actions. |
+| `/companies` | Target-company workspace: companies reverse-derived from named expert and PE-deal evidence. |
 | `/companies/[id]` | Company profile with linked experts, TowerBrook score, evidence, sources, graph path action. |
 | `/deals` | Deal Intelligence table with sourced parties, advisors, lawyers, surfaced experts/companies, fact completeness, and next actions. |
 | `/deals/[id]` | Deal scorecard with fact rubric, evidence, parties, advisors/counsel, missing facts, follow-up searches, and related people/companies. |
@@ -56,7 +205,7 @@ The app remains functional without an API key through deterministic fallbacks.
 | `/graph` | Standalone graph explorer with filters, traversal, path view, inspector, source-backed edges. |
 | `/ask` | Structured research copilot: ranked experts/companies, call sequence, what to listen for, gaps, risks, evidence rail. |
 | `/reports` | Memo builder with templates, section statuses, citations, source register, markdown/export controls. |
-| `/discover` | Discovery review queue for human approval of extracted candidates. |
+| `/discover` | Live origination queue: Keiro search/fetch, DeepSeek extraction, Supabase review-gated candidates. |
 | `/sources` | Source register audit table for ingestion and report provenance. |
 
 ## Design System
@@ -278,8 +427,8 @@ During final verification, these routes returned HTTP 200 from `pnpm dev`:
 
 - No authentication or multi-user state.
 - Shortlist, CRM sync, and contacted-state actions are UI prototypes.
-- Live discovery requires an Anthropic key and still returns review candidates,
-  not production graph mutations.
+- Live discovery requires KeiroLabs, DeepSeek and Supabase credentials and
+  still returns review candidates, not production graph mutations.
 - User deal ingestion is deterministic and review-gated; pasted or URL-sourced
   facts are not persisted into production graph data in this demo build.
 - Confidence is record-level and hand-curated; no learned source-quality model.

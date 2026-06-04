@@ -26,6 +26,25 @@ def test_structured_job_queries_take_precedence():
     ) == ["founder query", "identity query"]
 
 
+def test_expert_profile_completion_uses_targeted_profile_queries():
+    queries = _queries_for_job(
+        "grid-infrastructure",
+        None,
+        {
+            "category": "expert-profile-completion",
+            "target_name": "Jane Advisor",
+            "target_organizations": ["Canaccord Genuity"],
+            "target_companies": ["JSM Group"],
+            "target_deals": [{"deal_name": "TowerBrook majority investment in JSM"}],
+            "target_themes": ["grid-infrastructure"],
+        },
+    )
+
+    assert all('"Jane Advisor"' in query for query in queries)
+    assert any('"Canaccord Genuity"' in query for query in queries)
+    assert any('"JSM Group"' in query for query in queries)
+
+
 def test_unknown_theme_runs_all_private_equity_queries():
     queries = _queries_for_job("unknown-theme", None)
 

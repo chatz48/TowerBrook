@@ -23,6 +23,11 @@ import {
   SourceLinks,
   ThemeTag,
 } from "@/app/components/ui";
+import {
+  CallPrepChecklist,
+  NextActionPanel,
+  WorkflowRail,
+} from "@/app/components/InvestorWorkflow";
 
 export function generateStaticParams() {
   return getCompanies().map((c) => ({ id: c.id }));
@@ -83,6 +88,52 @@ export default async function CompanyPage({
             </div>
           </div>
         </header>
+
+        <section className="ee-panel mt-5 rounded-lg p-5">
+          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="ee-label text-ink">Company diligence objective</h2>
+              <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
+                Decide whether this company is a target, comparable, advisor or
+                introduction path by following the named expert evidence first.
+              </p>
+            </div>
+            <Link href="/reports" className="ee-button ee-button-secondary">
+              Add to company memo
+            </Link>
+          </div>
+          <div className="mt-4">
+            <WorkflowRail
+              steps={[
+                {
+                  label: "Evidence",
+                  title: company.linkedExperts[0]?.expert.name ?? "Named expert proof",
+                  body: company.linkedExperts[0]
+                    ? `Start with ${company.linkedExperts[0].expert.name}'s ${RELATIONSHIP_LABEL[company.linkedExperts[0].relationship].toLowerCase()} connection.`
+                    : "Find the named people who can verify the opportunity.",
+                  href: company.linkedExperts[0]
+                    ? `/experts/${company.linkedExperts[0].expert.id}`
+                    : "/experts",
+                },
+                {
+                  label: "Actionability",
+                  title: company.ownershipStatus
+                    ? OWNERSHIP_LABEL[company.ownershipStatus]
+                    : "Ownership to verify",
+                  body: company.owner
+                    ? `Confirm current ownership and decision-maker access at ${company.owner}.`
+                    : "Confirm whether the company is independent, sponsor-owned, acquired or public.",
+                },
+                {
+                  label: "Call ask",
+                  title: "Validate buyer pull",
+                  body: "Ask connected experts about customer urgency, budget ownership, margins and likely acquirers.",
+                  href: "/reports",
+                },
+              ]}
+            />
+          </div>
+        </section>
 
         <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
           <main className="space-y-5">
@@ -214,6 +265,36 @@ export default async function CompanyPage({
                 </div>
               </section>
             ) : null}
+
+            <section className="ee-panel rounded-lg p-5">
+              <div className="ee-label text-ink">Before this becomes a target</div>
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                <CallPrepChecklist
+                  title="Verify"
+                  items={[
+                    "Confirm ownership, scale and current strategic priorities.",
+                    "Check whether expert evidence is first-hand or adjacent.",
+                    "Identify any conflict from advisors, investors or sellers.",
+                  ]}
+                />
+                <CallPrepChecklist
+                  title="Ask experts"
+                  items={[
+                    "What customer pain makes this company durable?",
+                    "Which competitors or substitutes should we map?",
+                    "What diligence finding would change the investment case?",
+                  ]}
+                />
+                <CallPrepChecklist
+                  title="Decide"
+                  items={[
+                    "Promote to active target, comparable or advisor access point.",
+                    "Add missing experts to the discovery queue.",
+                    "Create memo notes only after source-backed verification.",
+                  ]}
+                />
+              </div>
+            </section>
           </main>
 
           <aside className="space-y-5">
@@ -264,6 +345,36 @@ export default async function CompanyPage({
                 Open graph path
               </Link>
             </section>
+
+            <NextActionPanel
+              title="Next best actions"
+              description="Keep the company workflow tied to named people and source evidence."
+              actions={[
+                {
+                  title: "Call strongest linked expert",
+                  body: company.linkedExperts[0]
+                    ? `Use ${company.linkedExperts[0].expert.name} to validate the company and ask for comparables.`
+                    : "Find a named expert before advancing the company.",
+                  href: company.linkedExperts[0]
+                    ? `/experts/${company.linkedExperts[0].expert.id}`
+                    : "/experts",
+                  action: "Prep",
+                  tone: "primary",
+                },
+                {
+                  title: "Open graph path",
+                  body: "Inspect the people-company route that caused the company to surface.",
+                  href: "/graph",
+                  action: "Graph",
+                },
+                {
+                  title: "Build company memo",
+                  body: "Use the profile only after evidence, ownership and expert path are clear.",
+                  href: "/reports",
+                  action: "Memo",
+                },
+              ]}
+            />
 
             <section className="ee-panel rounded-lg p-5" id="sources">
               <div className="mb-3 ee-label text-ink">Sources</div>

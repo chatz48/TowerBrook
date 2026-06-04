@@ -1,6 +1,7 @@
 import argparse
 import asyncio
 import json
+import sys
 from pathlib import Path
 
 from app.api.jobs import process_next_job
@@ -31,7 +32,7 @@ async def main() -> None:
     parser.add_argument("--limit", type=int)
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--verbose", action="store_true")
-    args = parser.parse_args()
+    args = parser.parse_args([arg for arg in sys.argv[1:] if arg != "--"])
 
     jobs = load_jobs(args.jobs, args.category, args.limit)
     created = []

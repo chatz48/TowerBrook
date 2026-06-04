@@ -21,6 +21,11 @@ import {
   ThemeTag,
 } from "@/app/components/ui";
 import ExpertActions from "@/app/components/ExpertActions";
+import {
+  CallPrepChecklist,
+  NextActionPanel,
+  WorkflowRail,
+} from "@/app/components/InvestorWorkflow";
 
 export function generateStaticParams() {
   return getExperts().map((e) => ({ id: e.id }));
@@ -83,6 +88,49 @@ export default async function ExpertPage({
                 </div>
               </div>
             </header>
+
+            <section className="ee-panel rounded-lg p-5">
+              <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <h2 className="ee-label text-ink">Call objective</h2>
+                  <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
+                    Treat this as a sourcing call: validate the theme, ask for
+                    named companies, and request the next skeptical or
+                    highly-connected expert.
+                  </p>
+                </div>
+                <Link href="/reports" className="ee-button ee-button-secondary">
+                  Add to memo
+                </Link>
+              </div>
+              <div className="mt-4">
+                <WorkflowRail
+                  steps={[
+                    {
+                      label: "Open",
+                      title: "Why now?",
+                      body: expert.signals?.[0] ?? "Ask what has changed in budgets, regulation, customer urgency or deal activity.",
+                    },
+                    {
+                      label: "Derive",
+                      title: expert.resolvedCompanies[0]?.company.name ?? "Named companies",
+                      body: expert.resolvedCompanies[0]
+                        ? `Use the ${RELATIONSHIP_LABEL[expert.resolvedCompanies[0].relationship].toLowerCase()} relationship as the first company thread.`
+                        : "Ask for investable companies, non-obvious advisors and comparable deals.",
+                      href: expert.resolvedCompanies[0]
+                        ? `/companies/${expert.resolvedCompanies[0].company.id}`
+                        : "/companies",
+                    },
+                    {
+                      label: "Extend",
+                      title: "Next people to call",
+                      body: "Ask who disagrees with the thesis and who sees the most proprietary deal flow.",
+                      href: "/experts",
+                    },
+                  ]}
+                />
+              </div>
+            </section>
 
             <section className="ee-panel rounded-lg">
               <div className="border-b border-line px-4 py-3">
@@ -221,6 +269,32 @@ export default async function ExpertPage({
                   <button className="ee-button ee-button-secondary">Download</button>
                 </div>
               </div>
+              <div className="mb-4 grid gap-3 md:grid-cols-3">
+                <CallPrepChecklist
+                  title="Before the call"
+                  items={[
+                    "Review linked companies and decide which names need validation.",
+                    "Pick one disconfirming question that tests the investment thesis.",
+                    "Prepare a referral ask for founders, advisors and skeptical operators.",
+                  ]}
+                />
+                <CallPrepChecklist
+                  title="During the call"
+                  items={[
+                    "Capture specific company names, buyers, advisors and recent deal processes.",
+                    "Separate budgeted customer pain from general market enthusiasm.",
+                    "Ask which diligence point would stop an investment committee.",
+                  ]}
+                />
+                <CallPrepChecklist
+                  title="After the call"
+                  items={[
+                    "Promote verified companies into the target list.",
+                    "Create follow-up expert calls from named referrals.",
+                    "Attach source-backed notes to the theme memo.",
+                  ]}
+                />
+              </div>
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 <CallPrepCard title="Snapshot" items={[expert.whyRelevant, `${expert.resolvedCompanies.length} company or deal relationships in the graph.`, `Priority score ${score.total}, confidence ${(expert.confidence * 100).toFixed(0)}%.`]} />
                 <CallPrepCard title="Why this call" items={["Validate where the theme is investable now.", "Ask for the companies, buyers and advisors that recur.", "Use relationship evidence to request warm follow-up names."]} />
@@ -253,7 +327,38 @@ export default async function ExpertPage({
                 </ul>
               </div>
             </section>
-            <ExpertActions expertId={expert.id} expertName={expert.name} />
+            <NextActionPanel
+              title="Next best actions"
+              description="Use the sourced profile before asking AI to draft anything."
+              actions={[
+                {
+                  title: "Generate call prep",
+                  body: "Create a sourced brief with thesis checks, questions and follow-up asks.",
+                  href: "#call-actions",
+                  action: "Use panel",
+                  tone: "primary",
+                },
+                {
+                  title: "Inspect first company link",
+                  body: expert.resolvedCompanies[0]
+                    ? `Open ${expert.resolvedCompanies[0].company.name} and review the relationship evidence.`
+                    : "Review the company explorer for adjacent targets.",
+                  href: expert.resolvedCompanies[0]
+                    ? `/companies/${expert.resolvedCompanies[0].company.id}`
+                    : "/companies",
+                  action: "Open",
+                },
+                {
+                  title: "Build memo appendix",
+                  body: "Carry sourced expert, company and deal links into a report-ready output.",
+                  href: "/reports",
+                  action: "Memo",
+                },
+              ]}
+            />
+            <div id="call-actions">
+              <ExpertActions expertId={expert.id} expertName={expert.name} />
+            </div>
           </aside>
         </div>
       </div>

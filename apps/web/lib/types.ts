@@ -27,9 +27,15 @@ export type ExpertType =
   | "ex-founder" // founded / co-founded a company in the space
   | "operator" // current or former senior operator / executive
   | "advisor" // independent advisor / board member / NED
+  | "strategy-consultant" // strategy / market / commercial advisory
+  | "commercial-dd" // commercial diligence provider
+  | "technical-dd" // operational, technical, environmental or ESG diligence
+  | "engineering-consultant" // engineering design / delivery / asset advisory
+  | "lender-credit" // credit fund, lender or debt-financing professional
+  | "regulatory-policy" // regulatory, policy or government-affairs expert
   | "banker" // M&A / capital-markets coverage of the space
   | "lawyer" // legal counsel on deals in the space
-  | "service-provider" // consultants, technical DD, engineering advisory
+  | "service-provider" // legacy umbrella for consultants / service providers
   | "investor"; // peer funds / dealmakers active in the space
 
 /** The edge label between an expert and a company. */

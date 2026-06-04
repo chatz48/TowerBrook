@@ -1,15 +1,15 @@
-import { callIntelligenceApi } from "@/lib/intelligence-api";
+import { callBackendApi } from "@/lib/backend-api";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const response = await callIntelligenceApi("/reports", {
+    const response = await callBackendApi("/reports", {
       method: "POST",
       body: JSON.stringify(body),
     });
     if (!response) {
       return Response.json(
-        { error: "Set INTELLIGENCE_API_URL to enable source-backed report generation." },
+        { error: "Set BACKEND_API_URL to enable source-backed report generation." },
         { status: 503 },
       );
     }

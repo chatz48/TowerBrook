@@ -58,11 +58,18 @@ const roleRules = [
     weight: 86,
   },
   {
-    pattern: /financial-advisor|banker|financing-provider/,
+    pattern: /financial-advisor|banker/,
     archetype: "banker",
     expertType: "banker",
     relationship: "banked",
     weight: 84,
+  },
+  {
+    pattern: /debt|lender|credit|financing-counsel/,
+    archetype: "lender-credit",
+    expertType: "lender-credit",
+    relationship: "banked",
+    weight: 83,
   },
   {
     pattern: /legal|counsel/,
@@ -72,9 +79,37 @@ const roleRules = [
     weight: 80,
   },
   {
-    pattern: /diligence|commercial|technical|environmental|tax|esg|insurance|advisor/,
-    archetype: "service-provider",
-    expertType: "service-provider",
+    pattern: /commercial-diligence|commercial-advisor/,
+    archetype: "commercial-diligence",
+    expertType: "commercial-dd",
+    relationship: "served",
+    weight: 80,
+  },
+  {
+    pattern: /technical|technology|operational|environmental|esg|insurance|diligence/,
+    archetype: "technical-diligence",
+    expertType: "technical-dd",
+    relationship: "served",
+    weight: 79,
+  },
+  {
+    pattern: /regulatory/,
+    archetype: "regulatory-policy",
+    expertType: "regulatory-policy",
+    relationship: "served",
+    weight: 79,
+  },
+  {
+    pattern: /engineering|asset|design/,
+    archetype: "engineering-consultant",
+    expertType: "engineering-consultant",
+    relationship: "served",
+    weight: 78,
+  },
+  {
+    pattern: /strategy|advisor/,
+    archetype: "strategy-consultant",
+    expertType: "strategy-consultant",
     relationship: "served",
     weight: 78,
   },
@@ -89,6 +124,13 @@ const advisorRules = [
     weight: 88,
   },
   {
+    pattern: /financing-provider|lender|debt|credit|finance-counsel/,
+    expertType: "lender-credit",
+    companyCategory: "investor",
+    relationship: "banked",
+    weight: 89,
+  },
+  {
     pattern: /financial|m-and-a|financing|lender/,
     expertType: "banker",
     companyCategory: "advisory",
@@ -96,8 +138,43 @@ const advisorRules = [
     weight: 90,
   },
   {
-    pattern: /diligence|commercial|technical|environmental|tax|esg|insurance|operational/,
-    expertType: "service-provider",
+    pattern: /commercial-diligence|commercial-advisor/,
+    expertType: "commercial-dd",
+    companyCategory: "service-provider",
+    relationship: "served",
+    weight: 88,
+  },
+  {
+    pattern: /technical|operational|technology|environmental|esg|insurance/,
+    expertType: "technical-dd",
+    companyCategory: "service-provider",
+    relationship: "served",
+    weight: 87,
+  },
+  {
+    pattern: /regulatory/,
+    expertType: "regulatory-policy",
+    companyCategory: "service-provider",
+    relationship: "served",
+    weight: 86,
+  },
+  {
+    pattern: /engineering|design|asset|infrastructure-advisory/,
+    expertType: "engineering-consultant",
+    companyCategory: "service-provider",
+    relationship: "served",
+    weight: 85,
+  },
+  {
+    pattern: /strategy|market|advisor|consult/,
+    expertType: "strategy-consultant",
+    companyCategory: "service-provider",
+    relationship: "advised",
+    weight: 84,
+  },
+  {
+    pattern: /diligence|tax|operational/,
+    expertType: "technical-dd",
     companyCategory: "service-provider",
     relationship: "served",
     weight: 86,
@@ -151,10 +228,20 @@ function advisorConfig(role) {
 
 function companyCategoryFromExpertType(expertType) {
   if (expertType === "investor") return "investor";
+  if (expertType === "lender-credit") return "investor";
   if (expertType === "lawyer" || expertType === "banker" || expertType === "advisor") {
     return "advisory";
   }
-  if (expertType === "service-provider") return "service-provider";
+  if (
+    expertType === "service-provider" ||
+    expertType === "strategy-consultant" ||
+    expertType === "commercial-dd" ||
+    expertType === "technical-dd" ||
+    expertType === "engineering-consultant" ||
+    expertType === "regulatory-policy"
+  ) {
+    return "service-provider";
+  }
   return "target";
 }
 

@@ -1,14 +1,14 @@
-import { callIntelligenceApi } from "@/lib/intelligence-api";
+import { callBackendApi } from "@/lib/backend-api";
 
 type Params = Promise<{ id: string }>;
 
 export async function GET(_request: Request, { params }: { params: Params }) {
   const { id } = await params;
   try {
-    const response = await callIntelligenceApi(`/discovery/jobs/${id}`);
+    const response = await callBackendApi(`/discovery/jobs/${id}`);
     if (!response) {
       return Response.json(
-        { error: "Set INTELLIGENCE_API_URL to read research jobs." },
+        { error: "Set BACKEND_API_URL to read research jobs." },
         { status: 503 },
       );
     }

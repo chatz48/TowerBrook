@@ -1,4 +1,4 @@
-import { callIntelligenceApi } from "@/lib/intelligence-api";
+import { callBackendApi } from "@/lib/backend-api";
 import { getTheme } from "@/lib/themes";
 
 export async function POST(request: Request) {
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       deep_discovery: `"${theme.name}" ("private equity" OR "portfolio company") experts`,
     };
 
-    const job = await callIntelligenceApi("/discovery/jobs", {
+    const job = await callBackendApi("/discovery/jobs", {
       method: "POST",
       body: JSON.stringify({
         job_type: selectedJobType,
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     if (!job) {
       return Response.json(
         {
-          error: "Set INTELLIGENCE_API_URL to create live discovery jobs.",
+          error: "Set BACKEND_API_URL to create live discovery jobs.",
           candidates: [],
         },
         { status: 503 },
