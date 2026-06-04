@@ -9,7 +9,7 @@
   "crons": [
     {
       "path": "/jobs/process-next",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }
