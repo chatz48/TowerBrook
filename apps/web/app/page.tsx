@@ -1,23 +1,43 @@
 import Link from "next/link";
-import { THEMES } from "@/lib/themes";
+import { THEME_SPECIALTIES, THEMES } from "@/lib/themes";
 import {
   companiesWithLinks,
   getCompanies,
   getExperts,
   expertsForTheme,
-  themeStats,
 } from "@/lib/data";
-import { rankExperts } from "@/lib/score";
-import { buildTowerBrookLens } from "@/lib/towerbrook";
+import { buildBrief } from "@/lib/brief";
+import {
+  isTowerBrookWorkedWithCompany,
+  isTowerBrookWorkedWithExpert,
+} from "@/lib/towerbrook";
+import type { ThemeId } from "@/lib/types";
 import SearchBox, { type SearchItem } from "./components/SearchBox";
-import TowerBrookFocus from "./components/TowerBrookFocus";
-import { NextActionPanel, WorkflowRail } from "./components/InvestorWorkflow";
-import { ConfidenceBars } from "./components/ui";
+import { Badge } from "./components/ui";
+
+function coverageGaps(themeId: ThemeId): string[] {
+  const covered = new Set(
+    expertsForTheme(themeId).flatMap((expert) => expert.specialties ?? []),
+  );
+  return THEME_SPECIALTIES[themeId].filter((specialty) => !covered.has(specialty));
+}
 
 export default function Home() {
   const experts = getExperts();
   const companies = getCompanies();
-  const towerBrookLens = buildTowerBrookLens(experts, companiesWithLinks());
+  const linkedCompanies = companiesWithLinks();
+  const directCompanies = linkedCompanies.filter(
+    (company) => company.id !== "towerbrook" && isTowerBrookWorkedWithCompany(company),
+  );
+  const directExperts = experts.filter(
+    (expert) =>
+      !(expert.org ?? "").toLowerCase().includes("towerbrook") &&
+      isTowerBrookWorkedWithExpert(expert),
+  );
+  const sourceCount = new Set([
+    ...experts.flatMap((expert) => expert.sources.map((source) => source.url)),
+    ...companies.flatMap((company) => company.sources.map((source) => source.url)),
+  ]).size;
 
   const index: SearchItem[] = [
     ...experts.map((expert) => ({
@@ -41,200 +61,151 @@ export default function Home() {
   return (
     <div className="ee-shell px-3 py-5 sm:px-5">
       <div className="mx-auto max-w-[1540px]">
-        <div className="mb-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_420px]">
-          <section className="ee-panel rounded-lg p-5">
-            <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-              <div>
-                <h1 className="text-[28px] font-semibold tracking-tight">
-                  People-led deal origination
-                </h1>
-                <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
-                  Start with TowerBrook&apos;s three themes, identify the people
-                  most likely to reveal investable companies, prepare the call,
-                  and trace each opportunity back to sourced expert evidence.
-                </p>
-              </div>
-              <div className="min-w-[360px] max-xl:min-w-0">
-                <SearchBox index={index} />
-              </div>
-            </div>
-          </section>
-
-          <section className="ee-panel rounded-lg p-5">
-            <div className="ee-label text-ink">Origination coverage</div>
-            <div className="mt-4 grid grid-cols-3 gap-3">
-              <StatusMetric value={experts.length} label="canonical experts" />
-              <StatusMetric value={companies.length} label="expert-derived companies" />
-              <StatusMetric value={THEMES.length} label="priority themes" />
-            </div>
-            <div className="mt-4 flex gap-2">
-              <Link href="/experts" className="ee-button ee-button-primary flex-1">
-                Find experts
-              </Link>
-              <Link href="/discover" className="ee-button ee-button-secondary flex-1">
-                Review live discovery
-              </Link>
-            </div>
-          </section>
-        </div>
-
-        <section className="mb-5">
-          <TowerBrookFocus lens={towerBrookLens} />
-        </section>
-
-        <section className="ee-panel mb-5 rounded-lg p-5">
-          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <section className="ee-panel rounded-lg p-5 sm:p-6">
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_520px] xl:items-end">
             <div>
-              <h2 className="ee-label text-ink">Investor workflow</h2>
-              <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
-                Use the engine as a short-cycle sourcing desk: pick one theme,
-                call the right people, pull out named companies, and turn the
-                evidence into a call plan or memo.
+              <div className="ee-label text-accent">Origination desk</div>
+              <h1 className="mt-2 max-w-3xl text-[30px] font-semibold tracking-tight">
+                Start with the next investment decision
+              </h1>
+              <p className="mt-3 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
+                Identify the people worth calling, the companies they can
+                unlock, and the evidence or coverage gap that should shape the
+                next diligence step.
               </p>
             </div>
-            <Link href="/companies" className="ee-button ee-button-secondary">
-              View derived targets
-            </Link>
+            <SearchBox index={index} />
           </div>
-          <div className="mt-4">
-            <WorkflowRail
-              steps={[
-                {
-                  label: "Pick a theme",
-                  title: "Start from the taxonomy",
-                  body: "Open one of the three priority themes and see coverage, blank spaces and the first people worth calling.",
-                  href: "/themes/grid-infrastructure",
-                },
-                {
-                  label: "Prioritize calls",
-                  title: "Use the expert pool",
-                  body: "Rank founders, operators, advisors, lawyers, bankers and peer-fund dealmakers by call objective and access path.",
-                  href: "/experts",
-                },
-                {
-                  label: "Derive targets",
-                  title: "Turn people into companies",
-                  body: "Follow expert relationships to companies, boards, advisory clients, service providers and PE-backed comparables.",
-                  href: "/companies",
-                },
-                {
-                  label: "Act on evidence",
-                  title: "Prepare outreach and memos",
-                  body: "Generate sourced call prep, outreach drafts and memo-ready evidence trails for the next diligence step.",
-                  href: "/reports",
-                },
-              ]}
+
+          <div className="mt-6 grid gap-3 border-t border-line pt-5 sm:grid-cols-2 lg:grid-cols-4">
+            <StatusMetric value={experts.length} label="Verified expert profiles" />
+            <StatusMetric value={companies.length} label="Mapped companies" />
+            <StatusMetric value={sourceCount} label="Unique source records" />
+            <StatusMetric
+              value={directExperts.length + directCompanies.length}
+              label="TowerBrook relationship paths"
             />
           </div>
         </section>
 
-        <section className="ee-panel overflow-hidden rounded-lg">
-          <div className="flex items-center justify-between border-b border-line px-4 py-3">
-            <h2 className="ee-label text-ink">Investment themes</h2>
-            <span className="text-[12px] text-ink-faint">Select a command center</span>
+        <section className="mt-5">
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-[18px] font-semibold tracking-tight">Theme command centers</h2>
+              <p className="mt-1 text-[12px] text-ink-soft">
+                Open a theme with a first call, a lead target, and a known research gap.
+              </p>
+            </div>
+            <Link href="/discover" className="ee-button ee-button-secondary">
+              Review discovery queue
+            </Link>
           </div>
-          <div className="overflow-x-auto">
-            <table className="ee-table min-w-[980px]">
-              <thead>
-                <tr>
-                  <th>Theme</th>
-                  <th>Experts</th>
-                  <th>Companies</th>
-                  <th>Top expert</th>
-                  <th>Coverage</th>
-                  <th>Next action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {THEMES.map((theme) => {
-                  const stats = themeStats(theme.id);
-                  const top = rankExperts(expertsForTheme(theme.id))[0];
-                  const coverage = Math.min(1, stats.expertCount / 16);
-                  return (
-                    <tr key={theme.id} className="hover:bg-[#fbfcff]">
-                      <td className="min-w-[360px]">
-                        <Link href={`/themes/${theme.id}`} className="ee-link text-[14px]">
+
+          <div className="grid gap-5 xl:grid-cols-3">
+            {THEMES.map((theme) => {
+              const brief = buildBrief(theme.id);
+              const themeCompanies = companiesWithLinks(theme.id);
+              const firstCall = brief.callList[0];
+              const leadTarget =
+                themeCompanies.find(
+                  (company) =>
+                    company.category === "target" &&
+                    company.ownershipStatus === "independent",
+                ) ?? themeCompanies[0];
+              const gap = coverageGaps(theme.id)[0];
+
+              return (
+                <article
+                  key={theme.id}
+                  className="ee-panel overflow-hidden rounded-lg border-t-2"
+                  style={{ borderTopColor: theme.accent }}
+                >
+                  <div className="border-b border-line p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-[17px] font-semibold tracking-tight">
                           {theme.name}
-                        </Link>
-                        <p className="mt-1 max-w-xl text-[12px] leading-relaxed text-ink-soft">
+                        </h3>
+                        <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">
                           {theme.description}
                         </p>
-                      </td>
-                      <td className="text-[18px] font-semibold tabular-nums">{stats.expertCount}</td>
-                      <td className="text-[18px] font-semibold tabular-nums">{stats.companyCount}</td>
-                      <td>
-                        {top ? (
-                          <Link href={`/experts/${top.expert.id}`} className="ee-link">
-                            {top.expert.name}
-                          </Link>
-                        ) : (
-                          <span className="text-ink-faint">None</span>
-                        )}
-                      </td>
-                      <td>
-                        <div className="font-semibold text-success">
-                          {coverage > 0.75 ? "Strong" : "Developing"}
-                        </div>
-                        <ConfidenceBars value={coverage} />
-                      </td>
-                      <td>
-                        <div className="flex gap-2">
-                          <Link href={`/themes/${theme.id}`} className="ee-button ee-button-primary min-h-8 px-3">
-                            Open
-                          </Link>
-                          <Link href="/reports" className="ee-button ee-button-secondary min-h-8 px-3">
-                            Memo
-                          </Link>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                      </div>
+                      <Badge className="shrink-0 border-line bg-paper text-ink-soft">
+                        {brief.stats.experts} experts
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="divide-y divide-line">
+                    <DecisionRow
+                      label="First call"
+                      title={firstCall?.expert.name ?? "No expert mapped"}
+                      body={firstCall?.whyNow ?? "Build expert coverage for this theme."}
+                      href={firstCall ? `/experts/${firstCall.expert.id}` : "/discover"}
+                    />
+                    <DecisionRow
+                      label="Lead target"
+                      title={leadTarget?.name ?? "No target mapped"}
+                      body={
+                        leadTarget?.whyInteresting ??
+                        leadTarget?.description ??
+                        "Derive a company from expert evidence."
+                      }
+                      href={leadTarget ? `/companies/${leadTarget.id}` : "/companies"}
+                    />
+                    <DecisionRow
+                      label="Coverage gap"
+                      title={gap ?? "No taxonomy gap identified"}
+                      body={
+                        gap
+                          ? "No mapped expert currently covers this specialty."
+                          : "Review source freshness and relationship depth."
+                      }
+                      href="/discover"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3 border-t border-line bg-[#fbfcff] px-5 py-4">
+                    <span className="text-[11px] text-ink-faint">
+                      {brief.stats.targets} independent targets · {brief.stats.exits} acquired comps
+                    </span>
+                    <Link
+                      href={`/themes/${theme.id}`}
+                      className="ee-button ee-button-primary min-h-8 px-3"
+                    >
+                      Open theme
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </section>
 
-        <section className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_420px]">
-          <div className="grid gap-5 md:grid-cols-3">
-          {[
-            ["Expert Origination", "Start with founders, ex-founders and PE deal participants who can reveal new companies.", "/experts"],
-            ["Research Copilot", "Ask for a ranked call sequence, diligence questions, risks and companies to investigate.", "/ask"],
-            ["Reports / Memo Builder", "Turn sourced expert and company evidence into call plans, briefs and IC-ready appendices.", "/reports"],
-          ].map(([title, body, href]) => (
-            <Link key={title} href={href} className="ee-panel rounded-lg p-5 hover:border-line-strong">
-              <div className="ee-label text-ink">{title}</div>
-              <p className="mt-3 text-[13px] leading-relaxed text-ink-soft">{body}</p>
-              <span className="mt-4 inline-flex text-[13px] font-semibold text-accent">
-                Open →
-              </span>
-            </Link>
-          ))}
-          </div>
-          <NextActionPanel
-            title="Best first hour"
-            description="A compact path for a busy deal professional opening the product cold."
-            actions={[
-              {
-                title: "Open Grid Infrastructure",
-                body: "Highest-density path to TowerBrook-linked portfolio operators, advisors and connection-service targets.",
-                href: "/themes/grid-infrastructure",
-                action: "Start",
-                tone: "primary",
-              },
-              {
-                title: "Call the first five experts",
-                body: "Use the theme call list to validate bottlenecks, budgets and names of companies to map next.",
-                href: "/experts",
-                action: "Rank",
-              },
-              {
-                title: "Review new company candidates",
-                body: "Scan companies reverse-derived from named expert and PE-deal evidence before building a memo.",
-                href: "/companies",
-                action: "Review",
-              },
-            ]}
+        <section className="mt-5 grid gap-5 lg:grid-cols-2">
+          <RelationshipPanel
+            title="Existing company paths"
+            description="Portfolio companies and transaction advisors already connected to TowerBrook."
+            items={directCompanies.slice(0, 6).map((company) => ({
+              name: company.name,
+              detail:
+                company.whyInteresting ??
+                company.description,
+              href: `/companies/${company.id}`,
+            }))}
+            actionHref="/companies"
+            actionLabel="Review all companies"
+          />
+          <RelationshipPanel
+            title="Existing people paths"
+            description="TowerBrook team members, portfolio operators, and transaction advisors in the graph."
+            items={directExperts.slice(0, 6).map((expert) => ({
+              name: expert.name,
+              detail: expert.headline,
+              href: `/experts/${expert.id}`,
+            }))}
+            actionHref="/experts"
+            actionLabel="Review all experts"
           />
         </section>
       </div>
@@ -244,9 +215,73 @@ export default function Home() {
 
 function StatusMetric({ value, label }: { value: number; label: string }) {
   return (
-    <div className="rounded-md border border-line bg-paper p-3">
+    <div className="rounded-md border border-line bg-[#fbfcff] px-4 py-3">
       <div className="text-[22px] font-semibold tabular-nums">{value}</div>
       <div className="mt-1 text-[11px] text-ink-faint">{label}</div>
     </div>
+  );
+}
+
+function DecisionRow({
+  label,
+  title,
+  body,
+  href,
+}: {
+  label: string;
+  title: string;
+  body: string;
+  href: string;
+}) {
+  return (
+    <Link href={href} className="block px-5 py-4 hover:bg-[#fbfcff]">
+      <div className="ee-label text-ink-faint">{label}</div>
+      <div className="mt-1 text-[13px] font-semibold text-ink">{title}</div>
+      <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-ink-soft">
+        {body}
+      </p>
+    </Link>
+  );
+}
+
+function RelationshipPanel({
+  title,
+  description,
+  items,
+  actionHref,
+  actionLabel,
+}: {
+  title: string;
+  description: string;
+  items: { name: string; detail: string; href: string }[];
+  actionHref: string;
+  actionLabel: string;
+}) {
+  return (
+    <section className="ee-panel overflow-hidden rounded-lg">
+      <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
+        <div>
+          <h2 className="ee-label text-ink">{title}</h2>
+          <p className="mt-1 text-[11px] text-ink-faint">{description}</p>
+        </div>
+        <Link href={actionHref} className="shrink-0 text-[12px] font-semibold text-accent">
+          {actionLabel}
+        </Link>
+      </div>
+      <div className="grid sm:grid-cols-2">
+        {items.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="border-b border-line px-5 py-4 odd:sm:border-r hover:bg-[#fbfcff]"
+          >
+            <div className="text-[13px] font-semibold text-ink">{item.name}</div>
+            <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-ink-soft">
+              {item.detail}
+            </p>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
