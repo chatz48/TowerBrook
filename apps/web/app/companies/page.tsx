@@ -10,9 +10,12 @@ import {
   OWNERSHIP_STYLE,
 } from "@/lib/labels";
 import { Badge, ConfidenceBars } from "@/app/components/ui";
+import { getThemeFocus } from "@/lib/theme-focus-server";
+import { matchesThemeFocus } from "@/lib/theme-focus";
 
 export default async function CompaniesPage() {
-  const companies = companiesWithLinks();
+  const themeFocus = await getThemeFocus();
+  const companies = companiesWithLinks(themeFocus === "all" ? undefined : themeFocus);
   const actionableTargets = companies
     .filter(
       (company) =>
@@ -20,7 +23,9 @@ export default async function CompaniesPage() {
         company.ownershipStatus === "independent",
     )
     .slice(0, 12);
-  const derivedCandidates = getDerivedCompanyCandidates();
+  const derivedCandidates = getDerivedCompanyCandidates().filter((company) =>
+    matchesThemeFocus(company.themes, themeFocus),
+  );
   const dealCounts = await dealCoverage();
 
   return (

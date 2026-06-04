@@ -4,8 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import type { AskResponse, CopilotFilters, SourceRecord } from "./types";
-
-const DEFAULT_QUESTION = "Who should I call first for grid interconnection bottlenecks?";
+import {
+  isThemeFocus,
+  publishThemeFocus,
+  type ThemeFocus,
+} from "@/lib/theme-focus";
 
 const OBJECTIVES = [
   { label: "Find experts", value: "Find experts" },
@@ -37,17 +40,34 @@ const PROMPTS = [
   "What are investors saying?",
 ];
 
-const INITIAL_FILTERS: CopilotFilters = {
-  objective: "Find experts",
-  theme: "grid-infrastructure",
-  geography: "Europe / North America",
-  archetypes: ["operator", "advisor", "banker", "ex-founder"],
-  sourceScope: "Premium sourced directory",
-};
+function makeInitialFilters(theme: ThemeFocus): CopilotFilters {
+  return {
+    objective: "Find experts",
+    theme,
+    geography: "Europe / North America",
+    archetypes: ["operator", "advisor", "banker", "ex-founder"],
+    sourceScope: "Premium sourced directory",
+  };
+}
 
-export default function ResearchWorkspace() {
-  const [question, setQuestion] = useState(DEFAULT_QUESTION);
-  const [filters, setFilters] = useState<CopilotFilters>(INITIAL_FILTERS);
+function defaultQuestion(theme: ThemeFocus) {
+  if (theme === "clean-energy-advisory") {
+    return "Who should I call first to assess clean-energy advisory and development opportunities?";
+  }
+  if (theme === "grid-infrastructure") {
+    return "Who should I call first for grid interconnection bottlenecks?";
+  }
+  if (theme === "smart-water") {
+    return "Who should I call first to assess smart-water infrastructure and analytics opportunities?";
+  }
+  return "Who should I call first across the three investment themes?";
+}
+
+export default function ResearchWorkspace({ initialTheme }: { initialTheme: ThemeFocus }) {
+  const startingFilters = useMemo(() => makeInitialFilters(initialTheme), [initialTheme]);
+  const startingQuestion = useMemo(() => defaultQuestion(initialTheme), [initialTheme]);
+  const [question, setQuestion] = useState(startingQuestion);
+  const [filters, setFilters] = useState<CopilotFilters>(startingFilters);
   const [answer, setAnswer] = useState<AskResponse | null>(null);
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -84,7 +104,7 @@ export default function ResearchWorkspace() {
         const res = await fetch("/api/ask", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ question: DEFAULT_QUESTION, filters: INITIAL_FILTERS }),
+          body: JSON.stringify({ question: startingQuestion, filters: startingFilters }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error ?? "Request failed");
@@ -105,7 +125,7 @@ export default function ResearchWorkspace() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [startingFilters, startingQuestion]);
 
   const selectedSource = useMemo(() => {
     if (!answer?.sources_used.length) return null;
@@ -120,6 +140,7 @@ export default function ResearchWorkspace() {
       <div className="grid md:grid-cols-[220px_minmax(0,1fr)] 2xl:grid-cols-[260px_minmax(0,1fr)_320px]">
         <SessionRail
           filters={filters}
+          resetFilters={startingFilters}
           onFiltersChange={setFilters}
           onRun={(nextFilters) => submit(question, nextFilters)}
         />
@@ -190,10 +211,12 @@ export default function ResearchWorkspace() {
 
 function SessionRail({
   filters,
+  resetFilters,
   onFiltersChange,
   onRun,
 }: {
   filters: CopilotFilters;
+  resetFilters: CopilotFilters;
   onFiltersChange: (filters: CopilotFilters) => void;
   onRun: (filters: CopilotFilters) => void;
 }) {
@@ -239,8 +262,9 @@ function SessionRail({
         action={
           <button
             onClick={() => {
-              onFiltersChange(INITIAL_FILTERS);
-              onRun(INITIAL_FILTERS);
+              onFiltersChange(resetFilters);
+              onRun(resetFilters);
+              if (isThemeFocus(resetFilters.theme)) publishThemeFocus(resetFilters.theme);
             }}
             className="text-[11px] font-medium text-[#0b5bd3]"
           >
@@ -254,6 +278,7 @@ function SessionRail({
             onChange={(event) => {
               const next = patch({ theme: event.target.value });
               onRun(next);
+              if (isThemeFocus(event.target.value)) publishThemeFocus(event.target.value);
             }}
             className="w-full rounded border border-[#d8dee8] bg-white px-3 py-2 text-xs outline-none"
           >

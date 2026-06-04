@@ -2,7 +2,6 @@ import Link from "next/link";
 import { getExperts, getCompanies } from "@/lib/data";
 import {
   getAdvisorExpertGaps,
-  getExpertDiscovery,
   getExpertDiscoveryCandidates,
 } from "@/lib/expert-discovery";
 import { getOriginationResearchJobs } from "@/lib/origination";
@@ -11,17 +10,31 @@ import { getTargetedExpertExpansion } from "@/lib/targeted-expansion";
 import { towerBrookExpertScore } from "@/lib/towerbrook";
 import { EXPERT_TYPE_LABEL } from "@/lib/labels";
 import { Badge } from "@/app/components/ui";
+import { getThemeFocus } from "@/lib/theme-focus-server";
+import { matchesThemeFocus } from "@/lib/theme-focus";
 
-export default function ExpertsPage() {
+export default async function ExpertsPage() {
+  const themeFocus = await getThemeFocus();
   const companies = getCompanies();
   const companyNames = Object.fromEntries(companies.map((company) => [company.id, company.name]));
   const companiesById = new Map(companies.map((company) => [company.id, company]));
-  const ranked = rankExperts(getExperts());
-  const discovery = getExpertDiscovery();
-  const expertCandidates = getExpertDiscoveryCandidates();
-  const advisorGaps = getAdvisorExpertGaps();
+  const ranked = rankExperts(
+    getExperts().filter((expert) => matchesThemeFocus(expert.themes, themeFocus)),
+  );
+  const expertCandidates = getExpertDiscoveryCandidates().filter((candidate) =>
+    matchesThemeFocus(candidate.themes, themeFocus),
+  );
+  const advisorGaps = getAdvisorExpertGaps().filter((gap) =>
+    matchesThemeFocus(gap.themes, themeFocus),
+  );
   const origination = getOriginationResearchJobs();
   const targetedExpansion = getTargetedExpertExpansion();
+  const targetedCandidates = targetedExpansion.expert_candidates.filter((candidate) =>
+    matchesThemeFocus(candidate.themes, themeFocus),
+  );
+  const founderOrigination = origination.queues.founder_origination.filter(
+    (job) => themeFocus === "all" || job.theme_id === themeFocus,
+  );
 
   return (
     <div className="ee-shell px-3 py-5 sm:px-5">
@@ -140,7 +153,7 @@ export default function ExpertsPage() {
               </p>
             </div>
             <div className="grid min-w-[300px] grid-cols-3 gap-2 text-right">
-              <DiscoveryMetric label="Candidates" value={targetedExpansion.coverage.expert_candidates} />
+              <DiscoveryMetric label="Candidates" value={targetedCandidates.length} />
               <DiscoveryMetric label="PE deals" value={targetedExpansion.coverage.recent_pe_deals_covered} />
               <DiscoveryMetric label="Publications" value={targetedExpansion.coverage.specialist_publications} />
             </div>
@@ -159,7 +172,7 @@ export default function ExpertsPage() {
                 </tr>
               </thead>
               <tbody>
-                {targetedExpansion.expert_candidates.slice(0, 24).map((candidate) => (
+                {targetedCandidates.slice(0, 24).map((candidate) => (
                   <tr key={candidate.candidate_id} className="hover:bg-[#fbfcff]">
                     <td className="min-w-[190px]">
                       <div className="font-semibold">{candidate.name}</div>
@@ -220,7 +233,7 @@ export default function ExpertsPage() {
                 </tr>
               </thead>
               <tbody>
-                {origination.queues.founder_origination.slice(0, 30).map((job) => (
+                {founderOrigination.slice(0, 30).map((job) => (
                   <tr key={job.external_job_id} className="hover:bg-[#fbfcff]">
                     <td className="font-semibold">{job.metadata.target_name}</td>
                     <td className="max-w-[260px] text-[11px] text-ink-soft">
@@ -326,7 +339,7 @@ export default function ExpertsPage() {
               </p>
             </div>
             <span className="text-[12px] text-ink-faint">
-              {discovery.coverage.advisor_gaps_with_no_named_expert} with no named expert
+              {advisorGaps.filter((gap) => gap.coverage_status === "no-named-expert").length} with no named expert
             </span>
           </div>
           <div className="overflow-x-auto">

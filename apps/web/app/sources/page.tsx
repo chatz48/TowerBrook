@@ -2,8 +2,13 @@ import sourceRegister from "@/data/source-register.json";
 import candidates from "@/data/candidates.json";
 import deals from "@/data/deals.json";
 import { ConfidenceBars } from "@/app/components/ui";
+import { getThemeFocus } from "@/lib/theme-focus-server";
 
-export default function SourcesPage() {
+export default async function SourcesPage() {
+  const themeFocus = await getThemeFocus();
+  const visibleSources = sourceRegister.sources.filter(
+    (source) => themeFocus === "all" || source.theme === themeFocus || source.theme === "all",
+  );
   const candidateBySource = new Map(
     candidates.candidates.map((candidate) => [candidate.source.source_id, candidate]),
   );
@@ -42,7 +47,7 @@ export default function SourcesPage() {
         <section className="ee-panel overflow-hidden rounded-lg">
           <div className="flex items-center justify-between border-b border-line px-4 py-3">
             <h2 className="ee-label text-ink">
-              Registered sources ({sourceRegister.sources.length})
+              Registered sources ({visibleSources.length})
             </h2>
             <span className="text-[12px] text-ink-faint">
               Research jobs: /discover
@@ -65,7 +70,7 @@ export default function SourcesPage() {
                 </tr>
               </thead>
               <tbody>
-                {sourceRegister.sources.map((source) => {
+                {visibleSources.map((source) => {
                   const candidate = candidateBySource.get(source.source_id);
                   return (
                     <tr key={source.source_id} className="hover:bg-[#fbfcff]">

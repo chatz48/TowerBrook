@@ -8,8 +8,11 @@ export async function POST(request: Request) {
       query?: string;
       jobType?: string;
     };
-    const theme = getTheme(themeId);
-    if (!theme) return Response.json({ error: "Unknown theme" }, { status: 400 });
+    const theme = themeId === "all" ? undefined : getTheme(themeId);
+    if (themeId !== "all" && !theme) {
+      return Response.json({ error: "Unknown theme" }, { status: 400 });
+    }
+    const themeName = theme?.name ?? "all three investment themes";
     const objectives: Record<string, string> = {
       deep_discovery:
         "Find named experts and company opportunities from relevant private-equity activity.",
@@ -22,17 +25,17 @@ export async function POST(request: Request) {
     };
     const selectedJobType = jobType && objectives[jobType] ? jobType : "deep_discovery";
     const defaultQueries: Record<string, string> = {
-      founder_origination: `"${theme.name}" (founder OR ex-founder) (investment OR acquisition) ("new company" OR portfolio OR board)`,
-      advisor_expert_gap: `"${theme.name}" ("financial advisor" OR "legal counsel" OR diligence) (partner OR managing director)`,
-      identity_resolution: `"${theme.name}" expert current role LinkedIn`,
-      deep_discovery: `"${theme.name}" ("private equity" OR "portfolio company") experts`,
+      founder_origination: `"${themeName}" (founder OR ex-founder) (investment OR acquisition) ("new company" OR portfolio OR board)`,
+      advisor_expert_gap: `"${themeName}" ("financial advisor" OR "legal counsel" OR diligence) (partner OR managing director)`,
+      identity_resolution: `"${themeName}" expert current role LinkedIn`,
+      deep_discovery: `"${themeName}" ("private equity" OR "portfolio company") experts`,
     };
 
     const job = await callBackendApi("/discovery/jobs", {
       method: "POST",
       body: JSON.stringify({
         job_type: selectedJobType,
-        theme_id: theme.id,
+        theme_id: theme?.id,
         query: query || defaultQueries[selectedJobType],
         metadata: {
           source: "web-discover",
