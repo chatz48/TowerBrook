@@ -131,8 +131,8 @@ called daily at midnight UTC by the Vercel Hobby-compatible cron schedule. Set
 `CRON_SECRET`; Vercel sends it as the scheduled request's bearer token.
 
 The FastAPI deployment runs as one Vercel Function, so each job must complete
-within the configured 300-second function duration. Supabase holds durable job
-and graph state; do not rely on in-memory fallback state in production.
+within the function duration allowed by the Vercel plan. Supabase holds durable
+job and graph state; do not rely on in-memory fallback state in production.
 
 ## AI Usage
 
