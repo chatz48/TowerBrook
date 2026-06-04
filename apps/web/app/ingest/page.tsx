@@ -178,18 +178,22 @@ export default function IngestPage() {
 
         {!result ? (
           <section className="ee-panel rounded-lg p-5">
-            <div className="ee-label text-ink">Expected output</div>
-            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <div className="ee-label text-ink">Ready for source evidence</div>
+            <h2 className="mt-2 text-[18px] font-semibold">Extract reviewable facts, not a finished conclusion</h2>
+            <p className="mt-2 max-w-3xl text-[12px] leading-relaxed text-ink-soft">
+              Submit a source in the left panel. The result will show extracted
+              people, companies, relationships, deal facts, and the evidence
+              that still requires analyst review before it reaches the graph.
+            </p>
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
               {[
-                "Deal scorecard",
-                "Extracted parties",
-                "Advisor and counsel checks",
-                "Missing facts checklist",
-                "Follow-up search queries",
-                "Reviewable relationship candidates",
-              ].map((item) => (
-                <div key={item} className="rounded-md border border-line bg-paper p-4 text-[13px] font-semibold">
-                  {item}
+                ["Verify identities", "Confirm named people and their current roles."],
+                ["Check relationships", "Ensure each person-company or advisor-deal edge is supported."],
+                ["Resolve gaps", "Review missing facts and follow-up searches before persistence."],
+              ].map(([title, body]) => (
+                <div key={title} className="rounded-md border border-line bg-paper p-4">
+                  <div className="text-[13px] font-semibold">{title}</div>
+                  <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">{body}</p>
                 </div>
               ))}
             </div>

@@ -110,10 +110,10 @@ export default async function CompaniesPage() {
           <div className="flex items-center justify-between border-b border-line px-4 py-3">
             <div>
               <h2 className="ee-label text-ink">
-                PE companies reverse-derived from experts ({derivedCandidates.length})
+                Research candidates awaiting review ({derivedCandidates.length})
               </h2>
               <p className="mt-1 text-[11px] text-ink-faint">
-                Candidate companies ranked only after aggregating named expert and PE-deal connections.
+                Non-canonical companies surfaced from named expert and PE-deal connections.
               </p>
             </div>
             <Link href="/experts" className="ee-link text-[12px]">
@@ -124,7 +124,6 @@ export default async function CompaniesPage() {
             <table className="ee-table min-w-[1120px]">
               <thead>
                 <tr>
-                  <th>Priority</th>
                   <th>Company candidate</th>
                   <th>Category</th>
                   <th>Ownership</th>
@@ -136,7 +135,6 @@ export default async function CompaniesPage() {
               <tbody>
                 {derivedCandidates.slice(0, 40).map((company) => (
                   <tr key={company.candidate_id} className="hover:bg-[#fbfcff]">
-                    <td className="font-semibold tabular-nums">{company.scores.research_priority}</td>
                     <td className="min-w-[220px]">
                       {company.canonical_match.company_id ? (
                         <Link href={`/companies/${company.canonical_match.company_id}`} className="ee-link">
@@ -171,8 +169,8 @@ export default async function CompaniesPage() {
 
         <section className="ee-panel overflow-hidden rounded-lg">
           <div className="flex items-center justify-between border-b border-line px-4 py-3">
-            <h2 className="ee-label text-ink">Derived companies ({companies.length})</h2>
-            <span className="text-[12px] text-ink-faint">Sorted by expert density</span>
+            <h2 className="ee-label text-ink">Company directory ({companies.length})</h2>
+            <span className="text-[12px] text-ink-faint">Canonical mapped companies</span>
           </div>
           <div className="overflow-x-auto">
             <table className="ee-table min-w-[1120px]">
@@ -183,8 +181,8 @@ export default async function CompaniesPage() {
                   <th>Ownership</th>
                   <th>Expert links</th>
                   <th>Deals</th>
-                  <th>TowerBrook</th>
-                  <th>Confidence</th>
+                  <th>Relationship path</th>
+                  <th>Record confidence</th>
                   <th>Investment angle</th>
                   <th>Linked experts</th>
                   <th>Sources</th>
@@ -222,21 +220,13 @@ export default async function CompaniesPage() {
                         {dealCounts.get(company.id) ?? 0}
                       </td>
                       <td>
-                        <div
-                          className={`font-semibold tabular-nums ${
-                            towerBrook.isDirect ? "text-success" : "text-ink"
-                          }`}
-                        >
-                          {towerBrook.score}
-                        </div>
-                        <div className="mt-0.5 text-[11px] text-ink-faint">
-                          {towerBrook.label}
-                        </div>
-                        <ConfidenceBars value={towerBrook.score / 100} />
+                        <span className={towerBrook.isDirect ? "text-success" : "text-ink-faint"}>
+                          {towerBrook.isDirect ? towerBrook.label : "No internal path mapped"}
+                        </span>
                       </td>
                       <td>
                         <div className="font-semibold tabular-nums">
-                          {(company.confidence * 5).toFixed(1)}
+                          {Math.round(company.confidence * 100)}%
                         </div>
                         <ConfidenceBars value={company.confidence} />
                       </td>

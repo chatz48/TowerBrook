@@ -18,16 +18,11 @@ import {
   BackLink,
   Chip,
   Confidence,
-  ConfidenceBars,
   NewsFeed,
   SourceLinks,
   ThemeTag,
 } from "@/app/components/ui";
-import {
-  CallPrepChecklist,
-  NextActionPanel,
-  WorkflowRail,
-} from "@/app/components/InvestorWorkflow";
+import { CallPrepChecklist } from "@/app/components/InvestorWorkflow";
 
 export function generateStaticParams() {
   return getCompanies().map((c) => ({ id: c.id }));
@@ -82,66 +77,50 @@ export default async function CompanyPage({
             </div>
             <div className="grid min-w-[420px] grid-cols-2 overflow-hidden rounded-lg border border-line max-lg:min-w-0">
               <Fact label="Expert links" value={String(company.expertCount)} />
-              <Fact label="TowerBrook" value={`${towerBrook.score}`} />
-              <Fact label="Confidence" value={`${(company.confidence * 100).toFixed(0)}%`} />
+              <Fact label="Source records" value={String(company.sources.length)} />
+              <Fact label="Ownership" value={company.ownershipStatus ? OWNERSHIP_LABEL[company.ownershipStatus] : "Verify"} />
               <Fact label="Scale" value={company.sizeBand ?? company.funding ?? "Not captured"} />
             </div>
           </div>
         </header>
 
-        <section className="ee-panel mt-5 rounded-lg p-5">
-          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-            <div>
-              <h2 className="ee-label text-ink">Company diligence objective</h2>
-              <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
-                Decide whether this company is a target, comparable, advisor or
-                introduction path by following the named expert evidence first.
-              </p>
-            </div>
-            <Link href="/reports" className="ee-button ee-button-secondary">
-              Add to company memo
-            </Link>
-          </div>
-          <div className="mt-4">
-            <WorkflowRail
-              steps={[
-                {
-                  label: "Evidence",
-                  title: company.linkedExperts[0]?.expert.name ?? "Named expert proof",
-                  body: company.linkedExperts[0]
-                    ? `Start with ${company.linkedExperts[0].expert.name}'s ${RELATIONSHIP_LABEL[company.linkedExperts[0].relationship].toLowerCase()} connection.`
-                    : "Find the named people who can verify the opportunity.",
-                  href: company.linkedExperts[0]
-                    ? `/experts/${company.linkedExperts[0].expert.id}`
-                    : "/experts",
-                },
-                {
-                  label: "Actionability",
-                  title: company.ownershipStatus
-                    ? OWNERSHIP_LABEL[company.ownershipStatus]
-                    : "Ownership to verify",
-                  body: company.owner
-                    ? `Confirm current ownership and decision-maker access at ${company.owner}.`
-                    : "Confirm whether the company is independent, sponsor-owned, acquired or public.",
-                },
-                {
-                  label: "Call ask",
-                  title: "Validate buyer pull",
-                  body: "Ask connected experts about customer urgency, budget ownership, margins and likely acquirers.",
-                  href: "/reports",
-                },
-              ]}
-            />
-          </div>
+        <section className="mt-5 grid gap-5 md:grid-cols-3">
+          <DecisionFact
+            label="Investment case"
+            title={company.category === "target" ? "Potential target" : COMPANY_CATEGORY_LABEL[company.category]}
+            body={company.whyInteresting ?? company.description}
+          />
+          <DecisionFact
+            label="First validation call"
+            title={company.linkedExperts[0]?.expert.name ?? "No named expert mapped"}
+            body={
+              company.linkedExperts[0]
+                ? `${RELATIONSHIP_LABEL[company.linkedExperts[0].relationship]} ${company.name}.`
+                : "Find a named person before advancing the company."
+            }
+            href={company.linkedExperts[0] ? `/experts/${company.linkedExperts[0].expert.id}` : "/discover"}
+          />
+          <DecisionFact
+            label="Most important gap"
+            title={!company.ownershipStatus ? "Ownership" : !company.sizeBand && !company.funding ? "Scale and funding" : "Commercial diligence"}
+            body={
+              !company.ownershipStatus
+                ? "Confirm whether the company is independent, sponsor-owned, acquired, or public."
+                : !company.sizeBand && !company.funding
+                  ? "Establish revenue scale, funding history, and ownership before prioritising outreach."
+                  : "Validate customer urgency, budget ownership, margins, and likely acquirers."
+            }
+            href="/discover"
+          />
         </section>
 
         <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
           <main className="space-y-5">
             {company.whyInteresting ? (
               <section className="ee-panel rounded-lg p-5">
-                <div className="ee-label text-ink">Why it surfaced</div>
+                <div className="ee-label text-ink">Investment relevance</div>
                 <p className="mt-3 text-[13px] leading-relaxed text-ink-soft">
-                  {company.whyInteresting} <a href="#sources" className="ee-link">[1]</a>
+                  {company.whyInteresting}
                 </p>
               </section>
             ) : null}
@@ -157,7 +136,7 @@ export default async function CompanyPage({
                     <th>Archetype</th>
                     <th>Relationship</th>
                     <th>Evidence</th>
-                    <th>Confidence</th>
+                    <th>Evidence coverage</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -180,9 +159,8 @@ export default async function CompanyPage({
                       <td className="max-w-[340px] text-[12px] text-ink-soft">
                         {link.note ?? link.expert.whyRelevant}
                       </td>
-                      <td>
-                        <span className="text-success">High</span>
-                        <div className="mt-1"><ConfidenceBars value={link.expert.confidence} /></div>
+                      <td className="text-[11px] text-ink-soft">
+                        {link.expert.sources.length} expert source{link.expert.sources.length === 1 ? "" : "s"}
                       </td>
                     </tr>
                   ))}
@@ -235,12 +213,7 @@ export default async function CompanyPage({
                           <td>{role.replaceAll("-", " ")}</td>
                           <td>{DEAL_TYPE_LABEL[deal.dealType]}</td>
                           <td>{dealDate(deal) ?? "Missing"}</td>
-                          <td>
-                            <div className="font-semibold tabular-nums">
-                              {Math.round(deal.completionScore * 100)}%
-                            </div>
-                            <ConfidenceBars value={deal.completionScore} />
-                          </td>
+                          <td>{deal.requiredFactsFound}/{deal.requiredFactsTotal} required facts</td>
                         </tr>
                       );
                     })}
@@ -299,36 +272,27 @@ export default async function CompanyPage({
 
           <aside className="space-y-5">
             <section className="ee-panel rounded-lg p-5">
-              <div className="ee-label text-ink">TowerBrook score</div>
-              <div className="mt-4 rounded-lg border border-line bg-paper p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-[12px] font-semibold">{towerBrook.label}</span>
-                  <span className="text-[22px] font-semibold tabular-nums">
-                    {towerBrook.score}
-                  </span>
-                </div>
-                <div className="mt-2"><ConfidenceBars value={towerBrook.score / 100} /></div>
-                <ul className="mt-3 space-y-1 text-[12px] leading-relaxed text-ink-soft">
-                  {(towerBrook.reasons.length
-                    ? towerBrook.reasons
-                    : ["Theme-adjacent infrastructure fit"]
-                  ).map((reason) => (
-                    <li key={reason}>{reason}</li>
-                  ))}
-                </ul>
+              <div className="ee-label text-ink">Relationship path</div>
+              <div className="mt-3 text-[14px] font-semibold">
+                {towerBrook.isDirect ? towerBrook.label : "No internal path mapped"}
               </div>
+              <ul className="mt-3 space-y-2 text-[12px] leading-relaxed text-ink-soft">
+                {(towerBrook.isDirect && towerBrook.reasons.length
+                  ? towerBrook.reasons
+                  : ["Use the named experts below to validate the company and request an introduction."]
+                ).map((reason) => <li key={reason}>{reason}</li>)}
+              </ul>
             </section>
 
             <section className="ee-panel rounded-lg p-5">
               <div className="ee-label text-ink">Company evidence</div>
               <div className="mt-4 rounded-lg border border-line bg-paper p-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-[12px] font-semibold">Confidence</span>
+                  <span className="text-[12px] font-semibold">Record confidence</span>
                   <span className="text-[18px] font-semibold tabular-nums">
-                    {(company.confidence * 5).toFixed(1)} / 5
+                    {Math.round(company.confidence * 100)}%
                   </span>
                 </div>
-                <div className="mt-2"><ConfidenceBars value={company.confidence} /></div>
                 <div className="mt-3"><Confidence value={company.confidence} /></div>
               </div>
               {company.website ? (
@@ -346,36 +310,6 @@ export default async function CompanyPage({
               </Link>
             </section>
 
-            <NextActionPanel
-              title="Next best actions"
-              description="Keep the company workflow tied to named people and source evidence."
-              actions={[
-                {
-                  title: "Call strongest linked expert",
-                  body: company.linkedExperts[0]
-                    ? `Use ${company.linkedExperts[0].expert.name} to validate the company and ask for comparables.`
-                    : "Find a named expert before advancing the company.",
-                  href: company.linkedExperts[0]
-                    ? `/experts/${company.linkedExperts[0].expert.id}`
-                    : "/experts",
-                  action: "Prep",
-                  tone: "primary",
-                },
-                {
-                  title: "Open graph path",
-                  body: "Inspect the people-company route that caused the company to surface.",
-                  href: "/graph",
-                  action: "Graph",
-                },
-                {
-                  title: "Build company memo",
-                  body: "Use the profile only after evidence, ownership and expert path are clear.",
-                  href: "/reports",
-                  action: "Memo",
-                },
-              ]}
-            />
-
             <section className="ee-panel rounded-lg p-5" id="sources">
               <div className="mb-3 ee-label text-ink">Sources</div>
               <SourceLinks sources={company.sources} />
@@ -384,6 +318,33 @@ export default async function CompanyPage({
         </div>
       </div>
     </div>
+  );
+}
+
+function DecisionFact({
+  label,
+  title,
+  body,
+  href,
+}: {
+  label: string;
+  title: string;
+  body: string;
+  href?: string;
+}) {
+  const content = (
+    <>
+      <div className="ee-label text-ink-faint">{label}</div>
+      <div className="mt-2 text-[14px] font-semibold text-ink">{title}</div>
+      <p className="mt-2 line-clamp-3 text-[12px] leading-relaxed text-ink-soft">{body}</p>
+      {href ? <span className="mt-3 inline-flex text-[12px] font-semibold text-accent">Open →</span> : null}
+    </>
+  );
+
+  return href ? (
+    <Link href={href} className="ee-panel rounded-lg p-5 hover:border-line-strong">{content}</Link>
+  ) : (
+    <section className="ee-panel rounded-lg p-5">{content}</section>
   );
 }
 

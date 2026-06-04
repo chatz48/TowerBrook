@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import Link from "next/link";
 import type { AskResponse, CopilotFilters, SourceRecord } from "./types";
 
 const DEFAULT_QUESTION = "Who should I call first for grid interconnection bottlenecks?";
@@ -27,13 +28,6 @@ const ARCHETYPES = [
   { label: "Banker", value: "banker" },
   { label: "Investor", value: "investor" },
   { label: "Lawyer", value: "lawyer" },
-];
-
-const RECENT_SESSIONS = [
-  "Grid interconnection bottlenecks",
-  "Transmission permitting timelines",
-  "Utility capex outlook",
-  "Water AMI consolidation",
 ];
 
 const PROMPTS = [
@@ -123,7 +117,7 @@ export default function ResearchWorkspace() {
 
   return (
     <div className="min-h-[calc(100vh-3.5rem)] bg-[#f7f8fb] text-[#111827]">
-      <div className="grid xl:grid-cols-[292px_minmax(0,1fr)_350px]">
+      <div className="grid lg:grid-cols-[250px_minmax(0,1fr)] 2xl:grid-cols-[260px_minmax(0,1fr)_320px]">
         <SessionRail
           filters={filters}
           onFiltersChange={setFilters}
@@ -138,14 +132,6 @@ export default function ResearchWorkspace() {
                 <p className="mt-1 text-xs text-[#667085]">
                   Structured answers over the sourced expert and company graph.
                 </p>
-              </div>
-              <div className="flex gap-2">
-                <button className="rounded border border-[#d8dee8] bg-white px-3 py-2 text-xs font-medium hover:bg-[#f6f8fb]">
-                  Export answer
-                </button>
-                <button className="rounded border border-[#d8dee8] bg-white px-2.5 py-2 text-xs font-semibold hover:bg-[#f6f8fb]">
-                  ...
-                </button>
               </div>
             </div>
 
@@ -225,7 +211,7 @@ function SessionRail({
   }
 
   return (
-    <aside className="space-y-7 border-b border-[#dfe3eb] bg-[#fbfcfe] p-4 xl:min-h-[calc(100vh-6.5rem)] xl:border-b-0">
+    <aside className="space-y-7 border-b border-[#dfe3eb] bg-[#fbfcfe] p-4 lg:min-h-[calc(100vh-6.5rem)] lg:border-b-0">
       <RailSection title="Session objective">
         <div className="space-y-2">
           {OBJECTIVES.map((objective) => (
@@ -325,24 +311,15 @@ function SessionRail({
         </ControlLabel>
       </RailSection>
 
-      <RailSection title="Recent sessions">
-        <div className="space-y-2">
-          {RECENT_SESSIONS.map((session, index) => (
-            <button
-              key={session}
-              onClick={() => onRun(filters)}
-              className={`flex w-full items-center justify-between rounded border px-3 py-2 text-left text-xs ${
-                index === 0
-                  ? "border-[#0b5bd3] bg-white text-[#0b5bd3]"
-                  : "border-[#e0e5ed] bg-white text-[#344054]"
-              }`}
-            >
-              <span>{session}</span>
-              <span className="text-[10px] text-[#667085]">{index === 0 ? "Today" : `May ${12 - index}`}</span>
-            </button>
-          ))}
+      <section className="rounded border border-[#dfe3eb] bg-white p-3">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#344054]">
+          Evidence standard
         </div>
-      </RailSection>
+        <p className="mt-2 text-[11px] leading-relaxed text-[#667085]">
+          Use Copilot to prioritize calls and identify gaps. Open the underlying
+          profiles and sources before outreach or circulation.
+        </p>
+      </section>
     </aside>
   );
 }
@@ -365,7 +342,7 @@ function StructuredAnswer({
             <span className="font-semibold">Expert Engine</span>
             <span className="text-[#667085]">{formatTime(answer.generated_at)}</span>
             <span className="rounded-full border border-[#d8dee8] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[#667085]">
-              {answer.grounded ? "Model refined" : "Deterministic"}
+              {answer.grounded ? "Model refined" : "Directory synthesis"}
             </span>
           </div>
           <p className="mt-1 text-sm text-[#344054]">{answer.answer_summary}</p>
@@ -385,9 +362,9 @@ function StructuredAnswer({
                 <th className="w-11 px-3 py-2">#</th>
                 <th className="w-[150px] px-3 py-2">Expert</th>
                 <th className="w-[230px] px-3 py-2">Title & firm</th>
-                <th className="w-[160px] px-3 py-2">Relevance</th>
-                <th className="w-[150px] px-3 py-2">Access</th>
                 <th className="w-[300px] px-3 py-2">Why top-ranked</th>
+                <th className="w-[120px] px-3 py-2">Evidence</th>
+                <th className="w-[160px] px-3 py-2">Access note</th>
               </tr>
             </thead>
             <tbody>
@@ -395,7 +372,9 @@ function StructuredAnswer({
                 <tr key={expert.expert_id} className="border-b border-[#edf0f5] align-top last:border-0">
                   <td className="px-3 py-2.5 font-mono text-sm">{expert.rank}</td>
                   <td className="px-3 py-2.5">
-                    <div className="font-semibold text-[#0b5bd3]">{expert.name}</div>
+                    <Link href={`/experts/${expert.expert_id}`} className="font-semibold text-[#0b5bd3] hover:underline">
+                      {expert.name}
+                    </Link>
                     <div className="mt-0.5 text-[11px] text-[#667085]">{expert.archetype}</div>
                   </td>
                   <td className="px-3 py-2.5">
@@ -403,26 +382,25 @@ function StructuredAnswer({
                     <div className="mt-0.5 text-[11px] text-[#667085]">{expert.firm}</div>
                   </td>
                   <td className="px-3 py-2.5">
-                    <Metric value={expert.relevance} />
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <div className="font-medium">{expert.access}</div>
-                    <div className="mt-1 text-[11px] text-[#07883f]">{expert.momentum} momentum</div>
-                  </td>
-                  <td className="px-3 py-2.5">
                     <div className="line-clamp-2 max-w-[270px] leading-relaxed text-[#344054]">{expert.why}</div>
                     <CitationList citations={expert.citations} onSourceSelect={onSourceSelect} />
+                  </td>
+                  <td className="px-3 py-2.5 text-[#344054]">
+                    {expert.citations.length} cited source{expert.citations.length === 1 ? "" : "s"}
+                  </td>
+                  <td className="px-3 py-2.5 text-[#344054]">
+                    {expert.access}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <ActionFooter
-          primary="Build call plan"
-          secondary="Add to shortlist"
-          tertiary="View full expert list"
-        />
+        <div className="mt-3 border-t border-[#edf0f5] pt-3">
+          <Link href="/experts" className="text-xs font-medium text-[#0b5bd3] hover:underline">
+            Open the full expert call list →
+          </Link>
+        </div>
       </Panel>
 
       <div className="grid gap-3 lg:grid-cols-[1.05fr_0.95fr]">
@@ -434,7 +412,9 @@ function StructuredAnswer({
                   {company.rank}
                 </div>
                 <div className="min-w-0">
-                  <div className="truncate font-semibold">{company.name}</div>
+                  <Link href={`/companies/${company.company_id}`} className="truncate font-semibold text-[#0b5bd3] hover:underline">
+                    {company.name}
+                  </Link>
                   <div className="text-[11px] text-[#667085]">{company.category} / {company.stage}</div>
                   <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[#344054]">{company.why}</p>
                   <CitationList citations={company.citations} onSourceSelect={onSourceSelect} />
@@ -552,7 +532,7 @@ function EvidenceInspector({
   onSourceSelect: (sourceId: string) => void;
 }) {
   return (
-    <aside className="bg-[#fbfcfe] p-4 xl:min-h-[calc(100vh-6.5rem)]">
+    <aside className="bg-[#fbfcfe] p-4 lg:col-span-2 2xl:col-span-1 2xl:min-h-[calc(100vh-6.5rem)]">
       <div className="mb-4 flex items-center justify-between">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#344054]">
@@ -560,7 +540,6 @@ function EvidenceInspector({
           </div>
           <div className="mt-1 text-[11px] text-[#667085]">Highest confidence first</div>
         </div>
-        <button className="rounded border border-[#d8dee8] bg-white px-2 py-1 text-xs">Tune</button>
       </div>
 
       {selectedSource ? (
@@ -646,7 +625,7 @@ function MessageFrame({ question }: { question: string }) {
         <div>
           <div className="text-xs">
             <span className="font-semibold">You</span>
-            <span className="ml-2 text-[#667085]">10:21 AM</span>
+            <span className="ml-2 text-[#667085]">Current question</span>
           </div>
           <p className="mt-1 text-sm text-[#344054]">{question}</p>
         </div>
@@ -740,22 +719,6 @@ function CitationList({
   );
 }
 
-function Metric({ value }: { value: number }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="font-mono text-sm font-semibold">{value}</span>
-      <span className="flex gap-1">
-        {[0, 1, 2].map((index) => (
-          <span
-            key={index}
-            className={`h-1.5 w-7 rounded-full ${value > 72 + index * 7 ? "bg-[#07883f]" : "bg-[#d8dee8]"}`}
-          />
-        ))}
-      </span>
-    </div>
-  );
-}
-
 function ConfidencePips({ confidence }: { confidence: number }) {
   return (
     <div className="ml-auto shrink-0 text-right">
@@ -781,30 +744,6 @@ function InspectorBlock({ title, children }: { title: string; children: ReactNod
         {title}
       </div>
       {children}
-    </div>
-  );
-}
-
-function ActionFooter({
-  primary,
-  secondary,
-  tertiary,
-}: {
-  primary: string;
-  secondary: string;
-  tertiary: string;
-}) {
-  return (
-    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[#edf0f5] pt-3">
-      <button className="text-xs font-medium text-[#0b5bd3]">{tertiary}</button>
-      <div className="flex gap-2">
-        <button className="rounded border border-[#d8dee8] bg-white px-3 py-2 text-xs font-medium hover:bg-[#f6f8fb]">
-          {secondary}
-        </button>
-        <button className="rounded bg-[#0b5bd3] px-3 py-2 text-xs font-semibold text-white hover:bg-[#084aa9]">
-          {primary}
-        </button>
-      </div>
     </div>
   );
 }

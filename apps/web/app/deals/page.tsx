@@ -22,8 +22,8 @@ export default async function DealsPage() {
             <Link href="/ingest" className="ee-button ee-button-secondary">
               Ingest deal
             </Link>
-            <Link href="/reports" className="ee-button ee-button-primary">
-              Build deal brief
+            <Link href="/sources" className="ee-button ee-button-primary">
+              Review source register
             </Link>
           </div>
         </header>
@@ -88,7 +88,7 @@ export default async function DealsPage() {
                       </td>
                       <td>
                         <div className="font-semibold tabular-nums">
-                          {(deal.confidence * 5).toFixed(1)}
+                            {Math.round(deal.confidence * 100)}%
                         </div>
                         <ConfidenceBars value={deal.confidence} />
                       </td>

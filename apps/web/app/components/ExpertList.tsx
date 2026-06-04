@@ -11,7 +11,7 @@ import {
   rankExpertsForSession,
 } from "@/lib/score";
 import { EXPERT_TYPE_LABEL } from "@/lib/labels";
-import { ConfidenceBars } from "./ui";
+import { Badge } from "./ui";
 
 export interface RankedExpert {
   expert: Expert;
@@ -137,17 +137,8 @@ export default function ExpertList({
           <div>
             <h2 className="ee-label text-ink">Experts in theme ({sessionRanked.length})</h2>
             <p className="mt-1 text-[12px] text-ink-faint">
-              Session priority = base graph score + objective, archetype, access,
-              confidence and momentum fit.
+              Ordered for the selected call objective. Open the profile to review sources before outreach.
             </p>
-          </div>
-          <div className="hidden items-center gap-2 text-[12px] text-accent sm:flex">
-            <button className="ee-button ee-button-secondary min-h-8 px-3">
-              Save view
-            </button>
-            <button className="ee-button ee-button-secondary min-h-8 px-3">
-              Filters ({spec === "all" ? 0 : 1})
-            </button>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -157,24 +148,15 @@ export default function ExpertList({
                 <th>Priority</th>
                 <th>Expert</th>
                 <th>Archetype</th>
-                <th>Session score</th>
-                <th>Base</th>
-                <th>TowerBrook</th>
-                <th>Fit components</th>
-                <th>Momentum</th>
-                <th>Access</th>
+                <th>Why call</th>
+                <th>Relationship path</th>
                 <th>Connected companies</th>
-                <th>Sources</th>
+                <th>Evidence</th>
+                <th />
               </tr>
             </thead>
             <tbody>
-              {sessionRanked.map(({ expert, score, towerBrook }, index) => {
-                const towerBrookFit = towerBrookOnly
-                  ? Math.round(towerBrook.score * 0.35)
-                  : 0;
-                const visibleScore = score.total + towerBrookFit;
-
-                return (
+              {sessionRanked.map(({ expert, towerBrook }, index) => (
                 <tr key={expert.id} className="hover:bg-[#fbfcff]">
                   <td>
                     <span className="inline-grid h-8 w-8 place-items-center rounded bg-[#f1f4f9] text-[16px] font-semibold text-accent tabular-nums">
@@ -195,68 +177,21 @@ export default function ExpertList({
                     ) : null}
                   </td>
                   <td>{EXPERT_TYPE_LABEL[expert.type]}</td>
-                  <td>
-                    <div className="text-[15px] font-semibold tabular-nums text-ink">
-                      {visibleScore}
-                    </div>
-                    <ConfidenceBars value={Math.min(1, visibleScore / 150)} />
-                  </td>
-                  <td className="tabular-nums">{score.baseTotal}</td>
-                  <td>
-                    <div
-                      className={`font-semibold tabular-nums ${
-                        towerBrook.isDirect ? "text-success" : "text-ink"
-                      }`}
-                    >
-                      {towerBrook.score}
-                    </div>
-                    <div className="mt-0.5 text-[11px] text-ink-faint">
-                      {towerBrook.label}
-                    </div>
-                    <ConfidenceBars value={towerBrook.score / 100} />
-                  </td>
-                  <td className="min-w-[170px] text-[11px] leading-relaxed text-ink-soft">
-                    <div>Objective +{score.objectiveFit}</div>
-                    <div>Archetype +{score.archetypeFit}</div>
-                    <div>Optimize +{score.optimizationFit}</div>
-                    <div>Theme +{score.themeFit}</div>
-                    <div>TowerBrook +{towerBrookFit}</div>
-                  </td>
-                  <td>
-                    <span className={score.recency || score.signals ? "text-success" : "text-warning"}>
-                      {score.recency || score.signals ? "High" : "Medium"}
+                  <td className="max-w-[340px] text-[11px] leading-relaxed text-ink-soft">
+                    <span className="line-clamp-3">
+                      {expert.news?.[0]?.headline ?? expert.signals?.[0] ?? expert.whyRelevant}
                     </span>
-                    <div className="text-[11px] text-ink-faint">
-                      +{score.recency + score.signals}
-                    </div>
                   </td>
                   <td>
-                    <span
+                    <Badge
                       className={
-                        expert.access === "proprietary"
-                          ? "text-success"
-                          : expert.access === "obvious"
-                            ? "text-ink-faint"
-                            : "text-warning"
+                        towerBrook.isDirect
+                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                          : "border-line bg-white text-ink-soft"
                       }
                     >
-                      {expert.access === "proprietary"
-                        ? "Warm"
-                        : expert.access === "obvious"
-                          ? "Known"
-                          : "Review"}
-                    </span>
-                    <div className="mt-1">
-                      <ConfidenceBars
-                        value={
-                          expert.access === "proprietary"
-                            ? 0.85
-                            : expert.access === "obvious"
-                              ? 0.45
-                              : 0.6
-                        }
-                      />
-                    </div>
+                      {towerBrook.isDirect ? towerBrook.label : "No internal path mapped"}
+                    </Badge>
                   </td>
                   <td className="max-w-[190px]">
                     <span className="line-clamp-2">
@@ -265,22 +200,17 @@ export default function ExpertList({
                         .join(", ")}
                     </span>
                   </td>
+                  <td className="whitespace-nowrap text-[11px] text-ink-soft">
+                    {expert.sources.length} source{expert.sources.length === 1 ? "" : "s"}
+                    {expert.news?.length ? ` · ${expert.news.length} dated signal${expert.news.length === 1 ? "" : "s"}` : ""}
+                  </td>
                   <td>
-                    {expert.sources.slice(0, 3).map((source, i) => (
-                      <a
-                        key={`${source.url}-${i}`}
-                        href={source.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="ee-link mr-1"
-                      >
-                        [{i + 1}]
-                      </a>
-                    ))}
+                    <Link href={`/experts/${expert.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
+                      Open
+                    </Link>
                   </td>
                 </tr>
-                );
-              })}
+              ))}
             </tbody>
           </table>
         </div>
@@ -288,7 +218,7 @@ export default function ExpertList({
 
       <aside className="space-y-4">
         <section className="ee-panel rounded-lg p-4">
-          <div className="ee-label text-ink">Session relevance calibration</div>
+          <div className="ee-label text-ink">Call-list calibration</div>
           <p className="mt-1 text-[12px] text-ink-faint">
             What kind of expert matters for this session?
           </p>
@@ -351,7 +281,7 @@ export default function ExpertList({
         <section className="ee-panel rounded-lg p-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <div className="ee-label text-ink">TowerBrook focus</div>
+          <div className="ee-label text-ink">Existing relationship paths</div>
               <p className="mt-1 text-[12px] leading-relaxed text-ink-faint">
                 Show only experts with a direct TowerBrook, portfolio, or named advisor link.
               </p>

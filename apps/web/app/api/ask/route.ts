@@ -329,7 +329,10 @@ async function buildStructuredAnswer(
       firm: expert.org ?? firmFromHeadline(expert.headline),
       archetype: EXPERT_TYPE_LABEL[expert.type],
       relevance: clamp(Math.round(score), 1, 99),
-      access: expert.access === "proprietary" ? "Warm/proprietary" : "Known-market",
+      access:
+        expert.access === "proprietary"
+          ? "Non-obvious directory lead; introduction path not verified"
+          : "Well-known market participant",
       momentum: momentumLabel(expert),
       why: expert.whyRelevant,
       citations,

@@ -176,7 +176,7 @@ export default async function DealPage({
 
           <aside className="space-y-5 xl:sticky xl:top-20 xl:self-start">
             <section className="ee-panel rounded-lg p-5">
-              <div className="ee-label text-ink">Scorecard</div>
+              <div className="ee-label text-ink">Evidence completeness</div>
               <div className="mt-4 rounded-lg border border-line bg-paper p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-[12px] font-semibold">Required facts</span>
@@ -225,8 +225,8 @@ export default async function DealPage({
               <Link href="/ingest" className="ee-button ee-button-primary mt-4 w-full">
                 Find missing facts
               </Link>
-              <Link href="/reports" className="ee-button ee-button-secondary mt-3 w-full">
-                Generate deal brief
+              <Link href="/sources" className="ee-button ee-button-secondary mt-3 w-full">
+                Review source register
               </Link>
             </section>
 
