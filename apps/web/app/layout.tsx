@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import AppShellNav from "@/app/components/AppShellNav";
 import PageAwareChat from "@/app/components/PageAwareChat";
+import ThemeSwitcher from "@/app/components/ThemeSwitcher";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -63,6 +64,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             </span>
           </div>
           <AppShellNav mobile />
+          <div className="border-t border-line bg-[#fbfcff]">
+            <ThemeSwitcher />
+          </div>
         </header>
         <main>{children}</main>
         <PageAwareChat />
