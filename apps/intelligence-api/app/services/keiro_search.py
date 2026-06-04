@@ -14,13 +14,15 @@ class KeiroSearchService:
     async def search(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
         if not self.settings.keirolabs_api_key:
             return self._fallback_results(query)
-        payload = {"query": query, "limit": limit}
-        headers = {"Authorization": f"Bearer {self.settings.keirolabs_api_key}"}
+        payload = {
+            "apiKey": self.settings.keirolabs_api_key,
+            "query": query,
+            "maxResults": limit,
+        }
         async with httpx.AsyncClient(timeout=30) as client:
             response = await client.post(
-                f"{self.settings.keirolabs_base_url.rstrip('/')}/search",
+                f"{self.settings.keirolabs_base_url.rstrip('/')}/api/search",
                 json=payload,
-                headers=headers,
             )
             response.raise_for_status()
             data = response.json()
@@ -30,22 +32,26 @@ class KeiroSearchService:
     async def fetch_content(self, url: str) -> dict[str, Any]:
         if not self.settings.keirolabs_api_key:
             return {"url": url, "title": url, "content": ""}
-        payload = {"url": url}
-        headers = {"Authorization": f"Bearer {self.settings.keirolabs_api_key}"}
+        payload = {
+            "apiKey": self.settings.keirolabs_api_key,
+            "query": url,
+            "maxResults": 1,
+            "mode": "deep",
+        }
         async with httpx.AsyncClient(timeout=45) as client:
             response = await client.post(
-                f"{self.settings.keirolabs_base_url.rstrip('/')}/content",
+                f"{self.settings.keirolabs_base_url.rstrip('/')}/api/search",
                 json=payload,
-                headers=headers,
             )
             response.raise_for_status()
             data = response.json()
+        first = (data.get("results") or [data])[0]
         return {
             "url": url,
-            "title": data.get("title") or url,
-            "publisher": data.get("publisher"),
-            "content": data.get("content") or data.get("text") or "",
-            "metadata": data,
+            "title": first.get("title") or url,
+            "publisher": first.get("publisher") or first.get("domain"),
+            "content": first.get("content") or first.get("text") or first.get("snippet") or "",
+            "metadata": first,
         }
 
     async def linkedin_links(self, name: str, company: str | None, role: str | None) -> list[dict[str, Any]]:
