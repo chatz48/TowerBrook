@@ -26,8 +26,21 @@ class KeiroSearchService:
             )
             response.raise_for_status()
             data = response.json()
-        results = data.get("results", data if isinstance(data, list) else [])
-        return [self._normalize_result(item, query) for item in results[:limit]]
+        if isinstance(data, list):
+            results = data
+            extracted = []
+        else:
+            results = data.get("search_results") or data.get("results") or []
+            extracted = data.get("extracted_content") or []
+        content_by_url = {
+            item.get("url"): item
+            for item in extracted
+            if isinstance(item, dict) and item.get("url")
+        }
+        return [
+            self._normalize_result(item, query, content_by_url.get(item.get("url") or item.get("link")))
+            for item in results[:limit]
+        ]
 
     async def fetch_content(self, url: str) -> dict[str, Any]:
         if not self.settings.keirolabs_api_key:
@@ -45,12 +58,20 @@ class KeiroSearchService:
             )
             response.raise_for_status()
             data = response.json()
-        first = (data.get("results") or [data])[0]
+        extracted = data.get("extracted_content") or []
+        results = data.get("search_results") or data.get("results") or []
+        first = extracted[0] if extracted else (results[0] if results else data)
         return {
             "url": url,
             "title": first.get("title") or url,
             "publisher": first.get("publisher") or first.get("domain"),
-            "content": first.get("content") or first.get("text") or first.get("snippet") or "",
+            "content": (
+                first.get("content")
+                or first.get("markdown_content")
+                or first.get("text")
+                or first.get("snippet")
+                or ""
+            ),
             "metadata": first,
         }
 
@@ -73,13 +94,20 @@ class KeiroSearchService:
             )
         return links[:5]
 
-    def _normalize_result(self, item: dict[str, Any], query: str) -> dict[str, Any]:
+    def _normalize_result(
+        self,
+        item: dict[str, Any],
+        query: str,
+        extracted: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        extracted = extracted or {}
         return {
-            "title": item.get("title") or item.get("name") or query,
+            "title": item.get("title") or extracted.get("title") or item.get("name") or query,
             "url": item.get("url") or item.get("link"),
             "snippet": item.get("snippet") or item.get("description") or "",
             "publisher": item.get("publisher") or item.get("domain"),
-            "metadata": item,
+            "content": extracted.get("content") or extracted.get("markdown_content") or "",
+            "metadata": {"search_result": item, "extracted_content": extracted},
         }
 
     def _fallback_results(self, query: str) -> list[dict[str, Any]]:

@@ -18,6 +18,18 @@ from app.schemas.domain import (
 
 
 SYSTEM_PROMPT = """You extract private-equity people intelligence.
+Experts are the primary output. Deals and companies are evidence and graph anchors.
+
+Prioritize every named person with a source-grounded role, especially:
+- founders, former founders, management, operators, board members and alumni;
+- private-equity and infrastructure-fund dealmakers;
+- named bankers, lawyers, lenders, diligence professionals and service providers.
+
+For each person, classify expert_type and explain why the person matters to the supplied theme.
+Create typed person-to-company and person-to-deal relationships using exact roles such as
+founded, led, invested_in, advised_on, banked, legal_counsel, diligence_provider or board_member.
+Extract companies that become interesting through those expert relationships.
+
 Return strict JSON with keys: people, companies, relationships, facts, citations.
 Only extract facts grounded in the supplied text. Do not invent URLs, dates, people or companies."""
 
@@ -26,7 +38,15 @@ class DeepSeekExtractor:
     def __init__(self) -> None:
         self.settings = get_settings()
 
-    async def extract(self, text: str, title: str | None, url: str | None, theme_id: str | None) -> ExtractionResult:
+    async def extract(
+        self,
+        text: str,
+        title: str | None,
+        url: str | None,
+        theme_id: str | None,
+        objective: str | None = None,
+        target_context: dict[str, Any] | None = None,
+    ) -> ExtractionResult:
         if not self.settings.deepseek_api_key:
             return self._heuristic_extract(text, title, url, theme_id)
 
@@ -34,6 +54,8 @@ class DeepSeekExtractor:
             "theme_id": theme_id,
             "source_title": title,
             "source_url": url,
+            "research_objective": objective,
+            "target_context": target_context or {},
             "text": text[:18000],
         }
         async with httpx.AsyncClient(timeout=60) as client:

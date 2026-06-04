@@ -23,6 +23,8 @@ class SupabaseRepository:
         self.memory_sources: dict[str, dict[str, Any]] = {}
         self.memory_people: dict[str, dict[str, Any]] = {}
         self.memory_companies: dict[str, dict[str, Any]] = {}
+        self.memory_discovery_candidates: dict[str, dict[str, Any]] = {}
+        self.memory_entity_match_candidates: dict[str, dict[str, Any]] = {}
 
     def health(self) -> dict[str, Any]:
         return {"supabase_enabled": self.enabled}
@@ -143,6 +145,85 @@ class SupabaseRepository:
             self.memory_companies[row["id"]] = row
             rows.append(row)
         return rows
+
+    def upsert_discovery_candidates(self, candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        if not candidates:
+            return []
+        if self.client:
+            return (
+                self.client.table("discovery_candidates")
+                .upsert(candidates, on_conflict="external_id")
+                .execute()
+                .data
+            )
+        rows = []
+        existing_by_external_id = {
+            row["external_id"]: candidate_id
+            for candidate_id, row in self.memory_discovery_candidates.items()
+        }
+        for candidate in candidates:
+            candidate_id = existing_by_external_id.get(candidate["external_id"], str(uuid4()))
+            row = {"id": candidate_id, **candidate}
+            self.memory_discovery_candidates[candidate_id] = row
+            rows.append(row)
+        return rows
+
+    def upsert_entity_match_candidates(self, matches: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        if not matches:
+            return []
+        if self.client:
+            return (
+                self.client.table("entity_match_candidates")
+                .upsert(
+                    matches,
+                    on_conflict=(
+                        "discovery_candidate_id,canonical_entity_type,"
+                        "canonical_entity_id,match_method"
+                    ),
+                )
+                .execute()
+                .data
+            )
+        rows = []
+        for match in matches:
+            row = {"id": str(uuid4()), **match}
+            self.memory_entity_match_candidates[row["id"]] = row
+            rows.append(row)
+        return rows
+
+    def find_people_by_name(self, name: str, limit: int = 10) -> list[dict[str, Any]]:
+        if self.client:
+            return (
+                self.client.table("people")
+                .select("*")
+                .ilike("name", name)
+                .limit(limit)
+                .execute()
+                .data
+            )
+        lowered = name.casefold()
+        return [
+            row
+            for row in self.memory_people.values()
+            if str(row.get("name", "")).casefold() == lowered
+        ][:limit]
+
+    def find_companies_by_name(self, name: str, limit: int = 10) -> list[dict[str, Any]]:
+        if self.client:
+            return (
+                self.client.table("companies")
+                .select("*")
+                .ilike("name", name)
+                .limit(limit)
+                .execute()
+                .data
+            )
+        lowered = name.casefold()
+        return [
+            row
+            for row in self.memory_companies.values()
+            if str(row.get("name", "")).casefold() == lowered
+        ][:limit]
 
     def insert_relationships(self, relationships: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not relationships:
