@@ -34,21 +34,15 @@ export default async function DealsPage() {
             <span className="text-[12px] text-ink-faint">Sorted by recency and completeness</span>
           </div>
           <div className="overflow-x-auto">
-            <table className="ee-table min-w-[1280px]">
+            <table className="ee-table min-w-[900px]">
               <thead>
                 <tr>
                   <th>Deal</th>
                   <th>Theme</th>
-                  <th>Target</th>
-                  <th>Buyer / investor</th>
-                  <th>Type</th>
-                  <th>Date</th>
-                  <th>Advisors</th>
-                  <th>Lawyers</th>
-                  <th>Experts</th>
-                  <th>Companies</th>
-                  <th>Fact completeness</th>
-                  <th>Confidence</th>
+                  <th>Parties</th>
+                  <th>Type & date</th>
+                  <th>Evidence coverage</th>
+                  <th>Network surfaced</th>
                   <th>Next action</th>
                 </tr>
               </thead>
@@ -58,7 +52,7 @@ export default async function DealsPage() {
                   const buyer = primaryDealParty(deal, "buyer") ?? primaryDealParty(deal, "investor");
                   return (
                     <tr key={deal.id} className="hover:bg-[#fbfcff]">
-                      <td className="min-w-[260px]">
+                      <td className="min-w-[220px]">
                         <Link href={`/deals/${deal.id}`} className="ee-link">
                           {deal.name}
                         </Link>
@@ -69,33 +63,46 @@ export default async function DealsPage() {
                       <td>
                         <ThemeTag id={deal.theme} small />
                       </td>
-                      <td>{target?.companyId ? companyLink(target.companyId, target.name) : target?.name ?? "Missing"}</td>
-                      <td>{buyer?.companyId ? companyLink(buyer.companyId, buyer.name) : buyer?.name ?? "Missing"}</td>
-                      <td>{DEAL_TYPE_LABEL[deal.dealType]}</td>
-                      <td>{dealDate(deal) ?? "Missing"}</td>
-                      <td className="font-semibold tabular-nums">{deal.advisorCount}</td>
-                      <td className="font-semibold tabular-nums">{deal.lawyerCount}</td>
-                      <td className="font-semibold tabular-nums">{deal.expertsSurfaced.length}</td>
-                      <td className="font-semibold tabular-nums">{deal.companiesSurfaced.length}</td>
-                      <td>
+                      <td className="min-w-[180px]">
+                        <div>
+                          <span className="text-[10px] uppercase tracking-wide text-ink-faint">Target </span>
+                          {target?.companyId ? companyLink(target.companyId, target.name) : target?.name ?? "Missing"}
+                        </div>
+                        <div className="mt-1">
+                          <span className="text-[10px] uppercase tracking-wide text-ink-faint">Buyer </span>
+                          {buyer?.companyId ? companyLink(buyer.companyId, buyer.name) : buyer?.name ?? "Missing"}
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap">
+                        <div>{DEAL_TYPE_LABEL[deal.dealType]}</div>
+                        <div className="mt-1 text-[11px] text-ink-faint">{dealDate(deal) ?? "Date missing"}</div>
+                      </td>
+                      <td className="min-w-[150px]">
                         <div className="font-semibold tabular-nums">
                           {Math.round(deal.completionScore * 100)}%
                         </div>
                         <div className="mt-0.5 text-[11px] text-ink-faint">
-                          {deal.requiredFactsFound}/{deal.requiredFactsTotal} required
+                          {deal.requiredFactsFound}/{deal.requiredFactsTotal} required facts · {Math.round(deal.confidence * 100)}% record confidence
                         </div>
                         <ConfidenceBars value={deal.completionScore} />
                       </td>
-                      <td>
+                      <td className="min-w-[150px]">
                         <div className="font-semibold tabular-nums">
-                            {Math.round(deal.confidence * 100)}%
+                          {deal.expertsSurfaced.length} experts · {deal.companiesSurfaced.length} companies
                         </div>
-                        <ConfidenceBars value={deal.confidence} />
+                        <div className="mt-0.5 text-[11px] text-ink-faint">
+                          {deal.advisorCount} advisors · {deal.lawyerCount} lawyers
+                        </div>
                       </td>
-                      <td className="max-w-[260px] text-[12px] leading-relaxed text-ink-soft">
-                        {deal.missingFacts[0]
-                          ? `Find ${deal.missingFacts[0].replaceAll("_", " ")}`
-                          : "Generate relationship brief"}
+                      <td className="max-w-[220px] text-[12px] leading-relaxed text-ink-soft">
+                        <div>
+                          {deal.missingFacts[0]
+                            ? `Find ${deal.missingFacts[0].replaceAll("_", " ")}`
+                            : "Review completed scorecard"}
+                        </div>
+                        <Link href={`/deals/${deal.id}`} className="ee-link mt-1 inline-flex text-[11px]">
+                          Open deal →
+                        </Link>
                       </td>
                     </tr>
                   );
