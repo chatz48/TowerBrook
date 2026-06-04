@@ -126,10 +126,9 @@ Deploy the repository as two separate Vercel projects:
 Deploy the Backend API first, then set its production URL as the web
 project's `BACKEND_API_URL`. Set the same random
 `BACKEND_API_TOKEN` on both projects so only the web project's server-side
-routes can call the API. The API project's existing `vercel.json` runs
-`/jobs/process-next` every 15 minutes. Vercel sends `CRON_SECRET` in the
-scheduled request's authorization header. The 15-minute cron schedule requires
-Vercel Pro or Enterprise; Hobby cron schedules can run only once per day.
+routes can call the API. The authenticated `GET /jobs/process-next` endpoint is
+called daily at midnight UTC by the Vercel Hobby-compatible cron schedule. Set
+`CRON_SECRET`; Vercel sends it as the scheduled request's bearer token.
 
 The FastAPI deployment runs as one Vercel Function, so each job must complete
 within the configured 300-second function duration. Supabase holds durable job
