@@ -9,6 +9,11 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit --pretty false",
     "ingest:validate": "node scripts/validate-ingest.mjs",
+    "investment:census": "node scripts/build-investment-census.mjs",
+    "private-equity:census": "node scripts/build-private-equity-deal-census.mjs",
+    "expert:census": "node scripts/build-expert-first-census.mjs",
+    "origination:jobs": "node scripts/build-origination-research-jobs.mjs",
+    "government-investment:census": "node scripts/build-government-investment-census.mjs",
     "db:seed": "node scripts/seed-supabase.mjs",
     "db:seed:graph": "node scripts/seed-people-graph.mjs"
   },

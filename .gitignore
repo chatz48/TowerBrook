@@ -47,3 +47,4 @@ next-env.d.ts
 
 # docs
 docs/*
+!docs/SEARCH_DISCOVERY_STRATEGY.md
