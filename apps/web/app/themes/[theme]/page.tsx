@@ -120,14 +120,7 @@ export default async function ThemePage({
           </div>
         </header>
 
-        <section className="ee-panel mt-6 grid rounded-lg sm:grid-cols-2 lg:grid-cols-4">
-          <ThemeMetric label="Experts mapped" value={stats.expertCount} sub="Across archetypes" />
-          <ThemeMetric label="Actionable targets" value={brief.stats.targets} sub="Independent companies" />
-          <ThemeMetric label="Companies mapped" value={stats.companyCount} sub={`${brief.stats.exits} acquired comparables`} />
-          <ThemeMetric label="Coverage gaps" value={blankSpaces.length} sub="Taxonomy specialties without an expert" />
-        </section>
-
-        <section className="mt-5 grid gap-5 lg:grid-cols-2 xl:grid-cols-4">
+        <section className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           <DecisionCard
             label="First call"
             title={topExperts[0]?.expert.name ?? "No expert mapped"}
@@ -177,6 +170,14 @@ export default async function ThemePage({
             action="Open path"
           />
         </section>
+
+        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-y border-line py-3 text-[11px] text-ink-faint">
+          <span className="ee-label text-ink">Coverage snapshot</span>
+          <CoverageFact value={stats.expertCount} label="experts mapped" />
+          <CoverageFact value={brief.stats.targets} label="independent targets" />
+          <CoverageFact value={stats.companyCount} label="companies mapped" />
+          <CoverageFact value={blankSpaces.length} label="taxonomy gaps" />
+        </div>
 
         <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_520px]">
           <div className="space-y-5">
@@ -471,22 +472,10 @@ function DecisionCard({
   );
 }
 
-function ThemeMetric({
-  label,
-  value,
-  sub,
-}: {
-  label: string;
-  value: React.ReactNode;
-  sub: string;
-}) {
+function CoverageFact({ value, label }: { value: React.ReactNode; label: string }) {
   return (
-    <div className="border-b border-r border-line px-5 py-4 last:border-r-0 lg:border-b-0">
-      <div className="ee-label">{label}</div>
-      <div className="mt-2 text-[26px] font-semibold tracking-tight tabular-nums">
-        {value}
-      </div>
-      <div className="mt-1 text-[12px] text-ink-soft">{sub}</div>
-    </div>
+    <span>
+      <strong className="font-semibold tabular-nums text-ink">{value}</strong> {label}
+    </span>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type {
   CompanyCategory,
   ExpertType,
@@ -198,6 +198,7 @@ export default function GraphExplorer({
   const [pathView, setPathView] = useState(true);
   const [selectedKey, setSelectedKey] = useState(defaultSelected ?? experts[0]?.key ?? companies[0]?.key);
   const [history, setHistory] = useState<string[]>([]);
+  const canvasColumnRef = useRef<HTMLElement>(null);
 
   const allNodes = useMemo(() => [...experts, ...companies, ...deals], [companies, deals, experts]);
   const nodeByKey = useMemo(
@@ -348,6 +349,13 @@ export default function GraphExplorer({
       return key;
     });
     setQuery("");
+  }
+
+  function selectNodeAndReveal(key: string) {
+    selectNode(key);
+    window.requestAnimationFrame(() => {
+      canvasColumnRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }
 
   function stepBack() {
@@ -607,7 +615,7 @@ export default function GraphExplorer({
           </div>
         </aside>
 
-        <main className={styles.canvasColumn}>
+        <main ref={canvasColumnRef} className={styles.canvasColumn}>
           <div className={styles.graphToolbar}>
             <div className={styles.toolbarFocus}>
               <span>Focused on</span>
@@ -655,7 +663,7 @@ export default function GraphExplorer({
           <section className={styles.insights}>
             <InsightCard
               title="Bridge experts"
-              onFocus={selectNode}
+              onFocus={selectNodeAndReveal}
               items={metrics.bridgeExperts.map(({ expert, count }, index) => ({
                 id: expert.id,
                 rank: index + 1,
@@ -676,7 +684,7 @@ export default function GraphExplorer({
             />
             <InsightCard
               title="High-density targets"
-              onFocus={selectNode}
+              onFocus={selectNodeAndReveal}
               items={metrics.denseTargets.map(({ company, count }) => ({
                 id: company.id,
                 label: company.name,
@@ -741,7 +749,7 @@ export default function GraphExplorer({
                         />
                         <button
                           type="button"
-                          onClick={() => neighbor && selectNode(neighbor.key)}
+                          onClick={() => neighbor && selectNodeAndReveal(neighbor.key)}
                         >
                           <strong>{edge.relationshipLabel}</strong>
                           <small>{neighbor?.name ?? "Unknown node"}</small>

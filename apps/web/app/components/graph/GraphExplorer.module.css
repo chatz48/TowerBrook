@@ -383,6 +383,7 @@
 .canvasColumn {
   min-width: 0;
   padding: 14px 14px 18px;
+  scroll-margin-top: 104px;
 }
 
 .graphToolbar {

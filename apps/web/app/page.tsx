@@ -77,13 +77,14 @@ export default function Home() {
             <SearchBox index={index} />
           </div>
 
-          <div className="mt-6 grid gap-3 border-t border-line pt-5 sm:grid-cols-2 lg:grid-cols-4">
-            <StatusMetric value={experts.length} label="Verified expert profiles" />
-            <StatusMetric value={companies.length} label="Mapped companies" />
-            <StatusMetric value={sourceCount} label="Unique source records" />
-            <StatusMetric
+          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line pt-4 text-[11px] text-ink-faint">
+            <span className="ee-label text-ink">Coverage snapshot</span>
+            <CoverageFact value={experts.length} label="expert profiles" />
+            <CoverageFact value={companies.length} label="companies" />
+            <CoverageFact value={sourceCount} label="source records" />
+            <CoverageFact
               value={directExperts.length + directCompanies.length}
-              label="TowerBrook relationship paths"
+              label="mapped TowerBrook paths"
             />
           </div>
         </section>
@@ -213,12 +214,11 @@ export default function Home() {
   );
 }
 
-function StatusMetric({ value, label }: { value: number; label: string }) {
+function CoverageFact({ value, label }: { value: number; label: string }) {
   return (
-    <div className="rounded-md border border-line bg-[#fbfcff] px-4 py-3">
-      <div className="text-[22px] font-semibold tabular-nums">{value}</div>
-      <div className="mt-1 text-[11px] text-ink-faint">{label}</div>
-    </div>
+    <span>
+      <strong className="font-semibold tabular-nums text-ink">{value}</strong> {label}
+    </span>
   );
 }
 

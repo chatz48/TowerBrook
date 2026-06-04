@@ -117,7 +117,7 @@ export default function ResearchWorkspace() {
 
   return (
     <div className="min-h-[calc(100vh-3.5rem)] bg-[#f7f8fb] text-[#111827]">
-      <div className="grid lg:grid-cols-[250px_minmax(0,1fr)] 2xl:grid-cols-[260px_minmax(0,1fr)_320px]">
+      <div className="grid md:grid-cols-[220px_minmax(0,1fr)] 2xl:grid-cols-[260px_minmax(0,1fr)_320px]">
         <SessionRail
           filters={filters}
           onFiltersChange={setFilters}
@@ -211,7 +211,7 @@ function SessionRail({
   }
 
   return (
-    <aside className="space-y-7 border-b border-[#dfe3eb] bg-[#fbfcfe] p-4 lg:min-h-[calc(100vh-6.5rem)] lg:border-b-0">
+    <aside className="space-y-7 border-b border-[#dfe3eb] bg-[#fbfcfe] p-4 md:min-h-[calc(100vh-6.5rem)] md:border-b-0">
       <RailSection title="Session objective">
         <div className="space-y-2">
           {OBJECTIVES.map((objective) => (
@@ -356,14 +356,14 @@ function StructuredAnswer({
         onSourceSelect={onSourceSelect}
       >
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] table-fixed border-collapse text-left text-xs">
+          <table className="w-full min-w-[640px] table-fixed border-collapse text-left text-xs">
             <thead>
               <tr className="border-b border-[#e6eaf0] bg-[#f8fafc] text-[10px] uppercase tracking-[0.12em] text-[#667085]">
                 <th className="w-11 px-3 py-2">#</th>
-                <th className="w-[150px] px-3 py-2">Expert</th>
-                <th className="w-[220px] px-3 py-2">Role & access</th>
+                <th className="w-[140px] px-3 py-2">Expert</th>
+                <th className="w-[190px] px-3 py-2">Role & access</th>
                 <th className="px-3 py-2">Why top-ranked</th>
-                <th className="w-[110px] px-3 py-2">Evidence</th>
+                <th className="w-[90px] px-3 py-2">Evidence</th>
               </tr>
             </thead>
             <tbody>
@@ -529,7 +529,7 @@ function EvidenceInspector({
   onSourceSelect: (sourceId: string) => void;
 }) {
   return (
-    <aside className="bg-[#fbfcfe] p-4 lg:col-span-2 2xl:col-span-1 2xl:min-h-[calc(100vh-6.5rem)]">
+    <aside className="bg-[#fbfcfe] p-4 md:col-span-2 2xl:col-span-1 2xl:min-h-[calc(100vh-6.5rem)]">
       <div className="mb-4 flex items-center justify-between">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#344054]">
