@@ -25,6 +25,21 @@ def test_create_and_get_job():
     assert fetched.json()["id"] == job["id"]
 
 
+def test_create_founder_origination_job():
+    response = client.post(
+        "/discovery/jobs",
+        json={
+            "job_type": "founder_origination",
+            "theme_id": "grid-infrastructure",
+            "query": '"Jane Founder" new company',
+            "metadata": {"review_gated": True},
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["job_type"] == "founder_origination"
+
+
 def test_chat_returns_tool_trace():
     response = client.post(
         "/chat",
