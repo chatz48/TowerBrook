@@ -40,13 +40,17 @@ const PROMPTS = [
   "What are investors saying?",
 ];
 
-function makeInitialFilters(theme: ThemeFocus): CopilotFilters {
+function makeInitialFilters(
+  theme: ThemeFocus,
+  includeTowerBrookEmployees: boolean,
+): CopilotFilters {
   return {
     objective: "Find experts",
     theme,
     geography: "Europe / North America",
     archetypes: ["operator", "advisor", "banker", "ex-founder"],
     sourceScope: "Premium sourced directory",
+    includeTowerBrookEmployees,
   };
 }
 
@@ -63,8 +67,17 @@ function defaultQuestion(theme: ThemeFocus) {
   return "Who should I call first across the three investment themes?";
 }
 
-export default function ResearchWorkspace({ initialTheme }: { initialTheme: ThemeFocus }) {
-  const startingFilters = useMemo(() => makeInitialFilters(initialTheme), [initialTheme]);
+export default function ResearchWorkspace({
+  initialTheme,
+  includeTowerBrookEmployees,
+}: {
+  initialTheme: ThemeFocus;
+  includeTowerBrookEmployees: boolean;
+}) {
+  const startingFilters = useMemo(
+    () => makeInitialFilters(initialTheme, includeTowerBrookEmployees),
+    [includeTowerBrookEmployees, initialTheme],
+  );
   const startingQuestion = useMemo(() => defaultQuestion(initialTheme), [initialTheme]);
   const [question, setQuestion] = useState(startingQuestion);
   const [filters, setFilters] = useState<CopilotFilters>(startingFilters);

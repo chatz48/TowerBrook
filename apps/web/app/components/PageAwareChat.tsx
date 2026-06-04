@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import type { AskResponse, PageContext } from "@/app/components/copilot/types";
 import { readThemeFocusCookie } from "@/lib/theme-focus";
+import { readIncludeTowerBrookEmployeesCookie } from "@/lib/employee-scope";
 
 const DEFAULT_PROMPT = "What should I pay attention to on this page?";
 
@@ -41,6 +42,7 @@ export default function PageAwareChat() {
             geography: "Global / Europe priority",
             archetypes: [],
             sourceScope: "Current page + sourced directory",
+            includeTowerBrookEmployees: readIncludeTowerBrookEmployeesCookie(),
           },
           pageContext,
         }),

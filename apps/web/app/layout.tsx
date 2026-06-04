@@ -5,6 +5,7 @@ import AppShellNav from "@/app/components/AppShellNav";
 import PageAwareChat from "@/app/components/PageAwareChat";
 import ThemeSwitcher from "@/app/components/ThemeSwitcher";
 import { getThemeFocus } from "@/lib/theme-focus-server";
+import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -17,7 +18,10 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const themeFocus = await getThemeFocus();
+  const [themeFocus, includeTowerBrookEmployees] = await Promise.all([
+    getThemeFocus(),
+    getIncludeTowerBrookEmployees(),
+  ]);
 
   return (
     <html
@@ -68,7 +72,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           </div>
           <AppShellNav mobile />
           <div className="border-t border-line bg-[#fbfcff]">
-            <ThemeSwitcher initialFocus={themeFocus} />
+            <ThemeSwitcher
+              initialFocus={themeFocus}
+              initialIncludeTowerBrookEmployees={includeTowerBrookEmployees}
+            />
           </div>
         </header>
         <main>{children}</main>

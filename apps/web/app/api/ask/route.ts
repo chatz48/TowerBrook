@@ -8,6 +8,7 @@ import { rankExperts } from "@/lib/score";
 import { getTheme, THEMES } from "@/lib/themes";
 import { callBackendApi, hasBackendApi } from "@/lib/backend-api";
 import type { Company, Deal, Expert, ExpertType, Source, ThemeId } from "@/lib/types";
+import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 
 type SourceRecord = {
   source_id: string;
@@ -110,6 +111,7 @@ type AskRequest = {
     geography?: string;
     archetypes?: string[];
     sourceScope?: string;
+    includeTowerBrookEmployees?: boolean;
   };
   pageContext?: PageContext;
 };
@@ -193,10 +195,14 @@ async function maybeAskIntelligenceApi(
     const contextBlock = pageContext
       ? `\n\nCurrent page context:\nTitle: ${pageContext.title ?? "Untitled"}\nPath: ${pageContext.pathname ?? ""}\nHeadings: ${(pageContext.headings ?? []).join(" | ")}\nSelected text: ${pageContext.selectedText ?? ""}\nVisible text excerpt: ${pageContext.visibleText ?? ""}`
       : "";
+    const employeeScopeInstruction =
+      filters.includeTowerBrookEmployees === true
+        ? ""
+        : "\n\nDo not include current TowerBrook employees in the answer or recommendations.";
     return await callBackendApi<{ answer: string; tool_calls: unknown[] }>("/chat", {
       method: "POST",
       body: JSON.stringify({
-        message: `${question}${contextBlock}`,
+        message: `${question}${contextBlock}${employeeScopeInstruction}`,
         theme_id: filters.theme && filters.theme !== "all" ? filters.theme : undefined,
         tools: toolsForQuestion(question),
       }),
@@ -247,14 +253,18 @@ async function buildStructuredAnswer(
   const themeId = inferTheme(`${question} ${pageContextText}`, filters.theme);
   const objective = filters.objective ?? inferObjective(question);
   const archetypes = normalizeArchetypes(filters.archetypes);
+  const includeTowerBrookEmployees = filters.includeTowerBrookEmployees === true;
   const theme = themeId ? getTheme(themeId) : undefined;
 
   const rankedExpertInputs = rankExperts(
-    getExperts().filter((expert) => {
-      if (themeId && !expert.themes.includes(themeId)) return false;
-      if (archetypes.length > 0 && !archetypes.includes(expert.type)) return false;
-      return true;
-    }),
+    filterTowerBrookEmployees(
+      getExperts().filter((expert) => {
+        if (themeId && !expert.themes.includes(themeId)) return false;
+        if (archetypes.length > 0 && !archetypes.includes(expert.type)) return false;
+        return true;
+      }),
+      includeTowerBrookEmployees,
+    ),
   )
     .map(({ expert, score }) => ({
       expert,
@@ -266,7 +276,7 @@ async function buildStructuredAnswer(
     .sort((a, b) => b.score - a.score)
     .slice(0, 5);
 
-  const rankedCompanyInputs = companiesWithLinks(themeId)
+  const rankedCompanyInputs = companiesWithLinks(themeId, includeTowerBrookEmployees)
     .map((company) => ({
       company,
       score:

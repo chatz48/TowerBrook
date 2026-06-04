@@ -10,16 +10,29 @@ import {
   writeThemeFocusCookie,
 } from "@/lib/theme-focus";
 import { THEMES } from "@/lib/themes";
+import {
+  INCLUDE_TOWERBROOK_EMPLOYEES_EVENT,
+  publishIncludeTowerBrookEmployees,
+} from "@/lib/employee-scope";
 
 const OPTIONS = [
   { id: "all" as const, shortName: "All", accent: "#596579" },
   ...THEMES,
 ];
 
-export default function ThemeSwitcher({ initialFocus }: { initialFocus: ThemeFocus }) {
+export default function ThemeSwitcher({
+  initialFocus,
+  initialIncludeTowerBrookEmployees,
+}: {
+  initialFocus: ThemeFocus;
+  initialIncludeTowerBrookEmployees: boolean;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const [focus, setFocus] = useState<ThemeFocus>(initialFocus);
+  const [includeTowerBrookEmployees, setIncludeTowerBrookEmployees] = useState(
+    initialIncludeTowerBrookEmployees,
+  );
   const routeValue = pathname.startsWith("/themes/") ? pathname.split("/")[2] : undefined;
   const routeFocus = isThemeFocus(routeValue) && routeValue !== "all" ? routeValue : undefined;
   const activeFocus = routeFocus ?? focus;
@@ -37,6 +50,16 @@ export default function ThemeSwitcher({ initialFocus }: { initialFocus: ThemeFoc
     return () => window.removeEventListener(THEME_FOCUS_EVENT, syncFocus);
   }, []);
 
+  useEffect(() => {
+    function syncEmployeeScope(event: Event) {
+      const include = (event as CustomEvent<unknown>).detail;
+      if (typeof include === "boolean") setIncludeTowerBrookEmployees(include);
+    }
+    window.addEventListener(INCLUDE_TOWERBROOK_EMPLOYEES_EVENT, syncEmployeeScope);
+    return () =>
+      window.removeEventListener(INCLUDE_TOWERBROOK_EMPLOYEES_EVENT, syncEmployeeScope);
+  }, []);
+
   function changeFocus(nextFocus: ThemeFocus) {
     publishThemeFocus(nextFocus);
 
@@ -47,6 +70,11 @@ export default function ThemeSwitcher({ initialFocus }: { initialFocus: ThemeFoc
       }
       router.refresh();
     });
+  }
+
+  function changeEmployeeScope(include: boolean) {
+    publishIncludeTowerBrookEmployees(include);
+    startTransition(() => router.refresh());
   }
 
   return (
@@ -80,6 +108,15 @@ export default function ThemeSwitcher({ initialFocus }: { initialFocus: ThemeFoc
           </button>
         );
       })}
+      <label className="ml-auto flex shrink-0 cursor-pointer items-center gap-2 border-l border-line pl-3 text-[11px] font-medium text-ink-soft">
+        <input
+          type="checkbox"
+          checked={includeTowerBrookEmployees}
+          onChange={(event) => changeEmployeeScope(event.target.checked)}
+          className="h-3.5 w-3.5 accent-accent"
+        />
+        Include TowerBrook employees
+      </label>
     </nav>
   );
 }

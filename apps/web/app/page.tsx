@@ -9,6 +9,8 @@ import {
 import { buildBrief } from "@/lib/brief";
 import { getThemeFocus } from "@/lib/theme-focus-server";
 import { matchesThemeFocus } from "@/lib/theme-focus";
+import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
+import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 import {
   isTowerBrookWorkedWithCompany,
   isTowerBrookWorkedWithExpert,
@@ -17,26 +19,35 @@ import type { ThemeId } from "@/lib/types";
 import SearchBox, { type SearchItem } from "./components/SearchBox";
 import { Badge } from "./components/ui";
 
-function coverageGaps(themeId: ThemeId): string[] {
+function coverageGaps(themeId: ThemeId, includeTowerBrookEmployees: boolean): string[] {
   const covered = new Set(
-    expertsForTheme(themeId).flatMap((expert) => expert.specialties ?? []),
+    filterTowerBrookEmployees(expertsForTheme(themeId), includeTowerBrookEmployees).flatMap(
+      (expert) => expert.specialties ?? [],
+    ),
   );
   return THEME_SPECIALTIES[themeId].filter((specialty) => !covered.has(specialty));
 }
 
 export default async function Home() {
-  const themeFocus = await getThemeFocus();
-  const experts = getExperts().filter((expert) => matchesThemeFocus(expert.themes, themeFocus));
+  const [themeFocus, includeTowerBrookEmployees] = await Promise.all([
+    getThemeFocus(),
+    getIncludeTowerBrookEmployees(),
+  ]);
+  const experts = filterTowerBrookEmployees(
+    getExperts().filter((expert) => matchesThemeFocus(expert.themes, themeFocus)),
+    includeTowerBrookEmployees,
+  );
   const companies = getCompanies().filter((company) => matchesThemeFocus(company.themes, themeFocus));
-  const linkedCompanies = companiesWithLinks(themeFocus === "all" ? undefined : themeFocus);
+  const linkedCompanies = companiesWithLinks(
+    themeFocus === "all" ? undefined : themeFocus,
+    includeTowerBrookEmployees,
+  );
   const visibleThemes = THEMES.filter((theme) => themeFocus === "all" || theme.id === themeFocus);
   const directCompanies = linkedCompanies.filter(
     (company) => company.id !== "towerbrook" && isTowerBrookWorkedWithCompany(company),
   );
   const directExperts = experts.filter(
-    (expert) =>
-      !(expert.org ?? "").toLowerCase().includes("towerbrook") &&
-      isTowerBrookWorkedWithExpert(expert),
+    (expert) => isTowerBrookWorkedWithExpert(expert),
   );
   const sourceCount = new Set([
     ...experts.flatMap((expert) => expert.sources.map((source) => source.url)),
@@ -108,8 +119,8 @@ export default async function Home() {
 
           <div className={`grid gap-5 ${visibleThemes.length > 1 ? "xl:grid-cols-3" : ""}`}>
             {visibleThemes.map((theme) => {
-              const brief = buildBrief(theme.id);
-              const themeCompanies = companiesWithLinks(theme.id);
+              const brief = buildBrief(theme.id, includeTowerBrookEmployees);
+              const themeCompanies = companiesWithLinks(theme.id, includeTowerBrookEmployees);
               const firstCall = brief.callList[0];
               const leadTarget =
                 themeCompanies.find(
@@ -117,7 +128,7 @@ export default async function Home() {
                     company.category === "target" &&
                     company.ownershipStatus === "independent",
                 ) ?? themeCompanies[0];
-              const gap = coverageGaps(theme.id)[0];
+              const gap = coverageGaps(theme.id, includeTowerBrookEmployees)[0];
 
               return (
                 <article

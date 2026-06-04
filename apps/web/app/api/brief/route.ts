@@ -2,6 +2,7 @@ import { buildBrief } from "@/lib/brief";
 import { getTheme } from "@/lib/themes";
 import { complete, hasModel } from "@/lib/llm";
 import type { ThemeId } from "@/lib/types";
+import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
 
 const SYSTEM = `You are a private equity analyst writing the "state of play" on an investment theme for a partner. 3-4 sentences, plain and decisive. You ONLY use the facts provided — never invent deals, numbers or names. Lead with where capital is flowing and who is consolidating, then what it implies for sourcing. No buzzwords.`;
 
@@ -10,7 +11,10 @@ export async function POST(request: Request) {
     const { themeId } = (await request.json()) as { themeId: string };
     const theme = getTheme(themeId);
     if (!theme) return Response.json({ error: "Unknown theme" }, { status: 400 });
-    const brief = buildBrief(theme.id as ThemeId);
+    const brief = buildBrief(
+      theme.id as ThemeId,
+      await getIncludeTowerBrookEmployees(),
+    );
 
     if (!hasModel()) {
       return Response.json({ narrative: brief.narrative, grounded: false });

@@ -12,17 +12,29 @@ import { EXPERT_TYPE_LABEL } from "@/lib/labels";
 import { Badge } from "@/app/components/ui";
 import { getThemeFocus } from "@/lib/theme-focus-server";
 import { matchesThemeFocus } from "@/lib/theme-focus";
+import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
+import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 
 export default async function ExpertsPage() {
-  const themeFocus = await getThemeFocus();
+  const [themeFocus, includeTowerBrookEmployees] = await Promise.all([
+    getThemeFocus(),
+    getIncludeTowerBrookEmployees(),
+  ]);
   const companies = getCompanies();
   const companyNames = Object.fromEntries(companies.map((company) => [company.id, company.name]));
   const companiesById = new Map(companies.map((company) => [company.id, company]));
   const ranked = rankExperts(
-    getExperts().filter((expert) => matchesThemeFocus(expert.themes, themeFocus)),
+    filterTowerBrookEmployees(
+      getExperts().filter((expert) => matchesThemeFocus(expert.themes, themeFocus)),
+      includeTowerBrookEmployees,
+    ),
   );
   const expertCandidates = getExpertDiscoveryCandidates().filter((candidate) =>
-    matchesThemeFocus(candidate.themes, themeFocus),
+    matchesThemeFocus(candidate.themes, themeFocus) &&
+    (includeTowerBrookEmployees ||
+      !candidate.organizations.some((organization) =>
+        organization.toLowerCase().includes("towerbrook"),
+      )),
   );
   const advisorGaps = getAdvisorExpertGaps().filter((gap) =>
     matchesThemeFocus(gap.themes, themeFocus),
