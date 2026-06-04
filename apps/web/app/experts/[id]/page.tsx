@@ -13,7 +13,6 @@ import {
   Badge,
   BackLink,
   Chip,
-  Confidence,
   NewsFeed,
   SourceLinks,
   ThemeTag,
@@ -36,10 +35,6 @@ export default async function ExpertPage({
   const companiesById = new Map(getCompanies().map((company) => [company.id, company]));
   const towerBrook = towerBrookExpertScore(base, companiesById);
   const relatedDeals = await listDealsForExpert(expert.id);
-  const latestNews = expert.news
-    ?.slice()
-    .sort((a, b) => (a.date < b.date ? 1 : -1))[0];
-
   return (
     <div className="ee-shell px-3 py-5 sm:px-5">
       <div className="mx-auto max-w-[1540px]">
@@ -74,11 +69,27 @@ export default async function ExpertPage({
                     ))}
                   </div>
                 </div>
-                <div className="grid min-w-[440px] grid-cols-4 overflow-hidden rounded-lg border border-line max-lg:min-w-0 max-lg:grid-cols-2">
-                  <ProfileMetric label="Company links" value={expert.resolvedCompanies.length} sub="Named graph edges" />
-                  <ProfileMetric label="Source records" value={expert.sources.length} sub={<Confidence value={expert.confidence} />} />
-                  <ProfileMetric label="Dated signals" value={expert.news?.length ?? 0} sub={latestNews?.date ?? "None captured"} />
-                  <ProfileMetric label="Internal path" value={towerBrook.isDirect ? "Mapped" : "None"} sub={towerBrook.isDirect ? towerBrook.label : "Requires outreach"} />
+                <div className="min-w-[360px] rounded-lg border border-line bg-[#fbfcff] p-4 max-lg:min-w-0">
+                  <div className="ee-label text-ink">Next action</div>
+                  <div className="mt-2 text-[15px] font-semibold text-ink">
+                    Prepare a source-backed call with {expert.name.split(" ")[0]}
+                  </div>
+                  <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">
+                    {expert.resolvedCompanies.length} company edge{expert.resolvedCompanies.length === 1 ? "" : "s"},
+                    {" "}{expert.sources.length} source record{expert.sources.length === 1 ? "" : "s"},
+                    {" "}and {towerBrook.isDirect ? towerBrook.label : "no mapped internal path"}.
+                  </p>
+                  <div className="mt-4 grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+                    <a href="#call-actions" className="ee-button ee-button-primary min-h-8 px-3">
+                      Prepare call
+                    </a>
+                    <Link href="/graph" className="ee-button ee-button-secondary min-h-8 px-3">
+                      Show path
+                    </Link>
+                    <Link href="/reports" className="ee-button ee-button-secondary min-h-8 px-3">
+                      Use in report
+                    </Link>
+                  </div>
                 </div>
               </div>
             </header>
@@ -223,24 +234,6 @@ export default async function ExpertPage({
           </aside>
         </div>
       </div>
-    </div>
-  );
-}
-
-function ProfileMetric({
-  label,
-  value,
-  sub,
-}: {
-  label: string;
-  value: React.ReactNode;
-  sub: React.ReactNode;
-}) {
-  return (
-    <div className="border-r border-line px-4 py-3 last:border-r-0">
-      <div className="ee-label">{label}</div>
-      <div className="mt-2 text-[22px] font-semibold tabular-nums">{value}</div>
-      <div className="mt-1 text-[12px] text-ink-faint">{sub}</div>
     </div>
   );
 }

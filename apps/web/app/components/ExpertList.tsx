@@ -206,7 +206,7 @@ export default function ExpertList({
                   </td>
                   <td>
                     <Link href={`/experts/${expert.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
-                      Open
+                      Prepare call
                     </Link>
                   </td>
                 </tr>

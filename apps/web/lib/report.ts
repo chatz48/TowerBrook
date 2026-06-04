@@ -41,7 +41,7 @@ export interface ReportSection {
   id: string;
   order: number;
   title: string;
-  status: "AI generated" | "Analyst review" | "Needs evidence";
+  status: "Evidence-backed draft" | "Ready for analyst review" | "Needs source confirmation";
   confidence: number;
   wordCount: number;
   citations: string[];
@@ -60,6 +60,7 @@ export interface ReportSection {
 export interface ReportModel {
   reportName: string;
   themeName: string;
+  themeHref: string;
   templateId: ReportTemplateId;
   generatedAt: string;
   wordCount: number;
@@ -237,7 +238,7 @@ export async function buildReport(
       id: "executive-summary",
       order: 1,
       title: "Executive summary",
-      status: "AI generated",
+      status: "Evidence-backed draft",
       confidence: averageConfidence([...topExperts.map((e) => e.expert), ...topCompanies]),
       wordCount: 412,
       citations: sourceIds.primary,
@@ -247,13 +248,13 @@ export async function buildReport(
         `${topCompanies[0]?.name ?? "The leading company"} is the highest-density company surfaced by the current graph.`,
         `Current source coverage is strongest across ${specialties.slice(0, 3).join(", ")}.`,
       ],
-      actions: ["Regenerate", "Open evidence"],
+      actions: ["Prepare partner readout", "Open evidence"],
     },
     {
       id: "market-map",
       order: 2,
       title: "Market map",
-      status: "AI generated",
+      status: "Evidence-backed draft",
       confidence: 0.84,
       wordCount: 1024,
       citations: sourceIds.register,
@@ -268,13 +269,13 @@ export async function buildReport(
         metric: index < 2 ? "High" : "Watch",
         citations: sourceIds.register.slice(0, 2),
       })),
-      actions: ["Refresh map", "Open evidence"],
+      actions: ["Review coverage gaps", "Open evidence"],
     },
     {
       id: "priority-experts",
       order: 3,
       title: "Priority experts",
-      status: "AI generated",
+      status: "Evidence-backed draft",
       confidence: averageConfidence(topExperts.map((e) => e.expert)),
       wordCount: 1312,
       citations: sourceIds.expert,
@@ -292,7 +293,7 @@ export async function buildReport(
       id: "company-longlist",
       order: 4,
       title: "Company longlist",
-      status: "AI generated",
+      status: "Evidence-backed draft",
       confidence: averageConfidence(topCompanies),
       wordCount: 1648,
       citations: sourceIds.company,
@@ -310,7 +311,7 @@ export async function buildReport(
       id: "deal-advisor-activity",
       order: 5,
       title: "Deal / advisor activity",
-      status: "Analyst review",
+      status: "Ready for analyst review",
       confidence: topDeals.length ? averageConfidence(topDeals) : 0.78,
       wordCount: 842,
       citations: sourceIds.deals.length ? sourceIds.deals : sourceIds.register,
@@ -324,7 +325,7 @@ export async function buildReport(
       id: "key-risks",
       order: 6,
       title: "Key risks",
-      status: "Needs evidence",
+      status: "Needs source confirmation",
       confidence: 0.69,
       wordCount: 612,
       citations: sourceIds.register.slice(1, 5),
@@ -340,7 +341,7 @@ export async function buildReport(
       id: "next-actions",
       order: 7,
       title: "Next actions",
-      status: "AI generated",
+      status: "Evidence-backed draft",
       confidence: 0.82,
       wordCount: 368,
       citations: sourceIds.primary.slice(0, 3),
@@ -350,7 +351,7 @@ export async function buildReport(
         `Deep dive on ${topCompanies[0]?.name ?? "the highest-density company"} and two adjacent comparables.`,
         "Add analyst notes back to the source register after each call.",
       ],
-      actions: ["Create shortlist", "Copy markdown"],
+      actions: ["Prepare call sequence", "Copy markdown"],
     },
   ];
 
@@ -359,6 +360,7 @@ export async function buildReport(
   const report: Omit<ReportModel, "markdown"> = {
     reportName: `${theme.shortName} - Partner Memo`,
     themeName: theme.name,
+    themeHref: themeId === "all" ? "/" : `/themes/${themeId}`,
     templateId: "theme-memo",
     generatedAt: REPORT_DATE,
     wordCount,
@@ -570,7 +572,7 @@ function buildMarkdown(report: Omit<ReportModel, "markdown">): string {
   const lines = [
     `# ${report.reportName}`,
     "",
-    `Generated: ${report.generatedAt}`,
+    `Drafted: ${report.generatedAt}`,
     `Theme: ${report.themeName}`,
     "",
   ];

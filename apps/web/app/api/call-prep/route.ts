@@ -4,6 +4,8 @@ import {
   hasModel,
   loadExpertOrThrow,
 } from "@/lib/llm";
+import { RELATIONSHIP_LABEL } from "@/lib/labels";
+import type { ExpertWithCompanies } from "@/lib/types";
 
 const SYSTEM = `You are a research analyst at a private equity firm preparing a partner for a call with a sector expert. You produce tight, skimmable one-page call-prep briefs. You ONLY use the facts provided — never invent companies, deals, dates or quotes. If something isn't in the context, omit it. Tone: professional, concise, useful for a time-crunched investor.`;
 
@@ -17,7 +19,7 @@ export async function POST(request: Request) {
     const ctx = buildExpertContext(expert);
 
     if (!hasModel()) {
-      return Response.json({ text: fallbackBrief(expert.name, ctx, context), grounded: false });
+      return Response.json({ text: fallbackBrief(expert, context), grounded: false });
     }
 
     const user = `Prepare a call-prep brief for an investor speaking with this expert.
@@ -43,23 +45,44 @@ Keep it under 250 words.`;
   }
 }
 
-function fallbackBrief(name: string, ctx: string, angle?: string): string {
-  return `CALL-PREP BRIEF — ${name}
-(Template view — set ANTHROPIC_API_KEY for an AI-written brief.)
+function fallbackBrief(expert: ExpertWithCompanies, angle?: string): string {
+  const firstCompany = expert.resolvedCompanies[0];
+  const companyLines = expert.resolvedCompanies.slice(0, 4).map(
+    (link) =>
+      `- ${RELATIONSHIP_LABEL[link.relationship]} ${link.company.name}${
+        link.note ? `: ${link.note}` : ""
+      }`,
+  );
+  const sourceLine = `${expert.sources.length} source record${
+    expert.sources.length === 1 ? "" : "s"
+  } on file; record confidence ${(expert.confidence * 100).toFixed(0)}%.`;
+  const whyCallLines = [
+    `- ${expert.whyRelevant}`,
+    expert.bio ? `- ${expert.bio}` : "",
+    firstCompany
+      ? `- First company angle to validate: ${firstCompany.company.name}.`
+      : "- No company edge is mapped yet; use the call to request referrals and validate coverage gaps.",
+  ].filter(Boolean);
 
-SNAPSHOT
-${ctx.split("\n").slice(0, 3).join("\n")}
+  return `CALL-PREP BRIEF — ${expert.name}
+Prepared from source-backed profile, company-link and deal records.
 
 WHY THIS CALL
-- Direct operating/advisory experience in the theme (see connections below).
-- Can speak to deal dynamics, valuations and the talent network in the space.
+${whyCallLines.join("\n")}
 
-SUGGESTED QUESTIONS
-- How has the competitive landscape shifted in the last 18 months?
-- Where do you see the most mispriced opportunity right now?
+COMPANIES / PATHS TO TEST
+${companyLines.length ? companyLines.join("\n") : "- Ask which companies, advisors and operators should be added to the graph."}
+
+SMART QUESTIONS
+- What has changed in customer urgency, procurement, or buyer behavior over the last 18 months?
+- Which companies would you diligence first, and which would you avoid?
+- What evidence would prove this theme is investable rather than just active?
 - Who else should we be speaking to?
-${angle ? `- On your angle "${angle}": what would you want to de-risk first?` : ""}
+- Which banker, lawyer, operator, or former founder sees the market most clearly?
+${angle ? `- On the stated angle (${angle}): what would you de-risk first?` : ""}
 
-CONTEXT ON FILE
-${ctx}`;
+WATCH-OUTS
+- Confirm whether any current role creates a conflict before discussing specific companies.
+- Treat graph coverage as directional until call notes and source evidence are added back.
+- ${sourceLine}`;
 }

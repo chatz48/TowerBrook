@@ -77,11 +77,30 @@ export default async function CompanyPage({
                 ))}
               </div>
             </div>
-            <div className="grid min-w-[420px] grid-cols-2 overflow-hidden rounded-lg border border-line max-lg:min-w-0">
-              <Fact label="Expert links" value={String(company.expertCount)} />
-              <Fact label="Source records" value={String(company.sources.length)} />
-              <Fact label="Ownership" value={company.ownershipStatus ? OWNERSHIP_LABEL[company.ownershipStatus] : "Verify"} />
-              <Fact label="Scale" value={company.sizeBand ?? company.funding ?? "Not captured"} />
+            <div className="min-w-[360px] rounded-lg border border-line bg-[#fbfcff] p-4 max-lg:min-w-0">
+              <div className="ee-label text-ink">Next action</div>
+              <div className="mt-2 text-[15px] font-semibold text-ink">
+                Validate {company.name} through named people evidence
+              </div>
+              <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">
+                {company.expertCount} expert link{company.expertCount === 1 ? "" : "s"},
+                {" "}{company.sources.length} source record{company.sources.length === 1 ? "" : "s"},
+                {" "}and {company.ownershipStatus ? OWNERSHIP_LABEL[company.ownershipStatus] : "ownership to verify"}.
+              </p>
+              <div className="mt-4 grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+                <Link
+                  href={company.linkedExperts[0] ? `/experts/${company.linkedExperts[0].expert.id}` : "/discover"}
+                  className="ee-button ee-button-primary min-h-8 px-3"
+                >
+                  Prepare call
+                </Link>
+                <Link href="/graph" className="ee-button ee-button-secondary min-h-8 px-3">
+                  Show path
+                </Link>
+                <Link href="/reports" className="ee-button ee-button-secondary min-h-8 px-3">
+                  Use in report
+                </Link>
+              </div>
             </div>
           </div>
         </header>
@@ -308,7 +327,10 @@ export default async function CompanyPage({
                 </a>
               ) : null}
               <Link href="/graph" className="ee-button ee-button-primary mt-3 w-full">
-                Open graph path
+                Show graph path
+              </Link>
+              <Link href="/reports" className="ee-button ee-button-secondary mt-3 w-full">
+                Use in report
               </Link>
             </section>
 
@@ -347,14 +369,5 @@ function DecisionFact({
     <Link href={href} className="ee-panel rounded-lg p-5 hover:border-line-strong">{content}</Link>
   ) : (
     <section className="ee-panel rounded-lg p-5">{content}</section>
-  );
-}
-
-function Fact({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="border-r border-b border-line px-4 py-3 even:border-r-0">
-      <dt className="ee-label">{label}</dt>
-      <dd className="mt-2 text-[18px] font-semibold">{value}</dd>
-    </div>
   );
 }

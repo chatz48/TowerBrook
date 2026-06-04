@@ -63,6 +63,9 @@ export default async function ExpertsPage() {
             <Link href="/ask" className="ee-button ee-button-secondary">
               Ask over experts
             </Link>
+            <Link href="/reports" className="ee-button ee-button-secondary">
+              Build memo
+            </Link>
             <Link href="/discover" className="ee-button ee-button-primary">
               Review coverage gaps
             </Link>
@@ -143,7 +146,7 @@ export default async function ExpertsPage() {
                       </td>
                       <td>
                         <Link href={`/experts/${expert.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
-                          Open
+                          Prepare call
                         </Link>
                       </td>
                     </tr>
