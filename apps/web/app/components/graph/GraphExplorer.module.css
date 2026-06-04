@@ -626,6 +626,7 @@
 }
 
 .insightCard li > a,
+.insightCard li > button,
 .insightCard li > div {
   display: grid;
   grid-template-columns: 26px 1fr auto;
@@ -638,8 +639,23 @@
 }
 
 .insightCard li:first-child > a,
+.insightCard li:first-child > button,
 .insightCard li:first-child > div {
   border-top: 0;
+}
+
+.insightCard li > button {
+  width: 100%;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.insightCard li > button:hover {
+  color: #075fe4;
 }
 
 .insightCard li span {

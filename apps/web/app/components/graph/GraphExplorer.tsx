@@ -655,13 +655,14 @@ export default function GraphExplorer({
           <section className={styles.insights}>
             <InsightCard
               title="Bridge experts"
+              onFocus={selectNode}
               items={metrics.bridgeExperts.map(({ expert, count }, index) => ({
                 id: expert.id,
                 rank: index + 1,
                 label: expert.name,
                 sub: `Connects ${count} mapped relationships`,
                 value: count,
-                href: expert.href,
+                focusKey: expert.key,
               }))}
             />
             <InsightCard
@@ -675,12 +676,13 @@ export default function GraphExplorer({
             />
             <InsightCard
               title="High-density targets"
+              onFocus={selectNode}
               items={metrics.denseTargets.map(({ company, count }) => ({
                 id: company.id,
                 label: company.name,
                 sub: `${count} linked expert${count === 1 ? "" : "s"}`,
                 value: count,
-                href: company.href,
+                focusKey: company.key,
               }))}
             />
             <InsightCard
@@ -1067,9 +1069,11 @@ function PathStrip({
 function InsightCard({
   title,
   items,
+  onFocus,
 }: {
   title: string;
-  items: { id: string; rank?: number; label: string; sub: string; value: number; href?: string }[];
+  items: { id: string; rank?: number; label: string; sub: string; value: number; focusKey?: string }[];
+  onFocus?: (key: string) => void;
 }) {
   return (
     <article className={styles.insightCard}>
@@ -1090,8 +1094,14 @@ function InsightCard({
           );
           return (
             <li key={item.id}>
-              {item.href ? (
-                <Link href={item.href}>{content}</Link>
+              {item.focusKey && onFocus ? (
+                <button
+                  type="button"
+                  aria-label={`Focus on ${item.label}`}
+                  onClick={() => onFocus(item.focusKey!)}
+                >
+                  {content}
+                </button>
               ) : (
                 <div>{content}</div>
               )}
