@@ -236,7 +236,7 @@ export default async function CompaniesPage() {
                       </td>
                       <td>
                         <span className={towerBrook.isDirect ? "text-success" : "text-ink-faint"}>
-                          {towerBrook.isDirect ? towerBrook.label : "No internal path mapped"}
+                          {towerBrook.isDirect ? towerBrook.label : "No public TowerBrook path mapped"}
                         </span>
                       </td>
                       <td>

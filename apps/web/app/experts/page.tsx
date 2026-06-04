@@ -137,7 +137,7 @@ export default async function ExpertsPage() {
                               : "border-line bg-white text-ink-soft"
                           }
                         >
-                          {towerBrook.isDirect ? towerBrook.label : "No internal path mapped"}
+                          {towerBrook.isDirect ? towerBrook.label : "No public TowerBrook path mapped"}
                         </Badge>
                       </td>
                       <td className="whitespace-nowrap text-[11px] text-ink-soft">
@@ -434,7 +434,7 @@ export default async function ExpertsPage() {
                         <span className="line-clamp-3">{expert.whyRelevant}</span>
                       </td>
                       <td className={towerBrook.isDirect ? "text-success" : "text-ink-faint"}>
-                        {towerBrook.isDirect ? towerBrook.label : "No internal path mapped"}
+                        {towerBrook.isDirect ? towerBrook.label : "No public TowerBrook path mapped"}
                       </td>
                       <td className="max-w-[260px]">
                         <span className="line-clamp-2">

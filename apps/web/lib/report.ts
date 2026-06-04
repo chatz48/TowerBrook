@@ -279,7 +279,7 @@ export async function buildReport(
       confidence: averageConfidence(topExperts.map((e) => e.expert)),
       wordCount: 1312,
       citations: sourceIds.expert,
-      summary: "Priority experts are sequenced for a first diligence pass. Open each profile to verify the relationship path and supporting sources before outreach.",
+      summary: "Priority experts are sequenced for a first diligence pass. Open each profile to verify the public relationship path and supporting sources before outreach.",
       rows: topExperts.slice(0, 5).map(({ expert }) => ({
         label: expert.name,
         value: expert.headline,

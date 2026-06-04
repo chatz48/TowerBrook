@@ -2,6 +2,7 @@ import { extractDealWithModel } from "@/lib/deal-ai";
 import { hasDealDatabase, persistDealIngestion } from "@/lib/deal-db";
 import { runDealEnrichment } from "@/lib/deal-enrichment";
 import { callBackendApi, hasBackendApi } from "@/lib/backend-api";
+import { hasModel } from "@/lib/llm";
 
 export async function POST(request: Request) {
   try {
@@ -41,10 +42,7 @@ export async function POST(request: Request) {
       extraction,
     });
 
-    const enrichment =
-      body.enrich && process.env.ANTHROPIC_API_KEY
-        ? await runDealEnrichment(persisted.dealId)
-        : null;
+    const enrichment = body.enrich && hasModel() ? await runDealEnrichment(persisted.dealId) : null;
 
     return Response.json({
       ...persisted,

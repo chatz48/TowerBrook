@@ -99,7 +99,7 @@ export default async function Home() {
             <CoverageFact value={sourceCount} label="source records" />
             <CoverageFact
               value={directExperts.length + directCompanies.length}
-              label="mapped TowerBrook paths"
+              label="public TowerBrook paths"
             />
           </div>
         </section>

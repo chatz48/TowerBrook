@@ -190,7 +190,7 @@ export default function ExpertList({
                           : "border-line bg-white text-ink-soft"
                       }
                     >
-                      {towerBrook.isDirect ? towerBrook.label : "No internal path mapped"}
+                      {towerBrook.isDirect ? towerBrook.label : "No public TowerBrook path mapped"}
                     </Badge>
                   </td>
                   <td className="max-w-[190px]">

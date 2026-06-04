@@ -120,7 +120,7 @@ Deploy the repository as two separate Vercel projects:
 
 | Project | Root directory | Required production environment variables |
 |---|---|---|
-| Web | `apps/web` | `BACKEND_API_URL`, `BACKEND_API_TOKEN`; add Supabase, Anthropic, and OpenAI variables for the optional features that use them |
+| Web | `apps/web` | `BACKEND_API_URL`, `BACKEND_API_TOKEN`; add Supabase, DeepSeek, and OpenAI variables for the optional features that use them |
 | Backend API | `apps/backend-api` | `BACKEND_API_TOKEN`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DEEPSEEK_API_KEY`, `KEIROLABS_API_KEY`, `CRON_SECRET` |
 
 Deploy the Backend API first, then set its production URL as the web

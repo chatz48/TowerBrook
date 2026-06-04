@@ -94,7 +94,7 @@ export default async function SourcesPage() {
                       <td className="max-w-[180px]">
                         {source.expected_entities.join(", ")}
                       </td>
-                      <td>{candidate?.review.status.replaceAll("_", " ") ?? "unprocessed"}</td>
+                      <td>{(candidate?.review.status ?? source.status ?? "unprocessed").replaceAll("_", " ")}</td>
                       <td>
                         {candidate ? (
                           <>

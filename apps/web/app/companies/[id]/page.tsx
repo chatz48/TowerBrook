@@ -295,12 +295,12 @@ export default async function CompanyPage({
             <section className="ee-panel rounded-lg p-5">
               <div className="ee-label text-ink">Relationship path</div>
               <div className="mt-3 text-[14px] font-semibold">
-                {towerBrook.isDirect ? towerBrook.label : "No internal path mapped"}
+                {towerBrook.isDirect ? towerBrook.label : "No public TowerBrook path mapped"}
               </div>
               <ul className="mt-3 space-y-2 text-[12px] leading-relaxed text-ink-soft">
                 {(towerBrook.isDirect && towerBrook.reasons.length
                   ? towerBrook.reasons
-                  : ["Use the named experts below to validate the company and request an introduction."]
+                  : ["Use the named experts below to validate the company and identify a public-source outreach path."]
                 ).map((reason) => <li key={reason}>{reason}</li>)}
               </ul>
             </section>

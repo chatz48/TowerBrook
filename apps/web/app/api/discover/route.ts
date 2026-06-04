@@ -12,7 +12,6 @@ export async function POST(request: Request) {
     if (themeId !== "all" && !theme) {
       return Response.json({ error: "Unknown theme" }, { status: 400 });
     }
-    const themeName = theme?.name ?? "all three investment themes";
     const objectives: Record<string, string> = {
       deep_discovery:
         "Find named experts and company opportunities from relevant private-equity activity.",
@@ -24,11 +23,14 @@ export async function POST(request: Request) {
         "Verify a candidate expert's identity, current role, employment history, LinkedIn profile and canonical match.",
     };
     const selectedJobType = jobType && objectives[jobType] ? jobType : "deep_discovery";
+    const keywordClause = theme
+      ? theme.keywords.slice(0, 4).map((keyword) => `"${keyword}"`).join(" OR ")
+      : '"clean energy advisory" OR "grid infrastructure" OR "smart water"';
     const defaultQueries: Record<string, string> = {
-      founder_origination: `"${themeName}" (founder OR ex-founder) (investment OR acquisition) ("new company" OR portfolio OR board)`,
-      advisor_expert_gap: `"${themeName}" ("financial advisor" OR "legal counsel" OR diligence) (partner OR managing director)`,
-      identity_resolution: `"${themeName}" expert current role LinkedIn`,
-      deep_discovery: `"${themeName}" ("private equity" OR "portfolio company") experts`,
+      founder_origination: `(${keywordClause}) (founder OR ex-founder OR CEO) ("private equity" OR acquisition OR investment) ("new company" OR portfolio OR board OR advisor)`,
+      advisor_expert_gap: `(${keywordClause}) ("financial advisor" OR "legal counsel" OR lender OR diligence) (partner OR managing director OR deal team)`,
+      identity_resolution: `(${keywordClause}) expert "current role" "public profile" deal team`,
+      deep_discovery: `(${keywordClause}) ("private equity" OR "portfolio company" OR "secondary buyout" OR "majority investment") (advisor OR counsel OR lender OR founder OR CEO)`,
     };
 
     const job = await callBackendApi("/discovery/jobs", {

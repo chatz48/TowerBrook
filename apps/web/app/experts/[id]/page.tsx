@@ -77,7 +77,7 @@ export default async function ExpertPage({
                   <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">
                     {expert.resolvedCompanies.length} company edge{expert.resolvedCompanies.length === 1 ? "" : "s"},
                     {" "}{expert.sources.length} source record{expert.sources.length === 1 ? "" : "s"},
-                    {" "}and {towerBrook.isDirect ? towerBrook.label : "no mapped internal path"}.
+                    {" "}and {towerBrook.isDirect ? towerBrook.label : "no public TowerBrook path mapped"}.
                   </p>
                   <div className="mt-4 grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
                     <a href="#call-actions" className="ee-button ee-button-primary min-h-8 px-3">
@@ -215,12 +215,12 @@ export default async function ExpertPage({
             <section className="ee-panel rounded-lg p-5">
               <div className="ee-label text-ink">Relationship path</div>
               <div className="mt-3 text-[14px] font-semibold">
-                {towerBrook.isDirect ? towerBrook.label : "No internal path mapped"}
+                {towerBrook.isDirect ? towerBrook.label : "No public TowerBrook path mapped"}
               </div>
               <ul className="mt-3 space-y-2 text-[12px] leading-relaxed text-ink-soft">
                 {(towerBrook.isDirect && towerBrook.reasons.length
                   ? towerBrook.reasons
-                  : ["Use sourced outreach or request an introduction from a connected expert."]
+                  : ["Use sourced outreach or verify an introduction path through public deal evidence."]
                 ).map((reason) => <li key={reason}>{reason}</li>)}
               </ul>
             </section>

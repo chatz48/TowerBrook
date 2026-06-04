@@ -157,7 +157,7 @@ export default async function ThemePage({
             action="Run discovery"
           />
           <DecisionCard
-            label="Existing relationship path"
+            label="Public relationship path"
             title={
               externalRelationshipExpert?.name ??
               externalRelationshipCompany?.name ??
@@ -166,7 +166,7 @@ export default async function ThemePage({
             body={
               externalRelationshipExpert?.headline ??
               externalRelationshipCompany?.description ??
-              "No TowerBrook relationship is evidenced in this theme."
+              "No public TowerBrook or transaction relationship is evidenced in this theme."
             }
             href={
               externalRelationshipExpert?.href ??
@@ -243,7 +243,7 @@ export default async function ThemePage({
                               : "border-line bg-white text-ink-soft"
                           }
                         >
-                          {towerBrook.isDirect ? towerBrook.label : "No internal path mapped"}
+                          {towerBrook.isDirect ? towerBrook.label : "No public TowerBrook path mapped"}
                         </Badge>
                       </td>
                       <td className="whitespace-nowrap text-[11px] text-ink-soft">

@@ -23,7 +23,7 @@
     "advisor_expert_gaps": 72,
     "advisor_gaps_with_no_named_expert": 64,
     "derived_companies": 40,
-    "canonical_company_matches": 13
+    "canonical_company_matches": 21
   },
   "expert_candidates": [
     {
@@ -13888,8 +13888,8 @@
       "owner": "TowerBrook",
       "why_interesting": "Berkeley Research Group is derived from 9 named expert connections across 1 priority PE transaction.",
       "canonical_match": {
-        "status": "unresolved",
-        "company_id": null
+        "status": "exact_name_match",
+        "company_id": "berkeley-research-group"
       },
       "expert_connections": [
         {
@@ -14734,8 +14734,8 @@
       "owner": "Wind Point Partners",
       "why_interesting": "Sigma Companies International is derived from 5 named expert connections across 1 priority PE transaction.",
       "canonical_match": {
-        "status": "unresolved",
-        "company_id": null
+        "status": "exact_name_match",
+        "company_id": "sigma-companies-international"
       },
       "expert_connections": [
         {
@@ -15661,12 +15661,12 @@
       "themes": [
         "grid-infrastructure"
       ],
-      "ownership_status": "unverified",
-      "owner": null,
+      "ownership_status": "sponsor-owned-or-invested",
+      "owner": "Hubbell",
       "why_interesting": "DMC Power is derived from 4 named expert connections across 1 priority PE transaction.",
       "canonical_match": {
-        "status": "unresolved",
-        "company_id": null
+        "status": "exact_name_match",
+        "company_id": "dmc-power"
       },
       "expert_connections": [
         {
@@ -15832,8 +15832,8 @@
       "owner": "Frontenac",
       "why_interesting": "CROM is derived from 3 named expert connections across 1 priority PE transaction.",
       "canonical_match": {
-        "status": "unresolved",
-        "company_id": null
+        "status": "exact_name_match",
+        "company_id": "crom"
       },
       "expert_connections": [
         {
@@ -16005,8 +16005,8 @@
       "owner": "EQT Infrastructure",
       "why_interesting": "Scale Microgrids is derived from 3 named expert connections across 1 priority PE transaction.",
       "canonical_match": {
-        "status": "unresolved",
-        "company_id": null
+        "status": "exact_name_match",
+        "company_id": "scale-microgrids"
       },
       "expert_connections": [
         {
@@ -16094,8 +16094,8 @@
       "owner": "EQT Infrastructure",
       "why_interesting": "Seven Seas Water Group is derived from 3 named expert connections across 1 priority PE transaction.",
       "canonical_match": {
-        "status": "unresolved",
-        "company_id": null
+        "status": "exact_name_match",
+        "company_id": "seven-seas-water-group"
       },
       "expert_connections": [
         {
@@ -16266,8 +16266,8 @@
       "owner": "TowerBrook",
       "why_interesting": "Langan is derived from 2 named expert connections across 1 priority PE transaction.",
       "canonical_match": {
-        "status": "unresolved",
-        "company_id": null
+        "status": "exact_name_match",
+        "company_id": "langan"
       },
       "expert_connections": [
         {
@@ -16801,8 +16801,8 @@
       "owner": "Nuveen Private Equity Impact",
       "why_interesting": "Ally Energy Solutions is derived from 1 named expert connection across 1 priority PE transaction.",
       "canonical_match": {
-        "status": "unresolved",
-        "company_id": null
+        "status": "exact_name_match",
+        "company_id": "ally-energy-solutions"
       },
       "expert_connections": [
         {
