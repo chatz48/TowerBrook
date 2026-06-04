@@ -331,8 +331,8 @@ async function buildStructuredAnswer(
       relevance: clamp(Math.round(score), 1, 99),
       access:
         expert.access === "proprietary"
-          ? "Non-obvious directory lead; introduction path not verified"
-          : "Well-known market participant",
+          ? "No introduction path verified"
+          : "Known market participant",
       momentum: momentumLabel(expert),
       why: expert.whyRelevant,
       citations,
