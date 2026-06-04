@@ -18,8 +18,34 @@ interface ResearchJob {
   error?: string;
 }
 
+const RESEARCH_MODES = [
+  {
+    id: "founder_origination",
+    label: "Founder opportunity origination",
+    description: "Find new companies, boards, investments and referrals around a previously funded founder.",
+  },
+  {
+    id: "advisor_expert_gap",
+    label: "Named advisor-person gap",
+    description: "Identify the named bankers, lawyers or diligence professionals behind a PE transaction.",
+  },
+  {
+    id: "identity_resolution",
+    label: "Expert identity resolution",
+    description: "Verify a candidate's current role, employment history, LinkedIn profile and canonical match.",
+  },
+  {
+    id: "deep_discovery",
+    label: "Theme-wide PE discovery",
+    description: "Find named experts and companies from relevant private-equity activity.",
+  },
+] as const;
+
 export default function DiscoverPage() {
   const [themeId, setThemeId] = useState(THEMES[0].id);
+  const [jobType, setJobType] = useState<(typeof RESEARCH_MODES)[number]["id"]>(
+    "founder_origination",
+  );
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -33,7 +59,7 @@ export default function DiscoverPage() {
       const res = await fetch("/api/discover", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ themeId, query: query || undefined }),
+        body: JSON.stringify({ themeId, jobType, query: query || undefined }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Discovery failed");
@@ -58,11 +84,32 @@ export default function DiscoverPage() {
         <div className="ee-label text-ink">Research jobs</div>
         <h1 className="mt-2 text-[24px] font-semibold tracking-tight">Deep discovery queue</h1>
         <p className="mt-2 text-[13px] leading-relaxed text-ink-soft">
-          Start pre-live or live enrichment jobs. Extracted people, companies,
-          relationships, chunks and entity embeddings are written automatically.
+          Start expert-led origination research. Keiro finds and fetches sources,
+          DeepSeek extracts named experts and opportunity signals, and Supabase
+          stores review-gated candidates and identity matches.
         </p>
 
         <label className="mt-5 block text-[12px] font-medium text-ink-soft">
+          Research mode
+          <select
+            value={jobType}
+            onChange={(event) =>
+              setJobType(event.target.value as (typeof RESEARCH_MODES)[number]["id"])
+            }
+            className="mt-1 w-full rounded-md border border-line-strong bg-white px-3 py-2 text-[13px] outline-none focus:border-accent"
+          >
+            {RESEARCH_MODES.map((mode) => (
+              <option key={mode.id} value={mode.id}>
+                {mode.label}
+              </option>
+            ))}
+          </select>
+          <span className="mt-1 block text-[11px] leading-relaxed text-ink-faint">
+            {RESEARCH_MODES.find((mode) => mode.id === jobType)?.description}
+          </span>
+        </label>
+
+        <label className="mt-3 block text-[12px] font-medium text-ink-soft">
           Theme
           <select
             value={themeId}
@@ -78,12 +125,12 @@ export default function DiscoverPage() {
         </label>
 
         <label className="mt-3 block text-[12px] font-medium text-ink-soft">
-          Optional focused query
+          Focused query or target
           <textarea
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             rows={4}
-            placeholder="e.g. UK grid connection advisors and former DNO operators"
+            placeholder='e.g. "Nick Boyle" new company investments board advisor'
             className="mt-1 w-full resize-y rounded-md border border-line-strong bg-white px-3 py-2 text-[13px] outline-none focus:border-accent"
           />
         </label>
@@ -117,9 +164,9 @@ export default function DiscoverPage() {
           <div className="ee-label text-ink">Automatic graph enrichment</div>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             {[
-              ["Source search", "KeiroLabs queries public web sources and LinkedIn profile links only."],
-              ["Extraction", "DeepSeek + Pydantic extracts people, companies, relationships and facts."],
-              ["Graph + RAG", "BGE embeddings populate source chunks, entities and relationships in pgvector."],
+              ["Keiro search", "KeiroLabs searches and fetches founder, advisor, identity and new-opportunity sources."],
+              ["DeepSeek extraction", "DeepSeek + Pydantic extracts named experts, exact roles, relationships and opportunity signals."],
+              ["Supabase review gate", "Candidates, source chunks and identity-match suggestions persist without mutating canonical experts."],
             ].map(([title, body]) => (
               <div key={title} className="rounded-md border border-line bg-paper p-4">
                 <div className="text-[13px] font-semibold">{title}</div>
