@@ -255,7 +255,7 @@ export default async function ThemePage({
                           href={`/experts/${expert.id}`}
                           className="ee-button ee-button-secondary min-h-8 px-3"
                         >
-                          View profile
+                          Prepare call
                         </Link>
                       </td>
                     </tr>

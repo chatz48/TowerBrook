@@ -9,17 +9,18 @@ export default function ReportWorkspace({ report }: { report: ReportModel }) {
         <header className="ee-panel rounded-lg p-5">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
             <div>
-              <div className="ee-label text-accent">Evidence-backed draft</div>
+              <div className="ee-label text-accent">Partner-ready work product</div>
               <h1 className="mt-2 text-[28px] font-semibold tracking-tight">
                 {report.reportName}
               </h1>
               <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
                 A reviewable memo assembled from the current expert, company,
-                deal, and source graph. Treat generated synthesis as a starting
-                point and verify claims before circulation.
+                deal, and source graph. Use it to decide who to call, which
+                companies to prioritize, and which claims need source confirmation
+                before circulation.
               </p>
               <div className="mt-4 flex flex-wrap gap-4 text-[11px] text-ink-faint">
-                <span>Generated {report.generatedAt}</span>
+                <span>Drafted {report.generatedAt}</span>
                 <span>{report.stats.sources} source records</span>
                 <span>{report.stats.experts} experts mapped</span>
                 <span>{report.stats.companies} companies mapped</span>
@@ -52,16 +53,16 @@ export default function ReportWorkspace({ report }: { report: ReportModel }) {
             </section>
 
             <section className="ee-panel rounded-lg p-5">
-              <div className="ee-label text-ink">Continue diligence</div>
+              <div className="ee-label text-ink">Use this memo</div>
               <div className="mt-4 space-y-2">
-                <Link href="/themes/grid-infrastructure" className="ee-button ee-button-secondary w-full">
+                <Link href={report.themeHref} className="ee-button ee-button-secondary w-full">
                   Open theme workspace
                 </Link>
                 <Link href="/experts" className="ee-button ee-button-secondary w-full">
-                  Review call list
+                  Prepare expert calls
                 </Link>
                 <Link href="/companies" className="ee-button ee-button-secondary w-full">
-                  Review targets
+                  Prioritize targets
                 </Link>
                 <Link href="/discover" className="ee-button ee-button-primary w-full">
                   Fill evidence gaps
@@ -182,9 +183,9 @@ function ReportSectionCard({
 
 function StatusBadge({ status }: { status: ReportSection["status"] }) {
   const style =
-    status === "Needs evidence"
+    status === "Needs source confirmation"
       ? "border-rose-200 bg-rose-50 text-rose-700"
-      : status === "Analyst review"
+      : status === "Ready for analyst review"
         ? "border-amber-200 bg-amber-50 text-amber-700"
         : "border-blue-200 bg-blue-50 text-blue-700";
   return <span className={`rounded-md border px-2 py-1 text-[10px] font-semibold ${style}`}>{status}</span>;

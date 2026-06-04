@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 type Mode = "call-prep" | "outreach";
 
@@ -69,9 +70,9 @@ export default function ExpertActions({
     <div className="ee-panel rounded-lg p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-[16px] font-semibold">Turn this expert into a sourcing call</h2>
+          <h2 className="text-[16px] font-semibold">Prepare the sourcing call</h2>
           <p className="mt-1 text-[12px] text-ink-faint">
-            Grounded in {expertName}&apos;s sourced background, company links and deal evidence.
+            Uses {expertName}&apos;s sourced profile, company edges and deal evidence.
           </p>
         </div>
         <button
@@ -114,7 +115,7 @@ export default function ExpertActions({
       </div>
 
       <label className="mt-5 block text-[12px] font-medium text-ink-soft">
-        Optional angle
+        Optional diligence angle
         <input
           value={context}
           onChange={(e) => setContext(e.target.value)}
@@ -129,15 +130,23 @@ export default function ExpertActions({
           disabled={loading}
           className="ee-button ee-button-primary w-full disabled:opacity-50"
         >
-          {loading && mode === "call-prep" ? "Preparing..." : "Generate sourcing call prep"}
+          {loading && mode === "call-prep" ? "Preparing..." : "Prepare call brief"}
         </button>
         <button
           onClick={() => run("outreach")}
           disabled={loading}
           className="ee-button ee-button-secondary w-full disabled:opacity-50"
         >
-          {loading && mode === "outreach" ? "Drafting..." : "Draft outreach"}
+          {loading && mode === "outreach" ? "Drafting..." : "Draft outreach note"}
         </button>
+        <div className="grid grid-cols-2 gap-2">
+          <Link href="/reports" className="ee-button ee-button-secondary min-h-8 px-3">
+            Use in report
+          </Link>
+          <Link href="/graph" className="ee-button ee-button-secondary min-h-8 px-3">
+            Show path
+          </Link>
+        </div>
       </div>
 
       {error ? (
@@ -150,7 +159,7 @@ export default function ExpertActions({
         <div className="mt-4">
           <div className="flex items-center justify-between mb-1.5">
             <span className="ee-label">
-              {mode === "call-prep" ? "Call-prep brief" : "Outreach draft"}
+              {mode === "call-prep" ? "Source-backed call brief" : "Outreach note"}
             </span>
             <button
               onClick={copy}

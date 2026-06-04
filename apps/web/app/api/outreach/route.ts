@@ -4,6 +4,7 @@ import {
   hasModel,
   loadExpertOrThrow,
 } from "@/lib/llm";
+import type { ExpertWithCompanies } from "@/lib/types";
 
 const SYSTEM = `You write short, credible cold-outreach emails on behalf of a private equity investor reaching out to a sector expert. The emails are warm but concise, show genuine homework, and make a specific, low-friction ask. You ONLY reference facts provided in the context — never invent shared connections, deals, or flattery you can't support. No buzzwords. 120-160 words max.`;
 
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
     const ctx = buildExpertContext(expert);
 
     if (!hasModel()) {
-      return Response.json({ text: fallbackEmail(expert.name, context), grounded: false });
+      return Response.json({ text: fallbackEmail(expert, context), grounded: false });
     }
 
     const user = `Draft a cold-outreach email to this expert from an investor at a PE firm.
@@ -43,17 +44,20 @@ Requirements:
   }
 }
 
-function fallbackEmail(name: string, angle?: string): string {
-  const first = name.split(" ")[0];
-  return `(Template view — set ANTHROPIC_API_KEY for an AI-written draft.)
+function fallbackEmail(expert: ExpertWithCompanies, angle?: string): string {
+  const first = expert.name.split(" ")[0];
+  const company = expert.resolvedCompanies[0]?.company.name;
+  const reason = company
+    ? `Your work around ${company} stood out because we are mapping people and companies in this part of the market.`
+    : `Your background as ${expert.headline} stood out as directly relevant to the market map we are building.`;
 
-Subject: A quick call on the space?
+  return `Subject: Quick perspective on ${expert.themes[0].replaceAll("-", " ")}
 
 Hi ${first},
 
-I lead diligence in your sector at TowerBrook and have been following your work closely. ${
-    angle ? `We're currently ${angle}, and ` : "We're "
-}building our view of where the real opportunity sits — and your perspective would be genuinely valuable.
+I am working with TowerBrook on a people-led map of the sector. ${reason}
+
+${angle ? `The immediate diligence angle is: ${angle}. ` : ""}I would value your perspective on where the real opportunity sits, which companies are worth diligence time, and who else has first-hand context.
 
 Would you be open to a 20-30 minute call in the next couple of weeks? Happy to work around your schedule.
 
