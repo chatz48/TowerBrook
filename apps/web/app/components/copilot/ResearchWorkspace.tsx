@@ -356,15 +356,14 @@ function StructuredAnswer({
         onSourceSelect={onSourceSelect}
       >
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[980px] table-fixed border-collapse text-left text-xs">
+          <table className="w-full min-w-[760px] table-fixed border-collapse text-left text-xs">
             <thead>
               <tr className="border-b border-[#e6eaf0] bg-[#f8fafc] text-[10px] uppercase tracking-[0.12em] text-[#667085]">
                 <th className="w-11 px-3 py-2">#</th>
                 <th className="w-[150px] px-3 py-2">Expert</th>
-                <th className="w-[230px] px-3 py-2">Title & firm</th>
-                <th className="w-[300px] px-3 py-2">Why top-ranked</th>
-                <th className="w-[120px] px-3 py-2">Evidence</th>
-                <th className="w-[160px] px-3 py-2">Access note</th>
+                <th className="w-[220px] px-3 py-2">Role & access</th>
+                <th className="px-3 py-2">Why top-ranked</th>
+                <th className="w-[110px] px-3 py-2">Evidence</th>
               </tr>
             </thead>
             <tbody>
@@ -380,6 +379,7 @@ function StructuredAnswer({
                   <td className="px-3 py-2.5">
                     <div className="max-w-[190px] text-[#344054]">{expert.title}</div>
                     <div className="mt-0.5 text-[11px] text-[#667085]">{expert.firm}</div>
+                    <div className="mt-1 text-[11px] leading-snug text-[#667085]">{expert.access}</div>
                   </td>
                   <td className="px-3 py-2.5">
                     <div className="line-clamp-2 max-w-[270px] leading-relaxed text-[#344054]">{expert.why}</div>
@@ -387,9 +387,6 @@ function StructuredAnswer({
                   </td>
                   <td className="px-3 py-2.5 text-[#344054]">
                     {expert.citations.length} cited source{expert.citations.length === 1 ? "" : "s"}
-                  </td>
-                  <td className="px-3 py-2.5 text-[#344054]">
-                    {expert.access}
                   </td>
                 </tr>
               ))}

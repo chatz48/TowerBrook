@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
-  { href: "/themes/grid-infrastructure", label: "Themes", match: "/themes" },
   { href: "/experts", label: "Experts", match: "/experts" },
   { href: "/companies", label: "Companies", match: "/companies" },
   { href: "/deals", label: "Deals", match: "/deals" },

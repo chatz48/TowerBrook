@@ -140,6 +140,24 @@ function nodeInitials(node: ExplorerNode) {
     .toUpperCase();
 }
 
+function nodeKindName(node: ExplorerNode) {
+  if (node.kind === "expert") return "Person";
+  if (node.kind === "company") return "Company";
+  return "Deal";
+}
+
+function nodeTypeName(node: ExplorerNode) {
+  if (node.kind === "expert") return node.typeLabel;
+  if (node.kind === "company") return node.categoryLabel;
+  return node.typeLabel;
+}
+
+function nodeBadgeText(node: ExplorerNode) {
+  if (node.kind === "expert") return "P";
+  if (node.kind === "company") return "CO";
+  return "D";
+}
+
 function otherNode(edge: ExplorerEdge, key: string) {
   return edge.from === key ? edge.to : edge.from;
 }
@@ -196,7 +214,6 @@ export default function GraphExplorer({
     return labels;
   }, [edges]);
 
-  const searchText = query.trim().toLowerCase();
   const filteredEdges = useMemo(
     () =>
       edges.filter((edge) => {
@@ -207,11 +224,9 @@ export default function GraphExplorer({
         if (!relationships[edge.relationship]) return false;
         if (edge.confidence < confidenceFloor) return false;
         if (!nodeKinds[from.kind] || !nodeKinds[to.kind]) return false;
-        if (!searchText) return true;
-        const haystack = `${from.name} ${from.subtitle} ${to.name} ${to.subtitle} ${edge.relationshipLabel} ${edge.note}`.toLowerCase();
-        return haystack.includes(searchText);
+        return true;
       }),
-    [confidenceFloor, edges, nodeByKey, nodeKinds, relationships, searchText, theme],
+    [confidenceFloor, edges, nodeByKey, nodeKinds, relationships, theme],
   );
 
   const filteredNodeKeys = useMemo(() => {
@@ -235,6 +250,21 @@ export default function GraphExplorer({
         .sort((a, b) => b.confidence - a.confidence || b.sourceIds.length - a.sourceIds.length),
     [filteredEdges, selectedNode?.key],
   );
+
+  const focusMatches = useMemo(() => {
+    const searchText = query.trim().toLowerCase();
+    if (!searchText) return [];
+
+    return allNodes
+      .filter((node) => node.themes.includes(theme) && nodeKinds[node.kind])
+      .filter((node) => `${node.name} ${node.subtitle} ${node.tags.join(" ")}`.toLowerCase().includes(searchText))
+      .map((node) => ({
+        node,
+        connections: filteredEdges.filter((edge) => edge.from === node.key || edge.to === node.key).length,
+      }))
+      .sort((a, b) => b.connections - a.connections || a.node.name.localeCompare(b.node.name))
+      .slice(0, 6);
+  }, [allNodes, filteredEdges, nodeKinds, query, theme]);
 
   const visibleEdges = useMemo(() => {
     if (!selectedNode) return filteredEdges.slice(0, 10);
@@ -317,6 +347,7 @@ export default function GraphExplorer({
       if (current && current !== key) setHistory((items) => [...items.slice(-5), current]);
       return key;
     });
+    setQuery("");
   }
 
   function stepBack() {
@@ -337,18 +368,46 @@ export default function GraphExplorer({
     );
     setConfidenceFloor(0.72);
     setPathView(true);
-    setSelectedKey(defaultSelected ?? deals[0]?.key ?? experts[0]?.key ?? companies[0]?.key);
+    setSelectedKey(defaultSelected ?? experts[0]?.key ?? companies[0]?.key ?? deals[0]?.key);
     setHistory([]);
   }
 
   function runQuery() {
-    const next =
-      filteredEdges[0] &&
-      (nodeByKey.get(filteredEdges[0].to) ?? nodeByKey.get(filteredEdges[0].from));
+    const next = focusMatches[0]?.node;
     if (next) {
       setHistory([]);
       setSelectedKey(next.key);
+      setQuery("");
     }
+  }
+
+  function changeTheme(nextTheme: ThemeId) {
+    setTheme(nextTheme);
+    setQuery("");
+    setHistory([]);
+
+    const next = allNodes
+      .filter((node) => node.themes.includes(nextTheme) && nodeKinds[node.kind])
+      .map((node) => ({
+        node,
+        connections: edges.filter((edge) => {
+          const from = nodeByKey.get(edge.from);
+          const to = nodeByKey.get(edge.to);
+          return Boolean(
+            from &&
+              to &&
+              edge.themes.includes(nextTheme) &&
+              relationships[edge.relationship] &&
+              edge.confidence >= confidenceFloor &&
+              nodeKinds[from.kind] &&
+              nodeKinds[to.kind] &&
+              (edge.from === node.key || edge.to === node.key),
+          );
+        }).length,
+      }))
+      .sort((a, b) => b.connections - a.connections)[0]?.node;
+
+    if (next) setSelectedKey(next.key);
   }
 
   const selectedSources =
@@ -367,15 +426,27 @@ export default function GraphExplorer({
     <div className={styles.shell}>
       <div className={styles.workspace}>
         <aside className={styles.queryPanel}>
-          <PanelHeader title="Graph Explorer" caption="Build queries, explore relationships, surface insights." />
+          <PanelHeader title="Graph Explorer" caption="Choose a focus, then follow the relationships that matter." />
 
           <section className={styles.panelSection}>
             <div className={styles.sectionLine}>
-              <strong>Query Builder</strong>
+              <strong>Focus</strong>
               <button type="button" onClick={resetExplorer}>
-                Clear
+                Reset
               </button>
             </div>
+            {selectedNode ? (
+              <div className={styles.currentFocus}>
+                <span className={styles.focusGlyph} data-kind={selectedNode.kind}>
+                  {nodeBadgeText(selectedNode)}
+                </span>
+                <div>
+                  <small>Current focus</small>
+                  <strong>{selectedNode.name}</strong>
+                  <span>{selectedEdges.length} direct mapped relationship{selectedEdges.length === 1 ? "" : "s"}</span>
+                </div>
+              </div>
+            ) : null}
             <label className={styles.fieldLabel} htmlFor="graph-theme">
               Theme
             </label>
@@ -384,8 +455,7 @@ export default function GraphExplorer({
               className={styles.select}
               value={theme}
               onChange={(event) => {
-                setTheme(event.target.value as ThemeId);
-                setHistory([]);
+                changeTheme(event.target.value as ThemeId);
               }}
             >
               {themes.map((item) => (
@@ -395,15 +465,37 @@ export default function GraphExplorer({
               ))}
             </select>
             <label className={styles.fieldLabel} htmlFor="graph-query">
-              Find node or relationship
+              Change focus
             </label>
             <input
               id="graph-query"
               className={styles.select}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="e.g. JSM, founder, grid connection"
+              onKeyDown={(event) => {
+                if (event.key === "Enter") runQuery();
+              }}
+              placeholder="Find a person, company, or deal"
             />
+            {query.trim() ? (
+              <div className={styles.focusMatches}>
+                {focusMatches.length ? (
+                  focusMatches.map(({ node, connections }) => (
+                    <button key={node.key} type="button" onClick={() => selectNode(node.key)}>
+                      <span className={styles.focusGlyph} data-kind={node.kind}>
+                        {nodeBadgeText(node)}
+                      </span>
+                      <span>
+                        <strong>{node.name}</strong>
+                        <small>{connections} relationship{connections === 1 ? "" : "s"} · {node.kind}</small>
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <p>No matching nodes in this theme.</p>
+                )}
+              </div>
+            ) : null}
           </section>
 
           <section className={styles.panelSection}>
@@ -429,7 +521,7 @@ export default function GraphExplorer({
                   }
                 />
                 <span className={styles.nodeGlyph} data-kind={kind}>
-                  {kind === "expert" ? "○" : kind === "deal" ? "◇" : "▦"}
+                  {kind === "expert" ? "P" : kind === "deal" ? "D" : "CO"}
                 </span>
                 {NODE_KIND_LABEL[kind]}
               </label>
@@ -506,8 +598,8 @@ export default function GraphExplorer({
           </section>
 
           <div className={styles.panelActions}>
-            <button type="button" className={styles.primaryButton} onClick={runQuery}>
-              Run query
+            <button type="button" className={styles.primaryButton} onClick={runQuery} disabled={!focusMatches.length}>
+              Focus top match
             </button>
             <button type="button" className={styles.secondaryButton} onClick={resetExplorer}>
               Reset
@@ -517,26 +609,29 @@ export default function GraphExplorer({
 
         <main className={styles.canvasColumn}>
           <div className={styles.graphToolbar}>
+            <div className={styles.toolbarFocus}>
+              <span>Focused on</span>
+              <strong>{selectedNode?.name ?? "No matching node"}</strong>
+            </div>
             <div className={styles.toolbarButtons}>
-              <button type="button" onClick={() => selectNode(selectedNode?.key ?? selectedKey)}>
-                Fit to view
+              <button
+                type="button"
+                className={!pathView ? styles.activeToolbarButton : undefined}
+                onClick={() => setPathView(false)}
+              >
+                Direct network
               </button>
-              <button type="button" onClick={() => setPathView((value) => !value)}>
-                {pathView ? "Show ego network" : "Show path view"}
+              <button
+                type="button"
+                className={pathView ? styles.activeToolbarButton : undefined}
+                onClick={() => setPathView(true)}
+              >
+                Relationship paths
               </button>
               <button type="button" onClick={stepBack} disabled={history.length === 0}>
-                Back
+                Previous focus
               </button>
             </div>
-            <label className={styles.switchLabel}>
-              Path view
-              <input
-                type="checkbox"
-                checked={pathView}
-                onChange={(event) => setPathView(event.target.checked)}
-              />
-              <span />
-            </label>
           </div>
 
           <section className={styles.graphCard} aria-label="Interactive graph canvas">
@@ -630,7 +725,7 @@ export default function GraphExplorer({
                 <div className={styles.sectionLine}>
                   <strong>Mapped relationships ({selectedEdges.length})</strong>
                   <button type="button" onClick={() => setPathView(false)}>
-                    View all
+                    Show all direct
                   </button>
                 </div>
                 <ul className={styles.relationshipList}>
@@ -796,6 +891,9 @@ function GraphCanvas({
   return (
     <svg className={styles.graphSvg} viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Mapped relationship graph">
       <defs>
+        <filter id="graph-node-shadow" x="-20%" y="-30%" width="140%" height="170%">
+          <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#0f172a" floodOpacity="0.1" />
+        </filter>
         {RELATIONSHIP_ORDER.map((relationship) => (
           <marker
             key={relationship}
@@ -852,6 +950,14 @@ function GraphCanvas({
         if (!point) return null;
         const selected = node.key === selectedKey;
         const color = nodeColor(node);
+        const cardWidth = selected ? 214 : 180;
+        const cardHeight = selected ? 80 : 68;
+        const kindName = nodeKindName(node);
+        const typeName = nodeTypeName(node);
+        const displayName =
+          node.name.length > (selected ? 27 : 22)
+            ? `${node.name.slice(0, selected ? 25 : 20)}…`
+            : node.name;
         return (
           <g
             key={node.key}
@@ -868,16 +974,40 @@ function GraphCanvas({
             }}
             aria-label={`${node.name}, ${node.kind}. Select node.`}
           >
-            <circle r={selected ? 39 : 29} fill="#fff" stroke={color} strokeWidth={selected ? 2.4 : 1.8} />
-            <circle r={selected ? 27 : 20} fill={selected ? "#eef5ff" : "#ffffff"} stroke="#dbe6f5" />
-            <text y="5" textAnchor="middle" className={styles.nodeIcon} fill={color}>
-              {node.kind === "expert" ? nodeInitials(node) : node.kind === "deal" ? "◇" : "▦"}
+            <title>{`${node.name} · ${kindName} · ${typeName}`}</title>
+            <rect
+              className={styles.nodeCard}
+              x={-cardWidth / 2}
+              y={-cardHeight / 2}
+              width={cardWidth}
+              height={cardHeight}
+              rx={node.kind === "expert" ? cardHeight / 2 : node.kind === "deal" ? 4 : 9}
+              fill={selected ? "#f4f8ff" : "#ffffff"}
+              stroke={color}
+              strokeWidth={selected ? 2.4 : 1.4}
+              filter={selected ? "url(#graph-node-shadow)" : undefined}
+            />
+            <rect
+              x={-cardWidth / 2 + 11}
+              y={-16}
+              width="32"
+              height="32"
+              rx={node.kind === "deal" ? 5 : 16}
+              fill={color}
+            />
+            <text
+              x={-cardWidth / 2 + 27}
+              y="4"
+              textAnchor="middle"
+              className={styles.nodeBadge}
+            >
+              {node.kind === "expert" ? nodeInitials(node).slice(0, 2) : node.kind === "company" ? "CO" : "D"}
             </text>
-            <text y={selected ? 58 : 47} textAnchor="middle" className={styles.nodeTitle}>
-              {node.name.length > 24 ? `${node.name.slice(0, 22)}…` : node.name}
+            <text x={-cardWidth / 2 + 52} y="-7" className={styles.nodeTitle}>
+              {displayName}
             </text>
-            <text y={selected ? 74 : 62} textAnchor="middle" className={styles.nodeSub}>
-              {node.kind === "expert" ? node.typeLabel : node.kind === "company" ? node.categoryLabel : node.typeLabel}
+            <text x={-cardWidth / 2 + 52} y="12" className={styles.nodeSub}>
+              {kindName} · {typeName.length > 18 ? `${typeName.slice(0, 16)}…` : typeName}
             </text>
           </g>
         );
@@ -916,14 +1046,14 @@ function PathStrip({
   return (
     <div className={styles.pathStrip}>
       <div>
-        <strong>Selected path ({Math.max(path.length - 1, 0)} hops)</strong>
+        <strong>Example relationship path ({Math.max(path.length - 1, 0)} hops)</strong>
         <span>Selected-node evidence: {selectedNode ? confidenceBand(selectedNode.confidence) : "Indicative"}</span>
       </div>
       <ol>
         {path.map((node, index) => (
           <li key={node.key}>
             <span className={styles.pathNode} data-kind={node.kind}>
-              {node.kind === "expert" ? "○" : node.kind === "deal" ? "◇" : "▦"}
+              {nodeBadgeText(node)}
             </span>
             <span>{node.name}</span>
             {index < path.length - 1 ? <em>→</em> : null}
