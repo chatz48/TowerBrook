@@ -7,6 +7,8 @@ import {
   RELATIONSHIP_LABEL,
 } from "@/lib/labels";
 import { THEMES } from "@/lib/themes";
+import { matchesThemeFocus } from "@/lib/theme-focus";
+import { getThemeFocus } from "@/lib/theme-focus-server";
 import type { Company, Deal, Expert, RelationshipType, Source } from "@/lib/types";
 import GraphExplorer, {
   type ExplorerCompanyNode,
@@ -60,6 +62,7 @@ function buildSourceRegister(experts: Expert[], companies: Company[], deals: Dea
 }
 
 export default async function GraphPage() {
+  const themeFocus = await getThemeFocus();
   const experts = getExperts();
   const companies = getCompanies();
   const deals = await listDeals();
@@ -204,13 +207,13 @@ export default async function GraphPage() {
 
   const defaultSelected =
     companyNodes
-      .filter((company) => company.themes.includes("grid-infrastructure"))
+      .filter((company) => matchesThemeFocus(company.themes, themeFocus))
       .map((company) => ({
         company,
         edges: edges.filter(
           (edge) =>
             (edge.from === company.key || edge.to === company.key) &&
-            edge.themes.includes("grid-infrastructure"),
+            matchesThemeFocus(edge.themes, themeFocus),
         ).length,
       }))
       .sort((a, b) => b.edges - a.edges || b.company.confidence - a.company.confidence)[0]
@@ -218,21 +221,25 @@ export default async function GraphPage() {
     companyNodes[0]?.key ??
     expertNodes[0]?.key;
 
-  const themes: ExplorerTheme[] = THEMES.map((theme) => ({
-    id: theme.id,
-    name: theme.name,
-    shortName: theme.shortName,
-  }));
+  const themes: ExplorerTheme[] = [
+    { id: "all", name: "All themes", shortName: "All" },
+    ...THEMES.map((theme) => ({
+      id: theme.id,
+      name: theme.name,
+      shortName: theme.shortName,
+    })),
+  ];
 
   return (
     <GraphExplorer
+      key={themeFocus}
       themes={themes}
       experts={expertNodes}
       companies={companyNodes}
       deals={dealNodes}
       edges={edges}
       sources={sources}
-      defaultTheme="grid-infrastructure"
+      defaultTheme={themeFocus}
       defaultSelected={defaultSelected}
     />
   );

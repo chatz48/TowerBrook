@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import type { AskResponse, PageContext } from "@/app/components/copilot/types";
+import { readThemeFocusCookie } from "@/lib/theme-focus";
 
 const DEFAULT_PROMPT = "What should I pay attention to on this page?";
 
@@ -289,7 +290,7 @@ function inferThemeFromPath(pathname: string): string {
   if (pathname.includes("clean-energy-advisory")) return "clean-energy-advisory";
   if (pathname.includes("grid-infrastructure")) return "grid-infrastructure";
   if (pathname.includes("smart-water")) return "smart-water";
-  return "all";
+  return readThemeFocusCookie();
 }
 
 function inferObjective(question: string): string {

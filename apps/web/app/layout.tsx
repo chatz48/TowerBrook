@@ -4,6 +4,7 @@ import Link from "next/link";
 import AppShellNav from "@/app/components/AppShellNav";
 import PageAwareChat from "@/app/components/PageAwareChat";
 import ThemeSwitcher from "@/app/components/ThemeSwitcher";
+import { getThemeFocus } from "@/lib/theme-focus-server";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -15,7 +16,9 @@ export const metadata: Metadata = {
     "Discover the experts and companies behind an investment theme — and act on them.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const themeFocus = await getThemeFocus();
+
   return (
     <html
       lang="en"
@@ -65,7 +68,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </div>
           <AppShellNav mobile />
           <div className="border-t border-line bg-[#fbfcff]">
-            <ThemeSwitcher />
+            <ThemeSwitcher initialFocus={themeFocus} />
           </div>
         </header>
         <main>{children}</main>

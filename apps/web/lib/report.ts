@@ -1,10 +1,11 @@
 import seedSourcesRaw from "@/data/sources.json";
-import { companiesWithLinks, expertsForTheme, themeStats } from "@/lib/data";
+import { companiesWithLinks, expertsForTheme, getExperts, themeStats } from "@/lib/data";
 import { DEAL_TYPE_LABEL, dealDate } from "@/lib/deals";
 import { listDeals } from "@/lib/deal-repository";
 import { rankExperts } from "@/lib/score";
 import { getTheme } from "@/lib/themes";
 import type { CompanyWithLinks, Expert, Source, ThemeId } from "@/lib/types";
+import type { ThemeFocus } from "@/lib/theme-focus";
 
 export type ReportTemplateId =
   | "theme-memo"
@@ -188,15 +189,24 @@ const REPORT_DATE = new Intl.DateTimeFormat("en-GB", {
   timeZone: "Europe/London",
 }).format(new Date());
 
-export async function buildReport(themeId: ThemeId = "grid-infrastructure"): Promise<ReportModel> {
-  const theme = getTheme(themeId);
+export async function buildReport(themeId: ThemeFocus = "all"): Promise<ReportModel> {
+  const theme =
+    themeId === "all"
+      ? {
+          name: "All Investment Themes",
+          shortName: "All Themes",
+        }
+      : getTheme(themeId);
   if (!theme) throw new Error(`Unknown theme: ${themeId}`);
 
-  const experts = expertsForTheme(themeId);
+  const experts = themeId === "all" ? getExperts() : expertsForTheme(themeId);
   const rankedExperts = rankExperts(experts).slice(0, 6);
-  const companies = companiesWithLinks(themeId);
-  const deals = (await listDeals()).filter((deal) => deal.theme === themeId);
-  const stats = themeStats(themeId);
+  const companies = companiesWithLinks(themeId === "all" ? undefined : themeId);
+  const deals = (await listDeals()).filter((deal) => themeId === "all" || deal.theme === themeId);
+  const stats =
+    themeId === "all"
+      ? { expertCount: experts.length, companyCount: companies.length }
+      : themeStats(themeId);
   const sources = buildSourceRegister(themeId, rankedExperts.map((r) => r.expert), companies, deals);
 
   const sourceIds = {
@@ -361,7 +371,7 @@ export async function buildReport(themeId: ThemeId = "grid-infrastructure"): Pro
 }
 
 function buildSourceRegister(
-  themeId: ThemeId,
+  themeId: ThemeFocus,
   rankedExperts: Expert[],
   companies: CompanyWithLinks[],
   deals: Awaited<ReturnType<typeof listDeals>>,
@@ -405,7 +415,10 @@ function buildSourceRegister(
   }
 
   for (const source of rawSources.sources) {
-    if ((source.theme === themeId || source.theme === "all") && source.priority <= 2) {
+    if (
+      (themeId === "all" || source.theme === themeId || source.theme === "all") &&
+      source.priority <= 2
+    ) {
       add({
         title: source.why_useful,
         publisher: source.publisher,

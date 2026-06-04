@@ -7,6 +7,8 @@ import {
   expertsForTheme,
 } from "@/lib/data";
 import { buildBrief } from "@/lib/brief";
+import { getThemeFocus } from "@/lib/theme-focus-server";
+import { matchesThemeFocus } from "@/lib/theme-focus";
 import {
   isTowerBrookWorkedWithCompany,
   isTowerBrookWorkedWithExpert,
@@ -22,10 +24,12 @@ function coverageGaps(themeId: ThemeId): string[] {
   return THEME_SPECIALTIES[themeId].filter((specialty) => !covered.has(specialty));
 }
 
-export default function Home() {
-  const experts = getExperts();
-  const companies = getCompanies();
-  const linkedCompanies = companiesWithLinks();
+export default async function Home() {
+  const themeFocus = await getThemeFocus();
+  const experts = getExperts().filter((expert) => matchesThemeFocus(expert.themes, themeFocus));
+  const companies = getCompanies().filter((company) => matchesThemeFocus(company.themes, themeFocus));
+  const linkedCompanies = companiesWithLinks(themeFocus === "all" ? undefined : themeFocus);
+  const visibleThemes = THEMES.filter((theme) => themeFocus === "all" || theme.id === themeFocus);
   const directCompanies = linkedCompanies.filter(
     (company) => company.id !== "towerbrook" && isTowerBrookWorkedWithCompany(company),
   );
@@ -102,8 +106,8 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid gap-5 xl:grid-cols-3">
-            {THEMES.map((theme) => {
+          <div className={`grid gap-5 ${visibleThemes.length > 1 ? "xl:grid-cols-3" : ""}`}>
+            {visibleThemes.map((theme) => {
               const brief = buildBrief(theme.id);
               const themeCompanies = companiesWithLinks(theme.id);
               const firstCall = brief.callList[0];

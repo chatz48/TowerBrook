@@ -3,9 +3,13 @@ import { getCompany } from "@/lib/data";
 import { DEAL_TYPE_LABEL, dealDate, primaryDealParty } from "@/lib/deals";
 import { listDeals } from "@/lib/deal-repository";
 import { ConfidenceBars, ThemeTag } from "@/app/components/ui";
+import { getThemeFocus } from "@/lib/theme-focus-server";
 
 export default async function DealsPage() {
-  const deals = await listDeals();
+  const themeFocus = await getThemeFocus();
+  const deals = (await listDeals()).filter(
+    (deal) => themeFocus === "all" || deal.theme === themeFocus,
+  );
 
   return (
     <div className="ee-shell px-3 py-5 sm:px-5">

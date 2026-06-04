@@ -8,10 +8,11 @@ import type {
   RelationshipType,
   ThemeId,
 } from "@/lib/types";
+import { matchesThemeFocus, publishThemeFocus, type ThemeFocus } from "@/lib/theme-focus";
 import styles from "./GraphExplorer.module.css";
 
 export interface ExplorerTheme {
-  id: ThemeId;
+  id: ThemeFocus;
   name: string;
   shortName: string;
 }
@@ -178,10 +179,10 @@ export default function GraphExplorer({
   deals?: ExplorerDealNode[];
   edges: ExplorerEdge[];
   sources: ExplorerSource[];
-  defaultTheme: ThemeId;
+  defaultTheme: ThemeFocus;
   defaultSelected?: string;
 }) {
-  const [theme, setTheme] = useState<ThemeId>(defaultTheme);
+  const [theme, setTheme] = useState<ThemeFocus>(defaultTheme);
   const [query, setQuery] = useState("");
   const [nodeKinds, setNodeKinds] = useState<Record<ExplorerNode["kind"], boolean>>({
     expert: true,
@@ -221,7 +222,7 @@ export default function GraphExplorer({
         const from = nodeByKey.get(edge.from);
         const to = nodeByKey.get(edge.to);
         if (!from || !to) return false;
-        if (!edge.themes.includes(theme)) return false;
+        if (!matchesThemeFocus(edge.themes, theme)) return false;
         if (!relationships[edge.relationship]) return false;
         if (edge.confidence < confidenceFloor) return false;
         if (!nodeKinds[from.kind] || !nodeKinds[to.kind]) return false;
@@ -257,7 +258,7 @@ export default function GraphExplorer({
     if (!searchText) return [];
 
     return allNodes
-      .filter((node) => node.themes.includes(theme) && nodeKinds[node.kind])
+      .filter((node) => matchesThemeFocus(node.themes, theme) && nodeKinds[node.kind])
       .filter((node) => `${node.name} ${node.subtitle} ${node.tags.join(" ")}`.toLowerCase().includes(searchText))
       .map((node) => ({
         node,
@@ -389,13 +390,14 @@ export default function GraphExplorer({
     }
   }
 
-  function changeTheme(nextTheme: ThemeId) {
+  function changeTheme(nextTheme: ThemeFocus) {
     setTheme(nextTheme);
+    publishThemeFocus(nextTheme);
     setQuery("");
     setHistory([]);
 
     const next = allNodes
-      .filter((node) => node.themes.includes(nextTheme) && nodeKinds[node.kind])
+      .filter((node) => matchesThemeFocus(node.themes, nextTheme) && nodeKinds[node.kind])
       .map((node) => ({
         node,
         connections: edges.filter((edge) => {
@@ -404,7 +406,7 @@ export default function GraphExplorer({
           return Boolean(
             from &&
               to &&
-              edge.themes.includes(nextTheme) &&
+              matchesThemeFocus(edge.themes, nextTheme) &&
               relationships[edge.relationship] &&
               edge.confidence >= confidenceFloor &&
               nodeKinds[from.kind] &&
@@ -463,7 +465,7 @@ export default function GraphExplorer({
               className={styles.select}
               value={theme}
               onChange={(event) => {
-                changeTheme(event.target.value as ThemeId);
+                changeTheme(event.target.value as ThemeFocus);
               }}
             >
               {themes.map((item) => (

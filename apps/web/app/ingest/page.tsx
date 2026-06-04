@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ConfidenceBars } from "@/app/components/ui";
+import { getTheme } from "@/lib/themes";
+import { useThemeFocusClient } from "@/lib/theme-focus-client";
 
 interface DraftFact {
   id: string;
@@ -56,6 +58,7 @@ const SAMPLE_TEXT =
   "Badger Meter acquired SmartCover Systems from XPV Water Partners for $185m in 2025. Houlihan Lokey advised SmartCover Systems on the transaction.";
 
 export default function IngestPage() {
+  const themeFocus = useThemeFocusClient();
   const [url, setUrl] = useState("");
   const [title, setTitle] = useState("");
   const [text, setText] = useState(SAMPLE_TEXT);
@@ -75,6 +78,7 @@ export default function IngestPage() {
       body.set("title", title);
       body.set("text", text);
       body.set("enrich", String(enrich));
+      if (themeFocus !== "all") body.set("themeId", themeFocus);
       if (file) body.set("file", file);
       const res = await fetch("/api/ingest", { method: "POST", body });
       const data = await res.json();
@@ -96,6 +100,9 @@ export default function IngestPage() {
           Paste a press release, advisor page, company statement, call note or extracted PDF text.
           The source is parsed, embedded, extracted and sorted into the graph automatically.
         </p>
+        <div className="mt-4 rounded-md border border-line bg-paper px-3 py-2 text-[11px] text-ink-soft">
+          Evidence focus: {themeFocus === "all" ? "All themes" : getTheme(themeFocus)?.name}
+        </div>
 
         <label className="mt-5 block text-[12px] font-medium text-ink-soft">
           Source URL

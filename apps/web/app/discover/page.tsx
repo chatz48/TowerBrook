@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { THEMES } from "@/lib/themes";
+import { publishThemeFocus, type ThemeFocus } from "@/lib/theme-focus";
+import { useThemeFocusClient } from "@/lib/theme-focus-client";
 
 interface ResearchJob {
   id: string;
@@ -63,7 +65,7 @@ const DISCOVERY_PRESETS = [
 ] as const;
 
 export default function DiscoverPage() {
-  const [themeId, setThemeId] = useState(THEMES[0].id);
+  const themeId = useThemeFocusClient();
   const [jobType, setJobType] = useState<(typeof RESEARCH_MODES)[number]["id"]>(
     "founder_origination",
   );
@@ -71,6 +73,10 @@ export default function DiscoverPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [job, setJob] = useState<ResearchJob | null>(null);
+
+  function changeTheme(focus: ThemeFocus) {
+    publishThemeFocus(focus);
+  }
 
   async function createJob() {
     setLoading(true);
@@ -134,9 +140,10 @@ export default function DiscoverPage() {
           Theme
           <select
             value={themeId}
-            onChange={(event) => setThemeId(event.target.value as typeof themeId)}
+            onChange={(event) => changeTheme(event.target.value as ThemeFocus)}
             className="mt-1 w-full rounded-md border border-line-strong bg-white px-3 py-2 text-[13px] outline-none focus:border-accent"
           >
+            <option value="all">All themes</option>
             {THEMES.map((theme) => (
               <option key={theme.id} value={theme.id}>
                 {theme.name}
@@ -241,7 +248,7 @@ export default function DiscoverPage() {
                 key={preset.label}
                 type="button"
                 onClick={() => {
-                  setThemeId(preset.themeId);
+                  changeTheme(preset.themeId);
                   setJobType(preset.jobType);
                   setQuery(preset.query);
                 }}
