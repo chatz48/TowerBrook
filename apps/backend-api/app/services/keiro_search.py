@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import json
+import re
+from functools import lru_cache
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -44,6 +48,15 @@ class KeiroSearchService:
 
     async def fetch_content(self, url: str) -> dict[str, Any]:
         if not self.settings.keirolabs_api_key:
+            local = self._local_source_by_url(url)
+            if local:
+                return {
+                    "url": url,
+                    "title": local.get("title") or url,
+                    "publisher": local.get("publisher"),
+                    "content": local.get("content") or local.get("snippet") or "",
+                    "metadata": {"provider": "local-public-source-index", "source": local},
+                }
             return {"url": url, "title": url, "content": ""}
         payload = {
             "apiKey": self.settings.keirolabs_api_key,
@@ -111,15 +124,150 @@ class KeiroSearchService:
         }
 
     def _fallback_results(self, query: str) -> list[dict[str, Any]]:
+        tokens = self._tokens(query)
+        results = []
+        for item in self._local_public_sources():
+            haystack = self._tokens(
+                " ".join(
+                    str(value)
+                    for value in [
+                        item.get("title"),
+                        item.get("publisher"),
+                        item.get("snippet"),
+                        item.get("content"),
+                        " ".join(item.get("entities") or []),
+                    ]
+                    if value
+                )
+            )
+            if not haystack:
+                continue
+            score = sum(3 if token in haystack else 0 for token in tokens)
+            score += sum(1 for token in tokens for word in haystack if token in word and token != word)
+            if score <= 0:
+                continue
+            results.append((score, item))
+        results.sort(key=lambda pair: pair[0], reverse=True)
         return [
             {
-                "title": f"Search not configured: {query}",
+                "title": item.get("title") or query,
+                "url": item.get("url"),
+                "snippet": item.get("snippet") or item.get("content", "")[:320],
+                "publisher": item.get("publisher") or "local-public-source-index",
+                "content": item.get("content") or item.get("snippet") or "",
+                "metadata": {
+                    "query": query,
+                    "provider": "local-public-source-index",
+                    "score": score,
+                    "source_type": item.get("source_type"),
+                },
+            }
+            for score, item in results[:10]
+        ] or [
+            {
+                "title": f"No local public-source match: {query}",
                 "url": None,
-                "snippet": "Set KEIROLABS_API_KEY to enable public web discovery.",
-                "publisher": "local-fallback",
-                "metadata": {"query": query, "provider": "keirolabs"},
+                "snippet": "Set KEIROLABS_API_KEY for live web discovery, or add matching public sources to the source register.",
+                "publisher": "local-public-source-index",
+                "metadata": {"query": query, "provider": "local-public-source-index"},
             }
         ]
+
+    def _local_source_by_url(self, url: str) -> dict[str, Any] | None:
+        return next(
+            (source for source in self._local_public_sources() if source.get("url") == url),
+            None,
+        )
+
+    @staticmethod
+    def _tokens(value: str) -> set[str]:
+        stopwords = {
+            "and",
+            "are",
+            "for",
+            "from",
+            "into",
+            "or",
+            "the",
+            "to",
+            "with",
+        }
+        return {
+            token
+            for token in re.findall(r"[a-z0-9]+", value.lower())
+            if len(token) > 2 and token not in stopwords
+        }
+
+    @staticmethod
+    @lru_cache(maxsize=1)
+    def _local_public_sources() -> tuple[dict[str, Any], ...]:
+        root = Path(__file__).parents[4]
+        sources: list[dict[str, Any]] = []
+
+        source_register_path = root / "apps" / "web" / "data" / "source-register.json"
+        if source_register_path.exists():
+            payload = json.loads(source_register_path.read_text())
+            for source in payload.get("sources", []):
+                content = " ".join(
+                    str(value)
+                    for value in [
+                        source.get("why_useful"),
+                        " ".join(source.get("expected_entities") or []),
+                        " ".join(source.get("expected_relationships") or []),
+                    ]
+                    if value
+                )
+                sources.append(
+                    {
+                        "title": source.get("title"),
+                        "url": source.get("url"),
+                        "publisher": source.get("publisher"),
+                        "source_type": source.get("source_type"),
+                        "snippet": source.get("why_useful"),
+                        "content": content,
+                        "entities": source.get("expected_entities") or [],
+                    }
+                )
+
+        pe_census_path = root / "apps" / "web" / "data" / "private-equity-deal-census-candidates.json"
+        if pe_census_path.exists():
+            payload = json.loads(pe_census_path.read_text())
+            for deal in payload.get("candidates", []):
+                entities = [
+                    deal.get("target", {}).get("name"),
+                    *[item.get("name") for item in deal.get("sponsors", [])],
+                    *[item.get("name") for item in deal.get("advisors", [])],
+                    *[item.get("name") for item in deal.get("people", [])],
+                ]
+                for source in deal.get("sources", []):
+                    sources.append(
+                        {
+                            "title": source.get("title"),
+                            "url": source.get("url"),
+                            "publisher": source.get("publisher"),
+                            "source_type": "private-equity-census",
+                            "snippet": source.get("evidence"),
+                            "content": " ".join(
+                                item
+                                for item in [
+                                    deal.get("name"),
+                                    deal.get("theme"),
+                                    deal.get("thesis"),
+                                    source.get("evidence"),
+                                    " ".join(value for value in entities if value),
+                                ]
+                                if item
+                            ),
+                            "entities": [value for value in entities if value],
+                        }
+                    )
+
+        deduped = {}
+        for source in sources:
+            key = source.get("url") or source.get("title")
+            if key and key not in deduped:
+                deduped[key] = source
+        return tuple(deduped.values())
 
 
 keiro = KeiroSearchService()

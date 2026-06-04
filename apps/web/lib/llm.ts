@@ -1,9 +1,20 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { resolveExpert, getExpert } from "./data";
 import { RELATIONSHIP_LABEL } from "./labels";
 import type { ExpertWithCompanies } from "./types";
 
-const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
+const DEEPSEEK_BASE_URL = process.env.DEEPSEEK_BASE_URL ?? "https://api.deepseek.com";
+const MODEL = normalizeDeepSeekModel(process.env.DEEPSEEK_MODEL ?? "deepseek-v4-flash");
+
+type DeepSeekChatResponse = {
+  choices?: {
+    message?: {
+      content?: string | null;
+    };
+  }[];
+  error?: {
+    message?: string;
+  };
+};
 
 /**
  * Turn an expert record into a compact, factual context block. The model only
@@ -46,28 +57,51 @@ export interface GenResult {
 
 /** Whether a live model is configured. */
 export function hasModel(): boolean {
-  return Boolean(process.env.ANTHROPIC_API_KEY);
+  return Boolean(process.env.DEEPSEEK_API_KEY);
 }
 
-export async function complete(system: string, user: string): Promise<string> {
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const res = await client.messages.create({
-    model: MODEL,
-    max_tokens: 1200,
-    system: [
-      {
-        type: "text",
-        text: system,
-        // Cache the (stable) system prompt across requests.
-        cache_control: { type: "ephemeral" },
-      },
-    ],
-    messages: [{ role: "user", content: user }],
+export async function complete(
+  system: string,
+  user: string,
+  options: { maxTokens?: number; responseFormat?: "json_object" } = {},
+): Promise<string> {
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+  if (!apiKey) throw new Error("Set DEEPSEEK_API_KEY to use live AI generation.");
+
+  const response = await fetch(`${DEEPSEEK_BASE_URL.replace(/\/$/, "")}/chat/completions`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: user },
+      ],
+      max_tokens: options.maxTokens ?? 1200,
+      temperature: 0.2,
+      ...(options.responseFormat ? { response_format: { type: options.responseFormat } } : {}),
+    }),
   });
-  return res.content
-    .map((b) => (b.type === "text" ? b.text : ""))
-    .join("")
-    .trim();
+
+  const payload = (await response.json().catch(() => ({}))) as DeepSeekChatResponse;
+  if (!response.ok) {
+    throw new Error(payload.error?.message ?? `DeepSeek request failed with HTTP ${response.status}`);
+  }
+
+  const text = payload.choices?.[0]?.message?.content?.trim();
+  if (!text) throw new Error("DeepSeek returned an empty completion.");
+  return text;
+}
+
+function normalizeDeepSeekModel(model: string): string {
+  const aliases: Record<string, string> = {
+    "deepseek-chat": "deepseek-v4-flash",
+    "deepseek-v4": "deepseek-v4-flash",
+  };
+  return aliases[model] ?? model;
 }
 
 export { MODEL };

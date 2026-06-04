@@ -1,6 +1,13 @@
 import discoveryRaw from "@/data/expert-first-pe-discovery-candidates.json";
 import type { CompanyCategory, ExpertType, ThemeId } from "./types";
 
+interface DiscoverySource {
+  title: string;
+  publisher?: string;
+  url: string;
+  evidence: string;
+}
+
 export interface ExpertDiscoveryCandidate {
   candidate_id: string;
   name: string;
@@ -31,7 +38,7 @@ export interface ExpertDiscoveryCandidate {
     relationship: string;
     evidence_deal_ids: string[];
   }[];
-  sources: { title: string; publisher?: string; url: string; evidence: string }[];
+  sources: DiscoverySource[];
   scores: {
     research_priority: number;
   };
@@ -49,6 +56,7 @@ export interface AdvisorExpertGap {
   deals: { deal_id: string; deal_name: string; target: string; lane: string; priority: number }[];
   search_priority: number;
   search_queries: string[];
+  sources?: DiscoverySource[];
 }
 
 export interface DerivedCompanyCandidate {
@@ -70,9 +78,11 @@ export interface DerivedCompanyCandidate {
     expert_priority: number;
   }[];
   deal_connections: { id: string; name: string; lane: string; theme: ThemeId; priority: number }[];
+  sources?: DiscoverySource[];
   scores: {
     research_priority: number;
   };
+  next_questions?: string[];
 }
 
 export interface ExpertDiscoveryCensus {

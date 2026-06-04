@@ -29,7 +29,7 @@
       "named_people": 46,
       "named_advisors": 29,
       "unresolved_people": 36,
-      "unresolved_organizations": 34
+      "unresolved_organizations": 32
     },
     "peers": {
       "candidates": 12,
@@ -41,7 +41,7 @@
       "named_people": 40,
       "named_advisors": 38,
       "unresolved_people": 40,
-      "unresolved_organizations": 55
+      "unresolved_organizations": 49
     },
     "by_lane": {
       "towerbrook": 9,
@@ -682,8 +682,8 @@
       "geography": "Global",
       "target": {
         "name": "Berkeley Research Group",
-        "canonical_id": null,
-        "canonical_match_status": "unresolved"
+        "canonical_id": "berkeley-research-group",
+        "canonical_match_status": "exact_name_match"
       },
       "sponsors": [
         {
@@ -716,7 +716,7 @@
           "canonical_id": null,
           "canonical_match_status": "unresolved",
           "organization": "Berkeley Research Group",
-          "organization_canonical_id": null
+          "organization_canonical_id": "berkeley-research-group"
         },
         {
           "role": "outgoing-executive-chair-and-continuing-professional",
@@ -724,7 +724,7 @@
           "canonical_id": null,
           "canonical_match_status": "unresolved",
           "organization": "Berkeley Research Group",
-          "organization_canonical_id": null
+          "organization_canonical_id": "berkeley-research-group"
         },
         {
           "role": "legal-counsel-target",
@@ -1422,8 +1422,8 @@
       "geography": "United States",
       "target": {
         "name": "Langan",
-        "canonical_id": null,
-        "canonical_match_status": "unresolved"
+        "canonical_id": "langan",
+        "canonical_match_status": "exact_name_match"
       },
       "sponsors": [
         {
@@ -1456,7 +1456,7 @@
           "canonical_id": null,
           "canonical_match_status": "unresolved",
           "organization": "Langan",
-          "organization_canonical_id": null
+          "organization_canonical_id": "langan"
         }
       ],
       "advisors": [
@@ -2020,8 +2020,8 @@
       "geography": "United States",
       "target": {
         "name": "Ally Energy Solutions",
-        "canonical_id": null,
-        "canonical_match_status": "unresolved"
+        "canonical_id": "ally-energy-solutions",
+        "canonical_match_status": "exact_name_match"
       },
       "sponsors": [
         {
@@ -2139,8 +2139,8 @@
       "geography": "North America",
       "target": {
         "name": "Scale Microgrids",
-        "canonical_id": null,
-        "canonical_match_status": "unresolved"
+        "canonical_id": "scale-microgrids",
+        "canonical_match_status": "exact_name_match"
       },
       "sponsors": [
         {
@@ -2172,7 +2172,7 @@
           "canonical_id": null,
           "canonical_match_status": "unresolved",
           "organization": "Scale Microgrids",
-          "organization_canonical_id": null
+          "organization_canonical_id": "scale-microgrids"
         },
         {
           "role": "seller-dealmaker",
@@ -2295,8 +2295,8 @@
       "geography": "Americas",
       "target": {
         "name": "Seven Seas Water Group",
-        "canonical_id": null,
-        "canonical_match_status": "unresolved"
+        "canonical_id": "seven-seas-water-group",
+        "canonical_match_status": "exact_name_match"
       },
       "sponsors": [
         {
@@ -2328,7 +2328,7 @@
           "canonical_id": null,
           "canonical_match_status": "unresolved",
           "organization": "Seven Seas Water Group",
-          "organization_canonical_id": null
+          "organization_canonical_id": "seven-seas-water-group"
         },
         {
           "role": "seller-dealmaker",
@@ -2433,8 +2433,8 @@
       "geography": "North America",
       "target": {
         "name": "Sigma Companies International",
-        "canonical_id": null,
-        "canonical_match_status": "unresolved"
+        "canonical_id": "sigma-companies-international",
+        "canonical_match_status": "exact_name_match"
       },
       "sponsors": [
         {
@@ -2467,7 +2467,7 @@
           "canonical_id": null,
           "canonical_match_status": "unresolved",
           "organization": "Sigma Companies International",
-          "organization_canonical_id": null
+          "organization_canonical_id": "sigma-companies-international"
         },
         {
           "role": "target-president",
@@ -2475,7 +2475,7 @@
           "canonical_id": null,
           "canonical_match_status": "unresolved",
           "organization": "Sigma Companies International",
-          "organization_canonical_id": null
+          "organization_canonical_id": "sigma-companies-international"
         },
         {
           "role": "incoming-chair",
@@ -2483,7 +2483,7 @@
           "canonical_id": null,
           "canonical_match_status": "unresolved",
           "organization": "Sigma Companies International",
-          "organization_canonical_id": null
+          "organization_canonical_id": "sigma-companies-international"
         }
       ],
       "advisors": [
@@ -2581,8 +2581,8 @@
       "geography": "United States",
       "target": {
         "name": "CROM",
-        "canonical_id": null,
-        "canonical_match_status": "unresolved"
+        "canonical_id": "crom",
+        "canonical_match_status": "exact_name_match"
       },
       "sponsors": [
         {
@@ -2614,7 +2614,7 @@
           "canonical_id": null,
           "canonical_match_status": "unresolved",
           "organization": "CROM",
-          "organization_canonical_id": null
+          "organization_canonical_id": "crom"
         },
         {
           "role": "executive-chair",
@@ -2622,7 +2622,7 @@
           "canonical_id": null,
           "canonical_match_status": "unresolved",
           "organization": "CROM",
-          "organization_canonical_id": null
+          "organization_canonical_id": "crom"
         }
       ],
       "advisors": [
@@ -2959,7 +2959,7 @@
           "canonical_id": null,
           "canonical_match_status": "unresolved",
           "organization": "Sigma Companies International",
-          "organization_canonical_id": null
+          "organization_canonical_id": "sigma-companies-international"
         },
         {
           "role": "target-founder",
@@ -3048,8 +3048,8 @@
       "geography": "United States",
       "target": {
         "name": "DMC Power",
-        "canonical_id": null,
-        "canonical_match_status": "unresolved"
+        "canonical_id": "dmc-power",
+        "canonical_match_status": "exact_name_match"
       },
       "sponsors": [
         {
@@ -3075,7 +3075,7 @@
           "canonical_id": null,
           "canonical_match_status": "unresolved",
           "organization": "DMC Power",
-          "organization_canonical_id": null
+          "organization_canonical_id": "dmc-power"
         },
         {
           "role": "buyer-ceo",

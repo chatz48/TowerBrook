@@ -1,5 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { MODEL } from "./llm";
+import { complete, hasModel } from "./llm";
 import { DEAL_TYPE_LABEL, extractDealFromText, scoreDeal, type DealExtractionResult } from "./deals";
 import type { Deal, DealAdvisor, DealFact, DealParty, DealType, ThemeId } from "./types";
 
@@ -43,17 +42,11 @@ export async function extractDealWithModel(input: {
   title?: string;
   url?: string;
 }): Promise<DealExtractionResult> {
-  if (!process.env.ANTHROPIC_API_KEY) return extractDealFromText(input);
+  if (!hasModel()) return extractDealFromText(input);
 
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const response = await client.messages.create({
-    model: MODEL,
-    max_tokens: 2600,
-    system: EXTRACTION_SYSTEM,
-    messages: [
-      {
-        role: "user",
-        content: `Source title: ${input.title ?? "Untitled"}
+  const text = await complete(
+    EXTRACTION_SYSTEM,
+    `Source title: ${input.title ?? "Untitled"}
 Source URL: ${input.url ?? "pasted text"}
 
 Extract this source into JSON:
@@ -81,11 +74,9 @@ Extract this source into JSON:
 
 TEXT:
 ${input.text.slice(0, 18000)}`,
-      },
-    ],
-  });
+    { maxTokens: 2600, responseFormat: "json_object" },
+  );
 
-  const text = response.content.map((part) => (part.type === "text" ? part.text : "")).join("");
   const parsed = parseJson<ModelExtraction>(text);
   if (!parsed) return extractDealFromText(input);
   return modelToExtraction(parsed, input);

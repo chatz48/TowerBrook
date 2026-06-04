@@ -1,7 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { getDbDeal, persistSourceChunks, upsertSource } from "./deal-db";
 import { getSupabaseServiceClient } from "./supabase";
-import { MODEL } from "./llm";
+import { complete, hasModel } from "./llm";
+import { callBackendApi, hasBackendApi } from "./backend-api";
 import type { DealFact } from "./types";
 
 type EnrichedSource = {
@@ -34,13 +34,25 @@ type EnrichmentPayload = {
   remainingMissingFacts?: string[];
 };
 
+type BackendChatResponse = {
+  answer?: string;
+  citations?: {
+    title?: string;
+    url?: string;
+    evidence?: string;
+  }[];
+};
+
 const SYSTEM = `You enrich private-equity deal facts using web search.
 Use authoritative sources first: buyer, seller, target, investor, bank, law firm, regulator, reputable trade press.
 Never invent undisclosed economics. Return strict JSON only. Low-confidence or uncertain facts must be review-gated.`;
 
 export async function runDealEnrichment(externalDealId: string) {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error("Set ANTHROPIC_API_KEY to run web-search deal enrichment.");
+  if (!hasModel()) {
+    throw new Error("Set DEEPSEEK_API_KEY to run deal enrichment.");
+  }
+  if (!hasBackendApi()) {
+    throw new Error("Set BACKEND_API_URL so deal enrichment can use backend web search.");
   }
 
   const deal = await getDbDeal(externalDealId);
@@ -68,16 +80,10 @@ export async function runDealEnrichment(externalDealId: string) {
   if (runError) throw new Error(runError.message);
 
   try {
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-    const response = await client.messages.create({
-      model: MODEL,
-      max_tokens: 3000,
-      system: SYSTEM,
-      tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 8 }],
-      messages: [
-        {
-          role: "user",
-          content: `Deal: ${deal.name}
+    const searchSources = await collectSearchEvidence(deal.name, deal.followUpSearches);
+    const text = await complete(
+      SYSTEM,
+      `Deal: ${deal.name}
 Theme: ${deal.theme}
 Known facts:
 ${deal.facts.map((fact) => `- ${fact.factType}: ${fact.factValue}`).join("\n")}
@@ -88,6 +94,16 @@ ${deal.missingFacts.map((fact) => `- ${fact}`).join("\n")}
 Run targeted searches using these query ideas:
 ${deal.followUpSearches.map((query) => `- ${query}`).join("\n")}
 
+Source snippets from backend web search:
+${searchSources
+  .map(
+    (source, index) =>
+      `${index + 1}. ${source.title}\nURL: ${source.url}\nPublisher: ${source.publisher ?? ""}\nSnippet: ${
+        source.snippet ?? ""
+      }`,
+  )
+  .join("\n\n")}
+
 Return strict JSON:
 {
   "sources": [{"title": string, "url": string, "publisher": string, "snippet": string}],
@@ -95,15 +111,14 @@ Return strict JSON:
   "conflicts": [{"factType": string, "values": string[], "note": string}],
   "remainingMissingFacts": string[]
 }`,
-        },
-      ],
-    });
+      { maxTokens: 3000, responseFormat: "json_object" },
+    );
 
-    const text = response.content.map((part) => (part.type === "text" ? part.text : "")).join("");
     const payload = parseJson<EnrichmentPayload>(text) ?? {};
     const sourceIdByUrl = new Map<string, string>();
+    const sourcesToPersist = payload.sources?.length ? payload.sources : searchSources;
 
-    for (const source of payload.sources ?? []) {
+    for (const source of sourcesToPersist) {
       const sourceId = await upsertSource({
         title: source.title,
         url: source.url,
@@ -176,7 +191,7 @@ Return strict JSON:
       .from("deal_enrichment_runs")
       .update({
         status: "completed",
-        sources_found: payload.sources?.length ?? 0,
+        sources_found: sourcesToPersist.length,
         facts_created: factRows.length,
         completed_at: new Date().toISOString(),
       })
@@ -185,7 +200,7 @@ Return strict JSON:
 
     return {
       runId: run.id as string,
-      sourcesFound: payload.sources?.length ?? 0,
+      sourcesFound: sourcesToPersist.length,
       factsCreated: factRows.length,
       conflictsCreated: conflictRows.length,
       remainingMissingFacts: payload.remainingMissingFacts ?? deal.missingFacts,
@@ -203,6 +218,33 @@ Return strict JSON:
   }
 }
 
+async function collectSearchEvidence(dealName: string, queries: string[]): Promise<EnrichedSource[]> {
+  const seen = new Map<string, EnrichedSource>();
+  const selectedQueries = (queries.length ? queries : [`${dealName} transaction advisor completion`]).slice(0, 4);
+
+  for (const query of selectedQueries) {
+    const response = await callBackendApi<BackendChatResponse>("/chat", {
+      method: "POST",
+      body: JSON.stringify({
+        message: query,
+        tools: ["web_search"],
+      }),
+    });
+    for (const citation of response?.citations ?? []) {
+      const url = citation.url;
+      if (!url || seen.has(url)) continue;
+      seen.set(url, {
+        title: citation.title || url,
+        url,
+        publisher: safePublisher(url),
+        snippet: citation.evidence,
+      });
+    }
+  }
+
+  return [...seen.values()].slice(0, 12);
+}
+
 function parseJson<T>(text: string): T | null {
   try {
     return JSON.parse(text) as T;
@@ -214,5 +256,13 @@ function parseJson<T>(text: string): T | null {
     } catch {
       return null;
     }
+  }
+}
+
+function safePublisher(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "Web source";
   }
 }
