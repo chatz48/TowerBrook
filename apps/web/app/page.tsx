@@ -53,9 +53,11 @@ export default async function Home() {
     ...experts.flatMap((expert) => expert.sources.map((source) => source.url)),
     ...companies.flatMap((company) => company.sources.map((source) => source.url)),
   ]).size;
+  const searchExperts = filterTowerBrookEmployees(getExperts(), includeTowerBrookEmployees);
+  const searchCompanies = getCompanies();
 
   const index: SearchItem[] = [
-    ...experts.map((expert) => ({
+    ...searchExperts.map((expert) => ({
       id: expert.id,
       name: expert.name,
       sub: expert.headline,
@@ -63,7 +65,7 @@ export default async function Home() {
       href: `/experts/${expert.id}`,
       keywords: `${expert.name} ${expert.headline} ${expert.org ?? ""} ${expert.whyRelevant}`.toLowerCase(),
     })),
-    ...companies.map((company) => ({
+    ...searchCompanies.map((company) => ({
       id: company.id,
       name: company.name,
       sub: company.description,
@@ -89,11 +91,14 @@ export default async function Home() {
                 next diligence step.
               </p>
             </div>
-            <SearchBox index={index} />
+            <SearchBox index={index} scopeLabel="Full expert and company graph" />
           </div>
 
           <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line pt-4 text-[11px] text-ink-faint">
             <span className="ee-label text-ink">Coverage snapshot</span>
+            <span className="rounded-md border border-line bg-paper px-2 py-1 text-[11px] font-semibold text-ink-soft">
+              Current page scope: {themeFocus === "all" ? "All three themes" : THEMES.find((theme) => theme.id === themeFocus)?.name}
+            </span>
             <CoverageFact value={experts.length} label="expert profiles" />
             <CoverageFact value={companies.length} label="companies" />
             <CoverageFact value={sourceCount} label="source records" />
@@ -170,14 +175,14 @@ export default async function Home() {
                       href={leadTarget ? `/companies/${leadTarget.id}` : "/companies"}
                     />
                     <DecisionRow
-                      label="Coverage gap"
-                      title={gap ?? "No taxonomy gap identified"}
+                      label={gap ? "Coverage gap" : "Coverage check"}
+                      title={gap ?? "No taxonomy gap flagged"}
                       body={
                         gap
                           ? "No mapped expert currently covers this specialty."
                           : "Review source freshness and relationship depth."
                       }
-                      href="/discover"
+                      href={`/discover?gap=${encodeURIComponent(gap ?? "source freshness")}`}
                     />
                   </div>
 

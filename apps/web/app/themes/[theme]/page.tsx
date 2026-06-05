@@ -120,7 +120,7 @@ export default async function ThemePage({
             <Link href="#companies" className="ee-button ee-button-secondary">
               Review targets
             </Link>
-            <Link href="/discover" className="ee-button ee-button-secondary">
+            <Link href={`/discover?gap=${encodeURIComponent(blankSpaces[0] ?? "source freshness")}`} className="ee-button ee-button-secondary">
               Fill coverage gaps
             </Link>
           </div>
@@ -146,15 +146,15 @@ export default async function ThemePage({
             action="Review evidence"
           />
           <DecisionCard
-            label="Critical coverage gap"
-            title={blankSpaces[0] ?? "No taxonomy gap identified"}
+            label={blankSpaces[0] ? "Next evidence gap" : "Coverage check"}
+            title={blankSpaces[0] ?? "No taxonomy gap flagged"}
             body={
               blankSpaces[0]
                 ? "No mapped expert currently covers this specialty."
                 : "Review source freshness and relationship depth."
             }
-            href="/discover"
-            action="Run discovery"
+            href={`/discover?gap=${encodeURIComponent(blankSpaces[0] ?? "source freshness")}`}
+            action={blankSpaces[0] ? "Find names" : "Review queue"}
           />
           <DecisionCard
             label="Public relationship path"

@@ -9,7 +9,11 @@ export async function POST(request: Request) {
     });
     if (!response) {
       return Response.json(
-        { error: "Set BACKEND_API_URL to enable LinkedIn link search." },
+        {
+          error:
+            "Live profile search is not connected in this demo. Use the saved public evidence and suggested searches instead.",
+          demoMode: true,
+        },
         { status: 503 },
       );
     }

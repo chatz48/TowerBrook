@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 
 type Mode = "call-prep" | "outreach";
 
@@ -140,11 +141,22 @@ export default function ExpertActions({
           {loading && mode === "outreach" ? "Drafting..." : "Draft outreach note"}
         </button>
         <div className="grid grid-cols-2 gap-2">
-          <Link href="/reports" className="ee-button ee-button-secondary min-h-8 px-3">
-            Use in report
-          </Link>
-          <Link href="/graph" className="ee-button ee-button-secondary min-h-8 px-3">
+          <WorkspaceActionButton
+            item={{
+              id: expertId,
+              kind: "call",
+              name: expertName,
+              sub: "Prepared expert call",
+              href: `/experts/${expertId}`,
+            }}
+          >
+            Add to tray
+          </WorkspaceActionButton>
+          <Link href={`/graph?focus=expert:${expertId}`} className="ee-button ee-button-secondary min-h-8 px-3">
             Show path
+          </Link>
+          <Link href={`/reports?expert=${expertId}`} className="ee-button ee-button-secondary min-h-8 px-3">
+            Use in report
           </Link>
         </div>
       </div>
@@ -171,6 +183,19 @@ export default function ExpertActions({
           <div className="max-h-[420px] overflow-auto rounded-md border border-line bg-paper p-3.5 text-sm leading-relaxed whitespace-pre-wrap">
             {output}
           </div>
+          <WorkspaceActionButton
+            item={{
+              id: `${expertId}:${mode}`,
+              kind: "memo",
+              name: `${expertName} ${mode === "call-prep" ? "call brief" : "outreach note"}`,
+              sub: output.slice(0, 160),
+              href: `/experts/${expertId}#call-actions`,
+              status: "ready for memo",
+            }}
+            className="ee-button ee-button-secondary mt-3 w-full"
+          >
+            Add output to memo basket
+          </WorkspaceActionButton>
         </div>
       ) : null}
     </div>

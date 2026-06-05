@@ -85,6 +85,9 @@ export default function ThemeSwitcher({
       <span className="mr-1 shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
         Theme focus
       </span>
+      <span className="hidden shrink-0 text-[11px] text-ink-faint lg:inline">
+        Filters counts, lists, memo, and graph
+      </span>
       {OPTIONS.map((theme) => {
         const active = activeFocus === theme.id;
         return (

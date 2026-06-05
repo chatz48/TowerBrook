@@ -10,6 +10,7 @@ import { getTargetedExpertExpansion } from "@/lib/targeted-expansion";
 import { towerBrookExpertScore } from "@/lib/towerbrook";
 import { EXPERT_TYPE_LABEL } from "@/lib/labels";
 import { Badge } from "@/app/components/ui";
+import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import { getThemeFocus } from "@/lib/theme-focus-server";
 import { matchesThemeFocus } from "@/lib/theme-focus";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
@@ -53,10 +54,10 @@ export default async function ExpertsPage() {
       <div className="mx-auto max-w-[1540px]">
         <header className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-[26px] font-semibold tracking-tight">Expert Explorer</h1>
+            <h1 className="text-[26px] font-semibold tracking-tight">Call-Ready Experts</h1>
             <p className="mt-2 max-w-3xl text-[13px] text-ink-soft">
-              Use founders, operators and transaction experts to uncover new
-              investment opportunities, introductions and companies.
+              Start with the people most likely to unlock investable companies, introductions,
+              and sharp diligence questions.
             </p>
           </div>
           <div className="flex gap-2">
@@ -75,7 +76,7 @@ export default async function ExpertsPage() {
         <section className="ee-panel mb-5 overflow-hidden rounded-lg">
           <div className="flex items-start justify-between gap-4 border-b border-line px-4 py-3">
             <div>
-              <h2 className="ee-label text-ink">Call list</h2>
+              <h2 className="ee-label text-ink">This week&apos;s call slate</h2>
               <p className="mt-1 text-[11px] text-ink-faint">
                 Canonical experts prioritized for a call, referral ask, or company lead.
               </p>
@@ -94,7 +95,7 @@ export default async function ExpertsPage() {
                   <th>Companies they can unlock</th>
                   <th>Relationship path</th>
                   <th>Evidence</th>
-                  <th />
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -145,9 +146,24 @@ export default async function ExpertsPage() {
                         {expert.news?.length ? ` · ${expert.news.length} dated signal${expert.news.length === 1 ? "" : "s"}` : ""}
                       </td>
                       <td>
-                        <Link href={`/experts/${expert.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
-                          Prepare call
-                        </Link>
+                        <div className="flex flex-wrap gap-2">
+                          <Link href={`/experts/${expert.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
+                            Prepare
+                          </Link>
+                          <WorkspaceActionButton
+                            item={{
+                              id: expert.id,
+                              kind: "call",
+                              name: expert.name,
+                              sub: expert.headline,
+                              href: `/experts/${expert.id}`,
+                              theme: expert.themes[0],
+                              note: latestNews?.headline ?? expert.whyRelevant,
+                            }}
+                          >
+                            Save
+                          </WorkspaceActionButton>
+                        </div>
                       </td>
                     </tr>
                   );

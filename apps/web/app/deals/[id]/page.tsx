@@ -1,6 +1,13 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { DEAL_ADVISOR_LABEL, DEAL_TYPE_LABEL, dealDate, resolveDealCompanies, resolveDealExperts } from "@/lib/deals";
+import {
+  DEAL_ADVISOR_LABEL,
+  DEAL_TYPE_LABEL,
+  dealDate,
+  isRequiredDealFact,
+  resolveDealCompanies,
+  resolveDealExperts,
+} from "@/lib/deals";
 import { listDeals, loadDeal } from "@/lib/deal-repository";
 import { Badge, BackLink, Confidence, ConfidenceBars, SourceLinks, ThemeTag } from "@/app/components/ui";
 
@@ -20,6 +27,8 @@ export default async function DealPage({
   const companies = resolveDealCompanies(deal);
   const experts = resolveDealExperts(deal);
   const missing = deal.missingFacts;
+  const requiredMissing = missing.filter(isRequiredDealFact);
+  const optionalMissing = missing.filter((fact) => !isRequiredDealFact(fact));
   const conflicts = deal.contradictoryFacts ?? [];
 
   return (
@@ -49,10 +58,10 @@ export default async function DealPage({
               </div>
             </div>
             <div className="grid min-w-[420px] grid-cols-2 overflow-hidden rounded-lg border border-line max-lg:min-w-0">
-              <Fact label="Completeness" value={`${Math.round(deal.completionScore * 100)}%`} />
+              <Fact label="Required completion" value={`${Math.round(deal.completionScore * 100)}%`} />
               <Fact label="Confidence" value={`${(deal.confidence * 100).toFixed(0)}%`} />
               <Fact label="Advisors" value={String(deal.advisorCount)} />
-              <Fact label="Missing facts" value={String(missing.length)} />
+              <Fact label="Follow-up gaps" value={String(missing.length)} />
             </div>
           </div>
         </header>
@@ -190,9 +199,18 @@ export default async function DealPage({
             </section>
 
             <section className="ee-panel rounded-lg p-5">
-              <div className="ee-label text-ink">Missing facts</div>
+              <div className="ee-label text-ink">Follow-up gaps</div>
+              <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">
+                Required completion measures the core rubric. These are remaining diligence items
+                or optional details to chase before relying on the scorecard in a memo.
+              </p>
               <ul className="mt-3 space-y-2 text-[12px] leading-relaxed text-ink-soft">
-                {(missing.length ? missing : ["No required gaps currently flagged"]).map((item) => (
+                {(requiredMissing.length ? requiredMissing : []).map((item) => (
+                  <li key={item} className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-rose-700">
+                    Required: {item.replaceAll("_", " ")}
+                  </li>
+                ))}
+                {(optionalMissing.length ? optionalMissing : missing.length ? [] : ["No required gaps currently flagged"]).map((item) => (
                   <li key={item} className="rounded-md border border-line bg-paper px-3 py-2">
                     {item.replaceAll("_", " ")}
                   </li>

@@ -4,13 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
-  { href: "/experts", label: "Experts", match: "/experts" },
+  { href: "/", label: "Themes", match: "/" },
+  { href: "/experts", label: "Call Tray", match: "/experts" },
   { href: "/companies", label: "Companies", match: "/companies" },
-  { href: "/deals", label: "Deals", match: "/deals" },
-  { href: "/discover", label: "Discover", match: "/discover" },
-  { href: "/graph", label: "Evidence", match: "/graph" },
-  { href: "/reports", label: "Reports", match: "/reports" },
+  { href: "/reports", label: "Memo", match: "/reports" },
   { href: "/ask", label: "Copilot", match: "/ask" },
+  { href: "/discover", label: "Research Queue", match: "/discover" },
+  { href: "/deals", label: "Deals", match: "/deals" },
+  { href: "/graph", label: "Evidence Graph", match: "/graph" },
 ];
 
 export default function AppShellNav({ mobile = false }: { mobile?: boolean }) {

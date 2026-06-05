@@ -154,8 +154,12 @@ export default function IngestPage() {
             onChange={(event) => setEnrich(event.target.checked)}
             className="accent-accent"
           />
-          Find missing facts after persistence
+          Create missing-fact searches after saving to the database
         </label>
+        <p className="mt-1 text-[11px] leading-relaxed text-ink-faint">
+          In local demo mode, the app extracts a reviewable draft and shows the searches to run
+          before anything is committed to the graph.
+        </p>
 
         <button
           type="button"
@@ -163,7 +167,7 @@ export default function IngestPage() {
           disabled={loading}
           className="ee-button ee-button-primary mt-4 w-full disabled:opacity-50"
         >
-        {loading ? "Extracting..." : "Extract and persist graph facts"}
+        {loading ? "Extracting..." : "Extract draft facts"}
         </button>
 
         <div className="mt-4 grid grid-cols-2 gap-2">
@@ -262,9 +266,9 @@ export default function IngestPage() {
             </section>
 
             <section className="grid gap-5 lg:grid-cols-3">
+              <ReviewChecklist facts={result.reviewCandidates ?? []} />
               <Checklist title="Missing facts" items={result.deal.missingFacts.map((item) => item.replaceAll("_", " "))} />
               <Checklist title="Follow-up searches" items={result.deal.followUpSearches} />
-              <Checklist title="Relationship candidates" items={result.relationshipCandidates ?? []} />
             </section>
           </div>
         ) : (
@@ -313,6 +317,27 @@ export default function IngestPage() {
         )}
       </main>
     </div>
+  );
+}
+
+function ReviewChecklist({ facts }: { facts: DraftFact[] }) {
+  return (
+    <section className="ee-panel rounded-lg p-5">
+      <div className="ee-label text-ink">Review checklist</div>
+      <ul className="mt-3 space-y-2 text-[12px] leading-relaxed text-ink-soft">
+        {(facts.length ? facts : []).slice(0, 6).map((fact) => (
+          <li key={fact.id} className="rounded-md border border-line bg-paper px-3 py-2">
+            Approve or reject {fact.factType.replaceAll("_", " ")}:{" "}
+            <span className="font-semibold text-ink">{fact.factValue}</span>
+          </li>
+        ))}
+        {!facts.length ? (
+          <li className="rounded-md border border-line bg-paper px-3 py-2">
+            No extracted facts need review.
+          </li>
+        ) : null}
+      </ul>
+    </section>
   );
 }
 

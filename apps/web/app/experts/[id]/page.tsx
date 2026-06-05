@@ -18,6 +18,7 @@ import {
   ThemeTag,
 } from "@/app/components/ui";
 import ExpertActions from "@/app/components/ExpertActions";
+import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 
 export function generateStaticParams() {
   return getExperts().map((e) => ({ id: e.id }));
@@ -41,10 +42,10 @@ export default async function ExpertPage({
         <BackLink href={`/themes/${expert.themes[0]}`}>Back to experts</BackLink>
 
         <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
-          <main className="space-y-5">
+          <main className="min-w-0 space-y-5">
             <header className="ee-panel rounded-lg p-5">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-                <div>
+                <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-3">
                     <h1 className="text-[28px] font-semibold tracking-tight">
                       {expert.name}
@@ -69,7 +70,7 @@ export default async function ExpertPage({
                     ))}
                   </div>
                 </div>
-                <div className="min-w-[360px] rounded-lg border border-line bg-[#fbfcff] p-4 max-lg:min-w-0">
+                <div className="w-full min-w-0 rounded-lg border border-line bg-[#fbfcff] p-4 lg:w-auto lg:min-w-[360px]">
                   <div className="ee-label text-ink">Next action</div>
                   <div className="mt-2 text-[15px] font-semibold text-ink">
                     Prepare a source-backed call with {expert.name.split(" ")[0]}
@@ -79,14 +80,27 @@ export default async function ExpertPage({
                     {" "}{expert.sources.length} source record{expert.sources.length === 1 ? "" : "s"},
                     {" "}and {towerBrook.isDirect ? towerBrook.label : "no public TowerBrook path mapped"}.
                   </p>
-                  <div className="mt-4 grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+                  <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                     <a href="#call-actions" className="ee-button ee-button-primary min-h-8 px-3">
                       Prepare call
                     </a>
-                    <Link href="/graph" className="ee-button ee-button-secondary min-h-8 px-3">
+                    <WorkspaceActionButton
+                      item={{
+                        id: expert.id,
+                        kind: "call",
+                        name: expert.name,
+                        sub: expert.headline,
+                        href: `/experts/${expert.id}`,
+                        theme: expert.themes[0],
+                        note: expert.whyRelevant,
+                      }}
+                    >
+                      Add to call tray
+                    </WorkspaceActionButton>
+                    <Link href={`/graph?focus=expert:${expert.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
                       Show path
                     </Link>
-                    <Link href="/reports" className="ee-button ee-button-secondary min-h-8 px-3">
+                    <Link href={`/reports?expert=${expert.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
                       Use in report
                     </Link>
                   </div>
@@ -125,37 +139,39 @@ export default async function ExpertPage({
               <div className="border-b border-line px-4 py-3">
                 <h2 className="ee-label text-ink">Company / deal connections ({expert.resolvedCompanies.length})</h2>
               </div>
-              <table className="ee-table">
-                <thead>
-                  <tr>
-                    <th>Company / deal</th>
-                    <th>Relationship</th>
-                    <th>Evidence</th>
-                    <th>Evidence coverage</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {expert.resolvedCompanies.map((rc) => (
-                    <tr key={`${rc.company.id}-${rc.relationship}`}>
-                      <td>
-                        <Link href={`/companies/${rc.company.id}`} className="ee-link">
-                          {rc.company.name}
-                        </Link>
-                        <div className="mt-0.5 text-[11px] text-ink-faint">
-                          {rc.company.category}
-                        </div>
-                      </td>
-                      <td>{RELATIONSHIP_LABEL[rc.relationship]}</td>
-                      <td className="max-w-[320px] text-[12px] text-ink-soft">
-                        {rc.note ?? rc.company.whyInteresting ?? rc.company.description}
-                      </td>
-                      <td className="text-[11px] text-ink-soft">
-                        {rc.company.sources.length} company source{rc.company.sources.length === 1 ? "" : "s"}
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="ee-table min-w-[760px]">
+                  <thead>
+                    <tr>
+                      <th>Company / deal</th>
+                      <th>Relationship</th>
+                      <th>Evidence</th>
+                      <th>Evidence coverage</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {expert.resolvedCompanies.map((rc) => (
+                      <tr key={`${rc.company.id}-${rc.relationship}`}>
+                        <td>
+                          <Link href={`/companies/${rc.company.id}`} className="ee-link">
+                            {rc.company.name}
+                          </Link>
+                          <div className="mt-0.5 text-[11px] text-ink-faint">
+                            {rc.company.category}
+                          </div>
+                        </td>
+                        <td>{RELATIONSHIP_LABEL[rc.relationship]}</td>
+                        <td className="max-w-[320px] text-[12px] text-ink-soft">
+                          {rc.note ?? rc.company.whyInteresting ?? rc.company.description}
+                        </td>
+                        <td className="text-[11px] text-ink-soft">
+                          {rc.company.sources.length} company source{rc.company.sources.length === 1 ? "" : "s"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </section>
 
             {expert.news?.length ? (
@@ -170,42 +186,44 @@ export default async function ExpertPage({
                 <div className="border-b border-line px-4 py-3">
                   <h2 className="ee-label text-ink">Deal involvement ({relatedDeals.length})</h2>
                 </div>
-                <table className="ee-table">
-                  <thead>
-                    <tr>
-                      <th>Deal</th>
-                      <th>Role</th>
-                      <th>Type</th>
-                      <th>Date</th>
-                      <th>Why call</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {relatedDeals.map((deal) => {
-                      const partyRole =
-                        deal.parties.find((party) => party.personId === expert.id)?.role ??
-                        "surfaced expert";
-                      return (
-                        <tr key={deal.id}>
-                          <td>
-                            <Link href={`/deals/${deal.id}`} className="ee-link">
-                              {deal.name}
-                            </Link>
-                            <div className="mt-0.5 text-[11px] text-ink-faint">
-                              Completeness {Math.round(deal.completionScore * 100)}%
-                            </div>
-                          </td>
-                          <td>{partyRole.replaceAll("-", " ")}</td>
-                          <td>{DEAL_TYPE_LABEL[deal.dealType]}</td>
-                          <td>{dealDate(deal) ?? "Missing"}</td>
-                          <td className="max-w-[360px] text-[12px] leading-relaxed text-ink-soft">
-                            Ask who advised the deal, what diligence mattered, and which similar companies should be mapped next.
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                <div className="overflow-x-auto">
+                  <table className="ee-table min-w-[840px]">
+                    <thead>
+                      <tr>
+                        <th>Deal</th>
+                        <th>Role</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Why call</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {relatedDeals.map((deal) => {
+                        const partyRole =
+                          deal.parties.find((party) => party.personId === expert.id)?.role ??
+                          "surfaced expert";
+                        return (
+                          <tr key={deal.id}>
+                            <td>
+                              <Link href={`/deals/${deal.id}`} className="ee-link">
+                                {deal.name}
+                              </Link>
+                              <div className="mt-0.5 text-[11px] text-ink-faint">
+                                Completeness {Math.round(deal.completionScore * 100)}%
+                              </div>
+                            </td>
+                            <td>{partyRole.replaceAll("-", " ")}</td>
+                            <td>{DEAL_TYPE_LABEL[deal.dealType]}</td>
+                            <td>{dealDate(deal) ?? "Missing"}</td>
+                            <td className="max-w-[360px] text-[12px] leading-relaxed text-ink-soft">
+                              Ask who advised the deal, what diligence mattered, and which similar companies should be mapped next.
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </section>
             ) : null}
 
