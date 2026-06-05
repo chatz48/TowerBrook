@@ -179,6 +179,18 @@ function quickJumpNodes(
     .slice(0, 6);
 }
 
+function expertDomainOptions(experts: ExplorerExpertNode[]): { value: string; label: string }[] {
+  const seen = new Set<string>();
+  const options: { value: string; label: string }[] = [];
+  for (const expert of experts) {
+    if (!seen.has(expert.type)) {
+      seen.add(expert.type);
+      options.push({ value: expert.type, label: expert.typeLabel });
+    }
+  }
+  return options.sort((a, b) => a.label.localeCompare(b.label));
+}
+
 export default function GraphExplorer({
   themes,
   experts,
@@ -213,6 +225,7 @@ export default function GraphExplorer({
   );
   const [confidenceFloor, setConfidenceFloor] = useState(0.72);
   const [pathView, setPathView] = useState(true);
+  const [expertDomain, setExpertDomain] = useState<string>("all");
   const [selectedKey, setSelectedKey] = useState(defaultSelected ?? experts[0]?.key ?? companies[0]?.key);
   const [history, setHistory] = useState<string[]>([]);
   const canvasColumnRef = useRef<HTMLElement>(null);
@@ -242,9 +255,13 @@ export default function GraphExplorer({
         if (!relationships[edge.relationship]) return false;
         if (edge.confidence < confidenceFloor) return false;
         if (!nodeKinds[from.kind] || !nodeKinds[to.kind]) return false;
+        if (expertDomain !== "all") {
+          const expertNode = from.kind === "expert" ? from : to.kind === "expert" ? to : null;
+          if (expertNode && expertNode.type !== expertDomain) return false;
+        }
         return true;
       }),
-    [confidenceFloor, edges, nodeByKey, nodeKinds, relationships, theme],
+    [confidenceFloor, edges, nodeByKey, nodeKinds, relationships, theme, expertDomain],
   );
 
   const filteredNodeKeys = useMemo(() => {
@@ -393,6 +410,7 @@ export default function GraphExplorer({
     );
     setConfidenceFloor(0.72);
     setPathView(true);
+    setExpertDomain("all");
     setSelectedKey(defaultSelected ?? experts[0]?.key ?? companies[0]?.key ?? deals[0]?.key);
     setHistory([]);
   }
@@ -585,6 +603,30 @@ export default function GraphExplorer({
                 {NODE_KIND_LABEL[kind]}
               </label>
             ))}
+          </section>
+
+          <section className={styles.panelSection}>
+            <div className={styles.sectionLine}>
+              <strong>Expert domain</strong>
+              <button
+                type="button"
+                onClick={() => setExpertDomain("all")}
+              >
+                All
+              </button>
+            </div>
+            <select
+              className={styles.select}
+              value={expertDomain}
+              onChange={(event) => setExpertDomain(event.target.value)}
+            >
+              <option value="all">All expert domains</option>
+              {expertDomainOptions(experts).map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
           </section>
 
           <section className={styles.panelSection}>
