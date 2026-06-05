@@ -30,6 +30,15 @@ Create typed person-to-company and person-to-deal relationships using exact role
 founded, led, invested_in, advised_on, banked, legal_counsel, diligence_provider or board_member.
 Extract companies that become interesting through those expert relationships.
 
+When target_context includes missing_fact_types or requested_fact_types, facts are
+the primary required output. Reason about those requested fields first, then return
+each supported value in facts[] using the exact fact_type names requested, including
+seed_round, last_funding, total_funding, launch_date, product_live_status, logo_url,
+website, linkedin, or email. Use target_context.target_name as subject_name and
+target_context.target_type as subject_type when available. Only add people or
+companies if the source provides useful additional entities. If the source does not
+support a requested fact, omit it rather than guessing.
+
 Return strict JSON with keys: people, companies, relationships, facts, citations.
 Do not return arrays of strings. Every item must be an object matching the key names in the request.
 Only extract facts grounded in the supplied text. Do not invent URLs, dates, people or companies."""
@@ -77,13 +86,15 @@ class DeepSeekExtractor:
         if not raw or not raw.strip():
             return self._heuristic_extract(text, title, url, theme_id)
         try:
-            return ExtractionResult.model_validate_json(raw)
+            result = ExtractionResult.model_validate_json(raw)
+            return self._apply_target_fact_context(result, target_context)
         except Exception:
             try:
                 parsed = json.loads(raw)
-                return ExtractionResult.model_validate(
+                result = ExtractionResult.model_validate(
                     self._normalize_extraction_payload(parsed, title, url, theme_id)
                 )
+                return self._apply_target_fact_context(result, target_context)
             except Exception:
                 return self._heuristic_extract(text, title, url, theme_id)
 
@@ -376,6 +387,53 @@ class DeepSeekExtractor:
     def _entity_type(self, value: Any, fallback: str) -> str:
         allowed = {"person", "company", "organization", "deal", "event", "theme", "relationship"}
         return value if isinstance(value, str) and value in allowed else fallback
+
+    def _apply_target_fact_context(
+        self,
+        result: ExtractionResult,
+        target_context: dict[str, Any] | None,
+    ) -> ExtractionResult:
+        if not target_context:
+            return result
+        requested = self._requested_fact_types(target_context)
+        target_name = self._first_text(target_context, "target_name", "company_name", "expert_name")
+        target_type = self._target_subject_type(target_context.get("target_type"))
+        if not requested or not target_name:
+            return result
+
+        facts = []
+        for fact in result.facts:
+            normalized_type = fact.fact_type.strip().lower().replace("-", "_").replace(" ", "_")
+            if normalized_type not in requested:
+                facts.append(fact)
+                continue
+            facts.append(
+                fact.model_copy(
+                    update={
+                        "subject_name": target_name,
+                        "subject_type": target_type,
+                        "fact_type": normalized_type,
+                    }
+                )
+            )
+        return result.model_copy(update={"facts": facts})
+
+    def _requested_fact_types(self, target_context: dict[str, Any]) -> set[str]:
+        raw = target_context.get("missing_fact_types") or target_context.get("requested_fact_types")
+        if isinstance(raw, str):
+            raw = [raw]
+        if not isinstance(raw, list):
+            raw = [target_context.get("missing_fact")]
+        return {
+            str(value).strip().lower().replace("-", "_").replace(" ", "_")
+            for value in raw
+            if isinstance(value, str) and value.strip()
+        }
+
+    def _target_subject_type(self, value: Any) -> str:
+        if value == "expert":
+            return "person"
+        return self._entity_type(value, fallback="company")
 
     def _fallback_synthesis(self, instruction: str, context: dict[str, Any]) -> str:
         citations = context.get("citations") or []

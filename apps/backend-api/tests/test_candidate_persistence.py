@@ -3,6 +3,7 @@ import asyncio
 from app.repositories.supabase_repo import repo
 from app.schemas.domain import (
     ExtractedCompany,
+    ExtractedFact,
     ExtractedPerson,
     ExtractedRelationship,
     ExtractionResult,
@@ -53,6 +54,17 @@ def test_live_discovery_persists_review_gated_candidates_and_matches():
                 confidence=0.9,
             )
         ],
+        facts=[
+            ExtractedFact(
+                subject_name="New Grid Co",
+                subject_type="company",
+                fact_type="last_funding",
+                fact_value="$10m Series A in 2025",
+                evidence_text="New Grid Co raised a $10m Series A in 2025.",
+                theme_id="grid-infrastructure",
+                confidence=0.82,
+            )
+        ],
     )
     source = SourceRecord(
         id="source-1",
@@ -81,6 +93,12 @@ def test_live_discovery_persists_review_gated_candidates_and_matches():
     assert result["people_candidates"] == 1
     assert result["company_candidates"] == 1
     assert result["relationship_candidates"] == 1
+    assert result["fact_candidates"] == 1
+    assert any(
+        candidate["candidate_type"] == "fact"
+        and candidate["payload"]["fact_type"] == "last_funding"
+        for candidate in repo.memory_discovery_candidates.values()
+    )
     assert result["entity_match_candidates"] == 1
     assert all(
         candidate["review_status"] == "needs_review"

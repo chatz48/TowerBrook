@@ -86,6 +86,35 @@ class SupabaseRepository:
                 return self._job_from_row(row)
         return None
 
+    def claim_job(self, job_id: str) -> ResearchJob | None:
+        if self.client:
+            rows = (
+                self.client.table("research_jobs")
+                .select("*")
+                .eq("id", job_id)
+                .eq("status", "queued")
+                .limit(1)
+                .execute()
+                .data
+            )
+            if not rows:
+                return None
+            updated = (
+                self.client.table("research_jobs")
+                .update({"status": "running"})
+                .eq("id", job_id)
+                .eq("status", "queued")
+                .execute()
+                .data
+            )
+            return self._job_from_row(updated[0]) if updated else None
+
+        row = self.memory_jobs.get(job_id)
+        if not row or row["status"] != "queued":
+            return None
+        row["status"] = "running"
+        return self._job_from_row(row)
+
     def update_job(self, job_id: str, values: dict[str, Any]) -> None:
         if self.client:
             self.client.table("research_jobs").update(values).eq("id", job_id).execute()

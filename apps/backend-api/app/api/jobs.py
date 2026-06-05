@@ -13,6 +13,10 @@ from app.services.expert_profile_completion import (
 )
 from app.services.graph_builder import persist_candidate_extraction
 from app.services.keiro_search import keiro
+from app.services.material_fact_completion import (
+    build_company_fact_queries,
+    build_expert_contact_queries,
+)
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -49,7 +53,26 @@ async def process_next_job():
     job = repo.claim_next_job()
     if not job:
         return {"processed": False, "reason": "No queued jobs"}
+    return await _process_claimed_job(job)
 
+
+@router.post("/process/{job_id}")
+async def process_job(job_id: str):
+    job = repo.claim_job(job_id)
+    if not job:
+        current = repo.get_job(job_id)
+        if not current:
+            raise HTTPException(status_code=404, detail="Research job not found")
+        return {
+            "processed": False,
+            "job_id": job_id,
+            "status": current.status,
+            "reason": "Job is not queued.",
+        }
+    return await _process_claimed_job(job)
+
+
+async def _process_claimed_job(job):
     try:
         settings = get_settings()
         queries = _queries_for_job(job.theme_id, job.query, job.metadata)
@@ -112,6 +135,7 @@ async def process_next_job():
             "people_candidates": 0,
             "company_candidates": 0,
             "relationship_candidates": 0,
+            "fact_candidates": 0,
             "entity_match_candidates": 0,
         }
         requests_used = 0
@@ -174,6 +198,7 @@ async def process_next_job():
                     "people_candidates",
                     "company_candidates",
                     "relationship_candidates",
+                    "fact_candidates",
                     "entity_match_candidates",
                 ):
                     totals[key] += persisted[key]
@@ -191,6 +216,7 @@ async def process_next_job():
                     "provider_status": provider_status,
                     "review_gated": True,
                     "entity_match_candidates": totals["entity_match_candidates"],
+                    "fact_candidates": totals["fact_candidates"],
                 },
             },
         )
@@ -219,6 +245,14 @@ def _queries_for_job(
         profile_queries = build_initial_profile_queries(metadata or {})
         if profile_queries:
             return profile_queries
+    if (metadata or {}).get("category") == "company-fact-completion":
+        company_fact_queries = build_company_fact_queries(metadata or {})
+        if company_fact_queries:
+            return company_fact_queries
+    if (metadata or {}).get("category") == "expert-contact-completion":
+        expert_contact_queries = build_expert_contact_queries(metadata or {})
+        if expert_contact_queries:
+            return expert_contact_queries
     metadata_queries = (metadata or {}).get("queries")
     if isinstance(metadata_queries, list):
         queries = [item.strip() for item in metadata_queries if isinstance(item, str) and item.strip()]
@@ -250,6 +284,7 @@ async def _process_expert_profile_completion(job, settings, provider_status):
         "people_candidates": 0,
         "company_candidates": 0,
         "relationship_candidates": 0,
+        "fact_candidates": 0,
         "entity_match_candidates": 0,
     }
     requests_used = 0
@@ -333,6 +368,7 @@ async def _process_expert_profile_completion(job, settings, provider_status):
                     "people_candidates",
                     "company_candidates",
                     "relationship_candidates",
+                    "fact_candidates",
                     "entity_match_candidates",
                 ):
                     totals[key] += persisted[key]
@@ -355,6 +391,7 @@ async def _process_expert_profile_completion(job, settings, provider_status):
             "evidence": coverage.evidence,
         },
         "entity_match_candidates": totals["entity_match_candidates"],
+        "fact_candidates": totals["fact_candidates"],
     }
     repo.update_job(
         job.id,
