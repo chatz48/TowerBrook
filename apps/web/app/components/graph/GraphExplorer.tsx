@@ -195,7 +195,7 @@ export default function GraphExplorer({
         RELATIONSHIP_ORDER.map((relationship) => [relationship, true]),
       ) as Record<RelationshipType, boolean>,
   );
-  const [confidenceFloor, setConfidenceFloor] = useState(0.72);
+  const [confidenceFloor, setConfidenceFloor] = useState(0.75);
   const [pathView, setPathView] = useState(true);
   const [selectedKey, setSelectedKey] = useState(defaultSelected ?? experts[0]?.key ?? companies[0]?.key);
   const [history, setHistory] = useState<string[]>([]);
@@ -271,7 +271,7 @@ export default function GraphExplorer({
   const visibleEdges = useMemo(() => {
     if (!selectedNode) return filteredEdges.slice(0, 10);
     const selected = selectedNode.key;
-    const firstHop = selectedEdges.slice(0, pathView ? 7 : 12);
+    const firstHop = selectedEdges.slice(0, pathView ? 6 : 10);
     if (!pathView) return firstHop;
 
     const firstHopKeys = new Set(firstHop.flatMap((edge) => [edge.from, edge.to]));
@@ -283,7 +283,7 @@ export default function GraphExplorer({
       )
       .filter((edge) => edge.from !== selected && edge.to !== selected)
       .sort((a, b) => b.confidence - a.confidence)
-      .slice(0, 5);
+      .slice(0, 3);
 
     return [...firstHop, ...secondHop];
   }, [filteredEdges, pathView, selectedEdges, selectedNode]);
@@ -375,7 +375,7 @@ export default function GraphExplorer({
         RELATIONSHIP_ORDER.map((relationship) => [relationship, true]),
       ) as Record<RelationshipType, boolean>,
     );
-    setConfidenceFloor(0.72);
+    setConfidenceFloor(0.75);
     setPathView(true);
     setSelectedKey(defaultSelected ?? experts[0]?.key ?? companies[0]?.key ?? deals[0]?.key);
     setHistory([]);
@@ -436,7 +436,7 @@ export default function GraphExplorer({
     <div className={styles.shell}>
       <div className={styles.workspace}>
         <aside className={styles.queryPanel}>
-          <PanelHeader title="Graph Explorer" caption="Choose a focus, then follow the relationships that matter." />
+          <PanelHeader title="Relationship Graph" caption="Start with a company or person, then follow the relationship layers that matter." />
 
           <section className={styles.panelSection}>
             <div className={styles.sectionLine}>
@@ -636,7 +636,7 @@ export default function GraphExplorer({
                 className={pathView ? styles.activeToolbarButton : undefined}
                 onClick={() => setPathView(true)}
               >
-                Relationship paths
+                Layered map
               </button>
               <button type="button" onClick={stepBack} disabled={history.length === 0}>
                 Previous focus
@@ -871,34 +871,81 @@ function GraphCanvas({
   const height = 520;
   const selected = selectedKey ? nodeByKey.get(selectedKey) : undefined;
   const others = nodes.filter((node) => node.key !== selectedKey);
-  const left = others.filter((node) => node.kind === "expert");
-  const right = others.filter((node) => node.kind === "company");
-  const overflow = others.filter(
-    (node) =>
-      !left.some((item) => item.key === node.key) && !right.some((item) => item.key === node.key),
-  );
-
   const positions = new Map<string, { x: number; y: number }>();
-  if (selected) positions.set(selected.key, { x: width / 2, y: height / 2 });
+  if (selected) positions.set(selected.key, { x: width / 2, y: 74 });
 
-  left.forEach((node, index) => {
-    positions.set(node.key, {
-      x: 180 + (index % 2) * 92,
-      y: 112 + (height - 220) * ((index + 0.5) / Math.max(left.length, 1)),
+  function edgeBetween(node: ExplorerNode) {
+    if (!selected) return undefined;
+    return edges.find(
+      (edge) =>
+        (edge.from === selected.key && edge.to === node.key) ||
+        (edge.to === selected.key && edge.from === node.key),
+    );
+  }
+
+  function layerFor(node: ExplorerNode) {
+    const edge = edgeBetween(node);
+    if (selected?.kind === "company") {
+      if (
+        node.kind === "expert" &&
+        (node.type === "ex-founder" ||
+          edge?.relationship === "founded" ||
+          edge?.relationship === "co-founded")
+      ) {
+        return "Founder layer";
+      }
+      if (
+        node.kind === "expert" &&
+        (node.type === "operator" ||
+          edge?.relationship === "led" ||
+          edge?.relationship === "board" ||
+          edge?.relationship === "served")
+      ) {
+        return "Operators and board";
+      }
+      return "Advisors, investors and deals";
+    }
+
+    if (node.kind === "company") return "Companies";
+    if (node.kind === "deal") return "Deals";
+    if (node.kind === "expert" && (node.type === "advisor" || node.type === "banker" || node.type === "lawyer")) {
+      return "Advisors";
+    }
+    return "Other people";
+  }
+
+  const yByLayer: Record<string, number> = selected?.kind === "company"
+    ? {
+        "Founder layer": 190,
+        "Operators and board": 306,
+        "Advisors, investors and deals": 430,
+      }
+    : {
+        Companies: 190,
+        "Other people": 306,
+        Advisors: 306,
+        Deals: 430,
+      };
+  const layers = new Map<string, ExplorerNode[]>();
+  for (const node of others) {
+    const layer = layerFor(node);
+    layers.set(layer, [...(layers.get(layer) ?? []), node]);
+  }
+  for (const [layer, layerNodes] of layers) {
+    const y = yByLayer[layer] ?? 430;
+    const gap = Math.min(176, 720 / Math.max(layerNodes.length - 1, 1));
+    const total = gap * (layerNodes.length - 1);
+    layerNodes.forEach((node, index) => {
+      positions.set(node.key, {
+        x: width / 2 - total / 2 + index * gap,
+        y,
+      });
     });
-  });
-  right.forEach((node, index) => {
-    positions.set(node.key, {
-      x: width - 180 - (index % 2) * 92,
-      y: 112 + (height - 220) * ((index + 0.5) / Math.max(right.length, 1)),
-    });
-  });
-  overflow.forEach((node, index) => {
-    positions.set(node.key, {
-      x: 330 + index * 110,
-      y: height - 82,
-    });
-  });
+  }
+  const layerLabels = [
+    selected ? { label: selected.kind === "company" ? "Company focus" : "Selected focus", y: 74 } : undefined,
+    ...Object.entries(yByLayer).map(([label, y]) => ({ label, y })),
+  ].filter((item): item is { label: string; y: number } => Boolean(item));
 
   return (
     <svg className={styles.graphSvg} viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Mapped relationship graph">
@@ -922,12 +969,15 @@ function GraphCanvas({
         ))}
       </defs>
       <rect width={width} height={height} rx="0" fill="#ffffff" />
-      <g opacity="0.52">
-        {Array.from({ length: 14 }).map((_, index) => (
-          <line key={`v-${index}`} x1={60 + index * 68} y1="44" x2={60 + index * 68} y2={height - 44} stroke="#eef2f7" />
-        ))}
-        {Array.from({ length: 7 }).map((_, index) => (
-          <line key={`h-${index}`} x1="52" y1={70 + index * 62} x2={width - 52} y2={70 + index * 62} stroke="#eef2f7" />
+      <g>
+        {layerLabels.map((layer) => (
+          <g key={layer.label}>
+            <line x1="48" y1={layer.y} x2={width - 48} y2={layer.y} stroke="#edf2f7" />
+            <rect x="56" y={layer.y - 17} width="154" height="22" rx="11" fill="#f8fafc" stroke="#e4eaf2" />
+            <text x="74" y={layer.y - 2} className={styles.layerText}>
+              {layer.label}
+            </text>
+          </g>
         ))}
       </g>
       {edges.map((edge) => {
@@ -937,14 +987,14 @@ function GraphCanvas({
         const midX = (from.x + to.x) / 2;
         const midY = (from.y + to.y) / 2;
         const color = RELATIONSHIP_COLOR[edge.relationship];
-        const bend = Math.abs(from.y - to.y) > 80 ? 36 : 0;
+        const bend = Math.abs(from.x - to.x) > 120 ? 42 : 20;
         return (
           <g key={edge.id}>
             <path
-              d={`M ${from.x} ${from.y} C ${midX} ${from.y - bend}, ${midX} ${to.y + bend}, ${to.x} ${to.y}`}
+              d={`M ${from.x} ${from.y + 34} C ${from.x} ${midY - bend}, ${to.x} ${midY + bend}, ${to.x} ${to.y - 34}`}
               fill="none"
               stroke={color}
-              strokeWidth="1.35"
+              strokeWidth="1.55"
               markerEnd={`url(#arrow-${edge.relationship})`}
               opacity={edge.confidence >= 0.8 ? 0.92 : 0.58}
             />

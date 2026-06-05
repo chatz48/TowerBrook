@@ -10,6 +10,7 @@ import {
 } from "@/lib/deals";
 import { listDeals, loadDeal } from "@/lib/deal-repository";
 import { Badge, BackLink, Confidence, ConfidenceBars, SourceLinks, ThemeTag } from "@/app/components/ui";
+import DealEnrichmentButton from "@/app/components/DealEnrichmentButton";
 
 export async function generateStaticParams() {
   return (await listDeals()).map((deal) => ({ id: deal.id }));
@@ -202,7 +203,7 @@ export default async function DealPage({
               <div className="ee-label text-ink">Follow-up gaps</div>
               <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">
                 Required completion measures the core rubric. These are remaining diligence items
-                or optional details to chase before relying on the scorecard in a memo.
+                or optional details to verify before relying on the scorecard in Copilot or a partner memo.
               </p>
               <ul className="mt-3 space-y-2 text-[12px] leading-relaxed text-ink-soft">
                 {(requiredMissing.length ? requiredMissing : []).map((item) => (
@@ -240,11 +241,11 @@ export default async function DealPage({
                   </li>
                 ))}
               </ul>
-              <Link href="/ingest" className="ee-button ee-button-primary mt-4 w-full">
-                Find missing facts
-              </Link>
-              <Link href="/sources" className="ee-button ee-button-secondary mt-3 w-full">
-                Review source register
+              <div className="mt-4">
+                <DealEnrichmentButton dealId={deal.id} label="Run Keiro + DeepSeek job" />
+              </div>
+              <Link href={`/graph?focus=deal:${deal.id}`} className="ee-button ee-button-secondary mt-3 w-full">
+                View relationships
               </Link>
             </section>
 

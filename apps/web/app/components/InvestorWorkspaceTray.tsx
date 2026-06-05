@@ -29,13 +29,13 @@ const WORKSPACE_EVENT = "towerbrook-investor-workspace-updated";
 const DEFAULT_STATUS: Record<WorkspaceKind, string> = {
   call: "shortlisted",
   target: "watchlist",
-  memo: "memo basket",
+  memo: "copilot note",
 };
 
 const KIND_LABEL: Record<WorkspaceKind, string> = {
   call: "Call tray",
   target: "Target watchlist",
-  memo: "Memo basket",
+  memo: "Copilot notes",
 };
 
 export function WorkspaceActionButton({
@@ -115,7 +115,7 @@ export default function InvestorWorkspaceTray() {
                 Saved work
               </div>
               <div className="mt-1 text-xs text-ink-faint">
-                Calls, targets, and memo items saved from the command center.
+                Calls, targets, and Copilot notes saved from the command centre.
               </div>
             </div>
             <button
@@ -131,7 +131,7 @@ export default function InvestorWorkspaceTray() {
           <div className="grid grid-cols-3 border-b border-line">
             <WorkspaceCount label="Calls" value={counts.call} />
             <WorkspaceCount label="Targets" value={counts.target} />
-            <WorkspaceCount label="Memo" value={counts.memo} />
+            <WorkspaceCount label="Notes" value={counts.memo} />
           </div>
 
           <div className="max-h-[58vh] overflow-y-auto p-3">
@@ -148,7 +148,7 @@ export default function InvestorWorkspaceTray() {
             ) : (
               <div className="rounded-md border border-line bg-paper p-4 text-[13px] leading-relaxed text-ink-soft">
                 Add experts to the call tray, companies to the target watchlist, or evidence to
-                the memo basket from profile pages.
+                Copilot notes from profile pages.
               </div>
             )}
           </div>

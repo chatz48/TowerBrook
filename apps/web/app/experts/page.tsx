@@ -1,14 +1,12 @@
 import Link from "next/link";
-import { getExperts, getCompanies } from "@/lib/data";
-import {
-  getAdvisorExpertGaps,
-  getExpertDiscoveryCandidates,
-} from "@/lib/expert-discovery";
-import { getOriginationResearchJobs } from "@/lib/origination";
-import { rankExperts } from "@/lib/score";
-import { getTargetedExpertExpansion } from "@/lib/targeted-expansion";
-import { towerBrookExpertScore } from "@/lib/towerbrook";
+import type { ReactNode } from "react";
+import { getCompanies, getExperts } from "@/lib/data";
+import { getAdvisorExpertGaps, getExpertDiscoveryCandidates } from "@/lib/expert-discovery";
 import { EXPERT_TYPE_LABEL } from "@/lib/labels";
+import { rankExperts } from "@/lib/score";
+import { THEME_BY_ID, THEMES, THEME_SPECIALTIES } from "@/lib/themes";
+import { towerBrookExpertScore } from "@/lib/towerbrook";
+import type { Expert, ExpertType, ThemeId } from "@/lib/types";
 import { Badge } from "@/app/components/ui";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import { getThemeFocus } from "@/lib/theme-focus-server";
@@ -16,94 +14,189 @@ import { matchesThemeFocus } from "@/lib/theme-focus";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 
-export default async function ExpertsPage() {
+const EXPERT_TYPES: ExpertType[] = [
+  "ex-founder",
+  "operator",
+  "advisor",
+  "banker",
+  "lawyer",
+  "investor",
+  "technical-dd",
+  "lender-credit",
+];
+
+export default async function ExpertsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const [themeFocus, includeTowerBrookEmployees] = await Promise.all([
     getThemeFocus(),
     getIncludeTowerBrookEmployees(),
   ]);
+  const params: Record<string, string | string[] | undefined> = (await searchParams) ?? {};
+  const selectedTheme = singleParam(params.theme);
+  const selectedSpecialty = singleParam(params.specialty) ?? "all";
+  const selectedType = singleParam(params.type) ?? "all";
+  const query = (singleParam(params.q) ?? "").trim().toLowerCase();
+  const activeTheme =
+    selectedTheme && selectedTheme !== "all" ? (selectedTheme as ThemeId) : themeFocus;
+
   const companies = getCompanies();
   const companyNames = Object.fromEntries(companies.map((company) => [company.id, company.name]));
   const companiesById = new Map(companies.map((company) => [company.id, company]));
-  const ranked = rankExperts(
-    filterTowerBrookEmployees(
-      getExperts().filter((expert) => matchesThemeFocus(expert.themes, themeFocus)),
-      includeTowerBrookEmployees,
-    ),
+  const scopedExperts = filterTowerBrookEmployees(
+    getExperts().filter((expert) => matchesThemeFocus(expert.themes, activeTheme)),
+    includeTowerBrookEmployees,
   );
-  const expertCandidates = getExpertDiscoveryCandidates().filter((candidate) =>
-    matchesThemeFocus(candidate.themes, themeFocus) &&
-    (includeTowerBrookEmployees ||
-      !candidate.organizations.some((organization) =>
-        organization.toLowerCase().includes("towerbrook"),
-      )),
-  );
-  const advisorGaps = getAdvisorExpertGaps().filter((gap) =>
-    matchesThemeFocus(gap.themes, themeFocus),
-  );
-  const origination = getOriginationResearchJobs();
-  const targetedExpansion = getTargetedExpertExpansion();
-  const targetedCandidates = targetedExpansion.expert_candidates.filter((candidate) =>
-    matchesThemeFocus(candidate.themes, themeFocus),
-  );
-  const founderOrigination = origination.queues.founder_origination.filter(
-    (job) => themeFocus === "all" || job.theme_id === themeFocus,
-  );
+  const filteredExperts = scopedExperts
+    .filter((expert) => selectedType === "all" || expert.type === selectedType)
+    .filter((expert) => selectedSpecialty === "all" || expert.specialties?.includes(selectedSpecialty))
+    .filter((expert) => {
+      if (!query) return true;
+      return [
+        expert.name,
+        expert.headline,
+        expert.org ?? "",
+        expert.location ?? "",
+        expert.whyRelevant,
+        expert.specialties?.join(" ") ?? "",
+        expert.companies.map((link) => companyNames[link.companyId] ?? link.companyId).join(" "),
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(query);
+    });
+  const ranked = rankExperts(filteredExperts);
+  const firstCall = ranked[0]?.expert;
+  const advisorGaps = getAdvisorExpertGaps().filter((gap) => matchesThemeFocus(gap.themes, activeTheme));
+  const candidateCount = getExpertDiscoveryCandidates().filter((candidate) =>
+    matchesThemeFocus(candidate.themes, activeTheme),
+  ).length;
+  const specialties =
+    activeTheme === "all"
+      ? Array.from(new Set(THEMES.flatMap((theme) => THEME_SPECIALTIES[theme.id]))).sort()
+      : THEME_SPECIALTIES[activeTheme];
 
   return (
     <div className="ee-shell px-3 py-5 sm:px-5">
       <div className="mx-auto max-w-[1540px]">
-        <header className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <header className="mb-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
           <div>
-            <h1 className="text-[26px] font-semibold tracking-tight">Call-Ready Experts</h1>
-            <p className="mt-2 max-w-3xl text-[13px] text-ink-soft">
-              Start with the people most likely to unlock investable companies, introductions,
-              and sharp diligence questions.
+            <h1 className="text-[26px] font-semibold tracking-tight">Call Tray</h1>
+            <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
+              A ranked slate of people to call, filtered by theme, specialty and expert type.
+              Each row shows why the person matters, what companies they can unlock, and how to reach them.
             </p>
           </div>
-          <div className="flex gap-2">
-            <Link href="/ask" className="ee-button ee-button-secondary">
-              Ask over experts
-            </Link>
-            <Link href="/reports" className="ee-button ee-button-secondary">
-              Build memo
-            </Link>
-            <Link href="/discover" className="ee-button ee-button-primary">
-              Review coverage gaps
-            </Link>
+          <div className="ee-panel rounded-lg p-4">
+            <div className="ee-label text-ink">This week&apos;s first call</div>
+            <div className="mt-2 text-[15px] font-semibold">
+              {firstCall?.name ?? "No matching expert"}
+            </div>
+            <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-ink-soft">
+              {firstCall?.signals?.[0] ?? firstCall?.whyRelevant ?? "Broaden the filters or ask Copilot to fill the coverage gap."}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {firstCall ? (
+                <>
+                  <Link href={`/experts/${firstCall.id}`} className="ee-button ee-button-primary min-h-8 px-3">
+                    Prepare call
+                  </Link>
+                  <Link href={`/graph?focus=expert:${firstCall.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
+                    View relationships
+                  </Link>
+                </>
+              ) : (
+                <Link href="/ask" className="ee-button ee-button-primary min-h-8 px-3">
+                  Ask Copilot
+                </Link>
+              )}
+            </div>
           </div>
         </header>
 
-        <section className="ee-panel mb-5 overflow-hidden rounded-lg">
+        <form className="ee-panel mb-5 rounded-lg p-4" action="/experts">
+          <div className="grid gap-3 md:grid-cols-[1.1fr_1.15fr_0.9fr_minmax(180px,1fr)_auto] md:items-end">
+            <FilterSelect label="Theme" name="theme" value={activeTheme}>
+              <option value="all">All three themes</option>
+              {THEMES.map((theme) => (
+                <option key={theme.id} value={theme.id}>
+                  {theme.name}
+                </option>
+              ))}
+            </FilterSelect>
+            <FilterSelect label="Specialty" name="specialty" value={selectedSpecialty}>
+              <option value="all">All specialties</option>
+              {specialties.map((specialty) => (
+                <option key={specialty} value={specialty}>
+                  {specialty}
+                </option>
+              ))}
+            </FilterSelect>
+            <FilterSelect label="Expert type" name="type" value={selectedType}>
+              <option value="all">All expert types</option>
+              {EXPERT_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {EXPERT_TYPE_LABEL[type]}
+                </option>
+              ))}
+            </FilterSelect>
+            <label className="block">
+              <span className="ee-label text-ink-faint">Search people, firms or companies</span>
+              <input
+                name="q"
+                defaultValue={singleParam(params.q) ?? ""}
+                placeholder="e.g. banker, BESS, leak detection"
+                className="mt-1 h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[13px] outline-none focus:border-accent"
+              />
+            </label>
+            <div className="flex gap-2">
+              <button className="ee-button ee-button-primary h-10 px-4" type="submit">
+                Search
+              </button>
+              <Link href="/experts" className="ee-button ee-button-secondary h-10 px-4">
+                Reset
+              </Link>
+            </div>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-line pt-3 text-[11px] text-ink-faint">
+            <span><strong className="text-ink">{ranked.length}</strong> call-ready matches</span>
+            <span><strong className="text-ink">{candidateCount}</strong> research candidates in Copilot</span>
+            <span><strong className="text-ink">{advisorGaps.length}</strong> advisor-name gaps</span>
+            <span>{activeTheme === "all" ? "All themes" : THEME_BY_ID[activeTheme]?.name}</span>
+          </div>
+        </form>
+
+        <section className="ee-panel overflow-hidden rounded-lg">
           <div className="flex items-start justify-between gap-4 border-b border-line px-4 py-3">
             <div>
-              <h2 className="ee-label text-ink">This week&apos;s call slate</h2>
+              <h2 className="ee-label text-ink">Call-ready experts</h2>
               <p className="mt-1 text-[11px] text-ink-faint">
-                Canonical experts prioritized for a call, referral ask, or company lead.
+                Prioritized for outreach, company discovery and source-backed diligence.
               </p>
             </div>
-            <Link href="/discover" className="ee-link text-[12px]">
-              Review research pipeline
+            <Link href="/ask" className="ee-link text-[12px]">
+              Ask Copilot to fill gaps
             </Link>
           </div>
           <div className="overflow-x-auto">
-            <table className="ee-table min-w-[1180px]">
+            <table className="ee-table min-w-[1260px]">
               <thead>
                 <tr>
                   <th className="w-14">#</th>
                   <th>Expert</th>
+                  <th>Specialty</th>
                   <th>Why call</th>
                   <th>Companies they can unlock</th>
+                  <th>Contact</th>
                   <th>Relationship path</th>
-                  <th>Evidence</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {ranked.slice(0, 10).map(({ expert }, index) => {
+                {ranked.slice(0, 36).map(({ expert }, index) => {
                   const towerBrook = towerBrookExpertScore(expert, companiesById);
-                  const latestNews = expert.news
-                    ?.slice()
-                    .sort((a, b) => (a.date < b.date ? 1 : -1))[0];
                   return (
                     <tr key={expert.id}>
                       <td>
@@ -111,24 +204,33 @@ export default async function ExpertsPage() {
                           {index + 1}
                         </span>
                       </td>
-                      <td className="min-w-[230px]">
+                      <td className="min-w-[240px]">
                         <Link href={`/experts/${expert.id}`} className="ee-link">
                           {expert.name}
                         </Link>
                         <div className="mt-0.5 text-[11px] text-ink-soft">{expert.headline}</div>
+                        <div className="mt-0.5 text-[11px] text-ink-faint">{expert.org ?? expert.location ?? EXPERT_TYPE_LABEL[expert.type]}</div>
+                      </td>
+                      <td className="max-w-[220px] text-[11px] text-ink-soft">
+                        <span className="line-clamp-3">
+                          {(expert.specialties?.length ? expert.specialties : [EXPERT_TYPE_LABEL[expert.type]]).join(", ")}
+                        </span>
                       </td>
                       <td className="max-w-[340px] text-[11px] leading-relaxed text-ink-soft">
                         <span className="line-clamp-3">
-                          {latestNews?.headline ?? expert.signals?.[0] ?? expert.whyRelevant}
+                          {expert.news?.[0]?.headline ?? expert.signals?.[0] ?? expert.whyRelevant}
                         </span>
                       </td>
-                      <td className="max-w-[260px] text-[11px] text-ink-soft">
+                      <td className="max-w-[270px] text-[11px] text-ink-soft">
                         <span className="line-clamp-3">
                           {expert.companies
                             .map((link) => companyNames[link.companyId] ?? link.companyId)
-                            .slice(0, 4)
-                            .join(", ") || "No company edge mapped"}
+                            .slice(0, 5)
+                            .join(", ") || "Ask for target introductions"}
                         </span>
+                      </td>
+                      <td>
+                        <ContactLinks expert={expert} />
                       </td>
                       <td>
                         <Badge
@@ -138,17 +240,16 @@ export default async function ExpertsPage() {
                               : "border-line bg-white text-ink-soft"
                           }
                         >
-                          {towerBrook.isDirect ? towerBrook.label : "No public TowerBrook path mapped"}
+                          {towerBrook.isDirect ? towerBrook.label : "No public path mapped"}
                         </Badge>
-                      </td>
-                      <td className="whitespace-nowrap text-[11px] text-ink-soft">
-                        {expert.sources.length} source{expert.sources.length === 1 ? "" : "s"}
-                        {expert.news?.length ? ` · ${expert.news.length} dated signal${expert.news.length === 1 ? "" : "s"}` : ""}
                       </td>
                       <td>
                         <div className="flex flex-wrap gap-2">
-                          <Link href={`/experts/${expert.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
+                          <Link href={`/experts/${expert.id}`} className="ee-button ee-button-primary min-h-8 px-3">
                             Prepare
+                          </Link>
+                          <Link href={`/graph?focus=expert:${expert.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
+                            View relationships
                           </Link>
                           <WorkspaceActionButton
                             item={{
@@ -158,7 +259,7 @@ export default async function ExpertsPage() {
                               sub: expert.headline,
                               href: `/experts/${expert.id}`,
                               theme: expert.themes[0],
-                              note: latestNews?.headline ?? expert.whyRelevant,
+                              note: expert.whyRelevant,
                             }}
                           >
                             Save
@@ -172,312 +273,116 @@ export default async function ExpertsPage() {
             </table>
           </div>
         </section>
-
-        <section className="ee-panel mb-5 overflow-hidden rounded-lg">
-          <div className="flex flex-col gap-2 border-b border-line px-4 py-3 md:flex-row md:items-start md:justify-between">
-            <div>
-              <h2 className="ee-label text-ink">Targeted expansion from recent PE tombstones</h2>
-              <p className="mt-1 max-w-4xl text-[11px] leading-relaxed text-ink-faint">
-                Targeted search pass for named dealmakers, lender-credit professionals, lawyers and
-                diligence specialists from recent grid, clean-energy and smart-water transactions.
-                These are review-gated leads, not canonical experts yet.
-              </p>
-            </div>
-            <div className="grid min-w-[300px] grid-cols-3 gap-2 text-right">
-              <DiscoveryMetric label="Candidates" value={targetedCandidates.length} />
-              <DiscoveryMetric label="PE deals" value={targetedExpansion.coverage.recent_pe_deals_covered} />
-              <DiscoveryMetric label="Publications" value={targetedExpansion.coverage.specialist_publications} />
-            </div>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="ee-table min-w-[1260px]">
-              <thead>
-                <tr>
-                  <th>Candidate</th>
-                  <th>Type</th>
-                  <th>Organization</th>
-                  <th>Theme</th>
-                  <th>Deal / source</th>
-                  <th>Why useful for origination</th>
-                  <th>Evidence</th>
-                </tr>
-              </thead>
-              <tbody>
-                {targetedCandidates.slice(0, 24).map((candidate) => (
-                  <tr key={candidate.candidate_id} className="hover:bg-[#fbfcff]">
-                    <td className="min-w-[190px]">
-                      <div className="font-semibold">{candidate.name}</div>
-                      <div className="mt-0.5 text-[11px] text-ink-soft">{candidate.role}</div>
-                    </td>
-                    <td>{EXPERT_TYPE_LABEL[candidate.expert_type]}</td>
-                    <td className="max-w-[210px] text-[11px] text-ink-soft">{candidate.organization}</td>
-                    <td className="max-w-[190px] text-[11px] text-ink-soft">
-                      {candidate.themes.map((theme) => theme.replaceAll("-", " ")).join(", ")}
-                    </td>
-                    <td className="max-w-[250px] text-[11px] text-ink-soft">
-                      <span className="line-clamp-2">{candidate.deal_or_source}</span>
-                    </td>
-                    <td className="max-w-[390px] text-[11px] leading-relaxed text-ink-soft">
-                      <span className="line-clamp-3">{candidate.why_useful}</span>
-                    </td>
-                    <td>
-                      <a
-                        href={candidate.source.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="ee-link"
-                      >
-                        Source
-                      </a>
-                      <div className="mt-0.5 text-[11px] text-ink-faint">
-                        {Math.round(candidate.confidence * 100)}% · {candidate.review_status.replaceAll("_", " ")}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section className="ee-panel mb-5 overflow-hidden rounded-lg">
-          <div className="flex items-center justify-between border-b border-line px-4 py-3">
-            <div>
-              <h2 className="ee-label text-ink">Founder-led opportunity origination</h2>
-              <p className="mt-1 text-[11px] text-ink-faint">
-                Previously funded or acquired founders researched for new companies, investments, boards, referrals and opportunities.
-              </p>
-            </div>
-            <Link href="/discover" className="ee-link text-[12px]">
-              Run live discovery
-            </Link>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="ee-table min-w-[1120px]">
-              <thead>
-                <tr>
-                  <th>Founder / ex-founder</th>
-                  <th>Previously funded companies</th>
-                  <th>Theme</th>
-                  <th>Opportunity objective</th>
-                  <th>First Keiro search</th>
-                </tr>
-              </thead>
-              <tbody>
-                {founderOrigination.slice(0, 30).map((job) => (
-                  <tr key={job.external_job_id} className="hover:bg-[#fbfcff]">
-                    <td className="font-semibold">{job.metadata.target_name}</td>
-                    <td className="max-w-[260px] text-[11px] text-ink-soft">
-                      {(job.metadata.target_organizations ?? []).join(", ")}
-                    </td>
-                    <td className="text-[11px] text-ink-soft">{job.theme_id?.replaceAll("-", " ")}</td>
-                    <td className="max-w-[350px] text-[11px] text-ink-soft">
-                      <span className="line-clamp-2">{job.metadata.objective}</span>
-                    </td>
-                    <td className="max-w-[380px] text-[11px] text-ink-soft">
-                      <span className="line-clamp-2">{job.query}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section className="ee-panel mb-5 overflow-hidden rounded-lg">
-          <div className="flex items-center justify-between border-b border-line px-4 py-3">
-            <div>
-              <h2 className="ee-label text-ink">PE-derived expert candidate pool</h2>
-              <p className="mt-1 text-[11px] text-ink-faint">
-                Review-gated people ranked from TowerBrook and peer-fund transaction evidence.
-              </p>
-            </div>
-            <span className="text-[12px] text-ink-faint">Experts first</span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="ee-table min-w-[1260px]">
-              <thead>
-                <tr>
-                  <th>Expert candidate</th>
-                  <th>Archetype</th>
-                  <th>Access path</th>
-                  <th>PE deal roles</th>
-                  <th>Connected companies</th>
-                  <th>Profile gaps</th>
-                  <th>Evidence</th>
-                </tr>
-              </thead>
-              <tbody>
-                {expertCandidates.map((candidate) => (
-                  <tr key={candidate.candidate_id} className="hover:bg-[#fbfcff]">
-                    <td className="min-w-[230px]">
-                      {candidate.canonical_match.expert_id ? (
-                        <Link href={`/experts/${candidate.canonical_match.expert_id}`} className="ee-link">
-                          {candidate.name}
-                        </Link>
-                      ) : (
-                        <span className="font-semibold">{candidate.name}</span>
-                      )}
-                      <div className="mt-0.5 text-[11px] text-ink-soft">{candidate.headline}</div>
-                    </td>
-                    <td>{EXPERT_TYPE_LABEL[candidate.expert_type]}</td>
-                    <td className={candidate.access_path.startsWith("direct") ? "text-success" : "text-ink-soft"}>
-                      {candidate.access_path.replaceAll("-", " ")}
-                    </td>
-                    <td className="max-w-[300px] text-[11px] text-ink-soft">
-                      <span className="line-clamp-3">
-                        {candidate.deal_roles
-                          .map((role) => `${role.role.replaceAll("-", " ")} · ${role.target}`)
-                          .join("; ")}
-                      </span>
-                    </td>
-                    <td className="max-w-[260px] text-[11px] text-ink-soft">
-                      <span className="line-clamp-3">
-                        {candidate.connected_companies.map((company) => company.name).join(", ")}
-                      </span>
-                    </td>
-                    <td className="max-w-[250px] text-[11px] text-ink-soft">
-                      <span className="line-clamp-3">
-                        {candidate.missing_profile_facts.slice(0, 3).join(", ")}
-                      </span>
-                    </td>
-                    <td>
-                      {candidate.sources.slice(0, 4).map((source, index) => (
-                        <a
-                          key={`${candidate.candidate_id}-${source.url}`}
-                          href={source.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="ee-link mr-1"
-                        >
-                          [{index + 1}]
-                        </a>
-                      ))}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section className="ee-panel mb-5 overflow-hidden rounded-lg">
-          <div className="flex items-center justify-between border-b border-line px-4 py-3">
-            <div>
-              <h2 className="ee-label text-ink">Named-expert coverage gaps</h2>
-              <p className="mt-1 text-[11px] text-ink-faint">
-                Advisor and service-provider organizations evidenced on PE deals where the individual professionals still need to be identified.
-              </p>
-            </div>
-            <span className="text-[12px] text-ink-faint">
-              {advisorGaps.filter((gap) => gap.coverage_status === "no-named-expert").length} with no named expert
-            </span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="ee-table min-w-[1080px]">
-              <thead>
-                <tr>
-                  <th>Organization</th>
-                  <th>Expert sought</th>
-                  <th>Deal role</th>
-                  <th>PE deals</th>
-                  <th>Named coverage</th>
-                  <th>First search</th>
-                </tr>
-              </thead>
-              <tbody>
-                {advisorGaps.slice(0, 24).map((gap) => (
-                  <tr key={gap.gap_id} className="hover:bg-[#fbfcff]">
-                    <td className="font-semibold">{gap.organization}</td>
-                    <td>{EXPERT_TYPE_LABEL[gap.expert_type_sought]}</td>
-                    <td className="text-[11px] text-ink-soft">{gap.advisor_role.replaceAll("-", " ")}</td>
-                    <td className="max-w-[280px] text-[11px] text-ink-soft">
-                      {gap.deals.map((deal) => deal.target).join(", ")}
-                    </td>
-                    <td>{gap.named_experts_found.map((expert) => expert.name).join(", ") || "None yet"}</td>
-                    <td className="max-w-[340px] text-[11px] text-ink-soft">
-                      <span className="line-clamp-2">{gap.search_queries[0]}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section className="ee-panel overflow-hidden rounded-lg">
-          <div className="flex items-center justify-between border-b border-line px-4 py-3">
-            <h2 className="ee-label text-ink">All experts ({ranked.length})</h2>
-            <span className="text-[12px] text-ink-faint">Canonical expert directory</span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="ee-table min-w-[1120px]">
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th>Expert</th>
-                  <th>Archetype</th>
-                  <th>Themes</th>
-                  <th>Why relevant</th>
-                  <th>Relationship path</th>
-                  <th>Connected companies</th>
-                  <th>Evidence</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ranked.map(({ expert }, index) => {
-                  const towerBrook = towerBrookExpertScore(expert, companiesById);
-                  return (
-                    <tr key={expert.id} className="hover:bg-[#fbfcff]">
-                      <td>
-                        <span className="inline-grid h-8 w-8 place-items-center rounded bg-[#f1f4f9] text-[16px] font-semibold text-accent">
-                          {index + 1}
-                        </span>
-                      </td>
-                      <td className="min-w-[230px]">
-                        <Link href={`/experts/${expert.id}`} className="ee-link">
-                          {expert.name}
-                        </Link>
-                        <div className="mt-0.5 text-[11px] text-ink-soft">
-                          {expert.headline}
-                        </div>
-                      </td>
-                      <td>{EXPERT_TYPE_LABEL[expert.type]}</td>
-                      <td className="text-[11px] text-ink-soft">
-                        {expert.themes.join(", ")}
-                      </td>
-                      <td className="max-w-[340px] text-[11px] leading-relaxed text-ink-soft">
-                        <span className="line-clamp-3">{expert.whyRelevant}</span>
-                      </td>
-                      <td className={towerBrook.isDirect ? "text-success" : "text-ink-faint"}>
-                        {towerBrook.isDirect ? towerBrook.label : "No public TowerBrook path mapped"}
-                      </td>
-                      <td className="max-w-[260px]">
-                        <span className="line-clamp-2">
-                          {expert.companies.map((link) => companyNames[link.companyId] ?? link.companyId).join(", ")}
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap text-[11px] text-ink-soft">
-                        {expert.sources.length} source{expert.sources.length === 1 ? "" : "s"}
-                        {expert.news?.length ? ` · ${expert.news.length} dated signal${expert.news.length === 1 ? "" : "s"}` : ""}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </section>
       </div>
     </div>
   );
 }
 
-function DiscoveryMetric({ label, value }: { label: string; value: number }) {
+function FilterSelect({
+  label,
+  name,
+  value,
+  children,
+}: {
+  label: string;
+  name: string;
+  value: string;
+  children: ReactNode;
+}) {
   return (
-    <div className="ee-panel rounded-lg p-4">
-      <div className="ee-label">{label}</div>
-      <div className="mt-2 text-[22px] font-semibold tabular-nums">{value}</div>
+    <label className="block">
+      <span className="ee-label text-ink-faint">{label}</span>
+      <select
+        name={name}
+        defaultValue={value}
+        className="mt-1 h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[13px] outline-none focus:border-accent"
+      >
+        {children}
+      </select>
+    </label>
+  );
+}
+
+function ContactLinks({ expert }: { expert: Expert }) {
+  const contactFacts = expert.contactFacts ?? [];
+  const directLinks = [
+    expert.email ? { label: "Email", href: `mailto:${expert.email}`, kind: "email" as const } : null,
+    expert.linkedin ? { label: "LinkedIn", href: expert.linkedin, kind: "linkedin" as const } : null,
+  ].filter((link): link is { label: string; href: string; kind: "email" | "linkedin" } => Boolean(link));
+
+  const introFacts = contactFacts
+    .filter((fact) => fact.type === "intro_path" && fact.value)
+    .map((fact) => ({
+      label: fact.evidence ?? "Intro path",
+      value: fact.value!,
+      kind: "intro" as const,
+      confidence: fact.confidence,
+      status: fact.status,
+    }));
+
+  const websiteFacts = contactFacts
+    .filter((fact) => fact.type === "website" && fact.value)
+    .map((fact) => ({
+      label: "Website",
+      value: fact.value!,
+      kind: "website" as const,
+    }));
+
+  if (!directLinks.length && !introFacts.length && !websiteFacts.length) {
+    return (
+      <Link href={`/experts/${expert.id}#call-actions`} className="ee-link text-[12px]">
+        Draft outreach
+      </Link>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5 text-[12px]">
+      {directLinks.map((link) => (
+        <a
+          key={link.label}
+          href={link.href}
+          target={link.href.startsWith("http") ? "_blank" : undefined}
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 rounded border border-line bg-white px-2 py-1 text-[11px] font-medium text-accent hover:border-accent hover:bg-[#f4f8ff] transition-colors"
+        >
+          <span className="text-[10px]">
+            {link.kind === "email" ? "✉" : "in"}
+          </span>
+          {link.label}
+        </a>
+      ))}
+      {introFacts.map((fact, index) => (
+        <span
+          key={`intro-${index}`}
+          className="inline-flex items-center gap-1 rounded border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-700"
+          title={fact.status === "verified" ? "Verified intro path" : fact.status}
+        >
+          <span className="text-[10px]">↗</span>
+          {fact.label}
+          {fact.confidence !== undefined && (
+            <span className="text-[9px] text-emerald-500">
+              {Math.round(fact.confidence * 100)}%
+            </span>
+          )}
+        </span>
+      ))}
+      {websiteFacts.map((fact, index) => (
+        <a
+          key={`web-${index}`}
+          href={fact.value.startsWith("http") ? fact.value : `https://${fact.value}`}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 rounded border border-line bg-white px-2 py-1 text-[11px] font-medium text-ink-soft hover:border-accent hover:text-accent transition-colors"
+        >
+          <span className="text-[10px]">🌐</span>
+          {fact.label}
+        </a>
+      ))}
     </div>
   );
+}
+
+function singleParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
 }

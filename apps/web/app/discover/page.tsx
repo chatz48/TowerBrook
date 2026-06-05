@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { Suspense, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -87,6 +87,14 @@ const QUEUES: { id: QueueView; label: string; description: string }[] = [
 ];
 
 export default function DiscoverPage() {
+  return (
+    <Suspense fallback={<div className="ee-shell px-3 py-5 sm:px-5" />}>
+      <DiscoverPageContent />
+    </Suspense>
+  );
+}
+
+function DiscoverPageContent() {
   const themeId = useThemeFocusClient();
   const searchParams = useSearchParams();
   const [view, setView] = useState<QueueView>("experts");

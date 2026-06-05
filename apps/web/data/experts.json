@@ -21,6 +21,26 @@
         "companyId": "bp",
         "relationship": "acquired",
         "note": "bp acquired remaining 50.03% for £254m in 2023"
+      },
+      {
+        "companyId": "lightsource-bp",
+        "relationship": "served",
+        "note": "Nick Boyle is related to Lightsource bp."
+      },
+      {
+        "companyId": "lightsource-renewable-energy",
+        "relationship": "founded",
+        "note": "Nick Boyle is related to Lightsource Renewable Energy."
+      },
+      {
+        "companyId": "lightsource-bp",
+        "relationship": "led",
+        "note": "Nick Boyle is related to Lightsource bp."
+      },
+      {
+        "companyId": "lightsource-renewable-energy",
+        "relationship": "led",
+        "note": "Nick Boyle is related to Lightsource Renewable Energy."
       }
     ],
     "signals": [
@@ -41,6 +61,16 @@
         "title": "Nick Boyle - Entrepreneur and investor in a range of ... - LinkedIn",
         "url": "https://uk.linkedin.com/in/nick-boyle-a2b7a589",
         "publisher": "LinkedIn"
+      },
+      {
+        "title": "Nick Boyle Email & Phone Number - ContactOut",
+        "url": "https://contactout.com/Nick-Boyle-16246591",
+        "publisher": "contactout.com"
+      },
+      {
+        "title": "Lightsource bp founder recognised with UK solar achievement ...",
+        "url": "https://lightsourcebp.com/news/lightsource-bp-founder-recognised-with-uk-solar-achievement-award/",
+        "publisher": "lightsourcebp.com"
       }
     ],
     "confidence": 0.88,
@@ -68,6 +98,16 @@
         "companyId": "green-giraffe",
         "relationship": "founded",
         "note": "Founder & MD 2010–2021"
+      },
+      {
+        "companyId": "green-giraffe",
+        "relationship": "advised",
+        "note": "https://www.sciencespo.fr/en/news/french-philosopher-bernard-stiegler-to-speak-at-sciences-po/"
+      },
+      {
+        "companyId": "green-giraffe",
+        "relationship": "led",
+        "note": "Jérôme Guillet"
       }
     ],
     "signals": [
@@ -84,6 +124,21 @@
         "title": "Top 30 people: Jérôme Guillet",
         "url": "https://www.windpowermonthly.com/article/1320027/top-30-people-24-jerome-guillet-md-green-giraffe-bankers",
         "publisher": "Windpower Monthly"
+      },
+      {
+        "title": "Conference with philosopher Bernard Stiegler | Sciences Po",
+        "url": "https://www.sciencespo.fr/en/news/french-philosopher-bernard-stiegler-to-speak-at-sciences-po/",
+        "publisher": "sciencespo.fr"
+      },
+      {
+        "title": "Jérôme Guillet - SNOW - M&A and Debt Advisory",
+        "url": "https://www.snow-bv.com/team/jerome-guillet",
+        "publisher": "snow-bv.com"
+      },
+      {
+        "title": "Dr. Jérôme Guillet - windforce2020",
+        "url": "https://windforce.info/windforce2020/en/speaker/dr-jerome-guillet/",
+        "publisher": "windforce.info"
       }
     ],
     "confidence": 0.87,
@@ -117,6 +172,16 @@
         "companyId": "cge-partners",
         "relationship": "invested-in",
         "note": "CGE Partners backed Aurora"
+      },
+      {
+        "companyId": "aurora-energy-research",
+        "relationship": "served",
+        "note": "John Feddersen is related to Aurora Energy Research."
+      },
+      {
+        "companyId": "aurora-energy-research",
+        "relationship": "led",
+        "note": "John Feddersen"
       }
     ],
     "signals": [
@@ -132,6 +197,16 @@
         "title": "John Feddersen - Founder & CEO, Aurora Energy Research ...",
         "url": "https://uk.linkedin.com/in/john-feddersen-6b9a043b",
         "publisher": "LinkedIn"
+      },
+      {
+        "title": "Podcast 191 - Everything Electric",
+        "url": "https://fullycharged.show/podcasts/podcast-191-energy-markets-who-informs-the-energy-policy-makers-with-dr-john-feddersen/",
+        "publisher": "fullycharged.show"
+      },
+      {
+        "title": "About | Aurora Energy Research",
+        "url": "https://auroraer.com/company/about",
+        "publisher": "auroraer.com"
       }
     ],
     "confidence": 0.83,
@@ -200,6 +275,31 @@
         "companyId": "augusta-co",
         "relationship": "co-founded",
         "note": "Managing Partner; firm acquired by Mizuho 2025"
+      },
+      {
+        "companyId": "augusta-co-mizuho",
+        "relationship": "board",
+        "note": "Managing Partner and co-founder."
+      },
+      {
+        "companyId": "augusta-co-mizuho",
+        "relationship": "founded",
+        "note": "Mortimer Menzel is related to Augusta & Co (Mizuho)."
+      },
+      {
+        "companyId": "augusta-co",
+        "relationship": "partner",
+        "note": "Mortimer Menzel is related to Augusta & Co."
+      },
+      {
+        "companyId": "augusta-co-limited",
+        "relationship": "partner",
+        "note": "Mortimer Menzel is related to Augusta & Co Limited."
+      },
+      {
+        "companyId": "augusta-co-limited",
+        "relationship": "served",
+        "note": "https://uk.linkedin.com/in/mortimer-menzel-a7176780"
       }
     ],
     "signals": [
@@ -220,6 +320,11 @@
         "title": "Mortimer Menzel - Managing Partner at Augusta & Co Limited",
         "url": "https://uk.linkedin.com/in/mortimer-menzel-a7176780",
         "publisher": "LinkedIn"
+      },
+      {
+        "title": "Mortimer Menzel - tamarindo.global",
+        "url": "https://tamarindo.global/team/mortimer-menzel/",
+        "publisher": "tamarindo.global"
       }
     ],
     "confidence": 0.8,
@@ -247,6 +352,46 @@
         "companyId": "augusta-co",
         "relationship": "co-founded",
         "note": "Managing Partner; firm acquired by Mizuho 2025"
+      },
+      {
+        "companyId": "augusta-co-mizuho",
+        "relationship": "board",
+        "note": "Managing Partner."
+      },
+      {
+        "companyId": "keystone-law",
+        "relationship": "led",
+        "note": "James Knight"
+      },
+      {
+        "companyId": "augusta-co",
+        "relationship": "served",
+        "note": "James Knight is related to Augusta & Co."
+      },
+      {
+        "companyId": "augusta-co",
+        "relationship": "founded",
+        "note": "James Knight"
+      },
+      {
+        "companyId": "augusta-co",
+        "relationship": "led",
+        "note": "James Knight"
+      },
+      {
+        "companyId": "augusta-co-mizuho",
+        "relationship": "led",
+        "note": "James Knight is related to Augusta & Co (Mizuho)."
+      },
+      {
+        "companyId": "augusta-co",
+        "relationship": "partner",
+        "note": "James Knight is related to Augusta & Co."
+      },
+      {
+        "companyId": "goldman-sachs",
+        "relationship": "served",
+        "note": "James Knight"
       }
     ],
     "signals": [
@@ -267,6 +412,11 @@
         "title": "James Knight - Managing Partner at Augusta & Co | LinkedIn",
         "url": "https://uk.linkedin.com/in/james-knight-a4020811",
         "publisher": "LinkedIn"
+      },
+      {
+        "title": "James Knight - CEO - Keystone Law",
+        "url": "https://keystonelaw.com/central-office/james-knight/",
+        "publisher": "keystonelaw.com"
       }
     ],
     "confidence": 0.78,
@@ -274,7 +424,8 @@
       "M&A advisory"
     ],
     "access": "proprietary",
-    "linkedin": "https://uk.linkedin.com/in/james-knight-a4020811"
+    "linkedin": "https://uk.linkedin.com/in/james-knight-a4020811",
+    "email": "james.knight@keystonelaw.co.uk"
   },
   {
     "id": "greg-jackson",
@@ -294,6 +445,21 @@
         "companyId": "octopus-energy",
         "relationship": "founded",
         "note": "Founder & CEO since 2015"
+      },
+      {
+        "companyId": "octopus-energy",
+        "relationship": "board",
+        "note": "Greg Jackson"
+      },
+      {
+        "companyId": "octopus-energy-group",
+        "relationship": "served",
+        "note": "Greg Jackson"
+      },
+      {
+        "companyId": "octopus-energy",
+        "relationship": "led",
+        "note": "Greg Jackson"
       }
     ],
     "signals": [
@@ -309,6 +475,16 @@
         "title": "Greg Jackson - Founder and CEO, Octopus Energy ... - LinkedIn",
         "url": "https://uk.linkedin.com/in/gregsjackson",
         "publisher": "LinkedIn"
+      },
+      {
+        "title": "Greg Jackson (businessman) - Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Greg_Jackson_(businessman)",
+        "publisher": "en.wikipedia.org"
+      },
+      {
+        "title": "Greg Jackson | Speaking Fee | Booking Agent",
+        "url": "https://www.allamericanspeakers.com/speakers/458981/Greg%E2%80%AFJackson",
+        "publisher": "allamericanspeakers.com"
       }
     ],
     "confidence": 0.85,
@@ -337,6 +513,16 @@
         "companyId": "piclo",
         "relationship": "co-founded",
         "note": "Co-founded 2013 with Andy Kilner and Alice Tyler"
+      },
+      {
+        "companyId": "piclo",
+        "relationship": "founded",
+        "note": "James Johnston is related to Piclo."
+      },
+      {
+        "companyId": "piclo",
+        "relationship": "led",
+        "note": "James Johnston is related to Piclo."
       }
     ],
     "signals": [
@@ -352,6 +538,16 @@
         "title": "James Johnston - CEO and Co-founder | LinkedIn",
         "url": "https://uk.linkedin.com/in/jamesjohnston53",
         "publisher": "LinkedIn"
+      },
+      {
+        "title": "Meet the Piclo Team",
+        "url": "https://www.piclo.com/team",
+        "publisher": "piclo.com"
+      },
+      {
+        "title": "James Johnston Email & Phone Number | Piclo CEO and Co ...",
+        "url": "https://rocketreach.co/james-johnston-email_3875796",
+        "publisher": "rocketreach.co"
       }
     ],
     "confidence": 0.84,
@@ -435,13 +631,19 @@
         "title": "Mitsubishi acquires Smarter Grid Solutions",
         "url": "https://dailybusinessgroup.co.uk/2021/08/smarter-grid-solutions-acquired-by-mitsubishi/",
         "publisher": "Daily Business"
+      },
+      {
+        "title": "Graham Ault - Mitsubishi Electric Europe BV | LinkedIn",
+        "url": "https://uk.linkedin.com/in/graham-ault-08415258",
+        "publisher": "uk.linkedin.com"
       }
     ],
     "confidence": 0.78,
     "specialties": [
       "Grid-edge software"
     ],
-    "access": "proprietary"
+    "access": "proprietary",
+    "linkedin": "https://uk.linkedin.com/in/graham-ault-08415258"
   },
   {
     "id": "quentin-scrimshire",
@@ -466,6 +668,21 @@
         "companyId": "kiwi-power",
         "relationship": "led",
         "note": "Led European energy-storage business"
+      },
+      {
+        "companyId": "modo-energy",
+        "relationship": "led",
+        "note": "https://www.linkedin.com/in/quentinscrimshire"
+      },
+      {
+        "companyId": "modo-energy",
+        "relationship": "served",
+        "note": "https://www.linkedin.com/in/quentinscrimshire"
+      },
+      {
+        "companyId": "modo-energy",
+        "relationship": "founded",
+        "note": "Quentin Scrimshire"
       }
     ],
     "signals": [
@@ -481,6 +698,11 @@
         "title": "Quentin Scrimshire — Leaders in Cleantech",
         "url": "https://leadersincleantech.com/quentin-q-scrimshire-modo-energy",
         "publisher": "Leaders in Cleantech"
+      },
+      {
+        "title": "Quentin 'Q' Scrimshire - Co-founder & CEO @ Modo Energy",
+        "url": "https://www.linkedin.com/in/quentinscrimshire",
+        "publisher": "linkedin.com"
       }
     ],
     "confidence": 0.83,
@@ -488,7 +710,8 @@
       "Storage optimisation & trading",
       "Energy market analytics"
     ],
-    "access": "proprietary"
+    "access": "proprietary",
+    "linkedin": "https://www.linkedin.com/in/quentinscrimshire"
   },
   {
     "id": "andrew-luers",
@@ -512,6 +735,16 @@
         "companyId": "quinbrook",
         "relationship": "acquired",
         "note": "Quinbrook acquired Habitat Energy"
+      },
+      {
+        "companyId": "habitat-energy",
+        "relationship": "founded",
+        "note": "Andrew Luers is related to Habitat Energy."
+      },
+      {
+        "companyId": "habitat-energy",
+        "relationship": "led",
+        "note": "Andrew Luers"
       }
     ],
     "signals": [
@@ -527,6 +760,26 @@
         "title": "Andrew Luers - Greater London, England, United Kingdom",
         "url": "https://uk.linkedin.com/in/andrew-luers",
         "publisher": "LinkedIn"
+      },
+      {
+        "title": "Habitat Energy acquired by Quinbrook as it eyes further global ...",
+        "url": "https://www.solarpowerportal.co.uk/solar-technology/habitat-energy-acquired-by-quinbrook-as-it-eyes-further-global-expansion",
+        "publisher": "solarpowerportal.co.uk"
+      },
+      {
+        "title": "Who we are - Habitat Energy",
+        "url": "https://habitat.energy/who-we-are/",
+        "publisher": "habitat.energy"
+      },
+      {
+        "title": "Andrew Luers - Gordon & Eden",
+        "url": "https://www.gordoneden.co.uk/lessons-in-leadership/andrew-luers/",
+        "publisher": "gordoneden.co.uk"
+      },
+      {
+        "title": "Squire Patton Boggs Advises Habitat Energy on Acquisition by ...",
+        "url": "https://www.squirepattonboggs.com/news/squire-patton-boggs-advises-habitat-energy-on-acquisition-by-quinbrook-infrastructure-partners/",
+        "publisher": "squirepattonboggs.com"
       }
     ],
     "confidence": 0.8,
@@ -564,6 +817,31 @@
         "companyId": "global-water-dev-partners",
         "relationship": "led",
         "note": "MD of the ~$1bn Blackstone-backed fund"
+      },
+      {
+        "companyId": "isle-group-ltd",
+        "relationship": "board",
+        "note": "Piers Clark is related to Isle Group Ltd."
+      },
+      {
+        "companyId": "isle-utilities",
+        "relationship": "board",
+        "note": "Piers Clark"
+      },
+      {
+        "companyId": "isle-utilities",
+        "relationship": "served",
+        "note": "Piers Clark is related to Isle Utilities (Isle Group)."
+      },
+      {
+        "companyId": "global-water-development-partners-gwdp",
+        "relationship": "partner",
+        "note": "Piers Clark is related to Global Water Development Partners (GWDP)."
+      },
+      {
+        "companyId": "isle-group",
+        "relationship": "founded",
+        "note": "piers-clark is related to isle-group."
       }
     ],
     "signals": [
@@ -579,6 +857,21 @@
         "title": "Piers Clark — Isle Utilities team",
         "url": "https://isleutilities.com/team-member/piers-clark-phd/",
         "publisher": "Isle Utilities"
+      },
+      {
+        "title": "Piers Clark - Mode Labs | LinkedIn",
+        "url": "https://uk.linkedin.com/in/piersclark",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "Piers Clark - World Water-Tech Innovation Summit 2026",
+        "url": "https://www.worldwatertechinnovation.com/full-speaker-list/piers-clark",
+        "publisher": "worldwatertechinnovation.com"
+      },
+      {
+        "title": "Dr Piers Clark",
+        "url": "https://www.siww.com.sg/spotlight-2023/programme/spotlight-plenaries/panellists-and-speakers/dr-piers-clark",
+        "publisher": "siww.com.sg"
       }
     ],
     "confidence": 0.86,
@@ -586,7 +879,8 @@
       "Digital twin & utility software",
       "Wastewater & treatment"
     ],
-    "access": "proprietary"
+    "access": "proprietary",
+    "linkedin": "https://uk.linkedin.com/in/piersclark"
   },
   {
     "id": "victoria-edwards",
@@ -610,6 +904,26 @@
         "companyId": "united-utilities",
         "relationship": "served",
         "note": "Five-year framework via the innovation lab"
+      },
+      {
+        "companyId": "fido-tech",
+        "relationship": "led",
+        "note": "Victoria Edwards is related to FIDO Tech."
+      },
+      {
+        "companyId": "k622-tech",
+        "relationship": "led",
+        "note": "Victoria Edwards is related to K622 Tech."
+      },
+      {
+        "companyId": "fido-tech",
+        "relationship": "served",
+        "note": "Victoria Edwards is related to FIDO Tech."
+      },
+      {
+        "companyId": "fido-tech",
+        "relationship": "founded",
+        "note": "Victoria Edwards"
       }
     ],
     "signals": [
@@ -630,6 +944,11 @@
         "title": "Victoria Edwards - CEO K622 Tech | Founder Emeritus FIDO ...",
         "url": "https://uk.linkedin.com/in/victoria-edwards-fido",
         "publisher": "LinkedIn"
+      },
+      {
+        "title": "Victoria Edwards speaker | FIDO Tech",
+        "url": "https://fido.tech/victoria-edwards-speaker/",
+        "publisher": "fido.tech"
       }
     ],
     "confidence": 0.82,
@@ -656,6 +975,26 @@
         "companyId": "fido-tech",
         "relationship": "co-founded",
         "note": "CTO & co-founder"
+      },
+      {
+        "companyId": "fido-tech",
+        "relationship": "served",
+        "note": "Neil Edwards"
+      },
+      {
+        "companyId": "fido-tech",
+        "relationship": "founded",
+        "note": "Neil Edwards is related to FIDO Tech."
+      },
+      {
+        "companyId": "fido-tech",
+        "relationship": "led",
+        "note": "Neil Edwards is related to FIDO Tech."
+      },
+      {
+        "companyId": "carfiguano",
+        "relationship": "served",
+        "note": "Neil Edwards"
       }
     ],
     "signals": [
@@ -671,6 +1010,11 @@
         "title": "Neil Edwards - FIDO Tech Ltd - LinkedIn",
         "url": "https://uk.linkedin.com/in/neiledwardsfidotech",
         "publisher": "LinkedIn"
+      },
+      {
+        "title": "Our team | FIDO Tech",
+        "url": "https://fido.tech/our-team/",
+        "publisher": "fido.tech"
       }
     ],
     "confidence": 0.74,
@@ -784,6 +1128,11 @@
         "companyId": "swiss-re",
         "relationship": "acquired",
         "note": "Swiss Re acquired Fathom in 2023"
+      },
+      {
+        "companyId": "fathom",
+        "relationship": "served",
+        "note": "paul-bates"
       }
     ],
     "signals": [
@@ -799,6 +1148,11 @@
         "title": "Swiss Re acquires Fathom",
         "url": "https://insurancedailynews.com/reinsurance-news/post/swiss-re-acquires-flood-risk-modeller-fathom",
         "publisher": "Insurance Daily News"
+      },
+      {
+        "title": "Fathom | LinkedIn",
+        "url": "https://uk.linkedin.com/company/fathom-global",
+        "publisher": "uk.linkedin.com"
       }
     ],
     "confidence": 0.8,
@@ -824,6 +1178,21 @@
         "companyId": "burnt-island-ventures",
         "relationship": "founded",
         "note": "Managing Partner; founded 2020"
+      },
+      {
+        "companyId": "burnt-island-ventures",
+        "relationship": "led",
+        "note": "Tom Ferguson"
+      },
+      {
+        "companyId": "imagine-h2o",
+        "relationship": "led",
+        "note": "Tom Ferguson"
+      },
+      {
+        "companyId": "burnt-island-ventures",
+        "relationship": "partner",
+        "note": "Tom Ferguson is related to Burnt Island Ventures."
       }
     ],
     "signals": [
@@ -839,6 +1208,21 @@
         "title": "Meet Tom Ferguson — Masters of Water",
         "url": "https://www.aquatechtrade.com/masters-of-water/tom-ferguson",
         "publisher": "Aquatech"
+      },
+      {
+        "title": "Tom Ferguson - Managing Partner at Burnt Island Ventures",
+        "url": "https://www.linkedin.com/in/tom-ferguson-biv",
+        "publisher": "linkedin.com"
+      },
+      {
+        "title": "RI Americas 2025 George Kelly - PEI Global Events Calendar",
+        "url": "https://www.peievents.com/en/event/ri-usa/speakers/kelly-george-riusa24",
+        "publisher": "peievents.com"
+      },
+      {
+        "title": "Antoine Walter - (don't) Waste Water Podcast",
+        "url": "https://dww.show/author/admin7250/",
+        "publisher": "dww.show"
       }
     ],
     "confidence": 0.83,
@@ -846,7 +1230,8 @@
       "Digital twin & utility software",
       "Water reuse & desalination"
     ],
-    "access": "proprietary"
+    "access": "proprietary",
+    "linkedin": "https://www.linkedin.com/in/tom-ferguson-biv"
   },
   {
     "id": "henrik-poulsen",
@@ -868,6 +1253,21 @@
         "companyId": "orsted",
         "relationship": "led",
         "note": "CEO 2012–2020"
+      },
+      {
+        "companyId": "dong-energy",
+        "relationship": "led",
+        "note": "Henrik Poulsen is related to DONG Energy."
+      },
+      {
+        "companyId": "carlsberg-breweries-a-s",
+        "relationship": "served",
+        "note": "Deputy Chairman of the Supervisory Board at Carlsberg Breweries A/S"
+      },
+      {
+        "companyId": "iss-a-s",
+        "relationship": "served",
+        "note": "Deputy Chairman at ISS A/S"
       }
     ],
     "signals": [
@@ -886,6 +1286,16 @@
         "title": "Poulsen quits as CEO of offshore wind giant Ørsted",
         "url": "https://www.rechargenews.com/wind/black-to-green-trailblazer-poulsen-quits-as-ceo-of-offshore-wind-giant-orsted/2-1-826352",
         "publisher": "Recharge"
+      },
+      {
+        "title": "DONG Energy announces intention to launch an Initial Public ...",
+        "url": "https://orsted.com/en/company-announcement-list/2016/05/1459022",
+        "publisher": "orsted.com"
+      },
+      {
+        "title": "Henrik Poulsen: Positions, Relations and Network",
+        "url": "https://www.marketscreener.com/insider/HENRIK-POULSEN-A0YWHV/",
+        "publisher": "marketscreener.com"
       }
     ],
     "confidence": 0.82,
@@ -913,6 +1323,11 @@
         "companyId": "orsted",
         "relationship": "led",
         "note": "UK Country Manager"
+      },
+      {
+        "companyId": "orsted",
+        "relationship": "served",
+        "note": "Benj Sykes"
       }
     ],
     "signals": [
@@ -931,10 +1346,16 @@
         "title": "Benj Sykes — Ørsted UK",
         "url": "https://orsted.co.uk/media/newsroom/news/2025/07/benj-sykes-uk-country-manager-thoughts-on-reform-of-the-uks-national-electricity-market",
         "publisher": "Ørsted"
+      },
+      {
+        "title": "Benj Sykes - Ørsted - LinkedIn",
+        "url": "https://uk.linkedin.com/in/benj-sykes-offshorewind",
+        "publisher": "uk.linkedin.com"
       }
     ],
     "confidence": 0.78,
-    "access": "proprietary"
+    "access": "proprietary",
+    "linkedin": "https://uk.linkedin.com/in/benj-sykes-offshorewind"
   },
   {
     "id": "michael-bonte-friedheim",
@@ -957,6 +1378,16 @@
         "companyId": "nextenergy-capital",
         "relationship": "founded",
         "note": "Founding Partner & Group CEO"
+      },
+      {
+        "companyId": "nextenergy-capital",
+        "relationship": "served",
+        "note": "Michael Bonte-Friedheim"
+      },
+      {
+        "companyId": "nextenergy-group",
+        "relationship": "served",
+        "note": "Michael Bonte-Friedheim"
       }
     ],
     "signals": [
@@ -967,10 +1398,16 @@
         "title": "Michael Bonte-Friedheim — NextEnergy Group",
         "url": "https://nextenergygroup.com/people/michael-bonte-friedheim/",
         "publisher": "NextEnergy Group"
+      },
+      {
+        "title": "Michael Bonte-Friedheim - NextEnergy Capital - LinkedIn",
+        "url": "https://uk.linkedin.com/in/michael-bonte-friedheim-54392911",
+        "publisher": "uk.linkedin.com"
       }
     ],
     "confidence": 0.8,
-    "access": "proprietary"
+    "access": "proprietary",
+    "linkedin": "https://uk.linkedin.com/in/michael-bonte-friedheim-54392911"
   },
   {
     "id": "roy-bedlow",
@@ -994,6 +1431,11 @@
         "companyId": "low-carbon",
         "relationship": "founded",
         "note": "Founder & CEO since 2011"
+      },
+      {
+        "companyId": "low-carbon",
+        "relationship": "led",
+        "note": "Roy Bedlow is related to Low Carbon."
       }
     ],
     "signals": [
@@ -1041,6 +1483,26 @@
         "companyId": "quinbrook",
         "relationship": "invested-in",
         "note": "Sector backed by infrastructure capital (KKR into Zenobē)"
+      },
+      {
+        "companyId": "arcform",
+        "relationship": "board",
+        "note": "Nicholas Beatty"
+      },
+      {
+        "companyId": "zenobe",
+        "relationship": "founded",
+        "note": "Nicholas Beatty is related to Zenobē."
+      },
+      {
+        "companyId": "zenobe-energy",
+        "relationship": "founded",
+        "note": "Nicholas Beatty is related to Zenobe Energy."
+      },
+      {
+        "companyId": "zenobe-energy-2",
+        "relationship": "founded",
+        "note": "Nicholas Beatty"
       }
     ],
     "signals": [
@@ -1051,10 +1513,21 @@
         "title": "Zenobē confirms c.£600m investment from KKR",
         "url": "https://www.solarpowerportal.co.uk/zenobee_confirms_c-600_million_investment_from_kkr/",
         "publisher": "Solar Power Portal"
+      },
+      {
+        "title": "Nicholas Beatty - Retired Founder of Zenobe Energy ...",
+        "url": "https://uk.linkedin.com/in/nicholas-beatty-126655141",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "Co-Founder Nicholas Beatty speaks to IJGlobal and Project ...",
+        "url": "https://www.zenobe.com/news-and-events/co-founder-nicholas-beatty-speaks-to-ijglobal-and-project-finance-international/",
+        "publisher": "zenobe.com"
       }
     ],
     "confidence": 0.78,
-    "access": "proprietary"
+    "access": "proprietary",
+    "linkedin": "https://uk.linkedin.com/in/nicholas-beatty-126655141"
   },
   {
     "id": "amit-gudka",
@@ -1083,6 +1556,16 @@
         "companyId": "bulb",
         "relationship": "co-founded",
         "note": "Co-founded 2015; left before 2021 administration"
+      },
+      {
+        "companyId": "field-energy",
+        "relationship": "led",
+        "note": "Amit Gudka"
+      },
+      {
+        "companyId": "bulb",
+        "relationship": "served",
+        "note": "Amit Gudka"
       }
     ],
     "signals": [
@@ -1101,10 +1584,21 @@
         "title": "Bulb co-founder on his latest energy venture, Field",
         "url": "https://uk.finance.yahoo.com/news/bulb-co-founder-says-latest-energy-venture-takes-very-different-approach-000100899.html",
         "publisher": "Yahoo Finance"
+      },
+      {
+        "title": "Amit Gudka - Field - LinkedIn",
+        "url": "https://uk.linkedin.com/in/amit-gudka-928180b1",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "Amit Gudka - Field - Second Home",
+        "url": "https://secondhome.io/amit-gudka-field/",
+        "publisher": "secondhome.io"
       }
     ],
     "confidence": 0.8,
-    "access": "proprietary"
+    "access": "proprietary",
+    "linkedin": "https://uk.linkedin.com/in/amit-gudka-928180b1"
   },
   {
     "id": "erik-nygard",
@@ -1132,6 +1626,11 @@
         "companyId": "shell",
         "relationship": "acquired",
         "note": "Shell acquired Limejump in 2019"
+      },
+      {
+        "companyId": "limejump",
+        "relationship": "served",
+        "note": "Erik Nygård"
       }
     ],
     "signals": [
@@ -1142,6 +1641,16 @@
         "title": "Limejump acquired by Shell — SET Ventures",
         "url": "https://setventures.com/set-ventures-portfolio-company-limejump-acquired-by-shell/",
         "publisher": "SET Ventures"
+      },
+      {
+        "title": "About | Powering Your Productivity - Kofa",
+        "url": "https://www.kofa.co/about",
+        "publisher": "kofa.co"
+      },
+      {
+        "title": "Erik Nygard, CEO LimeJump - Leaders in Cleantech",
+        "url": "https://leadersincleantech.com/erik-nygard-limejump",
+        "publisher": "leadersincleantech.com"
       }
     ],
     "confidence": 0.76,
@@ -1186,6 +1695,11 @@
         "title": "GRIDSERVE — Wikipedia",
         "url": "https://en.wikipedia.org/wiki/Gridserve",
         "publisher": "Wikipedia"
+      },
+      {
+        "title": "Gridserve team target $100bn of support for new global ...",
+        "url": "https://www.edie.net/gridserve-team-target-100bn-of-support-for-new-global-climate-tech-venture/",
+        "publisher": "edie.net"
       }
     ],
     "confidence": 0.76,
@@ -1212,6 +1726,11 @@
         "companyId": "bluefield-research",
         "relationship": "founded",
         "note": "Co-founder & CEO; founded 2013"
+      },
+      {
+        "companyId": "bluefield-research",
+        "relationship": "led",
+        "note": "Reese Tisdale is related to Bluefield Research."
       }
     ],
     "signals": [
@@ -1222,10 +1741,16 @@
         "title": "Reese Tisdale — Bluefield Research",
         "url": "https://www.bluefieldresearch.com/team/reese-tisdale/",
         "publisher": "Bluefield Research"
+      },
+      {
+        "title": "Reese Tisdale - Bluefield Research | LinkedIn",
+        "url": "https://www.linkedin.com/in/reese-tisdale-0573651",
+        "publisher": "linkedin.com"
       }
     ],
     "confidence": 0.82,
-    "access": "proprietary"
+    "access": "proprietary",
+    "linkedin": "https://www.linkedin.com/in/reese-tisdale-0573651"
   },
   {
     "id": "dapeng-yu",
@@ -1247,6 +1772,21 @@
         "companyId": "previsico",
         "relationship": "co-founded",
         "note": "Co-founder & Chief Scientific Officer; Loughborough spin-out 2019"
+      },
+      {
+        "companyId": "previsico",
+        "relationship": "served",
+        "note": "Chief Scientific Officer at Previsico."
+      },
+      {
+        "companyId": "previsico",
+        "relationship": "founded",
+        "note": "Co-founded Previsico."
+      },
+      {
+        "companyId": "loughborough-university",
+        "relationship": "served",
+        "note": "Professor at Loughborough University."
       }
     ],
     "signals": [
@@ -1257,6 +1797,11 @@
         "title": "Previsico — Loughborough University",
         "url": "https://www.lboro.ac.uk/internal/research-innovation-support/commercialisation-research/case-studies/previsico/",
         "publisher": "Loughborough University"
+      },
+      {
+        "title": "Our Mission in Flood Risk Mitigation - Previsico",
+        "url": "https://previsico.com/en-us/about-us",
+        "publisher": "previsico.com"
       }
     ],
     "confidence": 0.78,
@@ -1282,6 +1827,31 @@
         "companyId": "previsico",
         "relationship": "co-founded",
         "note": "Co-founder & CEO"
+      },
+      {
+        "companyId": "previsico",
+        "relationship": "served",
+        "note": "Avi Baruch"
+      },
+      {
+        "companyId": "climingo",
+        "relationship": "founded",
+        "note": "Avi Baruch is related to Climingo."
+      },
+      {
+        "companyId": "previsico",
+        "relationship": "founded",
+        "note": "Avi Baruch is related to Previsico."
+      },
+      {
+        "companyId": "climingo",
+        "relationship": "led",
+        "note": "Avi Baruch is related to Climingo."
+      },
+      {
+        "companyId": "previsico",
+        "relationship": "led",
+        "note": "Avi Baruch is related to Previsico."
       }
     ],
     "signals": [
@@ -1292,10 +1862,21 @@
         "title": "Foresight invests £1.75m into Previsico",
         "url": "https://www.foresight.group/news/foresight-invests-175m-into-previsico-loughborough-based-developers-of-a-market-leading-flood-forecasting-and-warning-system",
         "publisher": "Foresight Group"
+      },
+      {
+        "title": "Dr Avi Baruch - Co-Founder and CEO of Climingo ... - LinkedIn",
+        "url": "https://uk.linkedin.com/in/avinoam-avi-baruch",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "Our Mission in Flood Risk Mitigation - Previsico",
+        "url": "https://previsico.com/en-us/about-us",
+        "publisher": "previsico.com"
       }
     ],
     "confidence": 0.74,
-    "access": "proprietary"
+    "access": "proprietary",
+    "linkedin": "https://uk.linkedin.com/in/avinoam-avi-baruch"
   },
   {
     "id": "jeff-mcdermott",
@@ -1321,6 +1902,16 @@
         "companyId": "nomura-greentech",
         "relationship": "founded",
         "note": "Founded Greentech Capital Advisors (2009) → Nomura Greentech"
+      },
+      {
+        "companyId": "nomura",
+        "relationship": "served",
+        "note": "Jeff McDermott is related to Nomura."
+      },
+      {
+        "companyId": "energy-impact-partners",
+        "relationship": "served",
+        "note": "Jeff McDermott is related to Energy Impact Partners."
       }
     ],
     "signals": [
@@ -1339,9 +1930,15 @@
         "title": "Jeff McDermott — Nomura Greentech",
         "url": "https://www.nomuragreentech.com/who-we-are/jeff-mcdermott",
         "publisher": "Nomura Greentech"
+      },
+      {
+        "title": "Jeff McDermott - Co-Founder of Confluence Infrastructure ...",
+        "url": "https://www.linkedin.com/in/jeff-mcdermott-a2248441",
+        "publisher": "linkedin.com"
       }
     ],
-    "confidence": 0.83
+    "confidence": 0.83,
+    "linkedin": "https://www.linkedin.com/in/jeff-mcdermott-a2248441"
   },
   {
     "id": "martin-lucas",
@@ -1365,6 +1962,21 @@
         "companyId": "wfw",
         "relationship": "partner",
         "note": "Renewables / offshore-wind projects partner"
+      },
+      {
+        "companyId": "wfw",
+        "relationship": "legal-counsel",
+        "note": "Martin Lucas is a partner at Watson Farley & Williams, providing legal advice on energy and infrastructure projects."
+      },
+      {
+        "companyId": "watson-farley-williams-llp",
+        "relationship": "partner",
+        "note": "Martin Lucas is related to Watson Farley & Williams LLP."
+      },
+      {
+        "companyId": "wfw",
+        "relationship": "served",
+        "note": "Martin Lucas"
       }
     ],
     "signals": [
@@ -1375,9 +1987,20 @@
         "title": "WFW renewables practice — Legal 500",
         "url": "https://www.legal500.com/rankings/ranking/c-london/projects-energy-and-natural-resources/renewables/3483-watson-farley-williams-llp",
         "publisher": "Legal 500"
+      },
+      {
+        "title": "Martin Lucas - Partner at Watson, Farley & Williams | LinkedIn",
+        "url": "https://uk.linkedin.com/in/martin-lucas-71595030",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "Martin Lucas - Watson Farley & Williams",
+        "url": "https://www.wfw.com/people/martin-lucas/",
+        "publisher": "wfw.com"
       }
     ],
-    "confidence": 0.72
+    "confidence": 0.72,
+    "linkedin": "https://uk.linkedin.com/in/martin-lucas-71595030"
   },
   {
     "id": "ian-mccarlie",
@@ -1402,6 +2025,11 @@
         "companyId": "pinsent-masons",
         "relationship": "partner",
         "note": "Energy / renewables investments partner"
+      },
+      {
+        "companyId": "pinsent-masons",
+        "relationship": "served",
+        "note": "Energy partner at Pinsent Masons"
       }
     ],
     "signals": [
@@ -1412,6 +2040,16 @@
         "title": "Pinsent Masons — Energy",
         "url": "https://www.pinsentmasons.com/sectors/energy",
         "publisher": "Pinsent Masons"
+      },
+      {
+        "title": "Ian McCarlie - Pinsent Masons",
+        "url": "https://www.pinsentmasons.com/people/ian-mccarlie",
+        "publisher": "pinsentmasons.com"
+      },
+      {
+        "title": "Pinsent Masons advises consortium on the sale of the UK's ...",
+        "url": "https://www.pinsentmasons.com/about-us/announcements/pinsent-masons-advises-consortium-on-the-sale-of-the-uks-largest-operational-solar-park",
+        "publisher": "pinsentmasons.com"
       }
     ],
     "confidence": 0.72
@@ -1438,6 +2076,21 @@
         "companyId": "pinsent-masons",
         "relationship": "partner",
         "note": "Water infrastructure / consenting"
+      },
+      {
+        "companyId": "northern-ireland-water",
+        "relationship": "led",
+        "note": "Gordon McCreath"
+      },
+      {
+        "companyId": "dundas-wilson",
+        "relationship": "legal-counsel",
+        "note": "Gordon McCreath"
+      },
+      {
+        "companyId": "pinsent-masons",
+        "relationship": "legal-counsel",
+        "note": "Gordon McCreath"
       }
     ],
     "signals": [
@@ -1448,9 +2101,20 @@
         "title": "Pinsent Masons — Water (Legal 500)",
         "url": "https://www.legal500.com/rankings/ranking/c-london/projects-energy-and-natural-resources/water/2251-pinsent-masons-llp",
         "publisher": "Legal 500"
+      },
+      {
+        "title": "Gordon McCreath - Pinsent Masons LLP - LinkedIn",
+        "url": "https://uk.linkedin.com/in/gordon-mccreath-1099512b",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "Gordon McCreath - Pinsent Masons",
+        "url": "https://www.pinsentmasons.com/people/gordon-mccreath",
+        "publisher": "pinsentmasons.com"
       }
     ],
-    "confidence": 0.7
+    "confidence": 0.7,
+    "linkedin": "https://uk.linkedin.com/in/gordon-mccreath-1099512b"
   },
   {
     "id": "bobby-reifman",
@@ -1473,6 +2137,16 @@
         "companyId": "lincoln-international",
         "relationship": "partner",
         "note": "MD & Co-Head, Industrials"
+      },
+      {
+        "companyId": "lincoln-international",
+        "relationship": "led",
+        "note": "Managing Director & Co-Head, Industrials"
+      },
+      {
+        "companyId": "lincoln-international",
+        "relationship": "served",
+        "note": "Bobby Reifman is related to Lincoln International."
       }
     ],
     "signals": [
@@ -1491,9 +2165,20 @@
         "title": "Lincoln International — Waterline / Azuria transaction",
         "url": "https://www.lincolninternational.com/transactions/behrman-capital-has-sold-waterline-renewal-technologies-to-azuria-water-solutions-a-portfolio-company-of-new-mountain-capital/",
         "publisher": "Lincoln International"
+      },
+      {
+        "title": "Robert (Bobby) Reifman - Lincoln International - LinkedIn",
+        "url": "https://www.linkedin.com/in/robert-bobby-reifman-a25b4463",
+        "publisher": "linkedin.com"
+      },
+      {
+        "title": "Robert Reifman - Lincoln International LLC",
+        "url": "https://www.lincolninternational.com/people/robert-reifman/",
+        "publisher": "lincolninternational.com"
       }
     ],
-    "confidence": 0.72
+    "confidence": 0.72,
+    "linkedin": "https://www.linkedin.com/in/robert-bobby-reifman-a25b4463"
   },
   {
     "id": "michael-phelan-gridbeyond",
@@ -1518,6 +2203,26 @@
         "companyId": "gridbeyond",
         "relationship": "co-founded",
         "note": "CEO & Co-Founder of GridBeyond"
+      },
+      {
+        "companyId": "gridbeyond",
+        "relationship": "board",
+        "note": "Michael Phelan"
+      },
+      {
+        "companyId": "gridbeyond",
+        "relationship": "served",
+        "note": "Michael Phelan is related to GridBeyond."
+      },
+      {
+        "companyId": "gridbeyond",
+        "relationship": "founded",
+        "note": "Michael Phelan is related to GridBeyond."
+      },
+      {
+        "companyId": "gridbeyond",
+        "relationship": "led",
+        "note": "Michael Phelan is related to GridBeyond."
       }
     ],
     "signals": [
@@ -1541,9 +2246,25 @@
         "title": "GridBeyond — Investor relations",
         "url": "https://gridbeyond.com/about-us-2/investor-relations/",
         "publisher": "GridBeyond"
+      },
+      {
+        "title": "Michael Phelan - Ireland | Professional Profile | LinkedIn",
+        "url": "https://ie.linkedin.com/in/michael-phelan-b599b6",
+        "publisher": "ie.linkedin.com"
+      },
+      {
+        "title": "GridBeyond closes €52M Series C funding round to continue ...",
+        "url": "https://www.theade.co.uk/news/gridbeyond-closes-52m-series-c-funding-round-to-continue-its-platform-evolution-and-invest-in-new-existing-markets",
+        "publisher": "theade.co.uk"
+      },
+      {
+        "title": "An award-winning provider of AI-powered ... - GridBeyond",
+        "url": "https://gridbeyond.com/about-us-2/",
+        "publisher": "gridbeyond.com"
       }
     ],
-    "confidence": 0.87
+    "confidence": 0.87,
+    "linkedin": "https://ie.linkedin.com/in/michael-phelan-b599b6"
   },
   {
     "id": "jo-jo-hubbard",
@@ -1568,6 +2289,26 @@
         "companyId": "electron",
         "relationship": "co-founded",
         "note": "CEO & Co-Founder"
+      },
+      {
+        "companyId": "national-grid-eso",
+        "relationship": "advised",
+        "note": "Jo-Jo Hubbard"
+      },
+      {
+        "companyId": "ofgem",
+        "relationship": "advised",
+        "note": "Jo-Jo Hubbard"
+      },
+      {
+        "companyId": "electron",
+        "relationship": "founded",
+        "note": "Jo-Jo Hubbard is related to Electron."
+      },
+      {
+        "companyId": "electron",
+        "relationship": "led",
+        "note": "Jo-Jo Hubbard is related to Electron."
       }
     ],
     "signals": [
@@ -1591,9 +2332,20 @@
         "title": "Electron podcast with Jo-Jo Hubbard",
         "url": "https://electron.net/electron-resource/consumer-centric-energy-as-a-service-platform/",
         "publisher": "Electron"
+      },
+      {
+        "title": "Jo-Jo Hubbard FEI - Co-founder & CEO at Electron | LinkedIn",
+        "url": "https://uk.linkedin.com/in/jo-jo-hubbard",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "Jo-Jo Hubbard, Author at Electron",
+        "url": "https://electron.net/author/jo-jo-hubbard/",
+        "publisher": "electron.net"
       }
     ],
-    "confidence": 0.86
+    "confidence": 0.86,
+    "linkedin": "https://uk.linkedin.com/in/jo-jo-hubbard"
   },
   {
     "id": "amir-peleg",
@@ -1618,6 +2370,11 @@
         "companyId": "takadu",
         "relationship": "founded",
         "note": "Founder & CEO; founded TaKaDu in 2008"
+      },
+      {
+        "companyId": "takadu",
+        "relationship": "led",
+        "note": "Amir Peleg"
       }
     ],
     "signals": [
@@ -1633,9 +2390,15 @@
         "title": "TaKaDu — About us",
         "url": "https://www.takadu.com/about-us/",
         "publisher": "TaKaDu"
+      },
+      {
+        "title": "Amir Peleg‏ - ‏Founder & CEO of TaKaDu - LinkedIn",
+        "url": "https://il.linkedin.com/in/amirpeleg",
+        "publisher": "il.linkedin.com"
       }
     ],
-    "confidence": 0.88
+    "confidence": 0.88,
+    "linkedin": "https://il.linkedin.com/in/amirpeleg"
   },
   {
     "id": "bryce-smith",
@@ -1660,6 +2423,16 @@
         "companyId": "levelten-energy",
         "relationship": "founded",
         "note": "Founder & CEO"
+      },
+      {
+        "companyId": "levelten-energy",
+        "relationship": "led",
+        "note": "Bryce Smith"
+      },
+      {
+        "companyId": "levelten-energy",
+        "relationship": "served",
+        "note": "Bryce Smith is related to LevelTen Energy."
       }
     ],
     "signals": [
@@ -1675,9 +2448,20 @@
         "title": "LevelTen launches renewable energy marketplace",
         "url": "https://www.leveltenenergy.com/post/levelten-launches-renewable-energy-marketplace",
         "publisher": "LevelTen Energy"
+      },
+      {
+        "title": "Bryce Smith - Founder and Chief Executive Officer at LevelTen ...",
+        "url": "https://www.linkedin.com/in/bryce-smith-8545a819",
+        "publisher": "linkedin.com"
+      },
+      {
+        "title": "Working Geek: Bryce Smith, CEO of LevelTen Energy, Helps ...",
+        "url": "https://www.leveltenenergy.com/post/working-geek-bryce-smith",
+        "publisher": "leveltenenergy.com"
       }
     ],
-    "confidence": 0.86
+    "confidence": 0.86,
+    "linkedin": "https://www.linkedin.com/in/bryce-smith-8545a819"
   },
   {
     "id": "andrea-barber",
@@ -1708,6 +2492,21 @@
         "companyId": "enverus",
         "relationship": "acquired",
         "note": "RatedPower acquired by Enverus in 2022"
+      },
+      {
+        "companyId": "ratedpower",
+        "relationship": "founded",
+        "note": "Andrea Barber is related to RatedPower."
+      },
+      {
+        "companyId": "ratedpower",
+        "relationship": "led",
+        "note": "Andrea Barber is related to RatedPower."
+      },
+      {
+        "companyId": "enverus",
+        "relationship": "served",
+        "note": "Andrea Barber"
       }
     ],
     "signals": [
@@ -1731,9 +2530,20 @@
         "title": "RatedPower rebrand article by Andrea Barber",
         "url": "https://ratedpower.com/blog/smart-energy-flow/",
         "publisher": "RatedPower"
+      },
+      {
+        "title": "Andrea Barber - Enverus | LinkedIn",
+        "url": "https://es.linkedin.com/in/andrea-barber",
+        "publisher": "es.linkedin.com"
+      },
+      {
+        "title": "Posts from Andrea Barber - RatedPower",
+        "url": "https://ratedpower.com/blog/author/andrea-barber/",
+        "publisher": "ratedpower.com"
       }
     ],
-    "confidence": 0.88
+    "confidence": 0.88,
+    "linkedin": "https://es.linkedin.com/in/andrea-barber"
   },
   {
     "id": "michael-waldner",
@@ -2140,6 +2950,11 @@
         "title": "About Idrica",
         "url": "https://www.idrica.com/about-us/",
         "publisher": "Idrica"
+      },
+      {
+        "title": "Idrica - LinkedIn",
+        "url": "https://www.linkedin.com/company/idrica",
+        "publisher": "linkedin.com"
       }
     ],
     "confidence": 0.78
@@ -6310,5 +7125,969 @@
       }
     ],
     "confidence": 0.9
+  },
+  {
+    "id": "mohan-waghmare",
+    "name": "Mohan Waghmare",
+    "type": "operator",
+    "headline": "operator",
+    "themes": [
+      "smart-water"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Xylem.",
+    "bio": "Discovered through sourced enrichment around Xylem.",
+    "companies": [
+      {
+        "companyId": "xylem-water-solutions-india-pvt-ltd",
+        "relationship": "served",
+        "note": "Mohan Waghmare"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Mohan Waghmare - Xylem Water Solutions India Pvt. Ltd.",
+        "url": "https://in.linkedin.com/in/mohan-waghmare-1991701b3",
+        "publisher": "in.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "most-influential",
+    "name": "Most Influential",
+    "type": "operator",
+    "headline": "Potential sector expert",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "whyRelevant": "Andrea has been named one of the top 10 Most Influential Spanish Entrepreneurs for her work as the Co-Founder and CEO of RatedPower.",
+    "bio": "Mentioned in Posts from Andrea Barber - RatedPower.",
+    "companies": [
+      {
+        "companyId": "andrea",
+        "relationship": "served",
+        "note": "Andrea has been named one of the top 10 Most Influential Spanish Entrepreneurs for her work as the Co-Founder and CEO of RatedPower."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Posts from Andrea Barber - RatedPower",
+        "url": "https://ratedpower.com/blog/author/andrea-barber/",
+        "publisher": "ratedpower.com"
+      }
+    ],
+    "confidence": 0.55
+  },
+  {
+    "id": "robert-bobby-reifman",
+    "name": "Robert (Bobby) Reifman",
+    "type": "banker",
+    "headline": "investment_banker",
+    "themes": [
+      "smart-water"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Bobby Reifman.",
+    "bio": "Discovered through sourced enrichment around Bobby Reifman.",
+    "companies": [
+      {
+        "companyId": "lincoln-international",
+        "relationship": "served",
+        "note": "Robert (Bobby) Reifman is related to Lincoln International."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Robert (Bobby) Reifman - Lincoln International - LinkedIn",
+        "url": "https://www.linkedin.com/in/robert-bobby-reifman-a25b4463",
+        "publisher": "linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "sean-guerin",
+    "name": "Sean Guerin",
+    "type": "operator",
+    "headline": "marketing_communications_specialist",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around JSM Group.",
+    "bio": "Discovered through sourced enrichment around JSM Group.",
+    "companies": [
+      {
+        "companyId": "jsm-group-services-ltd",
+        "relationship": "served",
+        "note": "Sean Guerin is related to JSM Group Services Ltd."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Sean Guerin - Marketing Communications Specialist | LinkedIn",
+        "url": "https://uk.linkedin.com/in/sean-guerin-3523424",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "stu-cox",
+    "name": "Stu Cox",
+    "type": "operator",
+    "headline": "Head of Product Development",
+    "org": "Piclo",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "whyRelevant": "Head of Product Development at Piclo",
+    "bio": "Head of Product Development at Piclo",
+    "companies": [
+      {
+        "companyId": "piclo",
+        "relationship": "led",
+        "note": "Stu Cox is related to Piclo."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Meet the Piclo Team",
+        "url": "https://www.piclo.com/team",
+        "publisher": "piclo.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "tom-teles",
+    "name": "Tom Teles",
+    "type": "operator",
+    "headline": "executive",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around LS Power.",
+    "bio": "Discovered through sourced enrichment around LS Power.",
+    "companies": [
+      {
+        "companyId": "ls-power",
+        "relationship": "served",
+        "note": "Tom Teles is related to LS Power."
+      }
+    ],
+    "sources": [
+      {
+        "title": "About - LS Power",
+        "url": "https://www.lspower.com/about/",
+        "publisher": "lspower.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "spanish-entrepreneurs",
+    "name": "Spanish Entrepreneurs",
+    "type": "operator",
+    "headline": "Potential sector expert",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "whyRelevant": "Andrea has been named one of the top 10 Most Influential Spanish Entrepreneurs for her work as the Co-Founder and CEO of RatedPower.",
+    "bio": "Mentioned in Posts from Andrea Barber - RatedPower.",
+    "companies": [],
+    "sources": [
+      {
+        "title": "Posts from Andrea Barber - RatedPower",
+        "url": "https://ratedpower.com/blog/author/andrea-barber/",
+        "publisher": "ratedpower.com"
+      }
+    ],
+    "confidence": 0.55
+  },
+  {
+    "id": "ali-vojdani-2",
+    "name": "Ali Vojdani",
+    "type": "operator",
+    "headline": "CEO",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around GridBright.",
+    "bio": "Discovered through sourced enrichment around GridBright.",
+    "companies": [],
+    "sources": [
+      {
+        "title": "Shane Downing - San Francisco Business Times",
+        "url": "https://www.bizjournals.com/sanfrancisco/bio/40273/Shane+Downing?page=3",
+        "publisher": "bizjournals.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "allison-howe",
+    "name": "Allison Howe",
+    "type": "operator",
+    "headline": "human_resources_professional",
+    "themes": [
+      "smart-water"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Solenis.",
+    "bio": "Discovered through sourced enrichment around Solenis.",
+    "companies": [
+      {
+        "companyId": "solenis",
+        "relationship": "served",
+        "note": "Allison Howe is related to Solenis."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Allison Howe - Human Resources Professional | LinkedIn",
+        "url": "https://www.linkedin.com/in/allison-e-howe",
+        "publisher": "linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "amy-prinsloo",
+    "name": "Amy Prinsloo",
+    "type": "operator",
+    "headline": "executive",
+    "themes": [
+      "smart-water"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Neil Edwards.",
+    "bio": "Discovered through sourced enrichment around Neil Edwards.",
+    "companies": [],
+    "sources": [
+      {
+        "title": "Our team | FIDO Tech",
+        "url": "https://fido.tech/our-team/",
+        "publisher": "fido.tech"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "ben-irons",
+    "name": "Ben Irons",
+    "type": "ex-founder",
+    "headline": "co-founder, director",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Andrew Luers.",
+    "bio": "Discovered through sourced enrichment around Andrew Luers.",
+    "companies": [
+      {
+        "companyId": "habitat-energy",
+        "relationship": "board",
+        "note": "Ben Irons"
+      },
+      {
+        "companyId": "habitat-energy",
+        "relationship": "founded",
+        "note": "Ben Irons"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Who we are - Habitat Energy",
+        "url": "https://habitat.energy/who-we-are/",
+        "publisher": "habitat.energy"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "charlie-hodges",
+    "name": "Charlie Hodges",
+    "type": "banker",
+    "headline": "Advisory team member",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around James Knight.",
+    "bio": "Discovered through sourced enrichment around James Knight.",
+    "companies": [
+      {
+        "companyId": "augusta-co-mizuho",
+        "relationship": "board",
+        "note": "Partner."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Advisory Team - Augusta & Co",
+        "url": "https://augustaco.com/advisory-team/",
+        "publisher": "augustaco.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "claudius-von-plettenberg",
+    "name": "Claudius von Plettenberg",
+    "type": "operator",
+    "headline": "private_equity_executive",
+    "themes": [
+      "smart-water"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around AURELIUS.",
+    "bio": "Discovered through sourced enrichment around AURELIUS.",
+    "companies": [],
+    "sources": [
+      {
+        "title": "7 questions for Claudius von Plettenberg, Managing Director ...",
+        "url": "https://dealcircle.com/en/ressource/7-fragen-an-claudius-von-plettenberg-managing-director-bei-aurelius-wachstumskapital/",
+        "publisher": "dealcircle.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "doreen-nabaho",
+    "name": "Doreen Nabaho",
+    "type": "operator",
+    "headline": "Operator",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Erik Nygård.",
+    "bio": "Discovered through sourced enrichment around Erik Nygård.",
+    "companies": [],
+    "sources": [
+      {
+        "title": "About | Powering Your Productivity - Kofa",
+        "url": "https://www.kofa.co/about",
+        "publisher": "kofa.co"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "elizabeth-dew",
+    "name": "Elizabeth Dew",
+    "type": "operator",
+    "headline": "Sales Professional",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around TowerBrook.",
+    "bio": "Discovered through sourced enrichment around TowerBrook.",
+    "companies": [],
+    "sources": [
+      {
+        "title": "Elizabeth Dew - Macro Sales at Natixis | LinkedIn",
+        "url": "https://www.linkedin.com/in/elizabeth-dew-7b140a9",
+        "publisher": "linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "eloise-goulder",
+    "name": "Eloise Goulder",
+    "type": "operator",
+    "headline": "executive",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "whyRelevant": "Head of Data Assets and Alpha Group at J.P. Morgan",
+    "bio": "Head of Data Assets and Alpha Group at J.P. Morgan",
+    "companies": [
+      {
+        "companyId": "jp-morgan",
+        "relationship": "served",
+        "note": "Eloise Goulder is related to J.P. Morgan."
+      }
+    ],
+    "sources": [
+      {
+        "title": "J.P. Morgan | Official Website",
+        "url": "https://www.jpmorgan.com/",
+        "publisher": "jpmorgan.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "erik-nygard-2",
+    "name": "Erik Nygard",
+    "type": "ex-founder",
+    "headline": "Founder & former CEO",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Erik Nygård.",
+    "bio": "Discovered through sourced enrichment around Erik Nygård.",
+    "companies": [
+      {
+        "companyId": "limejump",
+        "relationship": "founded",
+        "note": "Erik Nygard"
+      },
+      {
+        "companyId": "shell",
+        "relationship": "served",
+        "note": "Erik Nygard"
+      }
+    ],
+    "sources": [
+      {
+        "title": "USF Ventures | LinkedIn",
+        "url": "https://www.linkedin.com/company/usf-ventures",
+        "publisher": "linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "grace-toms",
+    "name": "Grace Toms",
+    "type": "operator",
+    "headline": "chief financial officer",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Andrew Luers.",
+    "bio": "Discovered through sourced enrichment around Andrew Luers.",
+    "companies": [
+      {
+        "companyId": "habitat-energy",
+        "relationship": "led",
+        "note": "Grace Toms"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Who we are - Habitat Energy",
+        "url": "https://habitat.energy/who-we-are/",
+        "publisher": "habitat.energy"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "gunnar-m-christensen-sr",
+    "name": "Gunnar M. Christensen Sr.",
+    "type": "ex-founder",
+    "headline": "founder",
+    "themes": [
+      "smart-water"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around GMC Group.",
+    "bio": "Discovered through sourced enrichment around GMC Group.",
+    "companies": [],
+    "sources": [
+      {
+        "title": "GMC Group – Family-owned industrial group and real estate",
+        "url": "https://www.gmc.no/en/gmc-group",
+        "publisher": "gmc.no"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "jason-mcgray",
+    "name": "Jason McGray",
+    "type": "operator",
+    "headline": "clean_energy_development",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Gareth Miller.",
+    "bio": "Discovered through sourced enrichment around Gareth Miller.",
+    "companies": [
+      {
+        "companyId": "infinis",
+        "relationship": "served",
+        "note": "Jason McGray is related to Infinis."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Jason McGray - Head of Development at Infinis | LinkedIn",
+        "url": "https://uk.linkedin.com/in/jason-mcgray-65a15a63",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "jo-jo-hubbard-fei",
+    "name": "Jo-Jo Hubbard FEI",
+    "type": "ex-founder",
+    "headline": "Founder/CEO",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Electron.",
+    "bio": "Discovered through sourced enrichment around Electron.",
+    "companies": [],
+    "sources": [
+      {
+        "title": "Electron | LinkedIn",
+        "url": "https://uk.linkedin.com/company/electron-grid",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "joaquin-oliveira",
+    "name": "Joaquin Oliveira",
+    "type": "operator",
+    "headline": "new CEO",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Nick Boyle.",
+    "bio": "Discovered through sourced enrichment around Nick Boyle.",
+    "companies": [],
+    "sources": [
+      {
+        "title": "Leadership Change At Lightsource BP Post BP Acquisition",
+        "url": "https://taiyangnews.info/people/lightsource-bp-new-ceo-joaquin-oliveira",
+        "publisher": "taiyangnews.info"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "joshua-feldman",
+    "name": "Joshua Feldman",
+    "type": "ex-founder",
+    "headline": "Founder & Executive",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Jeff McDermott.",
+    "bio": "Discovered through sourced enrichment around Jeff McDermott.",
+    "companies": [],
+    "sources": [
+      {
+        "title": "team - - Energy Impact Partners",
+        "url": "https://www.energyimpactpartners.com/team/",
+        "publisher": "energyimpactpartners.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "juan-jose-reyes",
+    "name": "Juan José Reyes",
+    "type": "operator",
+    "headline": "Finance Professional",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Saeta Yield.",
+    "bio": "Discovered through sourced enrichment around Saeta Yield.",
+    "companies": [
+      {
+        "companyId": "saeta-yield",
+        "relationship": "served",
+        "note": "Juan José Reyes"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Juan José Reyes - Solclef",
+        "url": "https://solclef.com/en/personnel/juan-jose-reyes/",
+        "publisher": "solclef.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "kranthi-gade",
+    "name": "Kranthi Gade",
+    "type": "operator",
+    "headline": "executive",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "whyRelevant": "Head of Global Macro QIS at J.P. Morgan",
+    "bio": "Head of Global Macro QIS at J.P. Morgan",
+    "companies": [
+      {
+        "companyId": "jp-morgan",
+        "relationship": "served",
+        "note": "Kranthi Gade is related to J.P. Morgan."
+      }
+    ],
+    "sources": [
+      {
+        "title": "J.P. Morgan | Official Website",
+        "url": "https://www.jpmorgan.com/",
+        "publisher": "jpmorgan.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "lisa-davis",
+    "name": "Lisa Davis",
+    "type": "operator",
+    "headline": "executive",
+    "themes": [
+      "smart-water"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Neil Edwards.",
+    "bio": "Discovered through sourced enrichment around Neil Edwards.",
+    "companies": [
+      {
+        "companyId": "fido-tech",
+        "relationship": "served",
+        "note": "Lisa Davis"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Our team | FIDO Tech",
+        "url": "https://fido.tech/our-team/",
+        "publisher": "fido.tech"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "mitch-donnelly",
+    "name": "Mitch Donnelly",
+    "type": "operator",
+    "headline": "executive",
+    "themes": [
+      "smart-water"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Neil Edwards.",
+    "bio": "Discovered through sourced enrichment around Neil Edwards.",
+    "companies": [],
+    "sources": [
+      {
+        "title": "Our team | FIDO Tech",
+        "url": "https://fido.tech/our-team/",
+        "publisher": "fido.tech"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "nikita-chandrashekar",
+    "name": "Nikita Chandrashekar",
+    "type": "banker",
+    "headline": "Advisory team member",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around James Knight.",
+    "bio": "Discovered through sourced enrichment around James Knight.",
+    "companies": [],
+    "sources": [
+      {
+        "title": "Advisory Team - Augusta & Co",
+        "url": "https://augustaco.com/advisory-team/",
+        "publisher": "augustaco.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "patrick-watson",
+    "name": "Patrick Watson",
+    "type": "operator",
+    "headline": "Operator",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Erik Nygård.",
+    "bio": "Discovered through sourced enrichment around Erik Nygård.",
+    "companies": [],
+    "sources": [
+      {
+        "title": "About | Powering Your Productivity - Kofa",
+        "url": "https://www.kofa.co/about",
+        "publisher": "kofa.co"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "phil-robinson",
+    "name": "Phil Robinson",
+    "type": "ex-founder",
+    "headline": "co-founder, director",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Andrew Luers.",
+    "bio": "Discovered through sourced enrichment around Andrew Luers.",
+    "companies": [
+      {
+        "companyId": "habitat-energy",
+        "relationship": "board",
+        "note": "Phil Robinson"
+      },
+      {
+        "companyId": "habitat-energy",
+        "relationship": "founded",
+        "note": "Phil Robinson"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Who we are - Habitat Energy",
+        "url": "https://habitat.energy/who-we-are/",
+        "publisher": "habitat.energy"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "phil-tomlinson",
+    "name": "Phil Tomlinson",
+    "type": "operator",
+    "headline": "executive",
+    "themes": [
+      "smart-water"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Neil Edwards.",
+    "bio": "Discovered through sourced enrichment around Neil Edwards.",
+    "companies": [
+      {
+        "companyId": "fido-tech",
+        "relationship": "served",
+        "note": "Phil Tomlinson"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Our team | FIDO Tech",
+        "url": "https://fido.tech/our-team/",
+        "publisher": "fido.tech"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "prof-yu",
+    "name": "Prof. Yu",
+    "type": "ex-founder",
+    "headline": "Co-founder",
+    "themes": [
+      "smart-water"
+    ],
+    "whyRelevant": "Pioneered 2D flood modelling software and co-founded Previsico.",
+    "bio": "Pioneered 2D flood modelling software and co-founded Previsico.",
+    "companies": [
+      {
+        "companyId": "previsico",
+        "relationship": "served",
+        "note": "Prof. Yu"
+      },
+      {
+        "companyId": "previsico",
+        "relationship": "co-founded",
+        "note": "Prof. Yu"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Our Mission in Flood Risk Mitigation - Previsico",
+        "url": "https://previsico.com/en-us/about-us",
+        "publisher": "previsico.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "romane-guitard",
+    "name": "Romane Guitard",
+    "type": "banker",
+    "headline": "Advisory team member",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around James Knight.",
+    "bio": "Discovered through sourced enrichment around James Knight.",
+    "companies": [
+      {
+        "companyId": "augusta-co-mizuho",
+        "relationship": "board",
+        "note": "Partner."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Advisory Team - Augusta & Co",
+        "url": "https://augustaco.com/advisory-team/",
+        "publisher": "augustaco.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "shyam-sankar",
+    "name": "Shyam Sankar",
+    "type": "banker",
+    "headline": "Advisory team member",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around James Knight.",
+    "bio": "Discovered through sourced enrichment around James Knight.",
+    "companies": [
+      {
+        "companyId": "augusta-co-mizuho",
+        "relationship": "board",
+        "note": "Partner."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Advisory Team - Augusta & Co",
+        "url": "https://augustaco.com/advisory-team/",
+        "publisher": "augustaco.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "simon-clement-davies",
+    "name": "Simon Clement-Davies",
+    "type": "banker",
+    "headline": "Advisory team member",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around James Knight.",
+    "bio": "Discovered through sourced enrichment around James Knight.",
+    "companies": [
+      {
+        "companyId": "augusta-co-mizuho",
+        "relationship": "board",
+        "note": "Partner."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Advisory Team - Augusta & Co",
+        "url": "https://augustaco.com/advisory-team/",
+        "publisher": "augustaco.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "stefan-walter",
+    "name": "Stefan Walter",
+    "type": "banker",
+    "headline": "Advisory team member",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around James Knight.",
+    "bio": "Discovered through sourced enrichment around James Knight.",
+    "companies": [],
+    "sources": [
+      {
+        "title": "Advisory Team - Augusta & Co",
+        "url": "https://augustaco.com/advisory-team/",
+        "publisher": "augustaco.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "thomas-le-guevel",
+    "name": "Thomas Le Guevel",
+    "type": "operator",
+    "headline": "Operator",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Erik Nygård.",
+    "bio": "Discovered through sourced enrichment around Erik Nygård.",
+    "companies": [],
+    "sources": [
+      {
+        "title": "About | Powering Your Productivity - Kofa",
+        "url": "https://www.kofa.co/about",
+        "publisher": "kofa.co"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "toby-mellor",
+    "name": "Toby Mellor",
+    "type": "operator",
+    "headline": "Operator",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Erik Nygård.",
+    "bio": "Discovered through sourced enrichment around Erik Nygård.",
+    "companies": [],
+    "sources": [
+      {
+        "title": "About | Powering Your Productivity - Kofa",
+        "url": "https://www.kofa.co/about",
+        "publisher": "kofa.co"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "tom-gores",
+    "name": "Tom Gores",
+    "type": "ex-founder",
+    "headline": "founder",
+    "themes": [
+      "smart-water"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Platinum Equity.",
+    "bio": "Discovered through sourced enrichment around Platinum Equity.",
+    "companies": [
+      {
+        "companyId": "platinum-equity",
+        "relationship": "founded",
+        "note": "Tom Gores is related to Platinum Equity."
+      }
+    ],
+    "sources": [
+      {
+        "title": "About Us - Platinum Equity",
+        "url": "https://www.platinumequity.com/about-us/",
+        "publisher": "platinumequity.com"
+      },
+      {
+        "title": "Platinum Equity: Mergers, Acquisitions and Operations",
+        "url": "https://www.platinumequity.com/",
+        "publisher": "platinumequity.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "vaughan-johnson",
+    "name": "Vaughan Johnson",
+    "type": "operator",
+    "headline": "executive",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "whyRelevant": "Discovered through sourced enrichment around Nick Boyle.",
+    "bio": "Discovered through sourced enrichment around Nick Boyle.",
+    "companies": [],
+    "sources": [
+      {
+        "title": "Nick Boyle Email & Phone Number - ContactOut",
+        "url": "https://contactout.com/Nick-Boyle-16246591",
+        "publisher": "contactout.com"
+      }
+    ],
+    "confidence": 0.7
   }
 ]

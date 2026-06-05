@@ -4,6 +4,7 @@ import { DEAL_TYPE_LABEL, dealDate, primaryDealParty } from "@/lib/deals";
 import { listDeals } from "@/lib/deal-repository";
 import { ConfidenceBars, ThemeTag } from "@/app/components/ui";
 import { getThemeFocus } from "@/lib/theme-focus-server";
+import DealEnrichmentButton from "@/app/components/DealEnrichmentButton";
 
 export default async function DealsPage() {
   const themeFocus = await getThemeFocus();
@@ -23,11 +24,11 @@ export default async function DealsPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Link href="/ingest" className="ee-button ee-button-secondary">
-              Ingest deal
+            <Link href="/ask" className="ee-button ee-button-secondary">
+              Ask Copilot
             </Link>
-            <Link href="/sources" className="ee-button ee-button-primary">
-              Review source register
+            <Link href="/graph" className="ee-button ee-button-primary">
+              Relationship graph
             </Link>
           </div>
         </header>
@@ -44,10 +45,11 @@ export default async function DealsPage() {
                   <th>Deal</th>
                   <th>Theme</th>
                   <th>Parties</th>
-                  <th>Type & date</th>
+                  <th>Investment type</th>
+                  <th>Value / cost</th>
                   <th>Evidence coverage</th>
                   <th>Network surfaced</th>
-                  <th>Next action</th>
+                  <th>Enrichment action</th>
                 </tr>
               </thead>
               <tbody>
@@ -61,7 +63,7 @@ export default async function DealsPage() {
                           {deal.name}
                         </Link>
                         <div className="mt-0.5 text-[11px] text-ink-faint">
-                          {deal.status.replaceAll("_", " ")} · {deal.geography}
+                          {deal.status.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())} · {deal.geography}
                         </div>
                       </td>
                       <td>
@@ -81,6 +83,14 @@ export default async function DealsPage() {
                         <div>{DEAL_TYPE_LABEL[deal.dealType]}</div>
                         <div className="mt-1 text-[11px] text-ink-faint">{dealDate(deal) ?? "Date missing"}</div>
                       </td>
+                      <td className="min-w-[160px]">
+                        <div className="font-semibold">
+                          {dealFactValue(deal, ["transaction_value", "enterprise_value", "deal_value", "purchase_price"]) ?? "Not disclosed"}
+                        </div>
+                        <div className="mt-1 text-[11px] text-ink-faint">
+                          {dealFactValue(deal, ["entry_value", "valuation_multiple", "leverage"]) ?? "Cost basis to verify"}
+                        </div>
+                      </td>
                       <td className="min-w-[150px]">
                         <div className="font-semibold tabular-nums">
                           {Math.round(deal.completionScore * 100)}%
@@ -99,13 +109,18 @@ export default async function DealsPage() {
                         </div>
                       </td>
                       <td className="max-w-[220px] text-[12px] leading-relaxed text-ink-soft">
-                        <div>
-                          {deal.missingFacts[0]
-                            ? `Chase ${deal.missingFacts[0].replaceAll("_", " ")}`
-                            : "Review completed scorecard"}
-                        </div>
+                        {deal.missingFacts[0] ? (
+                          <>
+                            <div className="mb-2">
+                              Missing: {deal.missingFacts[0].replaceAll("_", " ")}. Run Keiro + DeepSeek to source and verify.
+                            </div>
+                            <DealEnrichmentButton dealId={deal.id} label="Enrich deal" />
+                          </>
+                        ) : (
+                          <div>Review completed scorecard</div>
+                        )}
                         <Link href={`/deals/${deal.id}`} className="ee-link mt-1 inline-flex text-[11px]">
-                          Open deal →
+                          Open deal
                         </Link>
                       </td>
                     </tr>
@@ -118,6 +133,12 @@ export default async function DealsPage() {
       </div>
     </div>
   );
+}
+
+function dealFactValue(deal: Awaited<ReturnType<typeof listDeals>>[number], factTypes: string[]) {
+  const raw = deal.facts.find((fact) => factTypes.includes(fact.factType) && fact.factValue)?.factValue;
+  if (!raw || raw === "not_disclosed") return null;
+  return raw;
 }
 
 function companyLink(companyId: string, fallback: string) {

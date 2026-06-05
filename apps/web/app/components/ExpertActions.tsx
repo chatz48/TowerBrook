@@ -153,10 +153,10 @@ export default function ExpertActions({
             Add to tray
           </WorkspaceActionButton>
           <Link href={`/graph?focus=expert:${expertId}`} className="ee-button ee-button-secondary min-h-8 px-3">
-            Show path
+            View relationships
           </Link>
-          <Link href={`/reports?expert=${expertId}`} className="ee-button ee-button-secondary min-h-8 px-3">
-            Use in report
+          <Link href={`/ask?expert=${expertId}`} className="ee-button ee-button-secondary min-h-8 px-3">
+            Use in Copilot
           </Link>
         </div>
       </div>

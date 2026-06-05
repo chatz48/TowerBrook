@@ -18,6 +18,7 @@ export default function PageAwareChat() {
   const [error, setError] = useState("");
 
   const pageLabel = useMemo(() => labelForPath(pathname), [pathname]);
+  const relationshipHref = useMemo(() => relationshipHrefForPath(pathname), [pathname]);
 
   if (pathname === "/ask") return null;
 
@@ -68,6 +69,12 @@ export default function PageAwareChat() {
               </div>
               <div className="mt-1 text-xs text-ink-faint">{pageLabel}</div>
             </div>
+            <a
+              href={relationshipHref}
+              className="rounded border border-line bg-white px-2 py-1 text-[11px] font-semibold text-accent hover:border-accent"
+            >
+              Relationship graph
+            </a>
             <button
               type="button"
               onClick={() => setOpen(false)}
@@ -304,11 +311,19 @@ function inferObjective(question: string): string {
 }
 
 function labelForPath(pathname: string) {
-  if (pathname === "/") return "Home command center";
+  if (pathname === "/") return "Home command centre";
   const clean = pathname
     .split("/")
     .filter(Boolean)
     .map((part) => part.replaceAll("-", " "))
     .join(" / ");
   return clean || "Current page";
+}
+
+function relationshipHrefForPath(pathname: string) {
+  const parts = pathname.split("/").filter(Boolean);
+  if (parts[0] === "experts" && parts[1]) return `/graph?focus=expert:${parts[1]}`;
+  if (parts[0] === "companies" && parts[1]) return `/graph?focus=company:${parts[1]}`;
+  if (parts[0] === "deals" && parts[1]) return `/graph?focus=deal:${parts[1]}`;
+  return "/graph";
 }

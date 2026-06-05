@@ -327,7 +327,10 @@ async def persist_candidate_extraction(
             }
         )
 
-    saved_candidates = repo.upsert_discovery_candidates(candidates)
+    deduped_candidates = {}
+    for candidate in candidates:
+        deduped_candidates[candidate["external_id"]] = candidate
+    saved_candidates = repo.upsert_discovery_candidates(list(deduped_candidates.values()))
     match_candidates = []
     for candidate in saved_candidates:
         if candidate["candidate_type"] == "person":

@@ -96,9 +96,6 @@ export default async function Home() {
 
           <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line pt-4 text-[11px] text-ink-faint">
             <span className="ee-label text-ink">Coverage snapshot</span>
-            <span className="rounded-md border border-line bg-paper px-2 py-1 text-[11px] font-semibold text-ink-soft">
-              Current page scope: {themeFocus === "all" ? "All three themes" : THEMES.find((theme) => theme.id === themeFocus)?.name}
-            </span>
             <CoverageFact value={experts.length} label="expert profiles" />
             <CoverageFact value={companies.length} label="companies" />
             <CoverageFact value={sourceCount} label="source records" />
@@ -112,13 +109,13 @@ export default async function Home() {
         <section className="mt-5">
           <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-[18px] font-semibold tracking-tight">Theme command centers</h2>
+              <h2 className="text-[18px] font-semibold tracking-tight">Theme command centre</h2>
               <p className="mt-1 text-[12px] text-ink-soft">
                 Open a theme with a first call, a lead target, and a known research gap.
               </p>
             </div>
-            <Link href="/discover" className="ee-button ee-button-secondary">
-              Review discovery queue
+            <Link href="/ask" className="ee-button ee-button-secondary">
+              Ask Copilot for the next move
             </Link>
           </div>
 
@@ -162,7 +159,7 @@ export default async function Home() {
                       label="First call"
                       title={firstCall?.expert.name ?? "No expert mapped"}
                       body={firstCall?.whyNow ?? "Build expert coverage for this theme."}
-                      href={firstCall ? `/experts/${firstCall.expert.id}` : "/discover"}
+                      href={firstCall ? `/experts/${firstCall.expert.id}` : "/ask"}
                     />
                     <DecisionRow
                       label="Lead target"
@@ -182,7 +179,7 @@ export default async function Home() {
                           ? "No mapped expert currently covers this specialty."
                           : "Review source freshness and relationship depth."
                       }
-                      href={`/discover?gap=${encodeURIComponent(gap ?? "source freshness")}`}
+                      href={`/ask?prompt=${encodeURIComponent(`Find experts for ${gap ?? "source freshness"}`)}`}
                     />
                   </div>
 
@@ -191,10 +188,10 @@ export default async function Home() {
                       {brief.stats.targets} independent targets · {brief.stats.exits} acquired comps
                     </span>
                     <Link
-                      href={`/themes/${theme.id}`}
+                      href="/experts"
                       className="ee-button ee-button-primary min-h-8 px-3"
                     >
-                      Open theme
+                      Open call tray
                     </Link>
                   </div>
                 </article>

@@ -521,6 +521,14 @@
   fill: #475569;
 }
 
+.layerText {
+  fill: #526176;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
 .edgeText {
   font-size: 9px;
   font-weight: 700;

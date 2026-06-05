@@ -49,10 +49,10 @@ export default async function CompaniesPage() {
           </div>
           <div className="flex gap-2">
             <Link href="/graph" className="ee-button ee-button-secondary">
-              Show relationship paths
+              Relationship graph
             </Link>
-            <Link href="/reports" className="ee-button ee-button-secondary">
-              Build target memo
+            <Link href="/ask" className="ee-button ee-button-secondary">
+              Build in Copilot
             </Link>
             <Link href="/deals" className="ee-button ee-button-primary">
               Review deal evidence
@@ -114,6 +114,9 @@ export default async function CompaniesPage() {
                         <div className="flex flex-wrap gap-2">
                           <Link href={`/companies/${company.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
                             Review
+                          </Link>
+                          <Link href={`/graph?focus=company:${company.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
+                            View relationships
                           </Link>
                           <WorkspaceActionButton
                             item={{
