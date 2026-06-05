@@ -163,6 +163,22 @@ function otherNode(edge: ExplorerEdge, key: string) {
   return edge.from === key ? edge.to : edge.from;
 }
 
+function quickJumpNodes(
+  allNodes: ExplorerNode[],
+  edges: ExplorerEdge[],
+  theme: ThemeFocus,
+): { node: ExplorerNode; count: number }[] {
+  return allNodes
+    .filter((node) => matchesThemeFocus(node.themes, theme))
+    .map((node) => ({
+      node,
+      count: edges.filter((edge) => edge.from === node.key || edge.to === node.key).length,
+    }))
+    .filter((item) => item.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6);
+}
+
 export default function GraphExplorer({
   themes,
   experts,
@@ -195,7 +211,7 @@ export default function GraphExplorer({
         RELATIONSHIP_ORDER.map((relationship) => [relationship, true]),
       ) as Record<RelationshipType, boolean>,
   );
-  const [confidenceFloor, setConfidenceFloor] = useState(0.75);
+  const [confidenceFloor, setConfidenceFloor] = useState(0.72);
   const [pathView, setPathView] = useState(true);
   const [selectedKey, setSelectedKey] = useState(defaultSelected ?? experts[0]?.key ?? companies[0]?.key);
   const [history, setHistory] = useState<string[]>([]);
@@ -271,7 +287,7 @@ export default function GraphExplorer({
   const visibleEdges = useMemo(() => {
     if (!selectedNode) return filteredEdges.slice(0, 10);
     const selected = selectedNode.key;
-    const firstHop = selectedEdges.slice(0, pathView ? 6 : 10);
+    const firstHop = selectedEdges.slice(0, pathView ? 7 : 12);
     if (!pathView) return firstHop;
 
     const firstHopKeys = new Set(firstHop.flatMap((edge) => [edge.from, edge.to]));
@@ -283,7 +299,7 @@ export default function GraphExplorer({
       )
       .filter((edge) => edge.from !== selected && edge.to !== selected)
       .sort((a, b) => b.confidence - a.confidence)
-      .slice(0, 3);
+      .slice(0, 5);
 
     return [...firstHop, ...secondHop];
   }, [filteredEdges, pathView, selectedEdges, selectedNode]);
@@ -375,7 +391,7 @@ export default function GraphExplorer({
         RELATIONSHIP_ORDER.map((relationship) => [relationship, true]),
       ) as Record<RelationshipType, boolean>,
     );
-    setConfidenceFloor(0.75);
+    setConfidenceFloor(0.72);
     setPathView(true);
     setSelectedKey(defaultSelected ?? experts[0]?.key ?? companies[0]?.key ?? deals[0]?.key);
     setHistory([]);
@@ -457,6 +473,39 @@ export default function GraphExplorer({
                 </div>
               </div>
             ) : null}
+
+            <div className="mt-3">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
+                Quick jump
+              </span>
+              <div className="mt-2 grid gap-1.5">
+                {quickJumpNodes(allNodes, filteredEdges, theme).map(({ node, count }) => (
+                  <button
+                    key={node.key}
+                    type="button"
+                    onClick={() => selectNode(node.key)}
+                    className={`flex items-center gap-2 rounded border px-2.5 py-2 text-left text-[12px] transition-colors ${
+                      selectedNode?.key === node.key
+                        ? "border-accent bg-[#f4f8ff]"
+                        : "border-line bg-white hover:border-line-strong"
+                    }`}
+                  >
+                    <span
+                      className="grid h-6 w-6 shrink-0 place-items-center rounded text-[10px] font-bold"
+                      style={{
+                        backgroundColor: node.kind === "company" ? "#e6f4ea" : "#eef5ff",
+                        color: node.kind === "company" ? "#11843b" : "#075fe4",
+                      }}
+                    >
+                      {nodeBadgeText(node)}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate font-medium">{node.name}</span>
+                    <span className="shrink-0 text-[10px] text-ink-faint">{count}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <label className={styles.fieldLabel} htmlFor="graph-theme">
               Theme
             </label>
