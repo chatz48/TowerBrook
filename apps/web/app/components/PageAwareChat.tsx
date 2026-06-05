@@ -1,33 +1,39 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import type { AskResponse, PageContext } from "@/app/components/copilot/types";
+import type { AskResponse, ChatTurn, PageContext } from "@/app/components/copilot/types";
 import { readThemeFocusCookie } from "@/lib/theme-focus";
 import { readIncludeTowerBrookEmployeesCookie } from "@/lib/employee-scope";
 
 const DEFAULT_PROMPT = "What should I pay attention to on this page?";
+type PageChatMessage = { id: string; role: "user" | "assistant"; content: string; answer?: AskResponse };
 
 export default function PageAwareChat() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState(DEFAULT_PROMPT);
-  const [answer, setAnswer] = useState<AskResponse | null>(null);
+  const [conversation, setConversation] = useState<PageChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
+  const [progressStep, setProgressStep] = useState(0);
   const [error, setError] = useState("");
 
   const pageLabel = useMemo(() => labelForPath(pathname), [pathname]);
   const relationshipHref = useMemo(() => relationshipHrefForPath(pathname), [pathname]);
 
-  if (pathname === "/ask") return null;
-
   async function submit(nextQuestion = question) {
     const cleanQuestion = nextQuestion.trim();
     if (!cleanQuestion || loading) return;
 
-    setQuestion(cleanQuestion);
+    const chatHistory = toPageChatHistory(conversation);
+    setQuestion("");
+    setConversation((current) => [
+      ...current,
+      { id: makePageChatId("user"), role: "user", content: cleanQuestion },
+    ]);
     setLoading(true);
+    setProgressStep(0);
     setError("");
 
     try {
@@ -46,17 +52,36 @@ export default function PageAwareChat() {
             includeTowerBrookEmployees: readIncludeTowerBrookEmployeesCookie(),
           },
           pageContext,
+          chatHistory,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Request failed");
-      setAnswer(data);
+      setConversation((current) => [
+        ...current,
+        {
+          id: makePageChatId("assistant"),
+          role: "assistant",
+          content: data.answer_summary,
+          answer: data,
+        },
+      ]);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    if (!loading) return;
+    const timers = [800, 2200, 4800].map((delay, index) =>
+      window.setTimeout(() => setProgressStep(index + 1), delay),
+    );
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [loading]);
+
+  if (pathname === "/ask") return null;
 
   return (
     <div className="fixed bottom-4 right-4 z-50 print:hidden">
@@ -124,10 +149,18 @@ export default function PageAwareChat() {
               </div>
             ) : null}
 
-            {answer ? (
-              <PageAnswer answer={answer} onPrompt={(prompt) => void submit(prompt)} />
+            {conversation.length ? (
+              <PageChatThread
+                messages={conversation}
+                loading={loading}
+                progressStep={progressStep}
+                onPrompt={(prompt) => void submit(prompt)}
+              />
             ) : (
-              <PromptStarters onPrompt={(prompt) => void submit(prompt)} />
+              <>
+                {loading ? <PageChatProgress progressStep={progressStep} /> : null}
+                <PromptStarters onPrompt={(prompt) => void submit(prompt)} />
+              </>
             )}
           </div>
         </section>
@@ -145,6 +178,63 @@ export default function PageAwareChat() {
       )}
     </div>
   );
+}
+
+function PageChatThread({
+  messages,
+  loading,
+  progressStep,
+  onPrompt,
+}: {
+  messages: PageChatMessage[];
+  loading: boolean;
+  progressStep: number;
+  onPrompt: (prompt: string) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      {messages.map((message) =>
+        message.role === "user" ? (
+          <div key={message.id} className="rounded border border-line bg-[#fbfcfe] p-2">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-faint">You</div>
+            <p className="mt-1 whitespace-pre-wrap text-sm text-ink-soft">{message.content}</p>
+          </div>
+        ) : message.answer ? (
+          <PageAnswer key={message.id} answer={message.answer} onPrompt={onPrompt} />
+        ) : null,
+      )}
+      {loading ? <PageChatProgress progressStep={progressStep} /> : null}
+    </div>
+  );
+}
+
+function PageChatProgress({ progressStep }: { progressStep: number }) {
+  const steps = ["Reading page context", "Searching sourced records", "Checking evidence", "Preparing answer"];
+  return (
+    <div className="rounded border border-[#cfe0ff] bg-[#f4f8ff] p-3">
+      <div className="text-xs font-semibold text-accent">AI is working</div>
+      <div className="mt-2 space-y-1.5">
+        {steps.map((step, index) => (
+          <div key={step} className="flex items-center gap-2 text-[11px] text-ink-soft">
+            <span className={`h-2 w-2 rounded-full ${index <= progressStep ? "bg-accent" : "bg-[#cfd6e2]"}`} />
+            <span>{step}</span>
+          </div>
+        ))}
+      </div>
+      <p className="mt-2 text-[11px] text-ink-faint">Previous replies stay available so you can continue the thread.</p>
+    </div>
+  );
+}
+
+function toPageChatHistory(messages: PageChatMessage[]): ChatTurn[] {
+  return messages
+    .map((message) => ({ role: message.role, content: message.content }))
+    .filter((message) => message.content.trim().length > 0)
+    .slice(-8);
+}
+
+function makePageChatId(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 function PageAnswer({
