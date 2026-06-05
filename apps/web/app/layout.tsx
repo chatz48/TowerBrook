@@ -50,7 +50,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             <AppShellNav />
             <Link
               href="/ask"
-              className="ml-auto hidden min-w-[280px] max-w-[460px] flex-1 items-center rounded-md border border-line-strong bg-white px-3 py-2 hover:border-line-dark hover:bg-[#fbfcff] xl:flex"
+              className="ml-auto hidden min-w-[280px] max-w-[460px] flex-1 items-center rounded-md border border-line-strong bg-white px-3 py-2 hover:border-line-dark hover:bg-[#fbfcff] 2xl:flex"
             >
               <span className="text-muted" aria-hidden="true">
                 <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
