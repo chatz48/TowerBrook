@@ -265,6 +265,16 @@
         "title": "Augusta & Co advisory team",
         "url": "https://augustaco.com/advisory-team/",
         "publisher": "Augusta & Co"
+      },
+      {
+        "title": "Mortimer Menzel - Managing Partner at Augusta & Co Limited",
+        "url": "https://uk.linkedin.com/in/mortimer-menzel-a7176780",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "James Knight - Managing Partner at Augusta & Co | LinkedIn",
+        "url": "https://uk.linkedin.com/in/james-knight-a4020811",
+        "publisher": "uk.linkedin.com"
       }
     ],
     "confidence": 0.88,
@@ -307,6 +317,16 @@
         "title": "Freshfields advises AURELIUS on acquisition of Xylem's Smart Metering Business",
         "url": "https://www.freshfields.com/en-gb/news/2026/01/freshfields-advises-aurelius-on-acquisition-of-xylems-smart-metering-business/",
         "publisher": "Freshfields"
+      },
+      {
+        "title": "In its biggest deal in history, AURELIUS acquires McKesson UK",
+        "url": "https://www.eqs-news.com/news/corporate/aurelius-erwirbt-mckesson-uk-in-der-grosten-transaktion-seiner-unternehmensgeschichte/240d3a64-90bb-4f6c-b3e9-26bf68ec304f",
+        "publisher": "eqs-news.com"
+      },
+      {
+        "title": "7 questions for Claudius von Plettenberg, Managing Director ...",
+        "url": "https://dealcircle.com/en/ressource/7-fragen-an-claudius-von-plettenberg-managing-director-bei-aurelius-wachstumskapital/",
+        "publisher": "dealcircle.com"
       }
     ],
     "confidence": 0.84
@@ -328,6 +348,21 @@
         "title": "Aurora Energy Research — CGE Partners portfolio",
         "url": "https://cge-partners.com/portfolio/aurora/",
         "publisher": "CGE Partners"
+      },
+      {
+        "title": "John Feddersen - Founder & CEO, Aurora Energy Research ...",
+        "url": "https://uk.linkedin.com/in/john-feddersen-6b9a043b",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "About | Aurora Energy Research",
+        "url": "https://auroraer.com/company/about",
+        "publisher": "auroraer.com"
+      },
+      {
+        "title": "Podcast 191 - Everything Electric",
+        "url": "https://fullycharged.show/podcasts/podcast-191-energy-markets-who-informs-the-energy-policy-makers-with-dr-john-feddersen/",
+        "publisher": "fullycharged.show"
       }
     ],
     "confidence": 0.88,
@@ -390,9 +425,38 @@
         "title": "Climate-AI Pioneer AutoGrid to be Acquired by Schneider Electric",
         "url": "https://www.businesswire.com/news/home/20220511005251/en/Climate-AI-Pioneer-AutoGrid-to-Be-Acquired-by-Schneider-Electric",
         "publisher": "Business Wire"
+      },
+      {
+        "title": "Autogrid - 2026 Company Profile - Tracxn",
+        "url": "https://tracxn.com/d/companies/autogrid/__XZl_p5p5pF3Vvslzzifw0DvwV2OZXDTF40vKlSjAzto",
+        "publisher": "tracxn.com"
+      },
+      {
+        "title": "Schneider Electric Acquires Stake in AutoGrid to Accelerate AI ...",
+        "url": "https://www.prnewswire.com/news-releases/schneider-electric-acquires-stake-in-autogrid-to-accelerate-ai-adoption-in-the-power-sector-300859854.html",
+        "publisher": "prnewswire.com"
+      },
+      {
+        "title": "Autogrid company information, funding & investors",
+        "url": "https://radar-innovation.dealroom.co/companies/autogrid",
+        "publisher": "radar-innovation.dealroom.co"
       }
     ],
-    "confidence": 0.88
+    "confidence": 0.88,
+    "materialFacts": [
+      {
+        "type": "launch_date",
+        "label": "Launch date",
+        "value": "2010",
+        "status": "partial",
+        "source": {
+          "title": "Autogrid company information, funding & investors",
+          "url": "https://radar-innovation.dealroom.co/companies/autogrid",
+          "publisher": "radar-innovation.dealroom.co"
+        },
+        "evidence": "2010"
+      }
+    ]
   },
   {
     "id": "azuria-water-solutions",
@@ -433,6 +497,11 @@
         "title": "Azuria Portfolio Page",
         "url": "https://www.newmountaincapital.com/portfolio/azuria/",
         "publisher": "New Mountain Capital"
+      },
+      {
+        "title": "About Us - Azuria Water Solutions",
+        "url": "https://www.azuria.com/about-us",
+        "publisher": "azuria.com"
       }
     ],
     "confidence": 0.92
@@ -453,6 +522,16 @@
         "title": "Badger Meter acquires Syrinix",
         "url": "https://www.waterworld.com/water-utility-management/asset-management/press-release/14287941/badger-meter-acquires-syrinix-for-15m",
         "publisher": "WaterWorld"
+      },
+      {
+        "title": "Escondido-based SmartCover Systems Acquired by Badger ...",
+        "url": "https://www.latimes.com/b2b/orange-county/story/2025-02-21/escondido-based-smartcover-systems-acquired-badger-meter-185m",
+        "publisher": "latimes.com"
+      },
+      {
+        "title": "Badger Meter Launches BlueEdge",
+        "url": "https://www.badgermeter.com/newsroom/badger-meter-introduces-blueedge/",
+        "publisher": "badgermeter.com"
       }
     ],
     "confidence": 0.82,
@@ -484,6 +563,11 @@
         "title": "Baker McKenzie Advises H2O America in $540 Million Acquisition of Quadvest",
         "url": "https://www.bakermckenzie.com/en/newsroom/2025/07/h2o-america-usd-540-million-acquisition-of-quadvest",
         "publisher": "Baker McKenzie"
+      },
+      {
+        "title": "Baker McKenzie | Western Sydney Law Students' Association",
+        "url": "https://wslsa.com.au/public/pages/baker-mckenzie",
+        "publisher": "wslsa.com.au"
       }
     ],
     "confidence": 0.84
@@ -676,9 +760,38 @@
         "title": "BlackRock Completes Acquisition of Global Infrastructure Partners",
         "url": "https://ir.blackrock.com/news-and-events/press-releases/press-releases-details/2024/BlackRock-Completes-Acquisition-of-Global-Infrastructure-Partners/default.aspx",
         "publisher": "BlackRock"
+      },
+      {
+        "title": "Capital for Good",
+        "url": "https://www.forcegood.org/tab-active-participants",
+        "publisher": "forcegood.org"
+      },
+      {
+        "title": "blackrock global funds - sustainable energy fund class a2 (usd ...",
+        "url": "https://www.hangseng.com/en-hk/fundsupermart/fund/fundinfo/?fundCode=U42756",
+        "publisher": "hangseng.com"
+      },
+      {
+        "title": "BlackRock's Climate Infrastructure business, Google to partner ...",
+        "url": "https://www.eco-business.com/press-releases/blackrocks-climate-infrastructure-business-google-to-partner-on-accelerating-solar-power-in-taiwan-through-new-green-power/",
+        "publisher": "eco-business.com"
       }
     ],
-    "confidence": 0.86
+    "confidence": 0.86,
+    "materialFacts": [
+      {
+        "type": "launch_date",
+        "label": "Launch date",
+        "value": "2001-04-06",
+        "status": "partial",
+        "source": {
+          "title": "blackrock global funds - sustainable energy fund class a2 (usd ...",
+          "url": "https://www.hangseng.com/en-hk/fundsupermart/fund/fundinfo/?fundCode=U42756",
+          "publisher": "hangseng.com"
+        },
+        "evidence": "2001-04-06"
+      }
+    ]
   },
   {
     "id": "bluefield-research",
@@ -704,6 +817,11 @@
         "title": "Reese Tisdale — Bluefield Research",
         "url": "https://www.bluefieldresearch.com/team/reese-tisdale/",
         "publisher": "Bluefield Research"
+      },
+      {
+        "title": "Reese Tisdale - Bluefield Research | LinkedIn",
+        "url": "https://www.linkedin.com/in/reese-tisdale-0573651",
+        "publisher": "linkedin.com"
       }
     ],
     "confidence": 0.82,
@@ -792,6 +910,11 @@
         "title": "What is Brief History of Brookfield Renewable Partners ...",
         "url": "https://matrixbcg.com/blogs/brief-history/bep?srsltid=AfmBOopxlM7uQBYczKN41Iq0nVGziDhHqe6bOtXn0296VQx7Jw9FEgZt",
         "publisher": "Matrix BCG"
+      },
+      {
+        "title": "About Us - TerraForm Power",
+        "url": "https://www.terraform.com/about-us/",
+        "publisher": "terraform.com"
       }
     ],
     "confidence": 0.88,
@@ -799,14 +922,21 @@
       {
         "type": "launch_date",
         "value": "November 28, 2011",
-        "status": "needs_review",
+        "status": "partial",
         "sources": [
           {
             "title": "What is Brief History of Brookfield Renewable Partners ...",
             "url": "https://matrixbcg.com/blogs/brief-history/bep?srsltid=AfmBOopxlM7uQBYczKN41Iq0nVGziDhHqe6bOtXn0296VQx7Jw9FEgZt",
             "publisher": "Matrix BCG"
           }
-        ]
+        ],
+        "label": "Launch date",
+        "source": {
+          "title": "What is Brief History of Brookfield Renewable Partners ...",
+          "url": "https://matrixbcg.com/blogs/brief-history/bep?srsltid=AfmBOopxlM7uQBYczKN41Iq0nVGziDhHqe6bOtXn0296VQx7Jw9FEgZt",
+          "publisher": "matrixbcg.com"
+        },
+        "evidence": "November 28, 2011"
       }
     ]
   },
@@ -830,6 +960,11 @@
         "title": "Bulb co-founder on his latest energy venture",
         "url": "https://uk.finance.yahoo.com/news/bulb-co-founder-says-latest-energy-venture-takes-very-different-approach-000100899.html",
         "publisher": "Yahoo Finance"
+      },
+      {
+        "title": "Amit Gudka - Field - LinkedIn",
+        "url": "https://uk.linkedin.com/in/amit-gudka-928180b1",
+        "publisher": "uk.linkedin.com"
       }
     ],
     "confidence": 0.72,
@@ -852,6 +987,21 @@
         "title": "Burnt Island Ventures raises $50m",
         "url": "https://www.burntislandventures.com/blog/burnt-island-ventures-raises-50-million-to-fund-the-development-of-critical-water-technologies-and-infrastructure",
         "publisher": "Burnt Island Ventures"
+      },
+      {
+        "title": "Tom Ferguson - Managing Partner at Burnt Island Ventures",
+        "url": "https://www.linkedin.com/in/tom-ferguson-biv",
+        "publisher": "linkedin.com"
+      },
+      {
+        "title": "RI Americas 2025 George Kelly - PEI Global Events Calendar",
+        "url": "https://www.peievents.com/en/event/ri-usa/speakers/kelly-george-riusa24",
+        "publisher": "peievents.com"
+      },
+      {
+        "title": "Antoine Walter - (don't) Waste Water Podcast",
+        "url": "https://dww.show/author/admin7250/",
+        "publisher": "dww.show"
       }
     ],
     "confidence": 0.84,
@@ -891,9 +1041,48 @@
         "title": "ECP and Constellation Complete Calpine Transaction",
         "url": "https://www.ecpgp.com/about/news-and-insights/press-releases/2025/energy-capital-partners--ecp--completes-calpine-transaction--pow",
         "publisher": "Energy Capital Partners"
+      },
+      {
+        "title": "Calpine's Acquisition of SkyGen Projects Reviewed by Fitch",
+        "url": "https://www.fitchratings.com/research/corporate-finance/calpine-acquisition-of-skygen-projects-reviewed-by-fitch-04-08-2000",
+        "publisher": "fitchratings.com"
+      },
+      {
+        "title": "Calpine Corporation | Encyclopedia.com",
+        "url": "https://www.encyclopedia.com/books/politics-and-business-magazines/calpine-corporation",
+        "publisher": "encyclopedia.com"
+      },
+      {
+        "title": "NEWS: With antitrust settlement, Constellation set to become ...",
+        "url": "https://www.energycentral.com/energy-biz/post/news-with-antitrust-settlement-constellation-set-to-become-largest-us-GK7vFB7EjMnUMyw",
+        "publisher": "energycentral.com"
+      },
+      {
+        "title": "Constellation to Acquire Calpine",
+        "url": "https://www.constellationenergy.com/news/2025/constellation-to-acquire-calpine-creates-americas-leading-producer-of-clean-and-reliable-energy-to-meet-growing-demand-for-customers-and-communities.html",
+        "publisher": "constellationenergy.com"
+      },
+      {
+        "title": "The Andorra startup ecosystem | Startups & scaleups",
+        "url": "https://ecosystem.andorra-startup.com/companies/calpine_energy_solutions/portfolio",
+        "publisher": "ecosystem.andorra-startup.com"
       }
     ],
-    "confidence": 0.9
+    "confidence": 0.9,
+    "materialFacts": [
+      {
+        "type": "launch_date",
+        "label": "Launch date",
+        "value": "2001",
+        "status": "partial",
+        "source": {
+          "title": "The Andorra startup ecosystem | Startups & scaleups",
+          "url": "https://ecosystem.andorra-startup.com/companies/calpine_energy_solutions/portfolio",
+          "publisher": "ecosystem.andorra-startup.com"
+        },
+        "evidence": "2001"
+      }
+    ]
   },
   {
     "id": "camlin-group",
@@ -1095,9 +1284,45 @@
         "title": "ECP and Constellation Complete Calpine Transaction",
         "url": "https://www.ecpgp.com/about/news-and-insights/press-releases/2025/energy-capital-partners--ecp--completes-calpine-transaction--pow",
         "publisher": "Energy Capital Partners"
+      },
+      {
+        "title": "Timeline: The evolution of Constellation Energy",
+        "url": "https://www.thebanner.com/economy/constellation-energy-timeline-G4XBP7DEYJH4HFSOUZHAZTF4UQ/",
+        "publisher": "thebanner.com"
+      },
+      {
+        "title": "NEWS: With antitrust settlement, Constellation set to become ...",
+        "url": "https://www.energycentral.com/energy-biz/post/news-with-antitrust-settlement-constellation-set-to-become-largest-us-GK7vFB7EjMnUMyw",
+        "publisher": "energycentral.com"
       }
     ],
-    "confidence": 0.9
+    "confidence": 0.9,
+    "materialFacts": [
+      {
+        "type": "launch_date",
+        "label": "Launch date",
+        "value": "June 1, 2025",
+        "status": "partial",
+        "source": {
+          "title": "NEWS: With antitrust settlement, Constellation set to become ...",
+          "url": "https://www.energycentral.com/energy-biz/post/news-with-antitrust-settlement-constellation-set-to-become-largest-us-GK7vFB7EjMnUMyw",
+          "publisher": "energycentral.com"
+        },
+        "evidence": "June 1, 2025"
+      },
+      {
+        "type": "product_live_status",
+        "label": "Product live",
+        "value": "live",
+        "status": "partial",
+        "source": {
+          "title": "NEWS: With antitrust settlement, Constellation set to become ...",
+          "url": "https://www.energycentral.com/energy-biz/post/news-with-antitrust-settlement-constellation-set-to-become-largest-us-GK7vFB7EjMnUMyw",
+          "publisher": "energycentral.com"
+        },
+        "evidence": "live"
+      }
+    ]
   },
   {
     "id": "cornwall-insight",
@@ -1403,6 +1628,21 @@
         "title": "Electron — About",
         "url": "https://electron.net/about/",
         "publisher": "Electron"
+      },
+      {
+        "title": "Electron | LinkedIn",
+        "url": "https://uk.linkedin.com/company/electron-grid",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "Jo-Jo Hubbard FEI - Co-founder & CEO at Electron | LinkedIn",
+        "url": "https://uk.linkedin.com/in/jo-jo-hubbard",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "Jo-Jo Hubbard, Author at Electron",
+        "url": "https://electron.net/author/jo-jo-hubbard/",
+        "publisher": "electron.net"
       }
     ],
     "confidence": 0.86
@@ -1431,9 +1671,33 @@
         "title": "ECP and Constellation Complete Calpine Transaction",
         "url": "https://www.ecpgp.com/about/news-and-insights/press-releases/2025/energy-capital-partners--ecp--completes-calpine-transaction--pow",
         "publisher": "Energy Capital Partners"
+      },
+      {
+        "title": "ADQ and Energy Capital Partners to establish a USD 25 ...",
+        "url": "https://www.ecpgp.com/about/news-and-insights/press-releases/2025/adq-and-energy-capital-partners-to-establish-a-usd-25-billion-us",
+        "publisher": "ecpgp.com"
+      },
+      {
+        "title": "Triple Oak Power Goes to ECP for Up to $750mn",
+        "url": "https://www.energycentral.com/renewables/post/encap-investments-seals-breezy-deal-triple-oak-power-goes-ecp-750mn-wm9VYPdwjHcDzy8",
+        "publisher": "energycentral.com"
       }
     ],
-    "confidence": 0.86
+    "confidence": 0.86,
+    "materialFacts": [
+      {
+        "type": "launch_date",
+        "label": "Launch date",
+        "value": "2005",
+        "status": "verified",
+        "source": {
+          "title": "ADQ and Energy Capital Partners to establish a USD 25 ...",
+          "url": "https://www.ecpgp.com/about/news-and-insights/press-releases/2025/adq-and-energy-capital-partners-to-establish-a-usd-25-billion-us",
+          "publisher": "ecpgp.com"
+        },
+        "evidence": "2005"
+      }
+    ]
   },
   {
     "id": "energyhub",
@@ -1500,6 +1764,11 @@
         "title": "Enverus to acquire SBS",
         "url": "https://www.enverus.com/newsroom/enverus-to-acquire-sbs-to-power-ai-driven-utility-planning-and-engineering/",
         "publisher": "Enverus"
+      },
+      {
+        "title": "Andrea Barber - Enverus | LinkedIn",
+        "url": "https://es.linkedin.com/in/andrea-barber",
+        "publisher": "es.linkedin.com"
       }
     ],
     "confidence": 0.84
@@ -1526,6 +1795,11 @@
         "title": "Investments",
         "url": "https://www.towerbrook.com/investments/",
         "publisher": "TowerBrook"
+      },
+      {
+        "title": "Responsible Ownership 2025 - TowerBrook",
+        "url": "https://www.towerbrook.com/TowerBrook_Responsible_Ownership-2025-Online-Printing.pdf",
+        "publisher": "towerbrook.com"
       }
     ],
     "confidence": 0.92,
@@ -1571,9 +1845,38 @@
         "title": "Consortium Led by Global Infrastructure Partners and EQT Agrees to Acquire AES",
         "url": "https://eqtgroup.com/news/consortium-led-by-global-infrastructure-partners-and-eqt-agrees-to-acquire-aes-2026-03-02",
         "publisher": "EQT"
+      },
+      {
+        "title": "EQT Group investor portfolio, rounds & team - Dealroom.co",
+        "url": "https://app.dealroom.co/investors/eqt_private_equity",
+        "publisher": "app.dealroom.co"
+      },
+      {
+        "title": "The Pipeline: EQT adds €1bn to Fund VI, Blackstone raises ...",
+        "url": "https://www.infrastructureinvestor.com/the-pipeline-eqt-adds-e1bn-to-fund-vi-blackstone-raises-further-1-7bn-gips-edinburgh-departure-and-continuation/",
+        "publisher": "infrastructureinvestor.com"
+      },
+      {
+        "title": "EQT Infrastructure closes second fund at EUR 1.925 billion",
+        "url": "https://eqtgroup.com/news/eqt-infrastructure-closes-second-fund-at-eur-1925-billion-2013-01-21",
+        "publisher": "eqtgroup.com"
       }
     ],
-    "confidence": 0.86
+    "confidence": 0.86,
+    "materialFacts": [
+      {
+        "type": "launch_date",
+        "label": "Launch date",
+        "value": "1994",
+        "status": "partial",
+        "source": {
+          "title": "EQT Group investor portfolio, rounds & team - Dealroom.co",
+          "url": "https://app.dealroom.co/investors/eqt_private_equity",
+          "publisher": "app.dealroom.co"
+        },
+        "evidence": "1994"
+      }
+    ]
   },
   {
     "id": "erm",
@@ -1716,6 +2019,11 @@
         "title": "Swiss Re acquires flood risk modeller Fathom",
         "url": "https://insurancedailynews.com/reinsurance-news/post/swiss-re-acquires-flood-risk-modeller-fathom",
         "publisher": "Insurance Daily News"
+      },
+      {
+        "title": "Fathom | LinkedIn",
+        "url": "https://uk.linkedin.com/company/fathom-global",
+        "publisher": "uk.linkedin.com"
       }
     ],
     "confidence": 0.85,
@@ -1753,6 +2061,41 @@
         "title": "Meet FIDO — the AI weapon against water leaks",
         "url": "https://www.unitedutilities.com/corporate/newsroom/latest-news/meet-fido---the-ai-weapon-in-the-battle-to-beat-water-leaks/",
         "publisher": "United Utilities"
+      },
+      {
+        "title": "with AMAZON.com Services Effective: February 21, 2025",
+        "url": "https://www.omniapartners.com/suppliers-files/A-D/Amazon_Just_Walk_Out/Contract_Documents/2025004494/2025004494_AMAZON.com_MAD.pdf",
+        "publisher": "omniapartners.com"
+      },
+      {
+        "title": "Our team | FIDO Tech",
+        "url": "https://fido.tech/our-team/",
+        "publisher": "fido.tech"
+      },
+      {
+        "title": "Neil Edwards - FIDO Tech Ltd - LinkedIn",
+        "url": "https://uk.linkedin.com/in/neiledwardsfidotech",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "Victoria Edwards - CEO K622 Tech | Founder Emeritus FIDO ...",
+        "url": "https://uk.linkedin.com/in/victoria-edwards-fido",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "FIDO AI: Advanced water leak detection and management",
+        "url": "https://fido.tech/",
+        "publisher": "fido.tech"
+      },
+      {
+        "title": "FIDO Direct launched as end-to-end solution to solve water loss",
+        "url": "https://smartwatermagazine.com/news/fido-tech/fido-direct-launched-end-end-solution-solve-water-loss",
+        "publisher": "smartwatermagazine.com"
+      },
+      {
+        "title": "Victoria Edwards speaker | FIDO Tech",
+        "url": "https://fido.tech/victoria-edwards-speaker/",
+        "publisher": "fido.tech"
       }
     ],
     "confidence": 0.84,
@@ -1760,7 +2103,21 @@
       "Leak detection"
     ],
     "ownershipStatus": "independent",
-    "owner": "Venture-backed"
+    "owner": "Venture-backed",
+    "materialFacts": [
+      {
+        "type": "product_live_status",
+        "label": "Product live",
+        "value": "launched",
+        "status": "partial",
+        "source": {
+          "title": "FIDO Direct launched as end-to-end solution to solve water loss",
+          "url": "https://smartwatermagazine.com/news/fido-tech/fido-direct-launched-end-end-solution-solve-water-loss",
+          "publisher": "smartwatermagazine.com"
+        },
+        "evidence": "The article states that 'A game-changing solution combining everything water utilities need to solve water leakage has been launched by UK company FIDO Tech.'"
+      }
+    ]
   },
   {
     "id": "field-energy",
@@ -1798,6 +2155,16 @@
         "title": "Bulb co-founder's new venture Field",
         "url": "https://uk.finance.yahoo.com/news/bulb-co-founder-says-latest-energy-venture-takes-very-different-approach-000100899.html",
         "publisher": "Yahoo Finance"
+      },
+      {
+        "title": "Amit Gudka - Field - Second Home",
+        "url": "https://secondhome.io/amit-gudka-field/",
+        "publisher": "secondhome.io"
+      },
+      {
+        "title": "Amit Gudka - Field - LinkedIn",
+        "url": "https://uk.linkedin.com/in/amit-gudka-928180b1",
+        "publisher": "uk.linkedin.com"
       }
     ],
     "confidence": 0.8,
@@ -1993,6 +2360,16 @@
         "title": "BlackRock Completes Acquisition of Global Infrastructure Partners",
         "url": "https://ir.blackrock.com/news-and-events/press-releases/press-releases-details/2024/BlackRock-Completes-Acquisition-of-Global-Infrastructure-Partners/default.aspx",
         "publisher": "BlackRock"
+      },
+      {
+        "title": "Global Infrastructure Partners - Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Global_Infrastructure_Partners",
+        "publisher": "en.wikipedia.org"
+      },
+      {
+        "title": "BlackRock-Owned GIP Expands to Qatar! Big moves in the ...",
+        "url": "https://www.instagram.com/p/DGw-nRbhlTR/?hl=de",
+        "publisher": "instagram.com"
       }
     ],
     "confidence": 0.84
@@ -2013,6 +2390,11 @@
         "title": "Dr Piers Clark — ex-MD, Global Water Development Partners",
         "url": "https://www.utilityweeklive.co.uk/innovation-advisory-board/dr-piers-clark-executive-chairman-isle-group",
         "publisher": "Utility Week Live"
+      },
+      {
+        "title": "Piers Clark (PhD) | Isle Utilities",
+        "url": "https://isleutilities.com/team-member/piers-clark-phd/",
+        "publisher": "isleutilities.com"
       }
     ],
     "confidence": 0.72,
@@ -2039,6 +2421,26 @@
         "title": "TowerBrook announces Strategic Investment in GMC Group",
         "url": "https://www.towerbrook.com/towerbrook-announces-strategic-investment-in-the-irish-infrastructure-services-provider-and-engineering-firm-gmc-group/",
         "publisher": "TowerBrook"
+      },
+      {
+        "title": "GMC Group – Family-owned industrial group and real estate",
+        "url": "https://www.gmc.no/en/gmc-group",
+        "publisher": "gmc.no"
+      },
+      {
+        "title": "Uncategorized – TowerBrook",
+        "url": "https://www.towerbrook.com/category/uncategorized/",
+        "publisher": "towerbrook.com"
+      },
+      {
+        "title": "Alexandria National Company For Financial Investments",
+        "url": "https://www.african-markets.com/en/stock-markets/egx/listed-companies/company?code=ANFI",
+        "publisher": "african-markets.com"
+      },
+      {
+        "title": "Squire Patton Boggs Advises Irelands GMC Utilities Group on ...",
+        "url": "https://www.squirepattonboggs.com/news/squire-patton-boggs-advises-irelands-gmc-utilities-group-on-investment-from-towerbrook-capital-partners/",
+        "publisher": "squirepattonboggs.com"
       }
     ],
     "confidence": 0.92,
@@ -2057,6 +2459,20 @@
         "date": "2025-09-15",
         "url": "https://www.towerbrook.com/towerbrook-announces-strategic-investment-in-the-irish-infrastructure-services-provider-and-engineering-firm-gmc-group/",
         "source": "TowerBrook"
+      }
+    ],
+    "materialFacts": [
+      {
+        "type": "launch_date",
+        "label": "Launch date",
+        "value": "1998",
+        "status": "partial",
+        "source": {
+          "title": "Alexandria National Company For Financial Investments",
+          "url": "https://www.african-markets.com/en/stock-markets/egx/listed-companies/company?code=ANFI",
+          "publisher": "african-markets.com"
+        },
+        "evidence": "1998"
       }
     ]
   },
@@ -2082,6 +2498,11 @@
         "title": "Constellation to Acquire Calpine",
         "url": "https://investors.constellationenergy.com/news-releases/news-release-details/constellation-acquire-calpine-creates-americas-leading-producer",
         "publisher": "Constellation Energy"
+      },
+      {
+        "title": "James Knight - Managing Partner at Augusta & Co | LinkedIn",
+        "url": "https://uk.linkedin.com/in/james-knight-a4020811",
+        "publisher": "uk.linkedin.com"
       }
     ],
     "confidence": 0.78
@@ -2128,6 +2549,16 @@
         "title": "Green Giraffe — financing offshore wind",
         "url": "https://green-giraffe.com/publication/news/financing-offshore-wind-is-about-finding-the-right-structure/",
         "publisher": "Green Giraffe"
+      },
+      {
+        "title": "Conference with philosopher Bernard Stiegler | Sciences Po",
+        "url": "https://www.sciencespo.fr/en/news/french-philosopher-bernard-stiegler-to-speak-at-sciences-po/",
+        "publisher": "sciencespo.fr"
+      },
+      {
+        "title": "Dr. Jérôme Guillet - windforce2020",
+        "url": "https://windforce.info/windforce2020/en/speaker/dr-jerome-guillet/",
+        "publisher": "windforce.info"
       }
     ],
     "confidence": 0.9,
@@ -2175,9 +2606,50 @@
         "title": "GridBeyond — Investor relations",
         "url": "https://gridbeyond.com/about-us-2/investor-relations/",
         "publisher": "GridBeyond"
+      },
+      {
+        "title": "GridBeyond closes €52M Series C funding round to continue ...",
+        "url": "https://www.theade.co.uk/news/gridbeyond-closes-52m-series-c-funding-round-to-continue-its-platform-evolution-and-invest-in-new-existing-markets",
+        "publisher": "theade.co.uk"
+      },
+      {
+        "title": "An award-winning provider of AI-powered ... - GridBeyond",
+        "url": "https://gridbeyond.com/about-us-2/",
+        "publisher": "gridbeyond.com"
+      },
+      {
+        "title": "Michael Phelan - Ireland | Professional Profile | LinkedIn",
+        "url": "https://ie.linkedin.com/in/michael-phelan-b599b6",
+        "publisher": "ie.linkedin.com"
       }
     ],
-    "confidence": 0.87
+    "confidence": 0.87,
+    "materialFacts": [
+      {
+        "type": "last_funding",
+        "label": "Last funding",
+        "value": "€52M Series C",
+        "status": "partial",
+        "source": {
+          "title": "GridBeyond closes €52M Series C funding round to continue ...",
+          "url": "https://www.theade.co.uk/news/gridbeyond-closes-52m-series-c-funding-round-to-continue-its-platform-evolution-and-invest-in-new-existing-markets",
+          "publisher": "theade.co.uk"
+        },
+        "evidence": "https://www.theade.co.uk/news/gridbeyond-closes-52m-series-c-funding-round-to-continue-its-platform-evolution-and-invest-in-new-existing-markets"
+      },
+      {
+        "type": "launch_date",
+        "label": "Launch date",
+        "value": "2010",
+        "status": "verified",
+        "source": {
+          "title": "An award-winning provider of AI-powered ... - GridBeyond",
+          "url": "https://gridbeyond.com/about-us-2/",
+          "publisher": "gridbeyond.com"
+        },
+        "evidence": "2010"
+      }
+    ]
   },
   {
     "id": "gridbright",
@@ -2202,6 +2674,16 @@
         "title": "Qualus Acquires GridBright",
         "url": "https://qualuscorp.com/qualus-acquires-gridbright-a-leading-power-industry-technology-solutions-firm-expanding-its-services-and-differentiated-market-position/",
         "publisher": "Qualus"
+      },
+      {
+        "title": "Why Choose Us - Blake Consulting",
+        "url": "https://www.blakeconsulting.net/history/",
+        "publisher": "blakeconsulting.net"
+      },
+      {
+        "title": "Shane Downing - San Francisco Business Times",
+        "url": "https://www.bizjournals.com/sanfrancisco/bio/40273/Shane+Downing?page=3",
+        "publisher": "bizjournals.com"
       }
     ],
     "confidence": 0.88
@@ -2235,10 +2717,39 @@
         "title": "GRIDSERVE — Wikipedia",
         "url": "https://en.wikipedia.org/wiki/Gridserve",
         "publisher": "Wikipedia"
+      },
+      {
+        "title": "Gridserve team target $100bn of support for new global ...",
+        "url": "https://www.edie.net/gridserve-team-target-100bn-of-support-for-new-global-climate-tech-venture/",
+        "publisher": "edie.net"
+      },
+      {
+        "title": "GRIDSERVE | Award-winning nationwide EV charging network",
+        "url": "https://www.gridserve.com/",
+        "publisher": "gridserve.com"
+      },
+      {
+        "title": "Project introduction and approach - Electric Freightway Report 1",
+        "url": "https://www.gridserve.com/wp-content/uploads/2024/02/ElectricFreightwayIntroductionAndApproach_v1.1.pdf",
+        "publisher": "GRIDSERVE"
       }
     ],
     "confidence": 0.78,
-    "ownershipStatus": "independent"
+    "ownershipStatus": "independent",
+    "materialFacts": [
+      {
+        "type": "product_live_status",
+        "label": "Product live",
+        "value": "EV charging network live; Electric Freightway HGV charging project in development",
+        "status": "partial",
+        "source": {
+          "title": "Project introduction and approach - Electric Freightway Report 1",
+          "url": "https://www.gridserve.com/wp-content/uploads/2024/02/ElectricFreightwayIntroductionAndApproach_v1.1.pdf",
+          "publisher": "GRIDSERVE"
+        },
+        "evidence": "GRIDSERVE public project report describes High Power chargers to be installed at public and private sites."
+      }
+    ]
   },
   {
     "id": "h-e-group",
@@ -2293,6 +2804,16 @@
         "title": "H2O America (HTO) Stock Price, News, Quote & History",
         "url": "https://finance.yahoo.com/quote/HTO/",
         "publisher": "Yahoo Finance"
+      },
+      {
+        "title": "pacific maple-brown abbott global infrastructure fund - i share ...",
+        "url": "https://www.pacificam.co.uk/wp-content/uploads/Pacific-MBA-Global-Infrastructure-factsheet-EUR-Iclass.pdf",
+        "publisher": "pacificam.co.uk"
+      },
+      {
+        "title": "H2O America expands presence in Texas through acquisition ...",
+        "url": "https://smartwatermagazine.com/news/smart-water-magazine/h2o-america-expands-presence-texas-through-acquisition-quadvest",
+        "publisher": "smartwatermagazine.com"
       }
     ],
     "confidence": 0.84,
@@ -2300,14 +2821,21 @@
       {
         "type": "launch_date",
         "value": "May 2025",
-        "status": "needs_review",
+        "status": "partial",
         "sources": [
           {
             "title": "H2O America (HTO) Stock Price, News, Quote & History",
             "url": "https://finance.yahoo.com/quote/HTO/",
             "publisher": "Yahoo Finance"
           }
-        ]
+        ],
+        "label": "Launch date",
+        "source": {
+          "title": "H2O America (HTO) Stock Price, News, Quote & History",
+          "url": "https://finance.yahoo.com/quote/HTO/",
+          "publisher": "finance.yahoo.com"
+        },
+        "evidence": "May 2025"
       }
     ]
   },
@@ -2332,6 +2860,21 @@
         "title": "Habitat Energy — who we are",
         "url": "https://habitat.energy/who-we-are/",
         "publisher": "Habitat Energy"
+      },
+      {
+        "title": "Habitat Energy acquired by Quinbrook as it eyes further global ...",
+        "url": "https://www.solarpowerportal.co.uk/solar-technology/habitat-energy-acquired-by-quinbrook-as-it-eyes-further-global-expansion",
+        "publisher": "solarpowerportal.co.uk"
+      },
+      {
+        "title": "Squire Patton Boggs Advises Habitat Energy on Acquisition by ...",
+        "url": "https://www.squirepattonboggs.com/news/squire-patton-boggs-advises-habitat-energy-on-acquisition-by-quinbrook-infrastructure-partners/",
+        "publisher": "squirepattonboggs.com"
+      },
+      {
+        "title": "Andrew Luers - Gordon & Eden",
+        "url": "https://www.gordoneden.co.uk/lessons-in-leadership/andrew-luers/",
+        "publisher": "gordoneden.co.uk"
       }
     ],
     "confidence": 0.86,
@@ -2520,6 +3063,11 @@
         "title": "Xylem Acquires Majority Stake in Idrica",
         "url": "https://xyleminc.gcs-web.com/news-releases/news-release-details/xylem-acquires-majority-stake-idrica-empower-water-utilities",
         "publisher": "Xylem"
+      },
+      {
+        "title": "Idrica - LinkedIn",
+        "url": "https://www.linkedin.com/company/idrica",
+        "publisher": "linkedin.com"
       }
     ],
     "confidence": 0.9
@@ -2577,6 +3125,11 @@
         "title": "Hogan Lovells Advises Infracapital on Zenobe Investment",
         "url": "https://www.hoganlovells.com/en/news/hogan-lovells-advises-infracapital-partners-greenfield-fund-ii-on-its-investment-in-zenobe",
         "publisher": "Hogan Lovells"
+      },
+      {
+        "title": "Zenobē Powers Global Expansion with c.£600 Million ...",
+        "url": "https://www.zenobe.com/news-and-events/zenobe-new-investment-kkr-infracapital/",
+        "publisher": "zenobe.com"
       }
     ],
     "confidence": 0.86
@@ -2608,9 +3161,33 @@
         "title": "Azuria Portfolio Page",
         "url": "https://www.newmountaincapital.com/portfolio/azuria/",
         "publisher": "New Mountain Capital"
+      },
+      {
+        "title": "Mangal Murti Inframark Magnate Pearl in Gota, Ahmedabad",
+        "url": "https://www.aurumproptech.in/pulse/properties/ahmedabad/gota/mangal-murti-inframark-magnate-pearl-3371245",
+        "publisher": "aurumproptech.in"
+      },
+      {
+        "title": "Inframark - 2026 Company Profile & Team - Tracxn",
+        "url": "https://tracxn.com/d/companies/inframark/__4pOje0zlYBx6bUewcGu5gJReRGp3AymqhnxP3USZ5Cg",
+        "publisher": "tracxn.com"
       }
     ],
-    "confidence": 0.88
+    "confidence": 0.88,
+    "materialFacts": [
+      {
+        "type": "launch_date",
+        "label": "Launch date",
+        "value": "1978",
+        "status": "partial",
+        "source": {
+          "title": "Inframark - 2026 Company Profile & Team - Tracxn",
+          "url": "https://tracxn.com/d/companies/inframark/__4pOje0zlYBx6bUewcGu5gJReRGp3AymqhnxP3USZ5Cg",
+          "publisher": "tracxn.com"
+        },
+        "evidence": "1978"
+      }
+    ]
   },
   {
     "id": "innovyze",
@@ -2694,6 +3271,16 @@
         "title": "Dr Piers Clark — Isle Group",
         "url": "https://www.utilityweeklive.co.uk/innovation-advisory-board/dr-piers-clark-executive-chairman-isle-group",
         "publisher": "Utility Week Live"
+      },
+      {
+        "title": "Piers Clark (PhD) | Isle Utilities",
+        "url": "https://isleutilities.com/team-member/piers-clark-phd/",
+        "publisher": "isleutilities.com"
+      },
+      {
+        "title": "Piers Clark - World Water-Tech Innovation Summit 2026",
+        "url": "https://www.worldwatertechinnovation.com/full-speaker-list/piers-clark",
+        "publisher": "worldwatertechinnovation.com"
       }
     ],
     "confidence": 0.86,
@@ -2733,6 +3320,11 @@
         "title": "H2O America Significantly Expands Texas Footprint with Texas Subsidiary's Acquisition of Quadvest",
         "url": "https://www.h2o-america.com/news-releases/news-release-details/h2o-america-significantly-expands-texas-footprint-texas",
         "publisher": "H2O America"
+      },
+      {
+        "title": "J.P. Morgan | Official Website",
+        "url": "https://www.jpmorgan.com/",
+        "publisher": "jpmorgan.com"
       }
     ],
     "confidence": 0.82
@@ -2785,6 +3377,16 @@
         "title": "Investments",
         "url": "https://www.towerbrook.com/investments/",
         "publisher": "TowerBrook"
+      },
+      {
+        "title": "Clearwater advises the shareholders of JSM Group on its sale ...",
+        "url": "https://www.clearwatercf.com/experience/transactions/clearwater-advises-the-shareholders-of-jsm-group-on-its-sale-to-towerbrook-capital-partners/",
+        "publisher": "clearwatercf.com"
+      },
+      {
+        "title": "JSM Group Services Ltd. works with clients to problem-solve ...",
+        "url": "https://ccemagazine.com/news/jsm-group-services-ltd-works-with-clients-to-problem-solve-and-develop-innovative-end-to-end-utility-infrastructure-solutions/",
+        "publisher": "ccemagazine.com"
       }
     ],
     "confidence": 0.92,
@@ -2803,6 +3405,20 @@
         "date": "2024-07-29",
         "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
         "source": "TowerBrook"
+      }
+    ],
+    "materialFacts": [
+      {
+        "type": "launch_date",
+        "label": "Launch date",
+        "value": "1998",
+        "status": "partial",
+        "source": {
+          "title": "JSM Group Services Ltd. works with clients to problem-solve ...",
+          "url": "https://ccemagazine.com/news/jsm-group-services-ltd-works-with-clients-to-problem-solve-and-develop-innovative-end-to-end-utility-infrastructure-solutions/",
+          "publisher": "ccemagazine.com"
+        },
+        "evidence": "1998"
       }
     ]
   },
@@ -2855,6 +3471,16 @@
         "title": "Kirkland Advises GIP/EQT Consortium on Agreement to Acquire AES",
         "url": "https://www.kirkland.com/news/press-release/2026/03/kirkland-advises-consortium-led-by-gip-and-eqt-on-a-to-acquire-aes-for-33-4b-gip",
         "publisher": "Kirkland & Ellis"
+      },
+      {
+        "title": "Kirkland & Ellis LLP: Home",
+        "url": "https://www.kirkland.com/",
+        "publisher": "kirkland.com"
+      },
+      {
+        "title": "Über Kirkland",
+        "url": "https://www.kirkland.com/content/about-kirkland?language=de",
+        "publisher": "kirkland.com"
       }
     ],
     "confidence": 0.88
@@ -3143,6 +3769,16 @@
         "title": "LevelTen launches renewable energy marketplace",
         "url": "https://www.leveltenenergy.com/post/levelten-launches-renewable-energy-marketplace",
         "publisher": "LevelTen Energy"
+      },
+      {
+        "title": "Bryce Smith - Founder and Chief Executive Officer at LevelTen ...",
+        "url": "https://www.linkedin.com/in/bryce-smith-8545a819",
+        "publisher": "linkedin.com"
+      },
+      {
+        "title": "Working Geek: Bryce Smith, CEO of LevelTen Energy, Helps ...",
+        "url": "https://www.leveltenenergy.com/post/working-geek-bryce-smith",
+        "publisher": "leveltenenergy.com"
       }
     ],
     "confidence": 0.86
@@ -3164,6 +3800,11 @@
         "title": "TowerBrook Capital Partners Announces Investment in LiftWerx",
         "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-liftwerx/",
         "publisher": "TowerBrook"
+      },
+      {
+        "title": "LiftWerx - LinkedIn",
+        "url": "https://ca.linkedin.com/company/liftwerx-solutions-inc-",
+        "publisher": "ca.linkedin.com"
       }
     ],
     "confidence": 0.91,
@@ -3206,6 +3847,21 @@
         "title": "Leadership change at Lightsource bp post-bp acquisition",
         "url": "https://taiyangnews.info/people/lightsource-bp-new-ceo-joaquin-oliveira",
         "publisher": "TaiyangNews"
+      },
+      {
+        "title": "Nick Boyle Email & Phone Number - ContactOut",
+        "url": "https://contactout.com/Nick-Boyle-16246591",
+        "publisher": "contactout.com"
+      },
+      {
+        "title": "Nick Boyle - Entrepreneur and investor in a range of ... - LinkedIn",
+        "url": "https://uk.linkedin.com/in/nick-boyle-a2b7a589",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "Lightsource bp founder recognised with UK solar achievement ...",
+        "url": "https://lightsourcebp.com/news/lightsource-bp-founder-recognised-with-uk-solar-achievement-award/",
+        "publisher": "lightsourcebp.com"
       }
     ],
     "confidence": 0.9,
@@ -3260,6 +3916,16 @@
         "title": "Limejump acquired by Shell — SET Ventures",
         "url": "https://setventures.com/set-ventures-portfolio-company-limejump-acquired-by-shell/",
         "publisher": "SET Ventures"
+      },
+      {
+        "title": "USF Ventures | LinkedIn",
+        "url": "https://www.linkedin.com/company/usf-ventures",
+        "publisher": "linkedin.com"
+      },
+      {
+        "title": "Erik Nygard, CEO LimeJump - Leaders in Cleantech",
+        "url": "https://leadersincleantech.com/erik-nygard-limejump",
+        "publisher": "leadersincleantech.com"
       }
     ],
     "confidence": 0.8,
@@ -3287,6 +3953,16 @@
         "title": "Lincoln advises on Waterline sale to Azuria",
         "url": "https://www.lincolninternational.com/transactions/behrman-capital-has-sold-waterline-renewal-technologies-to-azuria-water-solutions-a-portfolio-company-of-new-mountain-capital/",
         "publisher": "Lincoln International"
+      },
+      {
+        "title": "Robert (Bobby) Reifman - Lincoln International - LinkedIn",
+        "url": "https://www.linkedin.com/in/robert-bobby-reifman-a25b4463",
+        "publisher": "linkedin.com"
+      },
+      {
+        "title": "Robert Reifman - Lincoln International LLC",
+        "url": "https://www.lincolninternational.com/people/robert-reifman/",
+        "publisher": "lincolninternational.com"
       }
     ],
     "confidence": 0.76
@@ -3343,6 +4019,11 @@
         "title": "Roy Bedlow — Founder & CEO, Low Carbon",
         "url": "https://www.lowcarbon.com/people/founder-chief-executive-roy-bedlow",
         "publisher": "Low Carbon"
+      },
+      {
+        "title": "Roy Bedlow - Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Roy_Bedlow",
+        "publisher": "en.wikipedia.org"
       }
     ],
     "confidence": 0.8,
@@ -3371,9 +4052,33 @@
         "title": "Constellation Announces Agreement to Sell PJM Generation Assets to LS Power",
         "url": "https://www.constellationenergy.com/news/2026/03/constellation-announces-agreement-to-sell-pjm-generation-assets-to-ls-power-as-part-of-ferc-us-doj-resolution-of-calpine-transaction.html",
         "publisher": "Constellation Energy"
+      },
+      {
+        "title": "About - LS Power",
+        "url": "https://www.lspower.com/about/",
+        "publisher": "lspower.com"
+      },
+      {
+        "title": "LS Power - LinkedIn",
+        "url": "https://www.linkedin.com/company/ls-power",
+        "publisher": "linkedin.com"
       }
     ],
-    "confidence": 0.86
+    "confidence": 0.86,
+    "materialFacts": [
+      {
+        "type": "launch_date",
+        "label": "Launch date",
+        "value": "1990",
+        "status": "partial",
+        "source": {
+          "title": "LS Power - LinkedIn",
+          "url": "https://www.linkedin.com/company/ls-power",
+          "publisher": "linkedin.com"
+        },
+        "evidence": "1990"
+      }
+    ]
   },
   {
     "id": "masdar",
@@ -3444,6 +4149,16 @@
         "title": "Modo Energy raises $20m — Quentin Scrimshire",
         "url": "https://www.frontlines.io/podcasts/quentin-scrimshire/",
         "publisher": "Frontlines.io"
+      },
+      {
+        "title": "Quentin 'Q' Scrimshire – Modo Energy - Leaders in Cleantech",
+        "url": "https://leadersincleantech.com/quentin-q-scrimshire-modo-energy",
+        "publisher": "leadersincleantech.com"
+      },
+      {
+        "title": "Quentin 'Q' Scrimshire - Co-founder & CEO @ Modo Energy",
+        "url": "https://www.linkedin.com/in/quentinscrimshire",
+        "publisher": "linkedin.com"
       }
     ],
     "confidence": 0.85,
@@ -3590,6 +4305,21 @@
         "title": "Azuria — New Mountain Capital portfolio",
         "url": "https://www.newmountaincapital.com/portfolio/azuria/",
         "publisher": "New Mountain Capital"
+      },
+      {
+        "title": "New Mountain Capital - Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/New_Mountain_Capital",
+        "publisher": "en.wikipedia.org"
+      },
+      {
+        "title": "New Mountain Capital Closes on $15.4 Billion for New ...",
+        "url": "https://www.newmountaincapital.com/new-mountain-capital-closes-on-15-4-billion-for-new-mountain-partners-vii/",
+        "publisher": "newmountaincapital.com"
+      },
+      {
+        "title": "Side Letter: New Mountain's Holt halt",
+        "url": "https://www.privateequityinternational.com/side-letter-new-mountains-holt-halt/",
+        "publisher": "privateequityinternational.com"
       }
     ],
     "confidence": 0.78
@@ -3640,6 +4370,11 @@
         "title": "Michael Bonte-Friedheim — NextEnergy Group",
         "url": "https://nextenergygroup.com/people/michael-bonte-friedheim/",
         "publisher": "NextEnergy Group"
+      },
+      {
+        "title": "Michael Bonte-Friedheim - NextEnergy Capital - LinkedIn",
+        "url": "https://uk.linkedin.com/in/michael-bonte-friedheim-54392911",
+        "publisher": "uk.linkedin.com"
       }
     ],
     "confidence": 0.8,
@@ -3670,6 +4405,11 @@
         "title": "Jeff McDermott — Nomura Greentech",
         "url": "https://www.nomuragreentech.com/who-we-are/jeff-mcdermott",
         "publisher": "Nomura Greentech"
+      },
+      {
+        "title": "Jeff McDermott - Co-Founder of Confluence Infrastructure ...",
+        "url": "https://www.linkedin.com/in/jeff-mcdermott-a2248441",
+        "publisher": "linkedin.com"
       }
     ],
     "confidence": 0.82
@@ -3717,6 +4457,16 @@
         "title": "About Octopus Energy",
         "url": "https://octopus.energy/about-us/",
         "publisher": "Octopus Energy"
+      },
+      {
+        "title": "Greg Jackson (businessman) - Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Greg_Jackson_(businessman)",
+        "publisher": "en.wikipedia.org"
+      },
+      {
+        "title": "Greg Jackson - Founder and CEO, Octopus Energy ... - LinkedIn",
+        "url": "https://uk.linkedin.com/in/gregsjackson",
+        "publisher": "uk.linkedin.com"
       }
     ],
     "confidence": 0.9,
@@ -3776,10 +4526,39 @@
         "title": "Poulsen quits as CEO of offshore wind giant Ørsted",
         "url": "https://www.rechargenews.com/wind/black-to-green-trailblazer-poulsen-quits-as-ceo-of-offshore-wind-giant-orsted/2-1-826352",
         "publisher": "Recharge"
+      },
+      {
+        "title": "Benj Sykes - Ørsted - LinkedIn",
+        "url": "https://uk.linkedin.com/in/benj-sykes-offshorewind",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "Press Release : Doosan Group | Doosan Corporation",
+        "url": "https://www.doosan.com/en/media-center/press-release_view?id=20172443",
+        "publisher": "doosan.com"
+      },
+      {
+        "title": "History and transformation | Ørsted",
+        "url": "https://orsted.com/en/about-us/history-and-transformation",
+        "publisher": "orsted.com"
       }
     ],
     "confidence": 0.85,
-    "ownershipStatus": "public"
+    "ownershipStatus": "public",
+    "materialFacts": [
+      {
+        "type": "launch_date",
+        "label": "Launch date",
+        "value": "2022",
+        "status": "partial",
+        "source": {
+          "title": "Press Release : Doosan Group | Doosan Corporation",
+          "url": "https://www.doosan.com/en/media-center/press-release_view?id=20172443",
+          "publisher": "doosan.com"
+        },
+        "evidence": "2022"
+      }
+    ]
   },
   {
     "id": "ovarro",
@@ -3966,6 +4745,21 @@
         "title": "Piclo scales nationwide, unlocks 1GW of DER capacity",
         "url": "https://www.piclo.com/press-releases/piclo-scales-nationwide-in-six-months-unlocks-1gw-of-der-flexible-capacity-to-strengthen-u-s-grid",
         "publisher": "Piclo"
+      },
+      {
+        "title": "Meet the Piclo Team",
+        "url": "https://www.piclo.com/team",
+        "publisher": "piclo.com"
+      },
+      {
+        "title": "James Johnston - CEO and Co-founder | LinkedIn",
+        "url": "https://uk.linkedin.com/in/jamesjohnston53",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "James Johnston Email & Phone Number | Piclo CEO and Co ...",
+        "url": "https://rocketreach.co/james-johnston-email_3875796",
+        "publisher": "rocketreach.co"
       }
     ],
     "confidence": 0.86,
@@ -4001,6 +4795,16 @@
         "title": "Pinsent Masons — Energy & Natural Resources",
         "url": "https://www.pinsentmasons.com/sectors/energy",
         "publisher": "Pinsent Masons"
+      },
+      {
+        "title": "Gordon McCreath - Pinsent Masons LLP - LinkedIn",
+        "url": "https://uk.linkedin.com/in/gordon-mccreath-1099512b",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "Gordon McCreath - Pinsent Masons",
+        "url": "https://www.pinsentmasons.com/people/gordon-mccreath",
+        "publisher": "pinsentmasons.com"
       }
     ],
     "confidence": 0.8
@@ -4032,6 +4836,26 @@
         "title": "Gibson Dunn Advises Platinum Equity and Solenis on NCH Acquisition",
         "url": "https://www.gibsondunn.com/gibson-dunn-advises-platinum-equity-and-its-portfolio-company-solenis-on-the-acquisition-of-nch-corporation/",
         "publisher": "Gibson Dunn"
+      },
+      {
+        "title": "Platinum Equity: Mergers, Acquisitions and Operations",
+        "url": "https://www.platinumequity.com/",
+        "publisher": "platinumequity.com"
+      },
+      {
+        "title": "About Us - Platinum Equity",
+        "url": "https://www.platinumequity.com/about-us/",
+        "publisher": "platinumequity.com"
+      },
+      {
+        "title": "Platinum Equity",
+        "url": "https://privateequitylist.com/investors/platinum-equity",
+        "publisher": "privateequitylist.com"
+      },
+      {
+        "title": "LevFin Wrap - HY still in Labor, Solenis delivered early - 9fin",
+        "url": "https://www.9fin.com/insights/levfin-wrap---hy-still-in-labor-solenis-delivered-early",
+        "publisher": "9fin.com"
       }
     ],
     "confidence": 0.82
@@ -4121,6 +4945,21 @@
         "title": "Foresight invests £1.75m into Previsico",
         "url": "https://www.foresight.group/news/foresight-invests-175m-into-previsico-loughborough-based-developers-of-a-market-leading-flood-forecasting-and-warning-system",
         "publisher": "Foresight Group"
+      },
+      {
+        "title": "Previsico | Research and Innovation support | Loughborough ...",
+        "url": "https://www.lboro.ac.uk/internal/research-innovation-support/commercialisation-research/case-studies/previsico/",
+        "publisher": "lboro.ac.uk"
+      },
+      {
+        "title": "Dr Avi Baruch - Co-Founder and CEO of Climingo ... - LinkedIn",
+        "url": "https://uk.linkedin.com/in/avinoam-avi-baruch",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "Our Mission in Flood Risk Mitigation - Previsico",
+        "url": "https://previsico.com/en-us/about-us",
+        "publisher": "previsico.com"
       }
     ],
     "confidence": 0.8,
@@ -4207,9 +5046,43 @@
         "title": "H2O America Announces $540 Million Acquisition of Quadvest",
         "url": "https://www.bakermckenzie.com/en/newsroom/2025/07/h2o-america-usd-540-million-acquisition-of-quadvest",
         "publisher": "Baker McKenzie"
+      },
+      {
+        "title": "pacific maple-brown abbott global infrastructure fund - i share ...",
+        "url": "https://www.pacificam.co.uk/wp-content/uploads/Pacific-MBA-Global-Infrastructure-factsheet-EUR-Iclass.pdf",
+        "publisher": "pacificam.co.uk"
+      },
+      {
+        "title": "Start New Service - CustomerConnect For Quadvest",
+        "url": "https://quadvest.customerconnectportal.com/moving/start-service",
+        "publisher": "quadvest.customerconnectportal.com"
+      },
+      {
+        "title": "asset purchase agreement - SEC.gov",
+        "url": "https://www.sec.gov/Archives/edgar/data/766829/000110465925066289/tm2519459d1_ex2-2.htm",
+        "publisher": "sec.gov"
+      },
+      {
+        "title": "Our Story - Quadvest",
+        "url": "https://quadvest.com/about-us/our-story/",
+        "publisher": "quadvest.com"
       }
     ],
-    "confidence": 0.84
+    "confidence": 0.84,
+    "materialFacts": [
+      {
+        "type": "product_live_status",
+        "label": "Product live",
+        "value": "Live",
+        "status": "partial",
+        "source": {
+          "title": "Start New Service - CustomerConnect For Quadvest",
+          "url": "https://quadvest.customerconnectportal.com/moving/start-service",
+          "publisher": "quadvest.customerconnectportal.com"
+        },
+        "evidence": "Live"
+      }
+    ]
   },
   {
     "id": "qualus",
@@ -4249,9 +5122,38 @@
         "title": "Qualus Portfolio Page",
         "url": "https://www.newmountaincapital.com/portfolio/qualus-power-services/",
         "publisher": "New Mountain Capital"
+      },
+      {
+        "title": "Qualus Completes its acquisition of Wood's North American ...",
+        "url": "https://www.efcg.com/post/qualus-completes-its-acquisition-of-wood-s-north-american-transmission-and-distribution-engineering",
+        "publisher": "efcg.com"
+      },
+      {
+        "title": "Deal Snapshot: Qualus Power Services - Harris Williams",
+        "url": "https://www.harriswilliams.com/our-insights/deal-snapshot-qualus-power-services",
+        "publisher": "harriswilliams.com"
+      },
+      {
+        "title": "Qualus Revenue, Funding & Valuation - Prospeo",
+        "url": "https://prospeo.io/c/qualus-revenue",
+        "publisher": "prospeo.io"
       }
     ],
-    "confidence": 0.9
+    "confidence": 0.9,
+    "materialFacts": [
+      {
+        "type": "total_funding",
+        "label": "Total funding",
+        "value": "$2,600,000",
+        "status": "partial",
+        "source": {
+          "title": "Qualus Revenue, Funding & Valuation - Prospeo",
+          "url": "https://prospeo.io/c/qualus-revenue",
+          "publisher": "prospeo.io"
+        },
+        "evidence": "$2,600,000"
+      }
+    ]
   },
   {
     "id": "quinbrook",
@@ -4275,6 +5177,11 @@
         "title": "Quinbrook Infrastructure Partners 2026 Company Profile",
         "url": "https://pitchbook.com/profiles/company/181121-14",
         "publisher": "PitchBook"
+      },
+      {
+        "title": "Squire Patton Boggs Advises Habitat Energy on Acquisition by ...",
+        "url": "https://www.squirepattonboggs.com/news/squire-patton-boggs-advises-habitat-energy-on-acquisition-by-quinbrook-infrastructure-partners/",
+        "publisher": "squirepattonboggs.com"
       }
     ],
     "confidence": 0.8,
@@ -4287,14 +5194,21 @@
       {
         "type": "launch_date",
         "value": "2015",
-        "status": "needs_review",
+        "status": "partial",
         "sources": [
           {
             "title": "Quinbrook Infrastructure Partners 2026 Company Profile",
             "url": "https://pitchbook.com/profiles/company/181121-14",
             "publisher": "PitchBook"
           }
-        ]
+        ],
+        "label": "Launch date",
+        "source": {
+          "title": "Quinbrook Infrastructure Partners 2026 Company Profile",
+          "url": "https://pitchbook.com/profiles/company/181121-14",
+          "publisher": "pitchbook.com"
+        },
+        "evidence": "2015"
       }
     ]
   },
@@ -4336,6 +5250,16 @@
         "title": "RatedPower rebrand article by Andrea Barber",
         "url": "https://ratedpower.com/blog/smart-energy-flow/",
         "publisher": "RatedPower"
+      },
+      {
+        "title": "Posts from Andrea Barber - RatedPower",
+        "url": "https://ratedpower.com/blog/author/andrea-barber/",
+        "publisher": "ratedpower.com"
+      },
+      {
+        "title": "Andrea Barber - Enverus | LinkedIn",
+        "url": "https://es.linkedin.com/in/andrea-barber",
+        "publisher": "es.linkedin.com"
       }
     ],
     "confidence": 0.88
@@ -4467,6 +5391,16 @@
         "title": "Masdar to Acquire Saeta from Brookfield for $1.4 Billion",
         "url": "https://www.prnewswire.com/news-releases/masdar-to-acquire-saeta-from-brookfield-for-1-4-billion-302256978.html",
         "publisher": "Masdar / PR Newswire"
+      },
+      {
+        "title": "Juan José Reyes - Solclef",
+        "url": "https://solclef.com/en/personnel/juan-jose-reyes/",
+        "publisher": "solclef.com"
+      },
+      {
+        "title": "Green Energy Indexes & Financial Markets: An In-Depth Look",
+        "url": "https://hal.science/hal-04159744v1/document",
+        "publisher": "hal.science"
       }
     ],
     "confidence": 0.9
@@ -4563,6 +5497,16 @@
         "title": "Schneider Electric Appoints Ruben Llanes as AutoGrid CEO",
         "url": "https://www.se.com/us/en/about-us/newsroom/news/press-releases/schneider-electric-appoints-ruben-llanes-as-chief-executive-officer-of-autogrid-640039dec74788ce0f066e32",
         "publisher": "Schneider Electric"
+      },
+      {
+        "title": "History of our company, brand and innovation",
+        "url": "https://www.se.com/ww/en/about-us/company-profile/history/schneider-electric-history/",
+        "publisher": "se.com"
+      },
+      {
+        "title": "Schneider Electric Acquires Stake in AutoGrid to Accelerate AI ...",
+        "url": "https://www.prnewswire.com/news-releases/schneider-electric-acquires-stake-in-autogrid-to-accelerate-ai-adoption-in-the-power-sector-300859854.html",
+        "publisher": "prnewswire.com"
       }
     ],
     "confidence": 0.86
@@ -4608,9 +5552,45 @@
         "title": "Scout Clean Energy Portfolio",
         "url": "https://www.quinbrook.com/portfolio/scout-clean-energy/",
         "publisher": "Quinbrook"
+      },
+      {
+        "title": "Renewable energy project on Yakama Nation sacred site ...",
+        "url": "https://www.facebook.com/groups/UAINE/posts/10162989498782631/",
+        "publisher": "facebook.com"
+      },
+      {
+        "title": "Scout Clean Energy - 2026 Company Profile & Team - Tracxn",
+        "url": "https://tracxn.com/d/companies/scoutcleanenergy/__3O7nZdBCLs4TXPZcBAl7TUt-G18e-W_RGpyobcapr6Q",
+        "publisher": "tracxn.com"
       }
     ],
-    "confidence": 0.92
+    "confidence": 0.92,
+    "materialFacts": [
+      {
+        "type": "launch_date",
+        "label": "Launch date",
+        "value": "2026-03",
+        "status": "partial",
+        "source": {
+          "title": "Renewable energy project on Yakama Nation sacred site ...",
+          "url": "https://www.facebook.com/groups/UAINE/posts/10162989498782631/",
+          "publisher": "facebook.com"
+        },
+        "evidence": "2026-03"
+      },
+      {
+        "type": "product_live_status",
+        "label": "Product live",
+        "value": "expected launch in March 2026",
+        "status": "partial",
+        "source": {
+          "title": "Renewable energy project on Yakama Nation sacred site ...",
+          "url": "https://www.facebook.com/groups/UAINE/posts/10162989498782631/",
+          "publisher": "facebook.com"
+        },
+        "evidence": "expected launch in March 2026"
+      }
+    ]
   },
   {
     "id": "seven-seas-water-group",
@@ -4698,6 +5678,11 @@
         "title": "Shell to buy virtual power plant firm Limejump",
         "url": "https://www.edie.net/news/8/Shell-set-to-buy-Limejump--acquiring-large-UK-battery-storage-portfolio/",
         "publisher": "edie"
+      },
+      {
+        "title": "USF Ventures | LinkedIn",
+        "url": "https://www.linkedin.com/company/usf-ventures",
+        "publisher": "linkedin.com"
       }
     ],
     "confidence": 0.78,
@@ -4814,6 +5799,11 @@
         "title": "XPV Water Partners Announces Sale of SmartCover to Badger Meter",
         "url": "https://xpvwaterpartners.com/insights/news/2025/01/31/xpv-water-partners-announces-sale-of-smartcover-to-badger-meter",
         "publisher": "XPV Water Partners"
+      },
+      {
+        "title": "Escondido-based SmartCover Systems Acquired by Badger ...",
+        "url": "https://www.latimes.com/b2b/orange-county/story/2025-02-21/escondido-based-smartcover-systems-acquired-badger-meter-185m",
+        "publisher": "latimes.com"
       }
     ],
     "confidence": 0.92
@@ -4839,6 +5829,11 @@
         "title": "Strathclyde spinout acquired by Mitsubishi",
         "url": "https://www.scotsman.com/business/university-of-strathclyde-spinout-smarter-grid-solutions-acquired-by-industrial-giant-mitsubishi-3339221",
         "publisher": "The Scotsman"
+      },
+      {
+        "title": "Kenyan Startup Ecosystem | Team - Premium Feature",
+        "url": "https://kenya.dealroom.co/companies/smarter_grid_solutions/team",
+        "publisher": "kenya.dealroom.co"
       }
     ],
     "confidence": 0.9,
@@ -4859,7 +5854,21 @@
       }
     ],
     "ownershipStatus": "acquired",
-    "owner": "Mitsubishi Electric"
+    "owner": "Mitsubishi Electric",
+    "materialFacts": [
+      {
+        "type": "launch_date",
+        "label": "Launch date",
+        "value": "Aug 2008",
+        "status": "partial",
+        "source": {
+          "title": "Kenyan Startup Ecosystem | Team - Premium Feature",
+          "url": "https://kenya.dealroom.co/companies/smarter_grid_solutions/team",
+          "publisher": "kenya.dealroom.co"
+        },
+        "evidence": "https://kenya.dealroom.co/companies/smarter_grid_solutions/team"
+      }
+    ]
   },
   {
     "id": "solenis",
@@ -4889,6 +5898,11 @@
         "title": "Gibson Dunn Advises Platinum Equity and Solenis on NCH Acquisition",
         "url": "https://www.gibsondunn.com/gibson-dunn-advises-platinum-equity-and-its-portfolio-company-solenis-on-the-acquisition-of-nch-corporation/",
         "publisher": "Gibson Dunn"
+      },
+      {
+        "title": "Allison Howe - Human Resources Professional | LinkedIn",
+        "url": "https://www.linkedin.com/in/allison-e-howe",
+        "publisher": "linkedin.com"
       }
     ],
     "confidence": 0.84
@@ -5079,6 +6093,11 @@
         "title": "TaKaDu — Leadership",
         "url": "https://www.takadu.com/leadership/",
         "publisher": "TaKaDu"
+      },
+      {
+        "title": "Amir Peleg‏ - ‏Founder & CEO of TaKaDu - LinkedIn",
+        "url": "https://il.linkedin.com/in/amirpeleg",
+        "publisher": "il.linkedin.com"
       }
     ],
     "confidence": 0.88
@@ -5204,6 +6223,21 @@
         "title": "TowerBrook Capital Partners Announces Investment in LiftWerx",
         "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-liftwerx/",
         "publisher": "TowerBrook"
+      },
+      {
+        "title": "TowerBrook Capital Partners - Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/TowerBrook_Capital_Partners",
+        "publisher": "en.wikipedia.org"
+      },
+      {
+        "title": "Uncategorized – TowerBrook",
+        "url": "https://www.towerbrook.com/category/uncategorized/",
+        "publisher": "towerbrook.com"
+      },
+      {
+        "title": "Responsible Ownership 2025 - TowerBrook",
+        "url": "https://www.towerbrook.com/TowerBrook_Responsible_Ownership-2025-Online-Printing.pdf",
+        "publisher": "towerbrook.com"
       }
     ],
     "confidence": 0.94,
@@ -5475,6 +6509,16 @@
         "title": "WFW — Power and Renewables",
         "url": "https://www.wfw.com/sectors/energy/power-renewables/",
         "publisher": "Watson Farley & Williams"
+      },
+      {
+        "title": "Martin Lucas - Partner at Watson, Farley & Williams | LinkedIn",
+        "url": "https://uk.linkedin.com/in/martin-lucas-71595030",
+        "publisher": "uk.linkedin.com"
+      },
+      {
+        "title": "Martin Lucas - Watson Farley & Williams",
+        "url": "https://www.wfw.com/people/martin-lucas/",
+        "publisher": "wfw.com"
       }
     ],
     "confidence": 0.82,
@@ -5610,6 +6654,11 @@
         "title": "What is Brief History of Xylem Company?",
         "url": "https://pestel-analysis.com/blogs/brief-history/xylem",
         "publisher": "PESTEL Analysis"
+      },
+      {
+        "title": "About Xylem",
+        "url": "https://www.xylem.com/siteassets/about-xylem/one_xylem_brochure_en_company-overview-20page.pdf",
+        "publisher": "xylem.com"
       }
     ],
     "confidence": 0.9,
@@ -5617,14 +6666,21 @@
       {
         "type": "launch_date",
         "value": "2011",
-        "status": "needs_review",
+        "status": "partial",
         "sources": [
           {
             "title": "What is Brief History of Xylem Company?",
             "url": "https://pestel-analysis.com/blogs/brief-history/xylem",
             "publisher": "PESTEL Analysis"
           }
-        ]
+        ],
+        "label": "Launch date",
+        "source": {
+          "title": "What is Brief History of Xylem Company? - PESTEL Analysis",
+          "url": "https://pestel-analysis.com/blogs/brief-history/xylem",
+          "publisher": "pestel-analysis.com"
+        },
+        "evidence": "2011"
       }
     ]
   },
@@ -5692,10 +6748,1429 @@
         "title": "Zenobē confirms c.£600m investment from KKR",
         "url": "https://www.solarpowerportal.co.uk/zenobee_confirms_c-600_million_investment_from_kkr/",
         "publisher": "Solar Power Portal"
+      },
+      {
+        "title": "Our Story | About Zenobē & Our Mission - Zenobe",
+        "url": "https://www.zenobe.com/our-story/",
+        "publisher": "zenobe.com"
+      },
+      {
+        "title": "Co-Founder Nicholas Beatty speaks to IJGlobal and Project ...",
+        "url": "https://www.zenobe.com/news-and-events/co-founder-nicholas-beatty-speaks-to-ijglobal-and-project-finance-international/",
+        "publisher": "zenobe.com"
+      },
+      {
+        "title": "Zenobē Powers Global Expansion with c.£600 Million ...",
+        "url": "https://www.zenobe.com/news-and-events/zenobe-new-investment-kkr-infracapital/",
+        "publisher": "zenobe.com"
+      },
+      {
+        "title": "Zenobē - LinkedIn",
+        "url": "https://uk.linkedin.com/company/zenobe-energy-ltd",
+        "publisher": "uk.linkedin.com"
       }
     ],
     "confidence": 0.83,
     "ownershipStatus": "sponsor-owned",
     "owner": "KKR"
+  },
+  {
+    "id": "aim-aviation",
+    "name": "AIM Aviation",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for TowerBrook.",
+    "whyInteresting": "Discovered through sourced launch enrichment for TowerBrook.",
+    "sources": [
+      {
+        "title": "Investments – TowerBrook",
+        "url": "https://www.towerbrook.com/investments/",
+        "publisher": "towerbrook.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "global-water-development-partners-gwdp",
+    "name": "Global Water Development Partners (GWDP)",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Private equity fund focused on water; a Blackstone portfolio company",
+    "whyInteresting": "Private equity fund focused on water; a Blackstone portfolio company",
+    "sources": [
+      {
+        "title": "Piers Clark (PhD) | Isle Utilities",
+        "url": "https://isleutilities.com/team-member/piers-clark-phd/",
+        "publisher": "isleutilities.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "american-water-works",
+    "name": "American Water Works",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Largest listed utility in the water supply and wastewater treatment sector.",
+    "whyInteresting": "Largest listed utility in the water supply and wastewater treatment sector.",
+    "sources": [
+      {
+        "title": "DGI model portfolio: The American Water Works share",
+        "url": "https://www.captrader.com/en/analysis/dgi-sample-portfolio-the-america-water-works-stock/",
+        "publisher": "captrader.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "american-water-works-company-inc",
+    "name": "American Water Works Company, Inc.",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for American Water.",
+    "whyInteresting": "Discovered through sourced launch enrichment for American Water.",
+    "sources": [
+      {
+        "title": "Who owns American Water?",
+        "url": "https://amwater.com/who-owns-american-water",
+        "publisher": "amwater.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "arcform",
+    "name": "Arcform",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "Company where Nicholas Beatty serves as Chairman",
+    "whyInteresting": "Company where Nicholas Beatty serves as Chairman",
+    "sources": [
+      {
+        "title": "Nicholas Beatty - Retired Founder of Zenobe Energy ...",
+        "url": "https://uk.linkedin.com/in/nicholas-beatty-126655141",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "asterra",
+    "name": "ASTERRA",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Leading provider of geospatial data-driven platform solutions for water utilities, government agencies, and infrastructure sectors.",
+    "whyInteresting": "Leading provider of geospatial data-driven platform solutions for water utilities, government agencies, and infrastructure sectors.",
+    "sources": [
+      {
+        "title": "ASTERRA - Startup Nation Finder",
+        "url": "https://finder.startupnationcentral.org/company_page/asterra",
+        "publisher": "finder.startupnationcentral.org"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "asterra-properties",
+    "name": "Asterra Properties",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Lauren Guy.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Lauren Guy.",
+    "sources": [
+      {
+        "title": "Asterra Properties - Overview, News & Similar companies",
+        "url": "https://www.zoominfo.com/c/asterra-properties/346579882",
+        "publisher": "zoominfo.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "augusta-co-mizuho",
+    "name": "Augusta & Co (Mizuho)",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Investment bank advisory firm, part of Mizuho, focused on clean energy and infrastructure.",
+    "whyInteresting": "Investment bank advisory firm, part of Mizuho, focused on clean energy and infrastructure.",
+    "sources": [
+      {
+        "title": "Advisory Team - Augusta & Co",
+        "url": "https://augustaco.com/advisory-team/",
+        "publisher": "augustaco.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "aurelius-wachstumskapital",
+    "name": "Aurelius Wachstumskapital",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for AURELIUS.",
+    "whyInteresting": "Discovered through sourced launch enrichment for AURELIUS.",
+    "sources": [
+      {
+        "title": "7 questions for Claudius von Plettenberg, Managing Director ...",
+        "url": "https://dealcircle.com/en/ressource/7-fragen-an-claudius-von-plettenberg-managing-director-bei-aurelius-wachstumskapital/",
+        "publisher": "dealcircle.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "aurora-energy-research-limited",
+    "name": "Aurora Energy Research Limited",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for John Feddersen.",
+    "whyInteresting": "Discovered through sourced launch enrichment for John Feddersen.",
+    "sources": [
+      {
+        "title": "John Feddersen - Founder & CEO, Aurora Energy Research ...",
+        "url": "https://uk.linkedin.com/in/john-feddersen-6b9a043b",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "blackrock",
+    "name": "BlackRock",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Global Infrastructure Partners.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Global Infrastructure Partners.",
+    "sources": [
+      {
+        "title": "BlackRock-Owned GIP Expands to Qatar! Big moves in the ...",
+        "url": "https://www.instagram.com/p/DGw-nRbhlTR/?hl=de",
+        "publisher": "instagram.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "blake-consulting",
+    "name": "Blake Consulting",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "Consulting firm",
+    "whyInteresting": "Consulting firm",
+    "website": "https://www.blakeconsulting.net/",
+    "sources": [
+      {
+        "title": "Why Choose Us - Blake Consulting",
+        "url": "https://www.blakeconsulting.net/history/",
+        "publisher": "blakeconsulting.net"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "brookfield-asset-management",
+    "name": "Brookfield Asset Management",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Brookfield Renewable.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Brookfield Renewable.",
+    "sources": [
+      {
+        "title": "What is Brief History of Brookfield Renewable Partners ...",
+        "url": "https://matrixbcg.com/blogs/brief-history/bep?srsltid=AfmBOopxlM7uQBYczKN41Iq0nVGziDhHqe6bOtXn0296VQx7Jw9FEgZt",
+        "publisher": "matrixbcg.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "carfiguano",
+    "name": "Carfiguano",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Company founded by Neil Edwards, Nov 2018 - Present.",
+    "whyInteresting": "Company founded by Neil Edwards, Nov 2018 - Present.",
+    "sources": [
+      {
+        "title": "Neil Edwards - FIDO Tech Ltd - LinkedIn",
+        "url": "https://uk.linkedin.com/in/neiledwardsfidotech",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "carlsberg-breweries-a-s",
+    "name": "Carlsberg Breweries A/S",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Henrik Poulsen.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Henrik Poulsen.",
+    "sources": [
+      {
+        "title": "Henrik Poulsen: Positions, Relations and Network",
+        "url": "https://www.marketscreener.com/insider/HENRIK-POULSEN-A0YWHV/",
+        "publisher": "marketscreener.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "climingo",
+    "name": "Climingo",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "No description available from source.",
+    "whyInteresting": "No description available from source.",
+    "sources": [
+      {
+        "title": "Dr Avi Baruch - Co-Founder and CEO of Climingo ... - LinkedIn",
+        "url": "https://uk.linkedin.com/in/avinoam-avi-baruch",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "dong-energy",
+    "name": "DONG Energy",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Henrik Poulsen.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Henrik Poulsen.",
+    "sources": [
+      {
+        "title": "DONG Energy announces intention to launch an Initial Public ...",
+        "url": "https://orsted.com/en/company-announcement-list/2016/05/1459022",
+        "publisher": "orsted.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "dundas-wilson",
+    "name": "Dundas & Wilson",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Law firm where Gordon McCreath was Senior Associate – Environment in 2004.",
+    "whyInteresting": "Law firm where Gordon McCreath was Senior Associate – Environment in 2004.",
+    "sources": [
+      {
+        "title": "Gordon McCreath - Pinsent Masons",
+        "url": "https://www.pinsentmasons.com/people/gordon-mccreath",
+        "publisher": "pinsentmasons.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "energy-impact-partners",
+    "name": "Energy Impact Partners",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Jeff McDermott.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Jeff McDermott.",
+    "sources": [
+      {
+        "title": "Jeff McDermott - Co-Founder of Confluence Infrastructure ...",
+        "url": "https://www.linkedin.com/in/jeff-mcdermott-a2248441",
+        "publisher": "linkedin.com"
+      },
+      {
+        "title": "team - - Energy Impact Partners",
+        "url": "https://www.energyimpactpartners.com/team/",
+        "publisher": "energyimpactpartners.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "european-institute-of-innovation-and-technology",
+    "name": "European Institute of Innovation and Technology",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Andrea Barber.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Andrea Barber.",
+    "sources": [
+      {
+        "title": "Andrea Barber - Enverus | LinkedIn",
+        "url": "https://es.linkedin.com/in/andrea-barber",
+        "publisher": "es.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "greenlane",
+    "name": "Greenlane",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for BlackRock Climate Infrastructure.",
+    "whyInteresting": "Discovered through sourced launch enrichment for BlackRock Climate Infrastructure.",
+    "sources": [
+      {
+        "title": "Capital for Good",
+        "url": "https://www.forcegood.org/tab-active-participants",
+        "publisher": "forcegood.org"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "haymarket-financial",
+    "name": "Haymarket Financial",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for TowerBrook.",
+    "whyInteresting": "Discovered through sourced launch enrichment for TowerBrook.",
+    "sources": [
+      {
+        "title": "TowerBrook Capital Partners - Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/TowerBrook_Capital_Partners",
+        "publisher": "en.wikipedia.org"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "imagine-h2o",
+    "name": "Imagine H2O",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Tom Ferguson.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Tom Ferguson.",
+    "sources": [
+      {
+        "title": "Tom Ferguson - Managing Partner at Burnt Island Ventures",
+        "url": "https://www.linkedin.com/in/tom-ferguson-biv",
+        "publisher": "linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "isle-group",
+    "name": "Isle Group",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Piers Clark.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Piers Clark.",
+    "sources": [
+      {
+        "title": "Piers Clark - World Water-Tech Innovation Summit 2026",
+        "url": "https://www.worldwatertechinnovation.com/full-speaker-list/piers-clark",
+        "publisher": "worldwatertechinnovation.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "isle-group-ltd",
+    "name": "Isle Group Ltd",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Technical specialist water consultancy.",
+    "whyInteresting": "Technical specialist water consultancy.",
+    "sources": [
+      {
+        "title": "Dr Piers Clark",
+        "url": "https://www.siww.com.sg/spotlight-2023/programme/spotlight-plenaries/panellists-and-speakers/dr-piers-clark",
+        "publisher": "siww.com.sg"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "iss-a-s",
+    "name": "ISS A/S",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Henrik Poulsen.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Henrik Poulsen.",
+    "sources": [
+      {
+        "title": "Henrik Poulsen: Positions, Relations and Network",
+        "url": "https://www.marketscreener.com/insider/HENRIK-POULSEN-A0YWHV/",
+        "publisher": "marketscreener.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "jsm-group-services-ltd",
+    "name": "JSM Group Services Ltd.",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "Leading provider of integrated utility infrastructure solutions",
+    "whyInteresting": "Leading provider of integrated utility infrastructure solutions",
+    "sources": [
+      {
+        "title": "JSM Group Services Ltd. works with clients to problem-solve ...",
+        "url": "https://ccemagazine.com/news/jsm-group-services-ltd-works-with-clients-to-problem-solve-and-develop-innovative-end-to-end-utility-infrastructure-solutions/",
+        "publisher": "ccemagazine.com"
+      },
+      {
+        "title": "Sean Guerin - Marketing Communications Specialist | LinkedIn",
+        "url": "https://uk.linkedin.com/in/sean-guerin-3523424",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "k622-tech",
+    "name": "K622 Tech",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Victoria Edwards.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Victoria Edwards.",
+    "sources": [
+      {
+        "title": "Victoria Edwards - CEO K622 Tech | Founder Emeritus FIDO ...",
+        "url": "https://uk.linkedin.com/in/victoria-edwards-fido",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "keystone-law",
+    "name": "Keystone Law",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for James Knight.",
+    "whyInteresting": "Discovered through sourced launch enrichment for James Knight.",
+    "sources": [
+      {
+        "title": "James Knight - CEO - Keystone Law",
+        "url": "https://keystonelaw.com/central-office/james-knight/",
+        "publisher": "keystonelaw.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "kofa",
+    "name": "Kofa",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "Company mentioned in the source, focused on powering productivity.",
+    "whyInteresting": "Company mentioned in the source, focused on powering productivity.",
+    "sources": [
+      {
+        "title": "About | Powering Your Productivity - Kofa",
+        "url": "https://www.kofa.co/about",
+        "publisher": "kofa.co"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "lightsource-renewable-energy",
+    "name": "Lightsource Renewable Energy",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Clean energy company founded by Nick Boyle; later part of Lightsource bp. Evidence from LinkedIn profile.",
+    "whyInteresting": "Clean energy company founded by Nick Boyle; later part of Lightsource bp. Evidence from LinkedIn profile.",
+    "sources": [
+      {
+        "title": "Nick Boyle - Entrepreneur and investor in a range of ... - LinkedIn",
+        "url": "https://uk.linkedin.com/in/nick-boyle-a2b7a589",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "linkedin",
+    "name": "LinkedIn",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "soziales Netzwerk zur Pflege bestehender Geschäftskontakte und zum Knüpfen neuer Kontakte, mit Sitz in Sunnyvale, Kalifornien, USA",
+    "whyInteresting": "soziales Netzwerk zur Pflege bestehender Geschäftskontakte und zum Knüpfen neuer Kontakte, mit Sitz in Sunnyvale, Kalifornien, USA",
+    "sources": [
+      {
+        "title": "LinkedIn - Wikipedia",
+        "url": "https://de.wikipedia.org/wiki/LinkedIn",
+        "publisher": "de.wikipedia.org"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "loughborough-university",
+    "name": "Loughborough University",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "University that spun out Previsico.",
+    "whyInteresting": "University that spun out Previsico.",
+    "sources": [
+      {
+        "title": "Our Mission in Flood Risk Mitigation - Previsico",
+        "url": "https://previsico.com/en-us/about-us",
+        "publisher": "previsico.com"
+      },
+      {
+        "title": "Previsico | Research and Innovation support | Loughborough ...",
+        "url": "https://www.lboro.ac.uk/internal/research-innovation-support/commercialisation-research/case-studies/previsico/",
+        "publisher": "lboro.ac.uk"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "mckesson-uk",
+    "name": "McKesson UK",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Acquired by AURELIUS in its biggest deal.",
+    "whyInteresting": "Acquired by AURELIUS in its biggest deal.",
+    "sources": [
+      {
+        "title": "In its biggest deal in history, AURELIUS acquires McKesson UK",
+        "url": "https://www.eqs-news.com/news/corporate/aurelius-erwirbt-mckesson-uk-in-der-grosten-transaktion-seiner-unternehmensgeschichte/240d3a64-90bb-4f6c-b3e9-26bf68ec304f",
+        "publisher": "eqs-news.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "microsoft",
+    "name": "Microsoft",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Amir Peleg.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Amir Peleg.",
+    "sources": [
+      {
+        "title": "Leadership - TaKaDu",
+        "url": "https://www.takadu.com/leadership/",
+        "publisher": "takadu.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "mitsubishi-electric-europe-bv",
+    "name": "Mitsubishi Electric Europe BV",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "Experience listed on LinkedIn profile",
+    "whyInteresting": "Experience listed on LinkedIn profile",
+    "sources": [
+      {
+        "title": "Graham Ault - Mitsubishi Electric Europe BV | LinkedIn",
+        "url": "https://uk.linkedin.com/in/graham-ault-08415258",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "nextenergy-group",
+    "name": "NextEnergy Group",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Michael Bonte-Friedheim.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Michael Bonte-Friedheim.",
+    "sources": [
+      {
+        "title": "Michael Bonte-Friedheim - NextEnergy Capital - LinkedIn",
+        "url": "https://uk.linkedin.com/in/michael-bonte-friedheim-54392911",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "nomura",
+    "name": "Nomura",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Jeff McDermott.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Jeff McDermott.",
+    "sources": [
+      {
+        "title": "Jeff McDermott - Co-Founder of Confluence Infrastructure ...",
+        "url": "https://www.linkedin.com/in/jeff-mcdermott-a2248441",
+        "publisher": "linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "northern-ireland-water",
+    "name": "Northern Ireland Water",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Water company where Gordon McCreath served as Lead Legal Adviser on secondment in 2006.",
+    "whyInteresting": "Water company where Gordon McCreath served as Lead Legal Adviser on secondment in 2006.",
+    "sources": [
+      {
+        "title": "Gordon McCreath - Pinsent Masons",
+        "url": "https://www.pinsentmasons.com/people/gordon-mccreath",
+        "publisher": "pinsentmasons.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "pacific-mba-global-infrastructure-fund",
+    "name": "Pacific MBA Global Infrastructure Fund",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Quadvest.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Quadvest.",
+    "sources": [
+      {
+        "title": "pacific maple-brown abbott global infrastructure fund - i share ...",
+        "url": "https://www.pacificam.co.uk/wp-content/uploads/Pacific-MBA-Global-Infrastructure-factsheet-EUR-Iclass.pdf",
+        "publisher": "pacificam.co.uk"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "quadvest-wholesale-llc",
+    "name": "Quadvest Wholesale, LLC",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Quadvest.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Quadvest.",
+    "sources": [
+      {
+        "title": "asset purchase agreement - SEC.gov",
+        "url": "https://www.sec.gov/Archives/edgar/data/766829/000110465925066289/tm2519459d1_ex2-2.htm",
+        "publisher": "sec.gov"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "quadvest-l-p",
+    "name": "Quadvest, L.P.",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Quadvest.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Quadvest.",
+    "sources": [
+      {
+        "title": "asset purchase agreement - SEC.gov",
+        "url": "https://www.sec.gov/Archives/edgar/data/766829/000110465925066289/tm2519459d1_ex2-2.htm",
+        "publisher": "sec.gov"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "skygen",
+    "name": "SkyGen",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Company whose projects were acquired by Calpine",
+    "whyInteresting": "Company whose projects were acquired by Calpine",
+    "sources": [
+      {
+        "title": "Calpine's Acquisition of SkyGen Projects Reviewed by Fitch",
+        "url": "https://www.fitchratings.com/research/corporate-finance/calpine-acquisition-of-skygen-projects-reviewed-by-fitch-04-08-2000",
+        "publisher": "fitchratings.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "squire-patton-boggs",
+    "name": "Squire Patton Boggs",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "Law firm that advised Habitat Energy on the acquisition.",
+    "whyInteresting": "Law firm that advised Habitat Energy on the acquisition.",
+    "sources": [
+      {
+        "title": "Squire Patton Boggs Advises Habitat Energy on Acquisition by ...",
+        "url": "https://www.squirepattonboggs.com/news/squire-patton-boggs-advises-habitat-energy-on-acquisition-by-quinbrook-infrastructure-partners/",
+        "publisher": "squirepattonboggs.com"
+      },
+      {
+        "title": "Squire Patton Boggs Advises Irelands GMC Utilities Group on ...",
+        "url": "https://www.squirepattonboggs.com/news/squire-patton-boggs-advises-irelands-gmc-utilities-group-on-investment-from-towerbrook-capital-partners/",
+        "publisher": "squirepattonboggs.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "terraform-power",
+    "name": "TerraForm Power",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Brookfield Renewable.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Brookfield Renewable.",
+    "sources": [
+      {
+        "title": "About Us - TerraForm Power",
+        "url": "https://www.terraform.com/about-us/",
+        "publisher": "terraform.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "wood",
+    "name": "Wood",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Qualus.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Qualus.",
+    "sources": [
+      {
+        "title": "Qualus Completes its acquisition of Wood's North American ...",
+        "url": "https://www.efcg.com/post/qualus-completes-its-acquisition-of-wood-s-north-american-transmission-and-distribution-engineering",
+        "publisher": "efcg.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "xylem-water-solutions-india-pvt-ltd",
+    "name": "Xylem Water Solutions India Pvt. Ltd.",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Indian subsidiary of Xylem, as per LinkedIn profile of Mohan Waghmare.",
+    "whyInteresting": "Indian subsidiary of Xylem, as per LinkedIn profile of Mohan Waghmare.",
+    "sources": [
+      {
+        "title": "Mohan Waghmare - Xylem Water Solutions India Pvt. Ltd.",
+        "url": "https://in.linkedin.com/in/mohan-waghmare-1991701b3",
+        "publisher": "in.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "yadata",
+    "name": "YaData",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Amir Peleg.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Amir Peleg.",
+    "sources": [
+      {
+        "title": "Leadership - TaKaDu",
+        "url": "https://www.takadu.com/leadership/",
+        "publisher": "takadu.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "zenobe-energy",
+    "name": "Zenobe Energy",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Nicholas Beatty.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Nicholas Beatty.",
+    "sources": [
+      {
+        "title": "Nicholas Beatty - Retired Founder of Zenobe Energy ...",
+        "url": "https://uk.linkedin.com/in/nicholas-beatty-126655141",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "zenobe-energy-2",
+    "name": "Zenobē Energy",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "Energy company founded by Nicholas Beatty",
+    "whyInteresting": "Energy company founded by Nicholas Beatty",
+    "sources": [
+      {
+        "title": "Nicholas Beatty - Retired Founder of Zenobe Energy ...",
+        "url": "https://uk.linkedin.com/in/nicholas-beatty-126655141",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "andrea",
+    "name": "Andrea",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Mentioned in Posts from Andrea Barber - RatedPower.",
+    "whyInteresting": "Mentioned in Posts from Andrea Barber - RatedPower.",
+    "sources": [
+      {
+        "title": "Posts from Andrea Barber - RatedPower",
+        "url": "https://ratedpower.com/blog/author/andrea-barber/",
+        "publisher": "ratedpower.com"
+      }
+    ],
+    "confidence": 0.55
+  },
+  {
+    "id": "co-founder",
+    "name": "Co-Founder",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Mentioned in Posts from Andrea Barber - RatedPower.",
+    "whyInteresting": "Mentioned in Posts from Andrea Barber - RatedPower.",
+    "sources": [
+      {
+        "title": "Posts from Andrea Barber - RatedPower",
+        "url": "https://ratedpower.com/blog/author/andrea-barber/",
+        "publisher": "ratedpower.com"
+      }
+    ],
+    "confidence": 0.55
+  },
+  {
+    "id": "most-influential-spanish-entrepreneurs",
+    "name": "Most Influential Spanish Entrepreneurs",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Mentioned in Posts from Andrea Barber - RatedPower.",
+    "whyInteresting": "Mentioned in Posts from Andrea Barber - RatedPower.",
+    "sources": [
+      {
+        "title": "Posts from Andrea Barber - RatedPower",
+        "url": "https://ratedpower.com/blog/author/andrea-barber/",
+        "publisher": "ratedpower.com"
+      }
+    ],
+    "confidence": 0.55
+  },
+  {
+    "id": "ars-industrialis",
+    "name": "Ars Industrialis",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Jérôme Guillet.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Jérôme Guillet.",
+    "sources": [
+      {
+        "title": "Conference with philosopher Bernard Stiegler | Sciences Po",
+        "url": "https://www.sciencespo.fr/en/news/french-philosopher-bernard-stiegler-to-speak-at-sciences-po/",
+        "publisher": "sciencespo.fr"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "augusta-co-limited",
+    "name": "Augusta & Co Limited",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Mortimer Menzel.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Mortimer Menzel.",
+    "sources": [
+      {
+        "title": "Mortimer Menzel - Managing Partner at Augusta & Co Limited",
+        "url": "https://uk.linkedin.com/in/mortimer-menzel-a7176780",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "brookfield-renewable-partners",
+    "name": "Brookfield Renewable Partners",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Largest renewable energy holding of the fund.",
+    "whyInteresting": "Largest renewable energy holding of the fund.",
+    "sources": [
+      {
+        "title": "factsheet-fp-foresight-global-real-infrastructure-fund-march ...",
+        "url": "https://media.umbraco.io/foresight/n0ahzrke/factsheet-fp-foresight-global-real-infrastructure-fund-march-2023.pdf",
+        "publisher": "media.umbraco.io"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "brookfield-renewable-partners-lp",
+    "name": "Brookfield Renewable Partners LP",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Brookfield Renewable.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Brookfield Renewable.",
+    "sources": [
+      {
+        "title": "AS OF 29-May-2026 Solactive Global Eco Power Infra Index TR",
+        "url": "https://www.solactive.com/downloads/Factsheet_DE000SL0KN13",
+        "publisher": "solactive.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "clearwater",
+    "name": "Clearwater",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "Financial advisor to the shareholders of JSM Group on the sale.",
+    "whyInteresting": "Financial advisor to the shareholders of JSM Group on the sale.",
+    "sources": [
+      {
+        "title": "Clearwater advises the shareholders of JSM Group on its sale ...",
+        "url": "https://www.clearwatercf.com/experience/transactions/clearwater-advises-the-shareholders-of-jsm-group-on-its-sale-to-towerbrook-capital-partners/",
+        "publisher": "clearwatercf.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "connected-kerb",
+    "name": "Connected Kerb",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "Mentioned in association with Envevo Ltd.",
+    "whyInteresting": "Mentioned in association with Envevo Ltd.",
+    "sources": [
+      {
+        "title": "Source - EV - LinkedIn",
+        "url": "https://uk.linkedin.com/company/source-ev",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "constellation",
+    "name": "Constellation",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Announced acquisition of Calpine",
+    "whyInteresting": "Announced acquisition of Calpine",
+    "sources": [
+      {
+        "title": "Constellation to Acquire Calpine",
+        "url": "https://www.constellationenergy.com/news/2025/constellation-to-acquire-calpine-creates-americas-leading-producer-of-clean-and-reliable-energy-to-meet-growing-demand-for-customers-and-communities.html",
+        "publisher": "constellationenergy.com"
+      },
+      {
+        "title": "NEWS: With antitrust settlement, Constellation set to become ...",
+        "url": "https://www.energycentral.com/energy-biz/post/news-with-antitrust-settlement-constellation-set-to-become-largest-us-GK7vFB7EjMnUMyw",
+        "publisher": "energycentral.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "envevo-ltd",
+    "name": "Envevo Ltd",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "Utilities company based in Glasgow East Investment Park, Scotland.",
+    "whyInteresting": "Utilities company based in Glasgow East Investment Park, Scotland.",
+    "sources": [
+      {
+        "title": "Source - EV - LinkedIn",
+        "url": "https://uk.linkedin.com/company/source-ev",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "foresight-global-real-infrastructure-fund",
+    "name": "Foresight Global Real Infrastructure Fund",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Fund managed by Foresight Group, launched on 3 June 2019.",
+    "whyInteresting": "Fund managed by Foresight Group, launched on 3 June 2019.",
+    "sources": [
+      {
+        "title": "factsheet-fp-foresight-global-real-infrastructure-fund-march ...",
+        "url": "https://media.umbraco.io/foresight/n0ahzrke/factsheet-fp-foresight-global-real-infrastructure-fund-march-2023.pdf",
+        "publisher": "media.umbraco.io"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "google",
+    "name": "Google",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for BlackRock Climate Infrastructure.",
+    "whyInteresting": "Discovered through sourced launch enrichment for BlackRock Climate Infrastructure.",
+    "sources": [
+      {
+        "title": "BlackRock's Climate Infrastructure business, Google to partner ...",
+        "url": "https://www.eco-business.com/press-releases/blackrocks-climate-infrastructure-business-google-to-partner-on-accelerating-solar-power-in-taiwan-through-new-green-power/",
+        "publisher": "eco-business.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "infinis",
+    "name": "Infinis",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Renewable energy developer",
+    "whyInteresting": "Renewable energy developer",
+    "sources": [
+      {
+        "title": "Jason McGray - Head of Development at Infinis | LinkedIn",
+        "url": "https://uk.linkedin.com/in/jason-mcgray-65a15a63",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "liftwerx-solutions",
+    "name": "LiftWerx Solutions",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "LiftWerx Solutions is a company involved in product launches, as mentioned in the source.",
+    "whyInteresting": "LiftWerx Solutions is a company involved in product launches, as mentioned in the source.",
+    "sources": [
+      {
+        "title": "LiftWerx Solutions - Overview, News & Similar companies",
+        "url": "https://www.zoominfo.com/c/liftwerx-solutions-inc/395536303",
+        "publisher": "zoominfo.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "mode-labs",
+    "name": "Mode Labs",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Piers Clark.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Piers Clark.",
+    "sources": [
+      {
+        "title": "Piers Clark - Mode Labs | LinkedIn",
+        "url": "https://uk.linkedin.com/in/piersclark",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "national-grid-eso",
+    "name": "National Grid ESO",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Jo-Jo Hubbard.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Jo-Jo Hubbard.",
+    "sources": [
+      {
+        "title": "Jo-Jo Hubbard, Author at Electron",
+        "url": "https://electron.net/author/jo-jo-hubbard/",
+        "publisher": "electron.net"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "octopus-energy-group",
+    "name": "Octopus Energy Group",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Green energy company",
+    "whyInteresting": "Green energy company",
+    "sources": [
+      {
+        "title": "Greg Jackson | Speaking Fee | Booking Agent",
+        "url": "https://www.allamericanspeakers.com/speakers/458981/Greg%E2%80%AFJackson",
+        "publisher": "allamericanspeakers.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "ofgem",
+    "name": "Ofgem",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Jo-Jo Hubbard.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Jo-Jo Hubbard.",
+    "sources": [
+      {
+        "title": "Jo-Jo Hubbard, Author at Electron",
+        "url": "https://electron.net/author/jo-jo-hubbard/",
+        "publisher": "electron.net"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "shell-ventures",
+    "name": "Shell Ventures",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "investor",
+    "description": "Venture arm of Shell that acquired Limejump",
+    "whyInteresting": "Venture arm of Shell that acquired Limejump",
+    "sources": [
+      {
+        "title": "Erik Nygard, CEO LimeJump - Leaders in Cleantech",
+        "url": "https://leadersincleantech.com/erik-nygard-limejump",
+        "publisher": "leadersincleantech.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "sigura-water",
+    "name": "Sigura Water",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Platinum Equity.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Platinum Equity.",
+    "sources": [
+      {
+        "title": "LevFin Wrap - HY still in Labor, Solenis delivered early - 9fin",
+        "url": "https://www.9fin.com/insights/levfin-wrap---hy-still-in-labor-solenis-delivered-early",
+        "publisher": "9fin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "towerbrook-capital-partners",
+    "name": "Towerbrook Capital Partners",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for GMC Group.",
+    "whyInteresting": "Discovered through sourced launch enrichment for GMC Group.",
+    "sources": [
+      {
+        "title": "Squire Patton Boggs Advises Irelands GMC Utilities Group on ...",
+        "url": "https://www.squirepattonboggs.com/news/squire-patton-boggs-advises-irelands-gmc-utilities-group-on-investment-from-towerbrook-capital-partners/",
+        "publisher": "squirepattonboggs.com"
+      },
+      {
+        "title": "Clearwater advises the shareholders of JSM Group on its sale ...",
+        "url": "https://www.clearwatercf.com/experience/transactions/clearwater-advises-the-shareholders-of-jsm-group-on-its-sale-to-towerbrook-capital-partners/",
+        "publisher": "clearwatercf.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "university-of-southampton",
+    "name": "University of Southampton",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Piers Clark.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Piers Clark.",
+    "sources": [
+      {
+        "title": "Piers Clark - Mode Labs | LinkedIn",
+        "url": "https://uk.linkedin.com/in/piersclark",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "watson-farley-williams-llp",
+    "name": "Watson, Farley & Williams LLP",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Martin Lucas.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Martin Lucas.",
+    "sources": [
+      {
+        "title": "Martin Lucas - Partner at Watson, Farley & Williams | LinkedIn",
+        "url": "https://uk.linkedin.com/in/martin-lucas-71595030",
+        "publisher": "uk.linkedin.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "xylem-analytics",
+    "name": "Xylem Analytics",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Xylem.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Xylem.",
+    "sources": [
+      {
+        "title": "Our company ebro",
+        "url": "https://www.ebro.com/en/company/about-us/",
+        "publisher": "ebro.com"
+      }
+    ],
+    "confidence": 0.7
+  },
+  {
+    "id": "xylem-inc",
+    "name": "Xylem Inc.",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Discovered through sourced launch enrichment for Xylem.",
+    "whyInteresting": "Discovered through sourced launch enrichment for Xylem.",
+    "sources": [
+      {
+        "title": "Our company ebro",
+        "url": "https://www.ebro.com/en/company/about-us/",
+        "publisher": "ebro.com"
+      }
+    ],
+    "confidence": 0.7
   }
 ]

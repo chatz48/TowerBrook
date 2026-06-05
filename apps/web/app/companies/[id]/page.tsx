@@ -49,7 +49,7 @@ export default async function CompanyPage({
   return (
     <div className="ee-shell px-3 py-5 sm:px-5">
       <div className="mx-auto max-w-[1300px]">
-        <BackLink href={`/themes/${company.themes[0]}`}>Back to theme</BackLink>
+        <BackLink href="/companies">Back to companies</BackLink>
 
         <header className="ee-panel mt-5 rounded-lg p-5">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
@@ -90,7 +90,7 @@ export default async function CompanyPage({
               </p>
               <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                 <Link
-                  href={company.linkedExperts[0] ? `/experts/${company.linkedExperts[0].expert.id}?company=${company.id}` : `/discover?company=${company.id}`}
+                  href={company.linkedExperts[0] ? `/experts/${company.linkedExperts[0].expert.id}?company=${company.id}` : `/ask?company=${company.id}`}
                   className="ee-button ee-button-primary min-h-8 px-3"
                 >
                   Prepare call
@@ -108,10 +108,10 @@ export default async function CompanyPage({
                   Add to watchlist
                 </WorkspaceActionButton>
                 <Link href={`/graph?focus=company:${company.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
-                  Show path
+                  View relationships
                 </Link>
-                <Link href={`/reports?company=${company.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
-                  Use in report
+                <Link href={`/ask?company=${company.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
+                  Use in Copilot
                 </Link>
               </div>
             </div>
@@ -132,7 +132,7 @@ export default async function CompanyPage({
                 ? `${RELATIONSHIP_LABEL[company.linkedExperts[0].relationship]} ${company.name}.`
                 : "Find a named person before advancing the company."
             }
-            href={company.linkedExperts[0] ? `/experts/${company.linkedExperts[0].expert.id}?company=${company.id}` : `/discover?company=${company.id}`}
+            href={company.linkedExperts[0] ? `/experts/${company.linkedExperts[0].expert.id}?company=${company.id}` : `/ask?company=${company.id}`}
           />
           <DecisionFact
             label="Most important gap"
@@ -144,7 +144,7 @@ export default async function CompanyPage({
                   ? "Establish revenue scale, funding history, and ownership before prioritising outreach."
                   : "Validate customer urgency, budget ownership, margins, and likely acquirers."
             }
-            href={`/discover?company=${company.id}&gap=${encodeURIComponent(!company.ownershipStatus ? "ownership" : !company.sizeBand && !company.funding ? "scale and funding" : "commercial diligence")}`}
+            href={`/ask?company=${company.id}&prompt=${encodeURIComponent(!company.ownershipStatus ? "Verify ownership" : !company.sizeBand && !company.funding ? "Verify scale and funding" : "Prepare commercial diligence questions")}`}
           />
         </section>
 
@@ -180,6 +180,9 @@ export default async function CompanyPage({
                         <td>
                           <Link href={`/experts/${link.expert.id}`} className="ee-link">
                             {link.expert.name}
+                          </Link>
+                          <Link href={`/graph?focus=expert:${link.expert.id}`} className="ml-2 text-[11px] font-semibold text-accent">
+                            View relationships
                           </Link>
                           <div className="mt-0.5 text-[11px] text-ink-faint">
                             {link.expert.headline}
@@ -344,10 +347,10 @@ export default async function CompanyPage({
                 </a>
               ) : null}
               <Link href={`/graph?focus=company:${company.id}`} className="ee-button ee-button-primary mt-3 w-full">
-                Show graph path
+                View relationships
               </Link>
-              <Link href={`/reports?company=${company.id}`} className="ee-button ee-button-secondary mt-3 w-full">
-                Use in report
+              <Link href={`/ask?company=${company.id}`} className="ee-button ee-button-secondary mt-3 w-full">
+                Use in Copilot
               </Link>
             </section>
 

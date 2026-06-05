@@ -39,7 +39,7 @@ export default async function ExpertPage({
   return (
     <div className="ee-shell px-3 py-5 sm:px-5">
       <div className="mx-auto max-w-[1540px]">
-        <BackLink href={`/themes/${expert.themes[0]}`}>Back to experts</BackLink>
+        <BackLink href="/experts">Back to call tray</BackLink>
 
         <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
           <main className="min-w-0 space-y-5">
@@ -98,10 +98,10 @@ export default async function ExpertPage({
                       Add to call tray
                     </WorkspaceActionButton>
                     <Link href={`/graph?focus=expert:${expert.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
-                      Show path
+                      View relationships
                     </Link>
-                    <Link href={`/reports?expert=${expert.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
-                      Use in report
+                    <Link href={`/ask?expert=${expert.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
+                      Use in Copilot
                     </Link>
                   </div>
                 </div>
@@ -155,6 +155,9 @@ export default async function ExpertPage({
                         <td>
                           <Link href={`/companies/${rc.company.id}`} className="ee-link">
                             {rc.company.name}
+                          </Link>
+                          <Link href={`/graph?focus=company:${rc.company.id}`} className="ml-2 text-[11px] font-semibold text-accent">
+                            View relationships
                           </Link>
                           <div className="mt-0.5 text-[11px] text-ink-faint">
                             {rc.company.category}

@@ -20,7 +20,7 @@ const OPTIONS = [
   ...THEMES,
 ];
 
-export default function ThemeSwitcher({
+export default function ThemeNavBar({
   initialFocus,
   initialIncludeTowerBrookEmployees,
 }: {
@@ -33,13 +33,6 @@ export default function ThemeSwitcher({
   const [includeTowerBrookEmployees, setIncludeTowerBrookEmployees] = useState(
     initialIncludeTowerBrookEmployees,
   );
-  const routeValue = pathname.startsWith("/themes/") ? pathname.split("/")[2] : undefined;
-  const routeFocus = isThemeFocus(routeValue) && routeValue !== "all" ? routeValue : undefined;
-  const activeFocus = routeFocus ?? focus;
-
-  useEffect(() => {
-    if (routeFocus && routeFocus !== initialFocus) writeThemeFocusCookie(routeFocus);
-  }, [initialFocus, routeFocus]);
 
   useEffect(() => {
     function syncFocus(event: Event) {
@@ -62,7 +55,7 @@ export default function ThemeSwitcher({
 
   function changeFocus(nextFocus: ThemeFocus) {
     publishThemeFocus(nextFocus);
-
+    writeThemeFocusCookie(nextFocus);
     startTransition(() => {
       if (pathname.startsWith("/themes/")) {
         router.push(nextFocus === "all" ? "/" : `/themes/${nextFocus}`);
@@ -78,25 +71,16 @@ export default function ThemeSwitcher({
   }
 
   return (
-    <nav
-      aria-label="Switch investment theme"
-      className="flex min-w-0 items-center gap-1.5 overflow-x-auto px-4 py-1.5"
-    >
-      <span className="mr-1 shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
-        Theme focus
-      </span>
-      <span className="hidden shrink-0 text-[11px] text-ink-faint lg:inline">
-        Filters counts, call tray, Copilot, and graph
-      </span>
+    <div className="flex items-center gap-1.5" role="group" aria-label="Investment theme selector">
       {OPTIONS.map((theme) => {
-        const active = activeFocus === theme.id;
+        const active = focus === theme.id;
         return (
           <button
             key={theme.id}
             type="button"
             onClick={() => changeFocus(theme.id)}
             aria-pressed={active}
-            className={`flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
+            className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
               active
                 ? "border-accent bg-[#edf5ff] text-accent"
                 : "border-line bg-white text-ink-soft hover:border-line-strong hover:text-ink"
@@ -111,15 +95,16 @@ export default function ThemeSwitcher({
           </button>
         );
       })}
-      <label className="ml-auto flex shrink-0 cursor-pointer items-center gap-2 border-l border-line pl-3 text-[11px] font-medium text-ink-soft">
+      <span className="mx-1 h-5 w-px bg-line" aria-hidden="true" />
+      <label className="flex cursor-pointer items-center gap-1.5 text-[11px] font-medium text-ink-soft whitespace-nowrap">
         <input
           type="checkbox"
           checked={includeTowerBrookEmployees}
           onChange={(event) => changeEmployeeScope(event.target.checked)}
           className="h-3.5 w-3.5 accent-accent"
         />
-        Include TowerBrook employees
+        TB team
       </label>
-    </nav>
+    </div>
   );
 }
