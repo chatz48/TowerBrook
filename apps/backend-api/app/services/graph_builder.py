@@ -292,6 +292,41 @@ async def persist_candidate_extraction(
             }
         )
 
+    for fact in extraction.facts:
+        candidates.append(
+            {
+                "external_id": stable_external_id(
+                    "candidate-fact",
+                    (
+                        f"{fact.subject_type}:{fact.subject_name}:"
+                        f"{fact.fact_type}:{fact.fact_value}:"
+                        f"{source.url or source.id}"
+                    ),
+                ),
+                "candidate_type": "fact",
+                "name": f"{fact.subject_name} — {fact.fact_type}",
+                "theme_ids": [fact.theme_id or theme_id]
+                if fact.theme_id or theme_id
+                else [],
+                "priority": round(fact.confidence * 100, 2),
+                "review_status": "needs_review",
+                "source_ids": [source.id],
+                "job_id": job.id,
+                "payload": {
+                    **fact.model_dump(),
+                    "job_type": job.job_type,
+                    "job_metadata": job.metadata,
+                    "source": {
+                        "id": source.id,
+                        "title": source.title,
+                        "url": source.url,
+                        "publisher": source.publisher,
+                    },
+                    "review_gated": True,
+                },
+            }
+        )
+
     saved_candidates = repo.upsert_discovery_candidates(candidates)
     match_candidates = []
     for candidate in saved_candidates:
@@ -352,6 +387,9 @@ async def persist_candidate_extraction(
         ),
         "relationship_candidates": sum(
             candidate["candidate_type"] == "relationship" for candidate in saved_candidates
+        ),
+        "fact_candidates": sum(
+            candidate["candidate_type"] == "fact" for candidate in saved_candidates
         ),
         "entity_match_candidates": len(saved_matches),
         "chunks_created": len(chunk_rows),
