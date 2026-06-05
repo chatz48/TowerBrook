@@ -103,8 +103,14 @@ type AskResponse = {
   tool_calls?: unknown[];
 };
 
+type ChatTurn = {
+  role?: string;
+  content?: string;
+};
+
 type AskRequest = {
   question?: string;
+  chatHistory?: ChatTurn[];
   filters?: {
     objective?: string;
     theme?: string;
@@ -154,9 +160,11 @@ export async function POST(request: Request) {
       return Response.json({ error: "Ask a question first." }, { status: 400 });
     }
 
+    const chatHistory = normalizeChatHistory(body.chatHistory);
     const pageContext = normalizePageContext(body.pageContext);
-    const baseline = await buildStructuredAnswer(question, body.filters ?? {}, pageContext);
-    const agentic = await maybeAskIntelligenceApi(question, body.filters ?? {}, pageContext);
+    const contextualQuestion = questionWithChatHistory(question, chatHistory);
+    const baseline = await buildStructuredAnswer(contextualQuestion, body.filters ?? {}, pageContext, question);
+    const agentic = await maybeAskIntelligenceApi(question, body.filters ?? {}, pageContext, chatHistory);
     const enrichedBaseline = agentic
       ? {
           ...baseline,
@@ -189,11 +197,15 @@ async function maybeAskIntelligenceApi(
   question: string,
   filters: NonNullable<AskRequest["filters"]>,
   pageContext?: PageContext,
+  chatHistory: ChatTurn[] = [],
 ): Promise<{ answer: string; tool_calls: unknown[] } | null> {
   if (!hasBackendApi()) return null;
   try {
     const contextBlock = pageContext
       ? `\n\nCurrent page context:\nTitle: ${pageContext.title ?? "Untitled"}\nPath: ${pageContext.pathname ?? ""}\nHeadings: ${(pageContext.headings ?? []).join(" | ")}\nSelected text: ${pageContext.selectedText ?? ""}\nVisible text excerpt: ${pageContext.visibleText ?? ""}`
+      : "";
+    const historyBlock = chatHistory.length
+      ? `\n\nConversation so far:\n${chatHistory.map((turn) => `${turn.role === "assistant" ? "Assistant" : "User"}: ${turn.content}`).join("\n")}`
       : "";
     const employeeScopeInstruction =
       filters.includeTowerBrookEmployees === true
@@ -202,7 +214,7 @@ async function maybeAskIntelligenceApi(
     return await callBackendApi<{ answer: string; tool_calls: unknown[] }>("/chat", {
       method: "POST",
       body: JSON.stringify({
-        message: `${question}${contextBlock}${employeeScopeInstruction}`,
+        message: `${question}${historyBlock}${contextBlock}${employeeScopeInstruction}`,
         theme_id: filters.theme && filters.theme !== "all" ? filters.theme : undefined,
         tools: toolsForQuestion(question),
       }),
@@ -247,6 +259,7 @@ async function buildStructuredAnswer(
   question: string,
   filters: NonNullable<AskRequest["filters"]>,
   pageContext?: PageContext,
+  displayQuestion = question,
 ): Promise<AskResponse> {
   const pageContextText = pageContextSearchText(pageContext);
   const words = tokenize(`${question} ${pageContextText}`);
@@ -469,7 +482,7 @@ async function buildStructuredAnswer(
     answer_summary: summaryFor(objective, ranked_experts, ranked_companies),
     generated_at: new Date().toISOString(),
     input_context: {
-      question,
+      question: displayQuestion,
       objective,
       theme: theme?.name ?? "All themes",
       geography: filters.geography ?? "Global / Europe priority",
@@ -551,6 +564,26 @@ async function buildStructuredAnswer(
     grounded: false,
     model: "deterministic-fallback",
   };
+}
+
+function normalizeChatHistory(history: ChatTurn[] | undefined): ChatTurn[] {
+  if (!Array.isArray(history)) return [];
+  return history
+    .map((turn) => ({
+      role: turn.role === "assistant" ? "assistant" : "user",
+      content: typeof turn.content === "string" ? turn.content.trim() : "",
+    }))
+    .filter((turn) => turn.content.length > 0)
+    .slice(-8);
+}
+
+function questionWithChatHistory(question: string, history: ChatTurn[]): string {
+  if (!history.length) return question;
+  const context = history
+    .slice(-6)
+    .map((turn) => `${turn.role === "assistant" ? "Assistant" : "User"}: ${turn.content}`)
+    .join("\n");
+  return `${question}\n\nUse this prior conversation only to resolve follow-up references; prioritize the latest user question.\n${context}`;
 }
 
 function normalizeModelResponse(value: unknown, baseline: AskResponse): AskResponse {

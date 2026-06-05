@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import type { AskResponse, CopilotFilters, SourceRecord } from "./types";
+import type { AskResponse, ChatTurn, CopilotFilters, SourceRecord } from "./types";
 import {
   isThemeFocus,
   publishThemeFocus,
@@ -18,6 +18,7 @@ interface DiscoveryData {
 const DISCOVERY_CANDIDATES = (discoveryCandidatesRaw as DiscoveryData).expert_candidates ?? [];
 
 type CopilotTab = "ask" | "queue" | "notes";
+type ConversationMessage = { id: string; role: "user" | "assistant"; content: string; answer?: AskResponse };
 
 const OBJECTIVES = [
   { label: "Find experts", value: "Find experts" },
@@ -93,25 +94,40 @@ export default function ResearchWorkspace({
   const [question, setQuestion] = useState(startingQuestion);
   const [filters, setFilters] = useState<CopilotFilters>(startingFilters);
   const [answer, setAnswer] = useState<AskResponse | null>(null);
+  const [conversation, setConversation] = useState<ConversationMessage[]>([]);
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingQuestion, setLoadingQuestion] = useState(startingQuestion);
+  const [progressStep, setProgressStep] = useState(0);
   const [error, setError] = useState("");
 
   async function submit(nextQuestion = question, nextFilters = filters) {
     const cleanQuestion = nextQuestion.trim();
-    if (!cleanQuestion) return;
-    setQuestion(cleanQuestion);
+    if (!cleanQuestion || loading) return;
+    const userMessage: ConversationMessage = {
+      id: makeMessageId("user"),
+      role: "user",
+      content: cleanQuestion,
+    };
+    const chatHistory = toChatHistory(conversation);
+    setQuestion("");
+    setLoadingQuestion(cleanQuestion);
+    setConversation((current) => [...current, userMessage]);
     setLoading(true);
+    setProgressStep(0);
     setError("");
     try {
-      const res = await fetch("/api/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: cleanQuestion, filters: nextFilters }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Request failed");
+      const data = await requestAnswer(cleanQuestion, nextFilters, chatHistory);
       setAnswer(data);
+      setConversation((current) => [
+        ...current,
+        {
+          id: makeMessageId("assistant"),
+          role: "assistant",
+          content: data.answer_summary,
+          answer: data,
+        },
+      ]);
       setSelectedSourceId(data.sources_used?.[0]?.source_id ?? null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
@@ -124,16 +140,25 @@ export default function ResearchWorkspace({
     let cancelled = false;
 
     async function loadInitialAnswer() {
+      setLoadingQuestion(startingQuestion);
+      setProgressStep(0);
       try {
-        const res = await fetch("/api/ask", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ question: startingQuestion, filters: startingFilters }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error ?? "Request failed");
+        const data = await requestAnswer(startingQuestion, startingFilters, []);
         if (!cancelled) {
           setAnswer(data);
+          setConversation([
+            {
+              id: makeMessageId("user"),
+              role: "user",
+              content: startingQuestion,
+            },
+            {
+              id: makeMessageId("assistant"),
+              role: "assistant",
+              content: data.answer_summary,
+              answer: data,
+            },
+          ]);
           setSelectedSourceId(data.sources_used?.[0]?.source_id ?? null);
         }
       } catch (e) {
@@ -150,6 +175,14 @@ export default function ResearchWorkspace({
       cancelled = true;
     };
   }, [startingFilters, startingQuestion]);
+
+  useEffect(() => {
+    if (!loading) return;
+    const timers = [900, 2400, 5200].map((delay, index) =>
+      window.setTimeout(() => setProgressStep(index + 1), delay),
+    );
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [loading, loadingQuestion]);
 
   const selectedSource = useMemo(() => {
     if (!answer?.sources_used.length) return null;
@@ -179,7 +212,7 @@ export default function ResearchWorkspace({
           filters={filters}
           resetFilters={startingFilters}
           onFiltersChange={setFilters}
-          onRun={(nextFilters) => submit(question, nextFilters)}
+          onRun={(nextFilters) => submit(question || answer?.input_context.question || loadingQuestion, nextFilters)}
         />
 
         <main className="min-w-0 border-x border-[#dfe3eb] bg-white">
@@ -253,26 +286,17 @@ export default function ResearchWorkspace({
 
           {tab === "ask" ? (
             <div className="space-y-3 px-5 py-4">
-              <MessageFrame question={answer?.input_context.question ?? question} />
+              <ConversationThread messages={conversation} loading={loading} loadingQuestion={loadingQuestion} progressStep={progressStep} onSourceSelect={setSelectedSourceId} onPrompt={(prompt) => submit(prompt)} />
               {error ? (
                 <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
                   {error}
                 </div>
               ) : null}
-              {answer ? (
-                <StructuredAnswer
-                  answer={answer}
-                  onSourceSelect={setSelectedSourceId}
-                  onPrompt={(prompt) => submit(prompt)}
-                />
-              ) : (
-                <LoadingBlocks />
-              )}
+              {!answer && loading ? <LoadingBlocks /> : null}
             </div>
           ) : tab === "queue" ? (
             <ResearchQueueTab
               candidates={queueCandidates}
-              theme={initialTheme}
               onPrompt={(prompt) => {
                 setTab("ask");
                 submit(prompt);
@@ -292,6 +316,28 @@ export default function ResearchWorkspace({
       </div>
     </div>
   );
+}
+
+async function requestAnswer(question: string, filters: CopilotFilters, chatHistory: ChatTurn[]) {
+  const res = await fetch("/api/ask", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question, filters, chatHistory }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error ?? "Request failed");
+  return data as AskResponse;
+}
+
+function toChatHistory(messages: ConversationMessage[]): ChatTurn[] {
+  return messages
+    .map((message) => ({ role: message.role, content: message.content }))
+    .filter((message) => message.content.trim().length > 0)
+    .slice(-8);
+}
+
+function makeMessageId(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 function SessionRail({
@@ -753,19 +799,77 @@ function EvidenceInspector({
   );
 }
 
-function MessageFrame({ question }: { question: string }) {
+function ConversationThread({
+  messages,
+  loading,
+  loadingQuestion,
+  progressStep,
+  onSourceSelect,
+  onPrompt,
+}: {
+  messages: ConversationMessage[];
+  loading: boolean;
+  loadingQuestion: string;
+  progressStep: number;
+  onSourceSelect: (sourceId: string) => void;
+  onPrompt: (prompt: string) => void;
+}) {
+  const steps = [
+    "Reading the conversation and current filters",
+    "Searching the sourced expert and company graph",
+    "Checking evidence and relationship paths",
+    "Composing a follow-up-ready answer",
+  ];
+
   return (
-    <div className="space-y-3">
-      <div className="flex gap-3">
-        <Avatar label="AB" />
-        <div>
-          <div className="text-xs">
-            <span className="font-semibold">You</span>
-            <span className="ml-2 text-[#667085]">Current question</span>
+    <div className="space-y-4">
+      {messages.map((message) =>
+        message.role === "user" ? (
+          <div key={message.id} className="flex gap-3">
+            <Avatar label="AB" />
+            <div className="min-w-0 rounded-2xl rounded-tl-sm border border-[#dfe3eb] bg-[#fbfcfe] px-3 py-2">
+              <div className="text-xs">
+                <span className="font-semibold">You</span>
+                <span className="ml-2 text-[#667085]">Follow-up</span>
+              </div>
+              <p className="mt-1 whitespace-pre-wrap text-sm text-[#344054]">{message.content}</p>
+            </div>
           </div>
-          <p className="mt-1 text-sm text-[#344054]">{question}</p>
+        ) : message.answer ? (
+          <StructuredAnswer
+            key={message.id}
+            answer={message.answer}
+            onSourceSelect={onSourceSelect}
+            onPrompt={onPrompt}
+          />
+        ) : null,
+      )}
+      {loading ? (
+        <div className="flex gap-3">
+          <Avatar label="EE" active />
+          <div className="min-w-0 flex-1 rounded-2xl rounded-tl-sm border border-[#cfe0ff] bg-[#f4f8ff] px-3 py-3">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="font-semibold text-[#0b5bd3]">Expert Engine is working</span>
+              <span className="text-[#667085]">{loadingQuestion}</span>
+            </div>
+            <div className="mt-3 space-y-2">
+              {steps.map((step, index) => (
+                <div key={step} className="flex items-center gap-2 text-xs text-[#344054]">
+                  <span
+                    className={`h-2 w-2 rounded-full ${
+                      index <= progressStep ? "bg-[#0b5bd3]" : "bg-[#cfd6e2]"
+                    }`}
+                  />
+                  <span className={index === progressStep ? "font-medium" : "text-[#667085]"}>{step}</span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-[11px] leading-relaxed text-[#667085]">
+              You can keep reviewing the previous answer and source panel while this runs. The next reply will stay in this thread.
+            </p>
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }
@@ -920,11 +1024,9 @@ function formatTime(value: string) {
 
 function ResearchQueueTab({
   candidates,
-  theme,
   onPrompt,
 }: {
   candidates: ExpertDiscoveryCandidate[];
-  theme: ThemeFocus;
   onPrompt: (prompt: string) => void;
 }) {
   const unmatched = candidates.filter(
