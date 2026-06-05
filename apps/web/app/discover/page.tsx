@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   getAdvisorExpertGaps,
   getDerivedCompanyCandidates,
@@ -22,6 +23,10 @@ import type { CompanyCategory, ExpertType, ThemeId } from "@/lib/types";
 import { publishThemeFocus, type ThemeFocus } from "@/lib/theme-focus";
 import { matchesThemeFocus } from "@/lib/theme-focus";
 import { useThemeFocusClient } from "@/lib/theme-focus-client";
+import {
+  INCLUDE_TOWERBROOK_EMPLOYEES_EVENT,
+  readIncludeTowerBrookEmployeesCookie,
+} from "@/lib/employee-scope";
 import { Badge, ThemeTag } from "@/app/components/ui";
 
 interface ResearchJob {
@@ -66,25 +71,31 @@ const COMPANY_CATEGORY_FILTERS: CompanyCategory[] = [
 const QUEUES: { id: QueueView; label: string; description: string }[] = [
   {
     id: "experts",
-    label: "Experts",
+    label: "People to verify",
     description: "People to call or verify from public deal and company evidence.",
   },
   {
     id: "companies",
-    label: "Companies",
+    label: "Companies to validate",
     description: "Targets and ecosystem firms derived from expert connections.",
   },
   {
     id: "gaps",
-    label: "Missing names",
+    label: "Advisor names to find",
     description: "Advisor organizations where the named person is still missing.",
   },
 ];
 
 export default function DiscoverPage() {
   const themeId = useThemeFocusClient();
+  const searchParams = useSearchParams();
   const [view, setView] = useState<QueueView>("experts");
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(searchParams.get("gap") ?? searchParams.get("company") ?? "");
+  const includeTowerBrookEmployees = useSyncExternalStore(
+    subscribeIncludeTowerBrookEmployees,
+    readIncludeTowerBrookEmployeesCookie,
+    () => false,
+  );
   const [expertType, setExpertType] = useState<ExpertType | "all">("all");
   const [companyCategory, setCompanyCategory] = useState<CompanyCategory | "all">("all");
   const [selectedExpertId, setSelectedExpertId] = useState(EXPERTS[0]?.candidate_id ?? "");
@@ -99,6 +110,13 @@ export default function DiscoverPage() {
   const filteredExperts = useMemo(
     () =>
       EXPERTS.filter((expert) => matchesThemeFocus(expert.themes, themeId))
+        .filter(
+          (expert) =>
+            includeTowerBrookEmployees ||
+            !expert.organizations.some((organization) =>
+              organization.toLowerCase().includes("towerbrook"),
+            ),
+        )
         .filter((expert) => expertType === "all" || expert.expert_type === expertType)
         .filter((expert) => {
           if (!normalizedQuery) return true;
@@ -115,7 +133,7 @@ export default function DiscoverPage() {
             .includes(normalizedQuery);
         })
         .sort((a, b) => b.scores.research_priority - a.scores.research_priority),
-    [expertType, normalizedQuery, themeId],
+    [expertType, includeTowerBrookEmployees, normalizedQuery, themeId],
   );
 
   const filteredCompanies = useMemo(
@@ -194,7 +212,7 @@ export default function DiscoverPage() {
         body: JSON.stringify(request),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Discovery failed");
+      if (!res.ok) throw new Error(data.error ?? "Live enrichment is unavailable.");
       setJob(data.job);
     } catch (error) {
       setJobError(error instanceof Error ? error.message : "Discovery failed");
@@ -208,10 +226,10 @@ export default function DiscoverPage() {
       <div className="mx-auto max-w-[1580px]">
         <header className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="text-[26px] font-semibold tracking-tight">Discover</h1>
+            <h1 className="text-[26px] font-semibold tracking-tight">Research Queue</h1>
             <p className="mt-2 max-w-4xl text-[13px] leading-relaxed text-ink-soft">
-              Start from three investment themes, review the discovered people, derive company
-              opportunities from their relationships, and turn gaps into research jobs or call prep.
+              Review people to verify, companies to validate, and advisor names to find before
+              they become call-ready experts or memo-ready targets.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -226,7 +244,7 @@ export default function DiscoverPage() {
               disabled={loadingJob || !selectedLead}
               className="ee-button ee-button-primary disabled:opacity-50"
             >
-              {loadingJob ? "Creating job..." : "Enrich selected lead"}
+              {loadingJob ? "Checking..." : "Run live enrichment"}
             </button>
           </div>
         </header>
@@ -358,8 +376,8 @@ export default function DiscoverPage() {
             <section className="ee-panel rounded-lg p-5">
               <div className="ee-label text-ink">Job status</div>
               <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">
-                Use enrichment when a selected lead needs identity resolution, more sources, or a
-                named person behind an advisor organization.
+                Live enrichment checks public sources for identity resolution, more evidence, or a
+                named person behind an advisor organization. Static queues remain usable in demo mode.
               </p>
               {jobError ? (
                 <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-[12px] leading-relaxed text-amber-800">
@@ -1071,3 +1089,8 @@ const THEME_LABEL: Record<ThemeFocus, string> = {
   "grid-infrastructure": "Grid Infrastructure",
   "smart-water": "Smart Water",
 };
+
+function subscribeIncludeTowerBrookEmployees(onStoreChange: () => void) {
+  window.addEventListener(INCLUDE_TOWERBROOK_EMPLOYEES_EVENT, onStoreChange);
+  return () => window.removeEventListener(INCLUDE_TOWERBROOK_EMPLOYEES_EVENT, onStoreChange);
+}

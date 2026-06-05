@@ -101,7 +101,7 @@ export default async function DealsPage() {
                       <td className="max-w-[220px] text-[12px] leading-relaxed text-ink-soft">
                         <div>
                           {deal.missingFacts[0]
-                            ? `Find ${deal.missingFacts[0].replaceAll("_", " ")}`
+                            ? `Chase ${deal.missingFacts[0].replaceAll("_", " ")}`
                             : "Review completed scorecard"}
                         </div>
                         <Link href={`/deals/${deal.id}`} className="ee-link mt-1 inline-flex text-[11px]">

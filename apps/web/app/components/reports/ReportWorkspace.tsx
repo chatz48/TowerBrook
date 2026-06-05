@@ -1,8 +1,22 @@
 import Link from "next/link";
 import type { ReportModel, ReportSection, ReportSource } from "@/lib/report";
+import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import ReportExportControls from "./ReportExportControls";
 
-export default function ReportWorkspace({ report }: { report: ReportModel }) {
+interface FocusContext {
+  kind: "expert" | "company";
+  name: string;
+  href: string;
+  detail: string;
+}
+
+export default function ReportWorkspace({
+  report,
+  focusContext,
+}: {
+  report: ReportModel;
+  focusContext?: FocusContext;
+}) {
   return (
     <div className="ee-shell px-3 py-5 sm:px-5">
       <div className="mx-auto max-w-[1540px]">
@@ -29,6 +43,37 @@ export default function ReportWorkspace({ report }: { report: ReportModel }) {
             <ReportExportControls markdown={report.markdown} fileName={report.reportName} />
           </div>
         </header>
+
+        {focusContext ? (
+          <section className="mt-5 rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div>
+                <div className="ee-label text-blue-700">
+                  Selected {focusContext.kind === "expert" ? "expert" : "company"} for this memo
+                </div>
+                <Link href={focusContext.href} className="mt-1 inline-flex text-[15px] font-semibold text-blue-800 hover:underline">
+                  {focusContext.name}
+                </Link>
+                <p className="mt-1 max-w-4xl text-[12px] leading-relaxed text-blue-900">
+                  {focusContext.detail}
+                </p>
+              </div>
+              <WorkspaceActionButton
+                item={{
+                  id: `${focusContext.kind}:${focusContext.name}`,
+                  kind: "memo",
+                  name: focusContext.name,
+                  sub: focusContext.detail,
+                  href: focusContext.href,
+                  status: "selected for memo",
+                }}
+                className="ee-button ee-button-secondary shrink-0"
+              >
+                Add to memo basket
+              </WorkspaceActionButton>
+            </div>
+          </section>
+        ) : null}
 
         <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
           <main className="space-y-5">

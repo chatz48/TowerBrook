@@ -12,7 +12,13 @@ export interface SearchItem {
   keywords: string;
 }
 
-export default function SearchBox({ index }: { index: SearchItem[] }) {
+export default function SearchBox({
+  index,
+  scopeLabel = "All experts and companies",
+}: {
+  index: SearchItem[];
+  scopeLabel?: string;
+}) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -43,7 +49,7 @@ export default function SearchBox({ index }: { index: SearchItem[] }) {
           }}
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
-          placeholder="Search a person or company — e.g. “solar”, “leak detection”, “Piclo”…"
+          placeholder="Search any person or company - e.g. solar, leak detection, Piclo"
           className="flex-1 bg-transparent outline-none text-[15px] placeholder:text-ink-faint"
         />
         {q ? (
@@ -51,6 +57,10 @@ export default function SearchBox({ index }: { index: SearchItem[] }) {
             {results.length} match{results.length === 1 ? "" : "es"}
           </kbd>
         ) : null}
+      </div>
+      <div className="mt-2 flex items-center justify-between gap-3 text-[11px] text-ink-faint">
+        <span>Search scope: {scopeLabel}</span>
+        <span>{index.length} records</span>
       </div>
 
       {open && results.length > 0 ? (
@@ -70,6 +80,10 @@ export default function SearchBox({ index }: { index: SearchItem[] }) {
               </span>
             </button>
           ))}
+        </div>
+      ) : open && q.trim() ? (
+        <div className="absolute z-20 mt-2 w-full rounded-xl border border-line bg-card p-4 text-sm text-ink-soft shadow-lg">
+          No matches in {scopeLabel}. Try a company, person, technology, advisor, or theme term.
         </div>
       ) : null}
     </div>

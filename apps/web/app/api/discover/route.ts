@@ -50,7 +50,9 @@ export async function POST(request: Request) {
     if (!job) {
       return Response.json(
         {
-          error: "Set BACKEND_API_URL to create live discovery jobs.",
+          error:
+            "Live enrichment is not connected in this demo. You can still review the static coverage queue and use the suggested searches.",
+          demoMode: true,
           candidates: [],
         },
         { status: 503 },

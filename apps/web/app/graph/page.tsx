@@ -63,11 +63,17 @@ function buildSourceRegister(experts: Expert[], companies: Company[], deals: Dea
   return { add, sources };
 }
 
-export default async function GraphPage() {
+export default async function GraphPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const [themeFocus, includeTowerBrookEmployees] = await Promise.all([
     getThemeFocus(),
     getIncludeTowerBrookEmployees(),
   ]);
+  const params = (await searchParams) ?? {};
+  const focusParam = singleParam(params.focus);
   const experts = filterTowerBrookEmployees(getExperts(), includeTowerBrookEmployees);
   const companies = getCompanies();
   const deals = await listDeals();
@@ -210,7 +216,13 @@ export default async function GraphPage() {
 
   const edges = [...expertCompanyEdges, ...dealEdges];
 
+  const requestedSelected =
+    focusParam && isValidFocusKey(focusParam, expertNodes, companyNodes, dealNodes)
+      ? focusParam
+      : undefined;
+
   const defaultSelected =
+    requestedSelected ??
     companyNodes
       .filter((company) => matchesThemeFocus(company.themes, themeFocus))
       .map((company) => ({
@@ -237,7 +249,7 @@ export default async function GraphPage() {
 
   return (
     <GraphExplorer
-      key={themeFocus}
+      key={`${themeFocus}:${defaultSelected}`}
       themes={themes}
       experts={expertNodes}
       companies={companyNodes}
@@ -248,4 +260,17 @@ export default async function GraphPage() {
       defaultSelected={defaultSelected}
     />
   );
+}
+
+function singleParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function isValidFocusKey(
+  value: string,
+  experts: ExplorerExpertNode[],
+  companies: ExplorerCompanyNode[],
+  deals: ExplorerDealNode[],
+) {
+  return [...experts, ...companies, ...deals].some((node) => node.key === value);
 }

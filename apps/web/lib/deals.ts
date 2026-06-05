@@ -26,6 +26,8 @@ const REQUIRED_FACTS = [
   "investment_relevance",
 ];
 
+const REQUIRED_FACT_LABELS = new Set(REQUIRED_FACTS);
+
 export const DEAL_TYPE_LABEL: Record<DealType, string> = {
   acquisition: "Acquisition",
   "minority-investment": "Minority investment",
@@ -128,6 +130,10 @@ export function scoreDeal(deal: Deal): DealWithScore {
     advisorCount,
     lawyerCount,
   };
+}
+
+export function isRequiredDealFact(fact: string): boolean {
+  return REQUIRED_FACT_LABELS.has(fact);
 }
 
 export function averageConfidence(facts: DealFact[]): number {
@@ -267,20 +273,20 @@ function hostFromUrl(url: string): string {
 
 function inferTarget(text: string, title: string): string | undefined {
   const patterns = [
-    /acquires?\s+([A-Z][A-Za-z0-9&.,' -]{2,80}?)(?:\s+from|\s+for|\.|,|$)/,
-    /acquisition of\s+([A-Z][A-Za-z0-9&.,' -]{2,80}?)(?:\s+from|\s+for|\.|,|$)/,
-    /invest(?:s|ed)? in\s+([A-Z][A-Za-z0-9&.,' -]{2,80}?)(?:\s+from|\s+for|\.|,|$)/,
+    /\b(?:acquires?|acquired|has acquired)\s+([A-Z][A-Za-z0-9&.,' -]{2,80}?)(?:\s+from|\s+for|\.|,|$)/i,
+    /\bacquisition of\s+([A-Z][A-Za-z0-9&.,' -]{2,80}?)(?:\s+from|\s+for|\.|,|$)/i,
+    /\binvest(?:s|ed)? in\s+([A-Z][A-Za-z0-9&.,' -]{2,80}?)(?:\s+from|\s+for|\.|,|$)/i,
   ];
   for (const pattern of patterns) {
     const match = text.match(pattern);
     if (match?.[1]) return cleanEntity(match[1]);
   }
-  const titleMatch = title.match(/(?:acquires?|invests in)\s+(.+)/i);
+  const titleMatch = title.match(/(?:acquires?|acquired|has acquired|invests in)\s+(.+)/i);
   return titleMatch?.[1] ? cleanEntity(titleMatch[1]) : undefined;
 }
 
 function inferBuyer(text: string): string | undefined {
-  const match = text.match(/([A-Z][A-Za-z0-9&.,' -]{2,80}?)\s+(?:acquires?|invests?|announces acquisition|has acquired)/);
+  const match = text.match(/\b([A-Z][A-Za-z0-9&.,' -]{2,80}?)\s+(?:acquires?|acquired|invests?|announces acquisition|has acquired)\b/i);
   return match?.[1] ? cleanEntity(match[1]) : undefined;
 }
 
@@ -313,11 +319,11 @@ function inferEconomics(text: string): string[] {
 
 function inferAdvisorFacts(text: string, sourceId: string): DealFact[] {
   const advisors: DealFact[] = [];
-  const advisorMatch = text.match(/([A-Z][A-Za-z&.,' -]{2,80}?)\s+(?:advised|acted as financial advisor|served as financial advisor)/);
+  const advisorMatch = text.match(/(?:^|[.!?]\s+)([A-Z][A-Za-z&.,' -]{2,80}?)\s+(?:advised|acted as financial advisor|served as financial advisor)/);
   if (advisorMatch?.[1]) {
     advisors.push(fact("submitted-financial-advisor", "submitted-deal", "financial_advisor", cleanEntity(advisorMatch[1]), sourceId, text));
   }
-  const legalMatch = text.match(/([A-Z][A-Za-z&.,' -]{2,80}?)\s+(?:acted as legal counsel|served as legal counsel|provided legal counsel)/);
+  const legalMatch = text.match(/(?:^|[.!?]\s+)([A-Z][A-Za-z&.,' -]{2,80}?)\s+(?:acted as legal counsel|served as legal counsel|provided legal counsel)/);
   if (legalMatch?.[1]) {
     advisors.push(fact("submitted-legal-counsel", "submitted-deal", "legal_counsel", cleanEntity(legalMatch[1]), sourceId, text));
   }

@@ -23,6 +23,7 @@ import {
   ThemeTag,
 } from "@/app/components/ui";
 import { CallPrepChecklist } from "@/app/components/InvestorWorkflow";
+import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
 
 export function generateStaticParams() {
@@ -52,7 +53,7 @@ export default async function CompanyPage({
 
         <header className="ee-panel mt-5 rounded-lg p-5">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-            <div>
+            <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-[28px] font-semibold tracking-tight">{company.name}</h1>
                 <Badge className={COMPANY_CATEGORY_STYLE[company.category]}>
@@ -77,7 +78,7 @@ export default async function CompanyPage({
                 ))}
               </div>
             </div>
-            <div className="min-w-[360px] rounded-lg border border-line bg-[#fbfcff] p-4 max-lg:min-w-0">
+            <div className="w-full min-w-0 rounded-lg border border-line bg-[#fbfcff] p-4 lg:w-auto lg:min-w-[360px]">
               <div className="ee-label text-ink">Next action</div>
               <div className="mt-2 text-[15px] font-semibold text-ink">
                 Validate {company.name} through named people evidence
@@ -87,17 +88,29 @@ export default async function CompanyPage({
                 {" "}{company.sources.length} source record{company.sources.length === 1 ? "" : "s"},
                 {" "}and {company.ownershipStatus ? OWNERSHIP_LABEL[company.ownershipStatus] : "ownership to verify"}.
               </p>
-              <div className="mt-4 grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+              <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                 <Link
-                  href={company.linkedExperts[0] ? `/experts/${company.linkedExperts[0].expert.id}` : "/discover"}
+                  href={company.linkedExperts[0] ? `/experts/${company.linkedExperts[0].expert.id}?company=${company.id}` : `/discover?company=${company.id}`}
                   className="ee-button ee-button-primary min-h-8 px-3"
                 >
                   Prepare call
                 </Link>
-                <Link href="/graph" className="ee-button ee-button-secondary min-h-8 px-3">
+                <WorkspaceActionButton
+                  item={{
+                    id: company.id,
+                    kind: "target",
+                    name: company.name,
+                    sub: company.whyInteresting ?? company.description,
+                    href: `/companies/${company.id}`,
+                    theme: company.themes[0],
+                  }}
+                >
+                  Add to watchlist
+                </WorkspaceActionButton>
+                <Link href={`/graph?focus=company:${company.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
                   Show path
                 </Link>
-                <Link href="/reports" className="ee-button ee-button-secondary min-h-8 px-3">
+                <Link href={`/reports?company=${company.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
                   Use in report
                 </Link>
               </div>
@@ -119,7 +132,7 @@ export default async function CompanyPage({
                 ? `${RELATIONSHIP_LABEL[company.linkedExperts[0].relationship]} ${company.name}.`
                 : "Find a named person before advancing the company."
             }
-            href={company.linkedExperts[0] ? `/experts/${company.linkedExperts[0].expert.id}` : "/discover"}
+            href={company.linkedExperts[0] ? `/experts/${company.linkedExperts[0].expert.id}?company=${company.id}` : `/discover?company=${company.id}`}
           />
           <DecisionFact
             label="Most important gap"
@@ -131,12 +144,12 @@ export default async function CompanyPage({
                   ? "Establish revenue scale, funding history, and ownership before prioritising outreach."
                   : "Validate customer urgency, budget ownership, margins, and likely acquirers."
             }
-            href="/discover"
+            href={`/discover?company=${company.id}&gap=${encodeURIComponent(!company.ownershipStatus ? "ownership" : !company.sizeBand && !company.funding ? "scale and funding" : "commercial diligence")}`}
           />
         </section>
 
         <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <main className="space-y-5">
+          <main className="min-w-0 space-y-5">
             {company.whyInteresting ? (
               <section className="ee-panel rounded-lg p-5">
                 <div className="ee-label text-ink">Investment relevance</div>
@@ -150,43 +163,45 @@ export default async function CompanyPage({
               <div className="border-b border-line px-4 py-3">
                 <h2 className="ee-label text-ink">Experts connected to this company ({company.expertCount})</h2>
               </div>
-              <table className="ee-table">
-                <thead>
-                  <tr>
-                    <th>Expert</th>
-                    <th>Archetype</th>
-                    <th>Relationship</th>
-                    <th>Evidence</th>
-                    <th>Evidence coverage</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {company.linkedExperts.map((link) => (
-                    <tr key={`${link.expert.id}-${link.relationship}`}>
-                      <td>
-                        <Link href={`/experts/${link.expert.id}`} className="ee-link">
-                          {link.expert.name}
-                        </Link>
-                        <div className="mt-0.5 text-[11px] text-ink-faint">
-                          {link.expert.headline}
-                        </div>
-                      </td>
-                      <td>
-                        <Badge className={EXPERT_TYPE_STYLE[link.expert.type]}>
-                          {EXPERT_TYPE_LABEL[link.expert.type]}
-                        </Badge>
-                      </td>
-                      <td>{RELATIONSHIP_LABEL[link.relationship]}</td>
-                      <td className="max-w-[340px] text-[12px] text-ink-soft">
-                        {link.note ?? link.expert.whyRelevant}
-                      </td>
-                      <td className="text-[11px] text-ink-soft">
-                        {link.expert.sources.length} expert source{link.expert.sources.length === 1 ? "" : "s"}
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="ee-table min-w-[860px]">
+                  <thead>
+                    <tr>
+                      <th>Expert</th>
+                      <th>Archetype</th>
+                      <th>Relationship</th>
+                      <th>Evidence</th>
+                      <th>Evidence coverage</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {company.linkedExperts.map((link) => (
+                      <tr key={`${link.expert.id}-${link.relationship}`}>
+                        <td>
+                          <Link href={`/experts/${link.expert.id}`} className="ee-link">
+                            {link.expert.name}
+                          </Link>
+                          <div className="mt-0.5 text-[11px] text-ink-faint">
+                            {link.expert.headline}
+                          </div>
+                        </td>
+                        <td>
+                          <Badge className={EXPERT_TYPE_STYLE[link.expert.type]}>
+                            {EXPERT_TYPE_LABEL[link.expert.type]}
+                          </Badge>
+                        </td>
+                        <td>{RELATIONSHIP_LABEL[link.relationship]}</td>
+                        <td className="max-w-[340px] text-[12px] text-ink-soft">
+                          {link.note ?? link.expert.whyRelevant}
+                        </td>
+                        <td className="text-[11px] text-ink-soft">
+                          {link.expert.sources.length} expert source{link.expert.sources.length === 1 ? "" : "s"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </section>
 
             {company.news?.length ? (
@@ -201,45 +216,47 @@ export default async function CompanyPage({
                 <div className="border-b border-line px-4 py-3">
                   <h2 className="ee-label text-ink">Related deals ({relatedDeals.length})</h2>
                 </div>
-                <table className="ee-table">
-                  <thead>
-                    <tr>
-                      <th>Deal</th>
-                      <th>Role</th>
-                      <th>Type</th>
-                      <th>Date</th>
-                      <th>Completeness</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {relatedDeals.map((deal) => {
-                      const role =
-                        deal.parties.find((party) => party.companyId === company.id)?.role ??
-                        deal.advisors.find((advisor) => advisor.companyId === company.id)?.role ??
-                        "surfaced";
-                      const counterparty =
-                        primaryDealParty(deal, "buyer")?.name ??
-                        primaryDealParty(deal, "investor")?.name ??
-                        primaryDealParty(deal, "target")?.name;
-                      return (
-                        <tr key={deal.id}>
-                          <td>
-                            <Link href={`/deals/${deal.id}`} className="ee-link">
-                              {deal.name}
-                            </Link>
-                            <div className="mt-0.5 text-[11px] text-ink-faint">
-                              {counterparty}
-                            </div>
-                          </td>
-                          <td>{role.replaceAll("-", " ")}</td>
-                          <td>{DEAL_TYPE_LABEL[deal.dealType]}</td>
-                          <td>{dealDate(deal) ?? "Missing"}</td>
-                          <td>{deal.requiredFactsFound}/{deal.requiredFactsTotal} required facts</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                <div className="overflow-x-auto">
+                  <table className="ee-table min-w-[780px]">
+                    <thead>
+                      <tr>
+                        <th>Deal</th>
+                        <th>Role</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Completeness</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {relatedDeals.map((deal) => {
+                        const role =
+                          deal.parties.find((party) => party.companyId === company.id)?.role ??
+                          deal.advisors.find((advisor) => advisor.companyId === company.id)?.role ??
+                          "surfaced";
+                        const counterparty =
+                          primaryDealParty(deal, "buyer")?.name ??
+                          primaryDealParty(deal, "investor")?.name ??
+                          primaryDealParty(deal, "target")?.name;
+                        return (
+                          <tr key={deal.id}>
+                            <td>
+                              <Link href={`/deals/${deal.id}`} className="ee-link">
+                                {deal.name}
+                              </Link>
+                              <div className="mt-0.5 text-[11px] text-ink-faint">
+                                {counterparty}
+                              </div>
+                            </td>
+                            <td>{role.replaceAll("-", " ")}</td>
+                            <td>{DEAL_TYPE_LABEL[deal.dealType]}</td>
+                            <td>{dealDate(deal) ?? "Missing"}</td>
+                            <td>{deal.requiredFactsFound}/{deal.requiredFactsTotal} required facts</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </section>
             ) : null}
 
@@ -326,10 +343,10 @@ export default async function CompanyPage({
                   Open website
                 </a>
               ) : null}
-              <Link href="/graph" className="ee-button ee-button-primary mt-3 w-full">
+              <Link href={`/graph?focus=company:${company.id}`} className="ee-button ee-button-primary mt-3 w-full">
                 Show graph path
               </Link>
-              <Link href="/reports" className="ee-button ee-button-secondary mt-3 w-full">
+              <Link href={`/reports?company=${company.id}`} className="ee-button ee-button-secondary mt-3 w-full">
                 Use in report
               </Link>
             </section>

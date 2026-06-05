@@ -10,6 +10,7 @@ import {
   OWNERSHIP_STYLE,
 } from "@/lib/labels";
 import { Badge, ConfidenceBars } from "@/app/components/ui";
+import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import { getThemeFocus } from "@/lib/theme-focus-server";
 import { matchesThemeFocus } from "@/lib/theme-focus";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
@@ -40,10 +41,10 @@ export default async function CompaniesPage() {
       <div className="mx-auto max-w-[1540px]">
         <header className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-[26px] font-semibold tracking-tight">Company Explorer</h1>
+            <h1 className="text-[26px] font-semibold tracking-tight">Company Watchlist</h1>
             <p className="mt-2 max-w-3xl text-[13px] text-ink-soft">
-              Companies surfaced through the expert graph, ranked by independent
-              people evidence and investment relevance.
+              Companies surfaced through the expert graph, ranked by named people evidence,
+              validation paths, and investment relevance.
             </p>
           </div>
           <div className="flex gap-2">
@@ -79,7 +80,7 @@ export default async function CompaniesPage() {
                   <th>Why investigate</th>
                   <th>Named experts</th>
                   <th>Evidence</th>
-                  <th />
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -110,10 +111,24 @@ export default async function CompaniesPage() {
                       {company.expertCount} expert link{company.expertCount === 1 ? "" : "s"} · {company.sources.length} source{company.sources.length === 1 ? "" : "s"}
                     </td>
                     <td>
-                      <Link href={`/companies/${company.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
-                        Review target
-                      </Link>
-                    </td>
+                        <div className="flex flex-wrap gap-2">
+                          <Link href={`/companies/${company.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
+                            Review
+                          </Link>
+                          <WorkspaceActionButton
+                            item={{
+                              id: company.id,
+                              kind: "target",
+                              name: company.name,
+                              sub: company.whyInteresting ?? company.description,
+                              href: `/companies/${company.id}`,
+                              theme: company.themes[0],
+                            }}
+                          >
+                            Save
+                          </WorkspaceActionButton>
+                        </div>
+                      </td>
                   </tr>
                 ))}
               </tbody>
