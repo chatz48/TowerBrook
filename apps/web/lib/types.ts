@@ -219,6 +219,8 @@ export interface Expert {
   /** 0–1 confidence in the accuracy of this record (shown to the user). */
   confidence: number;
   linkedin?: string;
+  email?: string;
+  contactFacts?: ExpertContactFact[];
 }
 
 export type CompanyCategory =
@@ -252,10 +254,49 @@ export interface Company {
   similarCompanyIds?: string[];
   hq?: string;
   website?: string;
+  logoUrl?: string;
+  materialFacts?: CompanyMaterialFact[];
   /** Dated, sourced news items. */
   news?: Signal[];
   sources: Source[];
   confidence: number;
+}
+
+export type CompanyMaterialFactType =
+  | "website"
+  | "seed_round"
+  | "last_funding"
+  | "total_funding"
+  | "launch_date"
+  | "product_live_status"
+  | "logo_url"
+  | "hq"
+  | "ownership"
+  | "size";
+
+export type MaterialFactStatus = "verified" | "partial" | "missing" | "not_disclosed" | "needs_review";
+
+export interface CompanyMaterialFact {
+  type: CompanyMaterialFactType;
+  label: string;
+  value?: string;
+  status: MaterialFactStatus;
+  source?: Source;
+  evidence?: string;
+  confidence?: number;
+  asOfDate?: string;
+}
+
+export type ExpertContactFactType = "linkedin" | "email" | "website" | "intro_path";
+
+export interface ExpertContactFact {
+  type: ExpertContactFactType;
+  value?: string;
+  status: MaterialFactStatus;
+  source?: Source;
+  evidence?: string;
+  confidence?: number;
+  complianceNote?: string;
 }
 
 // ---- Derived view models (computed at load time, never stored) ----

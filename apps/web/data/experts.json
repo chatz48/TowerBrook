@@ -36,13 +36,19 @@
         "title": "Leadership change post-bp acquisition",
         "url": "https://taiyangnews.info/people/lightsource-bp-new-ceo-joaquin-oliveira",
         "publisher": "TaiyangNews"
+      },
+      {
+        "title": "Nick Boyle - Entrepreneur and investor in a range of ... - LinkedIn",
+        "url": "https://uk.linkedin.com/in/nick-boyle-a2b7a589",
+        "publisher": "LinkedIn"
       }
     ],
     "confidence": 0.88,
     "specialties": [
       "Solar development"
     ],
-    "access": "obvious"
+    "access": "obvious",
+    "linkedin": "https://uk.linkedin.com/in/nick-boyle-a2b7a589"
   },
   {
     "id": "jerome-guillet",
@@ -121,13 +127,19 @@
         "title": "Aurora Energy Research — CGE Partners",
         "url": "https://cge-partners.com/portfolio/aurora/",
         "publisher": "CGE Partners"
+      },
+      {
+        "title": "John Feddersen - Founder & CEO, Aurora Energy Research ...",
+        "url": "https://uk.linkedin.com/in/john-feddersen-6b9a043b",
+        "publisher": "LinkedIn"
       }
     ],
     "confidence": 0.83,
     "specialties": [
       "Energy market analytics"
     ],
-    "access": "proprietary"
+    "access": "proprietary",
+    "linkedin": "https://uk.linkedin.com/in/john-feddersen-6b9a043b"
   },
   {
     "id": "gareth-miller",
@@ -203,6 +215,11 @@
         "title": "Augusta & Co advisory team",
         "url": "https://augustaco.com/advisory-team/",
         "publisher": "Augusta & Co"
+      },
+      {
+        "title": "Mortimer Menzel - Managing Partner at Augusta & Co Limited",
+        "url": "https://uk.linkedin.com/in/mortimer-menzel-a7176780",
+        "publisher": "LinkedIn"
       }
     ],
     "confidence": 0.8,
@@ -210,7 +227,8 @@
       "M&A advisory",
       "Project finance"
     ],
-    "access": "proprietary"
+    "access": "proprietary",
+    "linkedin": "https://uk.linkedin.com/in/mortimer-menzel-a7176780"
   },
   {
     "id": "james-knight",
@@ -244,13 +262,19 @@
         "title": "Mizuho acquires Augusta & Co",
         "url": "https://www.esgtoday.com/mizuho-acquires-energy-transition-focused-investment-bank-augusta/",
         "publisher": "ESG Today"
+      },
+      {
+        "title": "James Knight - Managing Partner at Augusta & Co | LinkedIn",
+        "url": "https://uk.linkedin.com/in/james-knight-a4020811",
+        "publisher": "LinkedIn"
       }
     ],
     "confidence": 0.78,
     "specialties": [
       "M&A advisory"
     ],
-    "access": "proprietary"
+    "access": "proprietary",
+    "linkedin": "https://uk.linkedin.com/in/james-knight-a4020811"
   },
   {
     "id": "greg-jackson",
@@ -280,6 +304,11 @@
         "title": "About Octopus Energy",
         "url": "https://octopus.energy/about-us/",
         "publisher": "Octopus Energy"
+      },
+      {
+        "title": "Greg Jackson - Founder and CEO, Octopus Energy ... - LinkedIn",
+        "url": "https://uk.linkedin.com/in/gregsjackson",
+        "publisher": "LinkedIn"
       }
     ],
     "confidence": 0.85,
@@ -288,7 +317,8 @@
       "Grid-edge software",
       "Smart metering"
     ],
-    "access": "obvious"
+    "access": "obvious",
+    "linkedin": "https://uk.linkedin.com/in/gregsjackson"
   },
   {
     "id": "james-johnston",
@@ -317,6 +347,11 @@
         "title": "Interview with James Johnston, CEO & co-founder, Piclo",
         "url": "https://energycentral.com/c/cp/interview-james-johnston-ceo-and-co-founder-piclo",
         "publisher": "Energy Central"
+      },
+      {
+        "title": "James Johnston - CEO and Co-founder | LinkedIn",
+        "url": "https://uk.linkedin.com/in/jamesjohnston53",
+        "publisher": "LinkedIn"
       }
     ],
     "confidence": 0.84,
@@ -324,7 +359,8 @@
       "Flexibility & DER markets",
       "Grid connection"
     ],
-    "access": "proprietary"
+    "access": "proprietary",
+    "linkedin": "https://uk.linkedin.com/in/jamesjohnston53"
   },
   {
     "id": "bob-currie",
@@ -486,6 +522,11 @@
         "title": "Quinbrook acquires Habitat Energy",
         "url": "https://www.energy-storage.news/quinbrook-acquires-uk-battery-storage-optimisation-and-trading-specialist-habitat-energy/",
         "publisher": "Energy-Storage.news"
+      },
+      {
+        "title": "Andrew Luers - Greater London, England, United Kingdom",
+        "url": "https://uk.linkedin.com/in/andrew-luers",
+        "publisher": "LinkedIn"
       }
     ],
     "confidence": 0.8,
@@ -493,7 +534,8 @@
       "Storage optimisation & trading",
       "Battery storage (BESS)"
     ],
-    "access": "proprietary"
+    "access": "proprietary",
+    "linkedin": "https://uk.linkedin.com/in/andrew-luers"
   },
   {
     "id": "piers-clark",
@@ -583,13 +625,19 @@
         "title": "AI tool uses sound to pinpoint leaky pipes",
         "url": "https://news.microsoft.com/source/features/sustainability/ai-tool-uses-sound-to-pinpoint-leaky-pipes-saving-precious-drinking-water/",
         "publisher": "Microsoft Source"
+      },
+      {
+        "title": "Victoria Edwards - CEO K622 Tech | Founder Emeritus FIDO ...",
+        "url": "https://uk.linkedin.com/in/victoria-edwards-fido",
+        "publisher": "LinkedIn"
       }
     ],
     "confidence": 0.82,
     "specialties": [
       "Leak detection"
     ],
-    "access": "proprietary"
+    "access": "proprietary",
+    "linkedin": "https://uk.linkedin.com/in/victoria-edwards-fido"
   },
   {
     "id": "neil-edwards",
@@ -618,13 +666,19 @@
         "title": "AI tool uses sound to pinpoint leaky pipes",
         "url": "https://news.microsoft.com/source/features/sustainability/ai-tool-uses-sound-to-pinpoint-leaky-pipes-saving-precious-drinking-water/",
         "publisher": "Microsoft Source"
+      },
+      {
+        "title": "Neil Edwards - FIDO Tech Ltd - LinkedIn",
+        "url": "https://uk.linkedin.com/in/neiledwardsfidotech",
+        "publisher": "LinkedIn"
       }
     ],
     "confidence": 0.74,
     "specialties": [
       "Leak detection"
     ],
-    "access": "proprietary"
+    "access": "proprietary",
+    "linkedin": "https://uk.linkedin.com/in/neiledwardsfidotech"
   },
   {
     "id": "lauren-guy",

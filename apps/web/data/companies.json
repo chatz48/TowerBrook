@@ -787,9 +787,28 @@
         "title": "Brookfield Energy Business",
         "url": "https://www.brookfield.com/our-businesses/renewable-power",
         "publisher": "Brookfield"
+      },
+      {
+        "title": "What is Brief History of Brookfield Renewable Partners ...",
+        "url": "https://matrixbcg.com/blogs/brief-history/bep?srsltid=AfmBOopxlM7uQBYczKN41Iq0nVGziDhHqe6bOtXn0296VQx7Jw9FEgZt",
+        "publisher": "Matrix BCG"
       }
     ],
-    "confidence": 0.88
+    "confidence": 0.88,
+    "materialFacts": [
+      {
+        "type": "launch_date",
+        "value": "November 28, 2011",
+        "status": "needs_review",
+        "sources": [
+          {
+            "title": "What is Brief History of Brookfield Renewable Partners ...",
+            "url": "https://matrixbcg.com/blogs/brief-history/bep?srsltid=AfmBOopxlM7uQBYczKN41Iq0nVGziDhHqe6bOtXn0296VQx7Jw9FEgZt",
+            "publisher": "Matrix BCG"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "bulb",
@@ -2269,9 +2288,28 @@
         "title": "H2O America Announces $540 Million Acquisition of Quadvest",
         "url": "https://www.bakermckenzie.com/en/newsroom/2025/07/h2o-america-usd-540-million-acquisition-of-quadvest",
         "publisher": "Baker McKenzie"
+      },
+      {
+        "title": "H2O America (HTO) Stock Price, News, Quote & History",
+        "url": "https://finance.yahoo.com/quote/HTO/",
+        "publisher": "Yahoo Finance"
       }
     ],
-    "confidence": 0.84
+    "confidence": 0.84,
+    "materialFacts": [
+      {
+        "type": "launch_date",
+        "value": "May 2025",
+        "status": "needs_review",
+        "sources": [
+          {
+            "title": "H2O America (HTO) Stock Price, News, Quote & History",
+            "url": "https://finance.yahoo.com/quote/HTO/",
+            "publisher": "Yahoo Finance"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "habitat-energy",
@@ -4232,6 +4270,11 @@
         "title": "Habitat Energy — Quinbrook portfolio",
         "url": "https://www.quinbrook.com/portfolio/habitat-energy/",
         "publisher": "Quinbrook"
+      },
+      {
+        "title": "Quinbrook Infrastructure Partners 2026 Company Profile",
+        "url": "https://pitchbook.com/profiles/company/181121-14",
+        "publisher": "PitchBook"
       }
     ],
     "confidence": 0.8,
@@ -4239,7 +4282,21 @@
       "Battery storage (BESS)",
       "Solar development"
     ],
-    "ownershipStatus": "independent"
+    "ownershipStatus": "independent",
+    "materialFacts": [
+      {
+        "type": "launch_date",
+        "value": "2015",
+        "status": "needs_review",
+        "sources": [
+          {
+            "title": "Quinbrook Infrastructure Partners 2026 Company Profile",
+            "url": "https://pitchbook.com/profiles/company/181121-14",
+            "publisher": "PitchBook"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "ratedpower",
@@ -5548,9 +5605,28 @@
         "title": "Xylem 2024 Annual Report",
         "url": "https://www.xylem.com/siteassets/investors/2024-xylem-annual-report-and-10-k.pdf",
         "publisher": "Xylem"
+      },
+      {
+        "title": "What is Brief History of Xylem Company?",
+        "url": "https://pestel-analysis.com/blogs/brief-history/xylem",
+        "publisher": "PESTEL Analysis"
       }
     ],
-    "confidence": 0.9
+    "confidence": 0.9,
+    "materialFacts": [
+      {
+        "type": "launch_date",
+        "value": "2011",
+        "status": "needs_review",
+        "sources": [
+          {
+            "title": "What is Brief History of Xylem Company?",
+            "url": "https://pestel-analysis.com/blogs/brief-history/xylem",
+            "publisher": "PESTEL Analysis"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "xylem-smart-metering-business",
