@@ -112,10 +112,10 @@ export default function InvestorWorkspaceTray() {
           <div className="flex items-start justify-between gap-3 border-b border-line bg-[#fbfcfe] p-3">
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                Investor workspace
+                Saved work
               </div>
               <div className="mt-1 text-xs text-ink-faint">
-                Saved calls, targets, and memo items follow you across pages.
+                Calls, targets, and memo items saved from the command center.
               </div>
             </div>
             <button
@@ -159,7 +159,7 @@ export default function InvestorWorkspaceTray() {
           onClick={() => setOpen(true)}
           className="flex items-center gap-2 rounded-full border border-line-strong bg-white px-4 py-2.5 text-sm font-semibold text-ink shadow-lg hover:border-accent hover:text-accent"
         >
-          Workspace
+          Saved work
           <span className="rounded-full bg-accent px-2 py-0.5 text-[11px] text-white">
             {items.length}
           </span>

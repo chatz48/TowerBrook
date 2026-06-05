@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
+  { href: "/workspace", label: "Command Center", match: "/workspace" },
   { href: "/", label: "Themes", match: "/" },
   { href: "/experts", label: "Call Tray", match: "/experts" },
   { href: "/companies", label: "Companies", match: "/companies" },
