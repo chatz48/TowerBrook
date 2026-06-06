@@ -32,7 +32,7 @@
         "tier_2": 3,
         "disclosed_value_candidates": 3,
         "unresolved_people": 5,
-        "unresolved_organizations": 13
+        "unresolved_organizations": 12
       },
       "smart-water": {
         "candidates": 7,
@@ -985,8 +985,8 @@
       },
       "target": {
         "name": "DMC Power",
-        "canonical_id": null,
-        "canonical_match_status": "unresolved"
+        "canonical_id": "dmc-power",
+        "canonical_match_status": "exact_name_match"
       },
       "parties": [
         {
@@ -1033,7 +1033,7 @@
           "canonical_id": null,
           "canonical_match_status": "unresolved",
           "organization": "DMC Power",
-          "organization_canonical_id": null
+          "organization_canonical_id": "dmc-power"
         }
       ],
       "advisors": [
