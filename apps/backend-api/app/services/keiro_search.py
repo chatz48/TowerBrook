@@ -17,7 +17,8 @@ class KeiroSearchService:
 
     async def search(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
         if not self.settings.keirolabs_api_key:
-            return self._fallback_results(query)
+            provider_results = await self._provider_search(query, limit)
+            return (provider_results or self._fallback_results(query))[:limit]
         payload = {
             "apiKey": self.settings.keirolabs_api_key,
             "query": query,
@@ -44,6 +45,82 @@ class KeiroSearchService:
         return [
             self._normalize_result(item, query, content_by_url.get(item.get("url") or item.get("link")))
             for item in results[:limit]
+        ]
+
+
+    async def _provider_search(self, query: str, limit: int) -> list[dict[str, Any]]:
+        if self.settings.tavily_api_key:
+            return await self._search_tavily(query, limit)
+        if self.settings.serper_api_key:
+            return await self._search_serper(query, limit)
+        if self.settings.brave_search_api_key:
+            return await self._search_brave(query, limit)
+        return []
+
+    async def _search_tavily(self, query: str, limit: int) -> list[dict[str, Any]]:
+        payload = {
+            "api_key": self.settings.tavily_api_key,
+            "query": query,
+            "max_results": limit,
+            "search_depth": "basic",
+            "include_answer": False,
+        }
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.post("https://api.tavily.com/search", json=payload)
+            response.raise_for_status()
+            data = response.json()
+        return [
+            {
+                "title": item.get("title") or query,
+                "url": item.get("url"),
+                "snippet": item.get("content") or "",
+                "publisher": "Tavily",
+                "content": item.get("content") or "",
+                "metadata": {"provider": "tavily", "search_result": item},
+            }
+            for item in data.get("results", [])[:limit]
+        ]
+
+    async def _search_serper(self, query: str, limit: int) -> list[dict[str, Any]]:
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.post(
+                "https://google.serper.dev/search",
+                json={"q": query, "num": limit},
+                headers={"X-API-KEY": self.settings.serper_api_key or ""},
+            )
+            response.raise_for_status()
+            data = response.json()
+        return [
+            {
+                "title": item.get("title") or query,
+                "url": item.get("link"),
+                "snippet": item.get("snippet") or "",
+                "publisher": item.get("source") or "Serper",
+                "content": item.get("snippet") or "",
+                "metadata": {"provider": "serper", "search_result": item},
+            }
+            for item in data.get("organic", [])[:limit]
+        ]
+
+    async def _search_brave(self, query: str, limit: int) -> list[dict[str, Any]]:
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.get(
+                "https://api.search.brave.com/res/v1/web/search",
+                params={"q": query, "count": limit},
+                headers={"X-Subscription-Token": self.settings.brave_search_api_key or "", "Accept": "application/json"},
+            )
+            response.raise_for_status()
+            data = response.json()
+        return [
+            {
+                "title": item.get("title") or query,
+                "url": item.get("url"),
+                "snippet": item.get("description") or "",
+                "publisher": "Brave Search",
+                "content": item.get("description") or "",
+                "metadata": {"provider": "brave", "search_result": item},
+            }
+            for item in (data.get("web", {}).get("results") or [])[:limit]
         ]
 
     async def fetch_content(self, url: str) -> dict[str, Any]:

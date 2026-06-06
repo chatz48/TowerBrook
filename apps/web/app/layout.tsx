@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import AppShellNav from "@/app/components/AppShellNav";
 import InvestorWorkspaceTray from "@/app/components/InvestorWorkspaceTray";
@@ -8,9 +7,6 @@ import ThemeSwitcher from "@/app/components/ThemeSwitcher";
 import { getThemeFocus } from "@/lib/theme-focus-server";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
 import "./globals.css";
-
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Expert Engine — People & Companies by Theme",
@@ -25,10 +21,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   ]);
 
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
+    <html lang="en" className="h-full antialiased">
       <body className="min-h-full bg-paper text-ink">
         <header className="sticky top-0 z-40 border-b border-line bg-white">
           <div className="flex h-14 items-center gap-5 px-4">
