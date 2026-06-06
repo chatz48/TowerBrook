@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
-import type { AskResponse, CopilotFilters, PageContext, SourceRecord } from "./types";
+import type { AskResponse, ChatTurn, CopilotFilters, PageContext, SourceRecord } from "./types";
 import {
   isThemeFocus,
   publishThemeFocus,
@@ -19,6 +19,7 @@ interface DiscoveryData {
 const DISCOVERY_CANDIDATES = (discoveryCandidatesRaw as DiscoveryData).expert_candidates ?? [];
 
 type CopilotTab = "ask" | "queue" | "notes";
+type ConversationMessage = { id: string; role: "user" | "assistant"; content: string; answer?: AskResponse };
 
 const OBJECTIVES = [
   { label: "Find experts", value: "Find experts" },
@@ -94,16 +95,28 @@ export default function ResearchWorkspace({
   const [question, setQuestion] = useState(startingQuestion);
   const [filters, setFilters] = useState<CopilotFilters>(startingFilters);
   const [answer, setAnswer] = useState<AskResponse | null>(null);
+  const [conversation, setConversation] = useState<ConversationMessage[]>([]);
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingQuestion, setLoadingQuestion] = useState(startingQuestion);
+  const [progressStep, setProgressStep] = useState(0);
   const [error, setError] = useState("");
   const workspaceItems = useWorkspaceItems();
 
   async function submit(nextQuestion = question, nextFilters = filters) {
     const cleanQuestion = nextQuestion.trim();
-    if (!cleanQuestion) return;
-    setQuestion(cleanQuestion);
+    if (!cleanQuestion || loading) return;
+    const chatHistory = toChatHistory(conversation);
+    const userMessage: ConversationMessage = {
+      id: makeMessageId("user"),
+      role: "user",
+      content: cleanQuestion,
+    };
+    setQuestion("");
+    setLoadingQuestion(cleanQuestion);
+    setConversation((current) => [...current, userMessage]);
     setLoading(true);
+    setProgressStep(0);
     setError("");
     try {
       const res = await fetch("/api/ask", {
@@ -112,12 +125,22 @@ export default function ResearchWorkspace({
         body: JSON.stringify({
           question: cleanQuestion,
           filters: nextFilters,
+          chatHistory,
           pageContext: buildWorkspacePageContext(workspaceItems, nextFilters),
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Request failed");
       setAnswer(data);
+      setConversation((current) => [
+        ...current,
+        {
+          id: makeMessageId("assistant"),
+          role: "assistant",
+          content: data.answer_summary,
+          answer: data,
+        },
+      ]);
       setSelectedSourceId(data.sources_used?.[0]?.source_id ?? null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
@@ -131,7 +154,9 @@ export default function ResearchWorkspace({
 
     async function loadInitialAnswer() {
       setQuestion(startingQuestion);
+      setLoadingQuestion(startingQuestion);
       setLoading(true);
+      setProgressStep(0);
       setError("");
       try {
         const res = await fetch("/api/ask", {
@@ -140,6 +165,7 @@ export default function ResearchWorkspace({
           body: JSON.stringify({
             question: startingQuestion,
             filters: startingFilters,
+            chatHistory: [],
             pageContext: buildWorkspacePageContext(readWorkspaceItemsSnapshot(), startingFilters),
           }),
         });
@@ -147,6 +173,19 @@ export default function ResearchWorkspace({
         if (!res.ok) throw new Error(data.error ?? "Request failed");
         if (!cancelled) {
           setAnswer(data);
+          setConversation([
+            {
+              id: makeMessageId("user"),
+              role: "user",
+              content: startingQuestion,
+            },
+            {
+              id: makeMessageId("assistant"),
+              role: "assistant",
+              content: data.answer_summary,
+              answer: data,
+            },
+          ]);
           setSelectedSourceId(data.sources_used?.[0]?.source_id ?? null);
         }
       } catch (e) {
@@ -163,6 +202,14 @@ export default function ResearchWorkspace({
       cancelled = true;
     };
   }, [startingFilters, startingQuestion]);
+
+  useEffect(() => {
+    if (!loading) return;
+    const timers = [900, 2400, 5200].map((delay, index) =>
+      window.setTimeout(() => setProgressStep(index + 1), delay),
+    );
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [loading, loadingQuestion]);
 
   const selectedSource = useMemo(() => {
     if (!answer?.sources_used.length) return null;
@@ -190,7 +237,7 @@ export default function ResearchWorkspace({
           filters={filters}
           resetFilters={startingFilters}
           onFiltersChange={setFilters}
-          onRun={(nextFilters) => submit(question, nextFilters)}
+          onRun={(nextFilters) => submit(question || answer?.input_context.question || loadingQuestion, nextFilters)}
         />
 
         <main className="min-w-0 border-x border-[#dfe3eb] bg-white">
@@ -270,21 +317,46 @@ export default function ResearchWorkspace({
                 onOpenNotes={() => setTab("notes")}
                 onPrompt={(prompt) => submit(prompt)}
               />
-              <MessageFrame question={answer?.input_context.question ?? question} />
+              {conversation.length > 0 ? (
+                <div className="space-y-3">
+                  {conversation.map((message) => (
+                    <div key={message.id} className="space-y-1">
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-faint">
+                        {message.role === "user" ? "You" : "Copilot"}
+                      </div>
+                      <div className="text-[13px] leading-relaxed text-ink">
+                        {message.role === "user"
+                          ? message.content
+                          : message.answer
+                            ? <StructuredAnswer
+                                answer={message.answer}
+                                onSourceSelect={setSelectedSourceId}
+                                onPrompt={(prompt) => submit(prompt)}
+                              />
+                            : message.content}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <MessageFrame question={answer?.input_context.question ?? question} />
+              )}
+              {loading ? (
+                <div className="space-y-2">
+                  <div className="text-[11px] text-ink-faint">
+                    {progressStep === 0 ? "Searching expert graph..." :
+                     progressStep === 1 ? "Analysing relationships..." :
+                     progressStep === 2 ? "Synthesising answer..." :
+                     "Preparing response..."}
+                  </div>
+                  <LoadingBlocks />
+                </div>
+              ) : null}
               {error ? (
                 <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
                   {error}
                 </div>
               ) : null}
-              {answer ? (
-                <StructuredAnswer
-                  answer={answer}
-                  onSourceSelect={setSelectedSourceId}
-                  onPrompt={(prompt) => submit(prompt)}
-                />
-              ) : (
-                <LoadingBlocks />
-              )}
             </div>
           ) : tab === "queue" ? (
             <ResearchQueueTab
@@ -309,6 +381,17 @@ export default function ResearchWorkspace({
       </div>
     </div>
   );
+}
+
+function toChatHistory(messages: ConversationMessage[]): ChatTurn[] {
+  return messages
+    .map((message) => ({ role: message.role, content: message.content }))
+    .filter((message) => message.content.trim().length > 0)
+    .slice(-8);
+}
+
+function makeMessageId(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 function SessionRail({

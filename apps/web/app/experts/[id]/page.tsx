@@ -24,6 +24,8 @@ import {
 } from "@/app/components/ui";
 import ExpertActions from "@/app/components/ExpertActions";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
+import { expertReadiness } from "@/lib/investment-readiness";
+import ReadinessBadge from "@/app/components/ReadinessBadge";
 
 export function generateStaticParams() {
   return getExperts().map((e) => ({ id: e.id }));
@@ -42,6 +44,7 @@ export default async function ExpertPage({
   const towerBrook = towerBrookExpertScore(base, companiesById);
   const warmPaths = warmPathsForExpert(expert.id);
   const bestWarmPath = warmPaths[0] ?? null;
+  const readiness = expertReadiness(expert);
   const relatedDeals = await listDealsForExpert(expert.id);
   return (
     <div className="ee-shell px-3 py-5 sm:px-5">
@@ -67,6 +70,7 @@ export default async function ExpertPage({
                   <div className="mt-3 flex flex-wrap gap-4 text-[13px] text-ink-faint">
                     {expert.org ? <span>{expert.org}</span> : null}
                     {expert.location ? <span>{expert.location}</span> : null}
+                    <ReadinessBadge badge={readiness} compact />
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {expert.themes.map((t) => (
@@ -87,6 +91,9 @@ export default async function ExpertPage({
                     {" "}{expert.sources.length} source record{expert.sources.length === 1 ? "" : "s"},
                     {" "}and {bestWarmPath ? warmPathStatusLabel(bestWarmPath.status).toLowerCase() : towerBrook.isDirect ? towerBrook.label : "no public TowerBrook path mapped"}.
                   </p>
+                  <ul className="mt-3 space-y-1 text-[11px] leading-relaxed text-ink-faint">
+                    {readiness.reasons.slice(0, 4).map((reason) => <li key={reason}>• {reason}</li>)}
+                  </ul>
                   <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                     <a href="#call-actions" className="ee-button ee-button-primary min-h-8 px-3">
                       Prepare call
@@ -240,6 +247,18 @@ export default async function ExpertPage({
           </main>
 
           <aside className="space-y-5 xl:sticky xl:top-20 xl:self-start">
+            <section className="ee-panel rounded-lg p-5">
+              <div className="ee-label text-ink">Trust dossier</div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <ReadinessBadge badge={readiness} />
+                <span className="rounded-full border border-line bg-paper px-2.5 py-1 text-[11px] font-semibold text-ink-soft">
+                  {Math.round(expert.confidence * 100)}% profile confidence
+                </span>
+              </div>
+              <ul className="mt-3 space-y-2 text-[12px] leading-relaxed text-ink-soft">
+                {readiness.reasons.map((reason) => <li key={reason}>• {reason}</li>)}
+              </ul>
+            </section>
             <section className="ee-panel rounded-lg p-5">
               <div className="flex items-center justify-between gap-3">
                 <div className="ee-label text-ink">TowerBrook warm path</div>

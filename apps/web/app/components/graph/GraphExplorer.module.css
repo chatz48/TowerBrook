@@ -257,6 +257,59 @@
   font-size: 11px;
 }
 
+.directoryMeta {
+  color: #64748b;
+  font-size: 10px;
+  text-align: right;
+}
+
+.directoryList {
+  display: grid;
+  gap: 6px;
+  max-height: 292px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.directoryList button {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  border: 1px solid #e0e6ef;
+  border-radius: 7px;
+  background: #fff;
+  color: inherit;
+  padding: 7px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.directoryList button:hover,
+.directoryList .activeDirectoryItem {
+  border-color: #9bbcf0;
+  background: #f7faff;
+}
+
+.directoryList strong,
+.directoryList small {
+  display: block;
+}
+
+.directoryList strong {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.directoryList small {
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 11px;
+}
+
 .checkRow {
   display: grid;
   grid-template-columns: 16px 25px 1fr;
@@ -501,7 +554,13 @@
 .graphCard {
   position: relative;
   overflow: hidden;
-  min-height: 650px;
+  min-height: 710px;
+}
+
+.graphScroller {
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding-bottom: 96px;
 }
 
 .legend {
@@ -528,8 +587,8 @@
 }
 
 .graphSvg {
-  width: 100%;
-  height: 520px;
+  min-width: 100%;
+  height: auto;
   display: block;
 }
 

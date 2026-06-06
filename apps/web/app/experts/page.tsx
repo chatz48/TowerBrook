@@ -13,6 +13,8 @@ import { isThemeFocus, matchesThemeFocus, type ThemeFocus } from "@/lib/theme-fo
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 import ExpertFilters from "./ExpertFilters";
+import { expertReadiness } from "@/lib/investment-readiness";
+import ReadinessBadge from "@/app/components/ReadinessBadge";
 
 export default async function ExpertsPage({
   searchParams,
@@ -26,6 +28,7 @@ export default async function ExpertsPage({
   const params: Record<string, string | string[] | undefined> = (await searchParams) ?? {};
   const selectedTheme = singleParam(params.theme);
   const selectedType = singleParam(params.type) ?? "all";
+  const selectedReadiness = singleParam(params.readiness) ?? "all";
   const query = (singleParam(params.q) ?? "").trim().toLowerCase();
   const activeTheme: ThemeFocus = isThemeFocus(selectedTheme) ? selectedTheme : themeFocus;
   const specialties =
@@ -48,6 +51,12 @@ export default async function ExpertsPage({
   const filteredExperts = scopedExperts
     .filter((expert) => selectedType === "all" || expert.type === selectedType)
     .filter((expert) => selectedSpecialty === "all" || expert.specialties?.includes(selectedSpecialty))
+    .filter((expert) => {
+      const readiness = expertReadiness(expert);
+      if (selectedReadiness === "all") return true;
+      if (selectedReadiness === "actionable") return readiness.level === "call-ready" || readiness.level === "verify-contact";
+      return readiness.level === selectedReadiness;
+    })
     .filter((expert) => {
       if (!query) return true;
       return [
@@ -112,6 +121,7 @@ export default async function ExpertsPage({
           initialTheme={activeTheme}
           initialSpecialty={selectedSpecialty}
           initialType={selectedType}
+          initialReadiness={selectedReadiness}
           initialQuery={singleParam(params.q) ?? ""}
         />
         <div className="ee-panel mb-5 rounded-lg px-4 py-3">
@@ -136,28 +146,37 @@ export default async function ExpertsPage({
             </Link>
           </div>
           <div className="overflow-x-auto">
-            <table className="ee-table min-w-[1260px]">
+            <table className="ee-table min-w-[1480px]">
               <thead>
                 <tr>
                   <th className="w-14">#</th>
+                  <th>Score</th>
                   <th>Expert</th>
                   <th>Specialty</th>
                   <th>Why call</th>
                   <th>Companies they can unlock</th>
                   <th>Contact</th>
+                  <th>Readiness</th>
                   <th>Relationship path</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {ranked.slice(0, 36).map(({ expert }, index) => {
+                {ranked.slice(0, 36).map(({ expert, score }, index) => {
                   const towerBrook = towerBrookExpertScore(expert, companiesById);
+                  const readiness = expertReadiness(expert);
                   return (
                     <tr key={expert.id}>
                       <td>
                         <span className="inline-grid h-8 w-8 place-items-center rounded bg-[#f1f4f9] text-[16px] font-semibold text-accent">
                           {index + 1}
                         </span>
+                      </td>
+                      <td className="whitespace-nowrap text-[11px] text-ink-soft">
+                        <div className="text-[15px] font-semibold tabular-nums text-ink">{score.total}</div>
+                        <div title={`Type ${score.base}; edges ${score.edges}; signals ${score.signals}; recency ${score.recency}; access ${score.access}; cross-theme ${score.crossTheme}`}>
+                          type {score.base} · edges {score.edges}
+                        </div>
                       </td>
                       <td className="min-w-[240px]">
                         <Link href={`/experts/${expert.id}`} className="ee-link">
@@ -186,6 +205,12 @@ export default async function ExpertsPage({
                       </td>
                       <td>
                         <ContactLinks expert={expert} />
+                      </td>
+                      <td className="max-w-[170px]">
+                        <ReadinessBadge badge={readiness} compact />
+                        <div className="mt-1 line-clamp-2 text-[10px] leading-relaxed text-ink-faint">
+                          {readiness.reasons[0]}
+                        </div>
                       </td>
                       <td>
                         <Badge

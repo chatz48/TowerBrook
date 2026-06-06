@@ -15,20 +15,55 @@ import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import { getThemeFocus } from "@/lib/theme-focus-server";
 import { matchesThemeFocus } from "@/lib/theme-focus";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
+import { companyReadiness, targetScorecard } from "@/lib/investment-readiness";
+import ReadinessBadge from "@/app/components/ReadinessBadge";
 
 function askHref(prompt: string) {
   return `/ask?prompt=${encodeURIComponent(prompt)}`;
 }
 
-export default async function CompaniesPage() {
+function singleParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function CompaniesPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const [themeFocus, includeTowerBrookEmployees] = await Promise.all([
     getThemeFocus(),
     getIncludeTowerBrookEmployees(),
   ]);
-  const companies = companiesWithLinks(
+  const params: Record<string, string | string[] | undefined> = (await searchParams) ?? {};
+  const query = (singleParam(params.q) ?? "").trim().toLowerCase();
+  const selectedCategory = singleParam(params.category) ?? "all";
+  const selectedReadiness = singleParam(params.readiness) ?? "all";
+  const allCompanies = companiesWithLinks(
     themeFocus === "all" ? undefined : themeFocus,
     includeTowerBrookEmployees,
   );
+  const companies = allCompanies
+    .filter((company) => selectedCategory === "all" || company.category === selectedCategory)
+    .filter((company) => {
+      const readiness = companyReadiness(company);
+      if (selectedReadiness === "all") return true;
+      if (selectedReadiness === "actionable") return readiness.level === "target-ready" || readiness.level === "verify-ownership" || readiness.level === "verify-scale";
+      return readiness.level === selectedReadiness;
+    })
+    .filter((company) => {
+      if (!query) return true;
+      return [
+        company.name,
+        company.description,
+        company.whyInteresting ?? "",
+        company.owner ?? "",
+        company.hq ?? "",
+        company.website ?? "",
+        company.specialties?.join(" ") ?? "",
+        company.linkedExperts.map((link) => link.expert.name).join(" "),
+      ].join(" ").toLowerCase().includes(query);
+    });
   const actionableTargets = companies
     .filter(
       (company) =>
@@ -76,6 +111,58 @@ export default async function CompaniesPage() {
           </div>
         </header>
 
+        <form className="ee-panel mb-5 rounded-lg p-4" action="/companies">
+          <div className="grid gap-3 md:grid-cols-[minmax(220px,1fr)_220px_220px_auto] md:items-end">
+            <label className="block">
+              <span className="ee-label text-ink-faint">Search companies, experts or angles</span>
+              <input
+                name="q"
+                defaultValue={singleParam(params.q) ?? ""}
+                placeholder="e.g. independent, leak detection, JSM, grid"
+                className="mt-1 h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[13px] outline-none focus:border-accent"
+              />
+            </label>
+            <label className="block">
+              <span className="ee-label text-ink-faint">Company type</span>
+              <select
+                name="category"
+                defaultValue={selectedCategory}
+                className="mt-1 h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[13px] outline-none focus:border-accent"
+              >
+                <option value="all">All company types</option>
+                <option value="target">Targets</option>
+                <option value="advisory">Advisory firms</option>
+                <option value="service-provider">Service providers</option>
+                <option value="investor">Investors</option>
+                <option value="incumbent">Incumbents</option>
+              </select>
+            </label>
+            <label className="block">
+              <span className="ee-label text-ink-faint">Readiness</span>
+              <select
+                name="readiness"
+                defaultValue={selectedReadiness}
+                className="mt-1 h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[13px] outline-none focus:border-accent"
+              >
+                <option value="all">All readiness states</option>
+                <option value="actionable">Actionable diligence</option>
+                <option value="target-ready">Target-ready</option>
+                <option value="verify-ownership">Verify ownership</option>
+                <option value="verify-scale">Verify scale</option>
+                <option value="monitor">Monitor / comp</option>
+                <option value="research-needed">Research needed</option>
+              </select>
+            </label>
+            <div className="flex gap-2">
+              <button className="ee-button ee-button-primary h-10 px-4" type="submit">Search</button>
+              <Link href="/companies" className="ee-button ee-button-secondary h-10 px-4">Reset</Link>
+            </div>
+          </div>
+          <div className="mt-3 border-t border-line pt-3 text-[11px] text-ink-faint">
+            <strong className="text-ink">{companies.length}</strong> mapped companies visible in the current scope.
+          </div>
+        </form>
+
         <section className="ee-panel mb-5 overflow-hidden rounded-lg">
           <div className="flex items-start justify-between gap-4 border-b border-line px-4 py-3">
             <div>
@@ -89,18 +176,23 @@ export default async function CompaniesPage() {
             </Link>
           </div>
           <div className="overflow-x-auto">
-            <table className="ee-table min-w-[1080px]">
+            <table className="ee-table min-w-[1280px]">
               <thead>
                 <tr>
                   <th>Company</th>
                   <th>Why investigate</th>
                   <th>Named experts</th>
                   <th>Evidence</th>
+                  <th>Readiness</th>
+                  <th>PE score</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {actionableTargets.map((company) => (
+                {actionableTargets.map((company) => {
+                  const readiness = companyReadiness(company);
+                  const scorecard = targetScorecard(company);
+                  return (
                   <tr key={company.id}>
                     <td className="min-w-[220px]">
                       <Link href={`/companies/${company.id}`} className="ee-link">
@@ -125,6 +217,16 @@ export default async function CompaniesPage() {
                     </td>
                     <td className="whitespace-nowrap text-[11px] text-ink-soft">
                       {company.expertCount} expert link{company.expertCount === 1 ? "" : "s"} · {company.sources.length} source{company.sources.length === 1 ? "" : "s"}
+                    </td>
+                    <td className="max-w-[160px]">
+                      <ReadinessBadge badge={readiness} compact />
+                      <div className="mt-1 line-clamp-2 text-[10px] leading-relaxed text-ink-faint">
+                        {readiness.reasons[0]}
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap text-[11px] text-ink-soft">
+                      <div className="text-[15px] font-semibold tabular-nums text-ink">{scorecard.total}</div>
+                      <div className="text-[10px]">{scorecard.label}</div>
                     </td>
                     <td>
                         <div className="flex flex-wrap gap-2">
@@ -157,7 +259,8 @@ export default async function CompaniesPage() {
                         </div>
                       </td>
                   </tr>
-                ))}
+                );
+                })}
               </tbody>
             </table>
           </div>
