@@ -1,4 +1,5 @@
 import type { Company, Expert, ThemeId } from "./types";
+import { bestWarmPathForExpert, warmPathStatusLabel } from "./warm-paths";
 
 export const TOWERBROOK_ID = "towerbrook";
 
@@ -180,6 +181,7 @@ export function towerBrookExpertScore(
   companiesById: Map<string, Company>,
 ): TowerBrookScore {
   const reasons: string[] = [];
+  const bestWarmPath = bestWarmPathForExpert(expert.id);
   let score = 24;
   let label = "Theme fit";
   let isDirect = false;
@@ -195,6 +197,16 @@ export function towerBrookExpertScore(
     score = 100;
     label = "TowerBrook team";
     reasons.push("TowerBrook affiliation");
+    isDirect = true;
+  } else if (bestWarmPath?.status === "verified") {
+    score = Math.max(84, bestWarmPath.strength);
+    label = warmPathStatusLabel(bestWarmPath.status);
+    reasons.push(bestWarmPath.intro_route);
+    isDirect = true;
+  } else if (bestWarmPath?.status === "org_level") {
+    score = Math.max(76, bestWarmPath.strength);
+    label = warmPathStatusLabel(bestWarmPath.status);
+    reasons.push(bestWarmPath.intro_route);
     isDirect = true;
   } else if (expert.companies.some((link) => link.companyId === TOWERBROOK_ID)) {
     score = 98;
@@ -238,6 +250,13 @@ export function towerBrookExpertScore(
     score += Math.round((expert.confidence ?? 0.7) * 9);
     score += expert.access === "proprietary" ? 8 : 0;
     score += Math.min(10, Math.max(0, ...linkedCompanyScores) * 0.12);
+
+    if (bestWarmPath?.status === "nearest_public_path") {
+      score += 6;
+      reasons.push("Nearest public TowerBrook path needs validation");
+    } else if (bestWarmPath?.status === "not_found") {
+      reasons.push("No public TowerBrook path found");
+    }
   }
 
   const linkedCompanyNames = expert.companies
