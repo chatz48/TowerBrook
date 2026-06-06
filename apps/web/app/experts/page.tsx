@@ -1,29 +1,18 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 import { getCompanies, getExperts } from "@/lib/data";
 import { getAdvisorExpertGaps, getExpertDiscoveryCandidates } from "@/lib/expert-discovery";
 import { EXPERT_TYPE_LABEL } from "@/lib/labels";
 import { rankExperts } from "@/lib/score";
 import { THEME_BY_ID, THEMES, THEME_SPECIALTIES } from "@/lib/themes";
 import { towerBrookExpertScore } from "@/lib/towerbrook";
-import type { Expert, ExpertType, ThemeId } from "@/lib/types";
+import type { Expert } from "@/lib/types";
 import { Badge } from "@/app/components/ui";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import { getThemeFocus } from "@/lib/theme-focus-server";
-import { matchesThemeFocus } from "@/lib/theme-focus";
+import { isThemeFocus, matchesThemeFocus, type ThemeFocus } from "@/lib/theme-focus";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
-
-const EXPERT_TYPES: ExpertType[] = [
-  "ex-founder",
-  "operator",
-  "advisor",
-  "banker",
-  "lawyer",
-  "investor",
-  "technical-dd",
-  "lender-credit",
-];
+import ExpertFilters from "./ExpertFilters";
 
 export default async function ExpertsPage({
   searchParams,
@@ -36,11 +25,18 @@ export default async function ExpertsPage({
   ]);
   const params: Record<string, string | string[] | undefined> = (await searchParams) ?? {};
   const selectedTheme = singleParam(params.theme);
-  const selectedSpecialty = singleParam(params.specialty) ?? "all";
   const selectedType = singleParam(params.type) ?? "all";
   const query = (singleParam(params.q) ?? "").trim().toLowerCase();
-  const activeTheme =
-    selectedTheme && selectedTheme !== "all" ? (selectedTheme as ThemeId) : themeFocus;
+  const activeTheme: ThemeFocus = isThemeFocus(selectedTheme) ? selectedTheme : themeFocus;
+  const specialties =
+    activeTheme === "all"
+      ? Array.from(new Set(THEMES.flatMap((theme) => THEME_SPECIALTIES[theme.id]))).sort()
+      : THEME_SPECIALTIES[activeTheme];
+  const rawSelectedSpecialty = singleParam(params.specialty) ?? "all";
+  const selectedSpecialty =
+    rawSelectedSpecialty === "all" || specialties.includes(rawSelectedSpecialty)
+      ? rawSelectedSpecialty
+      : "all";
 
   const companies = getCompanies();
   const companyNames = Object.fromEntries(companies.map((company) => [company.id, company.name]));
@@ -73,17 +69,13 @@ export default async function ExpertsPage({
   const candidateCount = getExpertDiscoveryCandidates().filter((candidate) =>
     matchesThemeFocus(candidate.themes, activeTheme),
   ).length;
-  const specialties =
-    activeTheme === "all"
-      ? Array.from(new Set(THEMES.flatMap((theme) => THEME_SPECIALTIES[theme.id]))).sort()
-      : THEME_SPECIALTIES[activeTheme];
 
   return (
     <div className="ee-shell px-3 py-5 sm:px-5">
       <div className="mx-auto max-w-[1540px]">
         <header className="mb-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
           <div>
-            <h1 className="text-[26px] font-semibold tracking-tight">Call Tray</h1>
+            <h1 className="text-[26px] font-semibold tracking-tight">Expert Call List</h1>
             <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
               A ranked slate of people to call, filtered by theme, specialty and expert type.
               Each row shows why the person matters, what companies they can unlock, and how to reach them.
@@ -95,7 +87,7 @@ export default async function ExpertsPage({
               {firstCall?.name ?? "No matching expert"}
             </div>
             <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-ink-soft">
-              {firstCall?.signals?.[0] ?? firstCall?.whyRelevant ?? "Broaden the filters or ask Copilot to fill the coverage gap."}
+              {firstCall?.signals?.[0] ?? firstCall?.whyRelevant ?? "Broaden the filters or open the research queue to fill the coverage gap."}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               {firstCall ? (
@@ -108,65 +100,28 @@ export default async function ExpertsPage({
                   </Link>
                 </>
               ) : (
-                <Link href="/ask" className="ee-button ee-button-primary min-h-8 px-3">
-                  Ask Copilot
+                <Link href="/discover" className="ee-button ee-button-primary min-h-8 px-3">
+                  Open research queue
                 </Link>
               )}
             </div>
           </div>
         </header>
 
-        <form className="ee-panel mb-5 rounded-lg p-4" action="/experts">
-          <div className="grid gap-3 md:grid-cols-[1.1fr_1.15fr_0.9fr_minmax(180px,1fr)_auto] md:items-end">
-            <FilterSelect label="Theme" name="theme" value={activeTheme}>
-              <option value="all">All three themes</option>
-              {THEMES.map((theme) => (
-                <option key={theme.id} value={theme.id}>
-                  {theme.name}
-                </option>
-              ))}
-            </FilterSelect>
-            <FilterSelect label="Specialty" name="specialty" value={selectedSpecialty}>
-              <option value="all">All specialties</option>
-              {specialties.map((specialty) => (
-                <option key={specialty} value={specialty}>
-                  {specialty}
-                </option>
-              ))}
-            </FilterSelect>
-            <FilterSelect label="Expert type" name="type" value={selectedType}>
-              <option value="all">All expert types</option>
-              {EXPERT_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {EXPERT_TYPE_LABEL[type]}
-                </option>
-              ))}
-            </FilterSelect>
-            <label className="block">
-              <span className="ee-label text-ink-faint">Search people, firms or companies</span>
-              <input
-                name="q"
-                defaultValue={singleParam(params.q) ?? ""}
-                placeholder="e.g. banker, BESS, leak detection"
-                className="mt-1 h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[13px] outline-none focus:border-accent"
-              />
-            </label>
-            <div className="flex gap-2">
-              <button className="ee-button ee-button-primary h-10 px-4" type="submit">
-                Search
-              </button>
-              <Link href="/experts" className="ee-button ee-button-secondary h-10 px-4">
-                Reset
-              </Link>
-            </div>
-          </div>
-          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-line pt-3 text-[11px] text-ink-faint">
+        <ExpertFilters
+          initialTheme={activeTheme}
+          initialSpecialty={selectedSpecialty}
+          initialType={selectedType}
+          initialQuery={singleParam(params.q) ?? ""}
+        />
+        <div className="ee-panel mb-5 rounded-lg px-4 py-3">
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-[11px] text-ink-faint">
             <span><strong className="text-ink">{ranked.length}</strong> call-ready matches</span>
-            <span><strong className="text-ink">{candidateCount}</strong> research candidates in Copilot</span>
+            <span><strong className="text-ink">{candidateCount}</strong> research candidates in queue</span>
             <span><strong className="text-ink">{advisorGaps.length}</strong> advisor-name gaps</span>
             <span>{activeTheme === "all" ? "All themes" : THEME_BY_ID[activeTheme]?.name}</span>
           </div>
-        </form>
+        </div>
 
         <section className="ee-panel overflow-hidden rounded-lg">
           <div className="flex items-start justify-between gap-4 border-b border-line px-4 py-3">
@@ -176,8 +131,8 @@ export default async function ExpertsPage({
                 Prioritized for outreach, company discovery and source-backed diligence.
               </p>
             </div>
-            <Link href="/ask" className="ee-link text-[12px]">
-              Ask Copilot to fill gaps
+            <Link href="/discover" className="ee-link text-[12px]">
+              Fill gaps from research queue
             </Link>
           </div>
           <div className="overflow-x-auto">
@@ -275,31 +230,6 @@ export default async function ExpertsPage({
         </section>
       </div>
     </div>
-  );
-}
-
-function FilterSelect({
-  label,
-  name,
-  value,
-  children,
-}: {
-  label: string;
-  name: string;
-  value: string;
-  children: ReactNode;
-}) {
-  return (
-    <label className="block">
-      <span className="ee-label text-ink-faint">{label}</span>
-      <select
-        name={name}
-        defaultValue={value}
-        className="mt-1 h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[13px] outline-none focus:border-accent"
-      >
-        {children}
-      </select>
-    </label>
   );
 }
 

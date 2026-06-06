@@ -5,6 +5,11 @@ import { DEAL_TYPE_LABEL, dealDate } from "@/lib/deals";
 import { listDealsForExpert } from "@/lib/deal-repository";
 import { towerBrookExpertScore } from "@/lib/towerbrook";
 import {
+  warmPathsForExpert,
+  warmPathStatusLabel,
+  warmPathTone,
+} from "@/lib/warm-paths";
+import {
   EXPERT_TYPE_LABEL,
   EXPERT_TYPE_STYLE,
   RELATIONSHIP_LABEL,
@@ -35,6 +40,8 @@ export default async function ExpertPage({
   const expert = resolveExpert(base);
   const companiesById = new Map(getCompanies().map((company) => [company.id, company]));
   const towerBrook = towerBrookExpertScore(base, companiesById);
+  const warmPaths = warmPathsForExpert(expert.id);
+  const bestWarmPath = warmPaths[0] ?? null;
   const relatedDeals = await listDealsForExpert(expert.id);
   return (
     <div className="ee-shell px-3 py-5 sm:px-5">
@@ -78,7 +85,7 @@ export default async function ExpertPage({
                   <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">
                     {expert.resolvedCompanies.length} company edge{expert.resolvedCompanies.length === 1 ? "" : "s"},
                     {" "}{expert.sources.length} source record{expert.sources.length === 1 ? "" : "s"},
-                    {" "}and {towerBrook.isDirect ? towerBrook.label : "no public TowerBrook path mapped"}.
+                    {" "}and {bestWarmPath ? warmPathStatusLabel(bestWarmPath.status).toLowerCase() : towerBrook.isDirect ? towerBrook.label : "no public TowerBrook path mapped"}.
                   </p>
                   <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                     <a href="#call-actions" className="ee-button ee-button-primary min-h-8 px-3">
@@ -234,16 +241,74 @@ export default async function ExpertPage({
 
           <aside className="space-y-5 xl:sticky xl:top-20 xl:self-start">
             <section className="ee-panel rounded-lg p-5">
-              <div className="ee-label text-ink">Relationship path</div>
-              <div className="mt-3 text-[14px] font-semibold">
-                {towerBrook.isDirect ? towerBrook.label : "No public TowerBrook path mapped"}
+              <div className="flex items-center justify-between gap-3">
+                <div className="ee-label text-ink">TowerBrook warm path</div>
+                {bestWarmPath ? (
+                  <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${warmPathTone(bestWarmPath.status)}`}>
+                    {warmPathStatusLabel(bestWarmPath.status)}
+                  </span>
+                ) : null}
               </div>
-              <ul className="mt-3 space-y-2 text-[12px] leading-relaxed text-ink-soft">
-                {(towerBrook.isDirect && towerBrook.reasons.length
-                  ? towerBrook.reasons
-                  : ["Use sourced outreach or verify an introduction path through public deal evidence."]
-                ).map((reason) => <li key={reason}>{reason}</li>)}
-              </ul>
+              {bestWarmPath ? (
+                <div className="mt-3 space-y-4">
+                  <div>
+                    <div className="text-[14px] font-semibold text-ink">
+                      {bestWarmPath.intro_route}
+                    </div>
+                    <div className="mt-1 text-[11px] text-ink-faint">
+                      Strength {bestWarmPath.strength}/100 · Confidence {Math.round(bestWarmPath.confidence * 100)}%
+                    </div>
+                  </div>
+                  <p className="text-[12px] leading-relaxed text-ink-soft">
+                    {bestWarmPath.recommended_intro}
+                  </p>
+                  <div>
+                    <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
+                      Path
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {bestWarmPath.path_nodes.map((node, index) => (
+                        <span key={`${node}-${index}`} className="contents">
+                          <span className="rounded border border-line bg-white px-2 py-1 text-[11px] text-ink-soft">
+                            {node}
+                          </span>
+                          {index < bestWarmPath.path_nodes.length - 1 ? (
+                            <span className="text-[11px] text-ink-faint">-&gt;</span>
+                          ) : null}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="border-t border-line pt-3 text-[12px] leading-relaxed text-ink-soft">
+                    {bestWarmPath.evidence}
+                  </p>
+                  <div className="space-y-1">
+                    {bestWarmPath.sources.slice(0, 3).map((source) => (
+                      <a
+                        key={`${source.title}-${source.url}`}
+                        href={source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block truncate text-[12px] font-semibold text-accent"
+                      >
+                        {source.title}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="mt-3 text-[14px] font-semibold">
+                    {towerBrook.isDirect ? towerBrook.label : "No public TowerBrook path mapped"}
+                  </div>
+                  <ul className="mt-3 space-y-2 text-[12px] leading-relaxed text-ink-soft">
+                    {(towerBrook.isDirect && towerBrook.reasons.length
+                      ? towerBrook.reasons
+                      : ["Use sourced outreach or verify an introduction path through public deal evidence."]
+                    ).map((reason) => <li key={reason}>{reason}</li>)}
+                  </ul>
+                </>
+              )}
             </section>
             <div id="call-actions">
               <ExpertActions expertId={expert.id} expertName={expert.name} />
