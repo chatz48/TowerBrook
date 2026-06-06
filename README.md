@@ -75,13 +75,12 @@ Workflow:
 The strongest demo path is:
 
 ```text
-/experts -> founder-led opportunity jobs -> expert profile -> call prep
-         -> linked companies -> graph path -> report
+/ -> /campaign (Origination Desk) -> expert profile -> company profile -> /reports
 ```
 
 This makes the product more than a searchable database. It is an expert-led
-sourcing workflow where every new source, deal, expert call or review approval
-can compound into more people and more company targets.
+sourcing workflow where a theme becomes an assigned origination plan, validated
+company targets, and a memo-ready evidence pack.
 
 ## Run Locally
 
@@ -192,20 +191,17 @@ With more time, I would:
 
 | Route | What it does |
 |---|---|
-| `/` | Command landing page with theme rows, global search, workflow shortcuts, and the TowerBrook lens. |
-| `/themes/[theme]` | Theme Command Center: KPI strip, thesis, call list, clusters, blank spaces, TowerBrook score, session-aware expert ranking, companies, graph preview. |
-| `/experts` | Main origination workspace: founder opportunity jobs, PE-derived expert candidates, advisor-person gaps, canonical expert ranking. |
-| `/experts/[id]` | Expert profile with evidence, company/deal links, TowerBrook score, session call-prep rail, outreach and sourcing-call actions. |
-| `/companies` | Target-company workspace: companies reverse-derived from named expert and PE-deal evidence. |
-| `/companies/[id]` | Company profile with linked experts, TowerBrook score, evidence, sources, graph path action. |
-| `/deals` | Deal Intelligence table with sourced parties, advisors, lawyers, surfaced experts/companies, fact completeness, and next actions. |
-| `/deals/[id]` | Deal scorecard with fact rubric, evidence, parties, advisors/counsel, missing facts, follow-up searches, and related people/companies. |
-| `/ingest` | User deal ingestion workflow for pasted deal materials, source URLs, company statements, advisor pages, and extracted document text. |
-| `/graph` | Standalone graph explorer with filters, traversal, path view, inspector, source-backed edges. |
-| `/ask` | Structured research copilot: ranked experts/companies, call sequence, what to listen for, gaps, risks, evidence rail. |
-| `/reports` | Memo builder with templates, section statuses, citations, source register, markdown/export controls. |
-| `/discover` | Live origination queue: Keiro search/fetch, DeepSeek extraction, Supabase review-gated candidates. |
-| `/sources` | Source register audit table for ingestion and report provenance. |
+| `/` | Command Centre: the guided Monday-meeting workflow, coverage matrix, theme summaries, and global search. |
+| `/campaign` | Origination Desk: assign expert calls and target-company validation, track owner/status/notes, copy a meeting pack, and export CSV. |
+| `/experts` | Expert Call List: searchable and filterable expert pool. Theme selection immediately limits the specialty dropdown to that theme. |
+| `/experts/[id]` | Expert profile with evidence, company links, call prep, outreach, and source records. |
+| `/companies` | Company Watchlist: companies reverse-derived from expert evidence, with validation status and priority actions. |
+| `/companies/[id]` | Company profile with linked experts, material facts, evidence, and next diligence actions. |
+| `/reports` | Memo workspace with sourced sections, citations, source register, markdown, and export controls. |
+
+Supporting evidence and admin routes remain available by deep link from the
+main workflow, but are no longer primary navigation: `/graph`, `/deals`,
+`/discover`, `/ingest`, `/ask`, `/sources`, and `/themes/[theme]`.
 
 ## Design System
 

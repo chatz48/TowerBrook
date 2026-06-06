@@ -49,3 +49,4 @@ next-env.d.ts
 /docs/*
 !docs/SEARCH_DISCOVERY_STRATEGY.md
 /research-screenshots/*
+VIDEO_SCRIPT.md
