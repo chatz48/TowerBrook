@@ -94,3 +94,13 @@ def test_chat_returns_tool_trace():
     assert body["session_id"]
     assert body["answer"]
     assert body["tool_calls"]
+
+
+def test_search_endpoint_uses_local_fallback_without_provider_keys():
+    response = client.get("/search", params={"q": "grid infrastructure", "limit": 3})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["query"] == "grid infrastructure"
+    assert body["providers"]["keirolabs"] is False
+    assert isinstance(body["results"], list)
+    assert len(body["results"]) <= 3

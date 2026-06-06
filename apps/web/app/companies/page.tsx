@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { companiesWithLinks } from "@/lib/data";
 import { dealCoverage } from "@/lib/deal-repository";
 import { getDerivedCompanyCandidates } from "@/lib/expert-discovery";
@@ -14,16 +15,47 @@ import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import { getThemeFocus } from "@/lib/theme-focus-server";
 import { matchesThemeFocus } from "@/lib/theme-focus";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
+import { companyReadiness, targetScorecard } from "@/lib/investment-readiness";
+import ReadinessBadge from "@/app/components/ReadinessBadge";
 
-export default async function CompaniesPage() {
+export default async function CompaniesPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const [themeFocus, includeTowerBrookEmployees] = await Promise.all([
     getThemeFocus(),
     getIncludeTowerBrookEmployees(),
   ]);
-  const companies = companiesWithLinks(
+  const params = (await searchParams) ?? {};
+  const query = (singleParam(params.q) ?? "").trim().toLowerCase();
+  const selectedCategory = singleParam(params.category) ?? "all";
+  const selectedReadiness = singleParam(params.readiness) ?? "all";
+  const allCompanies = companiesWithLinks(
     themeFocus === "all" ? undefined : themeFocus,
     includeTowerBrookEmployees,
   );
+  const companies = allCompanies
+    .filter((company) => selectedCategory === "all" || company.category === selectedCategory)
+    .filter((company) => {
+      const readiness = companyReadiness(company);
+      if (selectedReadiness === "all") return true;
+      if (selectedReadiness === "actionable") return readiness.level === "target-ready" || readiness.level === "verify-ownership" || readiness.level === "verify-scale";
+      return readiness.level === selectedReadiness;
+    })
+    .filter((company) => {
+      if (!query) return true;
+      return [
+        company.name,
+        company.description,
+        company.whyInteresting ?? "",
+        company.owner ?? "",
+        company.hq ?? "",
+        company.website ?? "",
+        company.specialties?.join(" ") ?? "",
+        company.linkedExperts.map((link) => link.expert.name).join(" "),
+      ].join(" ").toLowerCase().includes(query);
+    });
   const actionableTargets = companies
     .filter(
       (company) =>
@@ -60,6 +92,44 @@ export default async function CompaniesPage() {
           </div>
         </header>
 
+        <form className="ee-panel mb-5 rounded-lg p-4" action="/companies">
+          <div className="grid gap-3 md:grid-cols-[minmax(220px,1fr)_220px_220px_auto] md:items-end">
+            <label className="block">
+              <span className="ee-label text-ink-faint">Search companies, experts or angles</span>
+              <input
+                name="q"
+                defaultValue={singleParam(params.q) ?? ""}
+                placeholder="e.g. independent, leak detection, JSM, grid"
+                className="mt-1 h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[13px] outline-none focus:border-accent"
+              />
+            </label>
+            <FilterSelect label="Company type" name="category" value={selectedCategory}>
+              <option value="all">All company types</option>
+              <option value="target">Targets</option>
+              <option value="advisory">Advisory firms</option>
+              <option value="service-provider">Service providers</option>
+              <option value="investor">Investors</option>
+              <option value="incumbent">Incumbents</option>
+            </FilterSelect>
+            <FilterSelect label="Readiness" name="readiness" value={selectedReadiness}>
+              <option value="all">All readiness states</option>
+              <option value="actionable">Actionable diligence</option>
+              <option value="target-ready">Target-ready</option>
+              <option value="verify-ownership">Verify ownership</option>
+              <option value="verify-scale">Verify scale</option>
+              <option value="monitor">Monitor / comp</option>
+              <option value="research-needed">Research needed</option>
+            </FilterSelect>
+            <div className="flex gap-2">
+              <button className="ee-button ee-button-primary h-10 px-4" type="submit">Search</button>
+              <Link href="/companies" className="ee-button ee-button-secondary h-10 px-4">Reset</Link>
+            </div>
+          </div>
+          <div className="mt-3 border-t border-line pt-3 text-[11px] text-ink-faint">
+            <strong className="text-ink">{companies.length}</strong> mapped companies visible in the current scope.
+          </div>
+        </form>
+
         <section className="ee-panel mb-5 overflow-hidden rounded-lg">
           <div className="flex items-start justify-between gap-4 border-b border-line px-4 py-3">
             <div>
@@ -80,11 +150,16 @@ export default async function CompaniesPage() {
                   <th>Why investigate</th>
                   <th>Named experts</th>
                   <th>Evidence</th>
+                  <th>Readiness</th>
+                  <th>PE score</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {actionableTargets.map((company) => (
+                {actionableTargets.map((company) => {
+                  const readiness = companyReadiness(company);
+                  const scorecard = targetScorecard(company);
+                  return (
                   <tr key={company.id}>
                     <td className="min-w-[220px]">
                       <Link href={`/companies/${company.id}`} className="ee-link">
@@ -110,6 +185,11 @@ export default async function CompaniesPage() {
                     <td className="whitespace-nowrap text-[11px] text-ink-soft">
                       {company.expertCount} expert link{company.expertCount === 1 ? "" : "s"} · {company.sources.length} source{company.sources.length === 1 ? "" : "s"}
                     </td>
+                    <td><ReadinessBadge badge={readiness} compact /></td>
+                    <td className="whitespace-nowrap">
+                      <div className="font-semibold tabular-nums">{scorecard.total}/100</div>
+                      <div className="text-[10px] text-ink-faint">{scorecard.label}</div>
+                    </td>
                     <td>
                         <div className="flex flex-wrap gap-2">
                           <Link href={`/companies/${company.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
@@ -133,7 +213,8 @@ export default async function CompaniesPage() {
                         </div>
                       </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -216,6 +297,8 @@ export default async function CompaniesPage() {
                   <th>Deals</th>
                   <th>Relationship path</th>
                   <th>Record confidence</th>
+                  <th>Readiness</th>
+                  <th>PE score</th>
                   <th>Investment angle</th>
                   <th>Linked experts</th>
                   <th>Sources</th>
@@ -224,6 +307,8 @@ export default async function CompaniesPage() {
               <tbody>
                 {companies.map((company) => {
                   const towerBrook = towerBrookCompanyScore(company, company.expertCount);
+                  const readiness = companyReadiness(company);
+                  const scorecard = targetScorecard(company);
                   return (
                     <tr key={company.id} className="hover:bg-[#fbfcff]">
                       <td className="min-w-[220px]">
@@ -263,6 +348,11 @@ export default async function CompaniesPage() {
                         </div>
                         <ConfidenceBars value={company.confidence} />
                       </td>
+                      <td><ReadinessBadge badge={readiness} compact /></td>
+                      <td className="whitespace-nowrap">
+                        <div className="font-semibold tabular-nums">{scorecard.total}/100</div>
+                        <div className="text-[10px] text-ink-faint">{scorecard.label}</div>
+                      </td>
                       <td className="max-w-[360px] text-[12px] leading-relaxed text-ink-soft">
                         <span className="line-clamp-2">
                           {company.whyInteresting ?? company.description}
@@ -295,5 +385,35 @@ export default async function CompaniesPage() {
         </section>
       </div>
     </div>
+  );
+}
+
+
+function singleParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function FilterSelect({
+  label,
+  name,
+  value,
+  children,
+}: {
+  label: string;
+  name: string;
+  value: string;
+  children: ReactNode;
+}) {
+  return (
+    <label className="block">
+      <span className="ee-label text-ink-faint">{label}</span>
+      <select
+        name={name}
+        defaultValue={value}
+        className="mt-1 h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[13px] outline-none focus:border-accent"
+      >
+        {children}
+      </select>
+    </label>
   );
 }

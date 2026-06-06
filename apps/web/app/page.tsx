@@ -17,6 +17,7 @@ import {
 } from "@/lib/towerbrook";
 import type { ThemeId } from "@/lib/types";
 import SearchBox, { type SearchItem } from "./components/SearchBox";
+import GuidedWorkflow from "./components/GuidedWorkflow";
 import { Badge } from "./components/ui";
 
 function coverageGaps(themeId: ThemeId, includeTowerBrookEmployees: boolean): string[] {
@@ -105,6 +106,8 @@ export default async function Home() {
             />
           </div>
         </section>
+
+        <GuidedWorkflow theme={themeFocus} includeTowerBrookEmployees={includeTowerBrookEmployees} />
 
         <section className="mt-5">
           <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">

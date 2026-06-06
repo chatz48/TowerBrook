@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import chat, discovery, ingest, jobs, linkedin, reports
+from app.api import chat, discovery, ingest, jobs, linkedin, reports, search
 from app.config import get_settings
 from app.repositories.supabase_repo import repo
 from app.services.embeddings_bge import embeddings
@@ -23,6 +23,7 @@ app.include_router(ingest.router)
 app.include_router(jobs.router)
 app.include_router(linkedin.router)
 app.include_router(reports.router)
+app.include_router(search.router)
 
 
 @app.middleware("http")
@@ -49,7 +50,9 @@ async def health():
         "ok": True,
         "supabase": repo.health(),
         "deepseek_configured": bool(settings.deepseek_api_key),
+        "gemini_configured": bool(settings.gemini_api_key),
         "keirolabs_configured": bool(settings.keirolabs_api_key),
+        "live_search_configured": bool(settings.keirolabs_api_key or settings.tavily_api_key or settings.serper_api_key or settings.brave_search_api_key),
         "embedding_model": embeddings.model_name,
         "embedding_dimensions": embeddings.dimensions,
     }

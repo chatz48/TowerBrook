@@ -29,7 +29,7 @@
       "named_people": 46,
       "named_advisors": 29,
       "unresolved_people": 36,
-      "unresolved_organizations": 32
+      "unresolved_organizations": 31
     },
     "peers": {
       "candidates": 12,
@@ -595,8 +595,8 @@
         {
           "role": "financial-advisor-target",
           "name": "Clearwater",
-          "canonical_id": null,
-          "canonical_match_status": "unresolved"
+          "canonical_id": "clearwater",
+          "canonical_match_status": "exact_name_match"
         }
       ],
       "value": {

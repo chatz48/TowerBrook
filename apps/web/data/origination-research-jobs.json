@@ -10,8 +10,8 @@
   ],
   "execution_policy": "Do not execute live jobs unless KeiroLabs, DeepSeek, and Supabase are all configured. Dry runs may inspect queries without provider credentials.",
   "coverage": {
-    "total_jobs": 123,
-    "founder_origination": 41,
+    "total_jobs": 127,
+    "founder_origination": 45,
     "advisor_expert_gaps": 8,
     "identity_resolution": 74,
     "advisor_organizations": [
@@ -388,6 +388,41 @@
         }
       },
       {
+        "external_job_id": "founder-origination:ben-irons",
+        "job_type": "founder_origination",
+        "theme_id": "grid-infrastructure",
+        "priority": 82,
+        "query": "\"Ben Irons\" (\"Habitat Energy\") (founder OR co-founder) (investment OR acquisition OR \"private equity\" OR \"growth equity\")",
+        "metadata": {
+          "category": "founder-origination",
+          "objective": "Verify the founder's prior investment or exit history, then identify new companies, boards, investments, advisory roles, and founder referrals that could reveal new investment opportunities.",
+          "queries": [
+            "\"Ben Irons\" (\"Habitat Energy\") (founder OR co-founder) (investment OR acquisition OR \"private equity\" OR \"growth equity\")",
+            "\"Ben Irons\" (\"new company\" OR founded OR launched OR startup OR portfolio) after (\"Habitat Energy\")",
+            "\"Ben Irons\" (angel OR investor OR board OR advisor) (\"grid-infrastructure\")",
+            "(\"Habitat Energy\") founder (investment OR acquisition OR funding)"
+          ],
+          "target_name": "Ben Irons",
+          "target_organizations": [
+            "Habitat Energy"
+          ],
+          "target_themes": [
+            "grid-infrastructure"
+          ],
+          "seed_source": "canonical-ex-founder",
+          "seed_candidate_id": null,
+          "canonical_expert_id": "ben-irons",
+          "expected_outputs": [
+            "verified_founder_profile",
+            "past_investment_or_exit",
+            "new_company_opportunities",
+            "current_board_and_advisory_roles",
+            "investments_and_founder_referrals"
+          ],
+          "review_gated": true
+        }
+      },
+      {
         "external_job_id": "founder-origination:bob-currie",
         "job_type": "founder_origination",
         "theme_id": "grid-infrastructure",
@@ -593,6 +628,42 @@
           "seed_source": "canonical-ex-founder",
           "seed_candidate_id": null,
           "canonical_expert_id": "ali-vojdani",
+          "expected_outputs": [
+            "verified_founder_profile",
+            "past_investment_or_exit",
+            "new_company_opportunities",
+            "current_board_and_advisory_roles",
+            "investments_and_founder_referrals"
+          ],
+          "review_gated": true
+        }
+      },
+      {
+        "external_job_id": "founder-origination:erik-nygard",
+        "job_type": "founder_origination",
+        "theme_id": "grid-infrastructure",
+        "priority": 82,
+        "query": "\"Erik Nygard\" (\"Limejump\" OR \"Shell\") (founder OR co-founder) (investment OR acquisition OR \"private equity\" OR \"growth equity\")",
+        "metadata": {
+          "category": "founder-origination",
+          "objective": "Verify the founder's prior investment or exit history, then identify new companies, boards, investments, advisory roles, and founder referrals that could reveal new investment opportunities.",
+          "queries": [
+            "\"Erik Nygard\" (\"Limejump\" OR \"Shell\") (founder OR co-founder) (investment OR acquisition OR \"private equity\" OR \"growth equity\")",
+            "\"Erik Nygard\" (\"new company\" OR founded OR launched OR startup OR portfolio) after (\"Limejump\" OR \"Shell\")",
+            "\"Erik Nygard\" (angel OR investor OR board OR advisor) (\"grid-infrastructure\")",
+            "(\"Limejump\" OR \"Shell\") founder (investment OR acquisition OR funding)"
+          ],
+          "target_name": "Erik Nygard",
+          "target_organizations": [
+            "Limejump",
+            "Shell"
+          ],
+          "target_themes": [
+            "grid-infrastructure"
+          ],
+          "seed_source": "canonical-ex-founder",
+          "seed_candidate_id": null,
+          "canonical_expert_id": "erik-nygard-2",
           "expected_outputs": [
             "verified_founder_profile",
             "past_investment_or_exit",
@@ -1141,6 +1212,41 @@
         }
       },
       {
+        "external_job_id": "founder-origination:phil-robinson",
+        "job_type": "founder_origination",
+        "theme_id": "grid-infrastructure",
+        "priority": 82,
+        "query": "\"Phil Robinson\" (\"Habitat Energy\") (founder OR co-founder) (investment OR acquisition OR \"private equity\" OR \"growth equity\")",
+        "metadata": {
+          "category": "founder-origination",
+          "objective": "Verify the founder's prior investment or exit history, then identify new companies, boards, investments, advisory roles, and founder referrals that could reveal new investment opportunities.",
+          "queries": [
+            "\"Phil Robinson\" (\"Habitat Energy\") (founder OR co-founder) (investment OR acquisition OR \"private equity\" OR \"growth equity\")",
+            "\"Phil Robinson\" (\"new company\" OR founded OR launched OR startup OR portfolio) after (\"Habitat Energy\")",
+            "\"Phil Robinson\" (angel OR investor OR board OR advisor) (\"grid-infrastructure\")",
+            "(\"Habitat Energy\") founder (investment OR acquisition OR funding)"
+          ],
+          "target_name": "Phil Robinson",
+          "target_organizations": [
+            "Habitat Energy"
+          ],
+          "target_themes": [
+            "grid-infrastructure"
+          ],
+          "seed_source": "canonical-ex-founder",
+          "seed_candidate_id": null,
+          "canonical_expert_id": "phil-robinson",
+          "expected_outputs": [
+            "verified_founder_profile",
+            "past_investment_or_exit",
+            "new_company_opportunities",
+            "current_board_and_advisory_roles",
+            "investments_and_founder_referrals"
+          ],
+          "review_gated": true
+        }
+      },
+      {
         "external_job_id": "founder-origination:prakash-govindan",
         "job_type": "founder_origination",
         "theme_id": "smart-water",
@@ -1165,6 +1271,41 @@
           "seed_source": "canonical-ex-founder",
           "seed_candidate_id": null,
           "canonical_expert_id": "prakash-govindan",
+          "expected_outputs": [
+            "verified_founder_profile",
+            "past_investment_or_exit",
+            "new_company_opportunities",
+            "current_board_and_advisory_roles",
+            "investments_and_founder_referrals"
+          ],
+          "review_gated": true
+        }
+      },
+      {
+        "external_job_id": "founder-origination:prof-yu",
+        "job_type": "founder_origination",
+        "theme_id": "smart-water",
+        "priority": 82,
+        "query": "\"Prof. Yu\" (\"Previsico\") (founder OR co-founder) (investment OR acquisition OR \"private equity\" OR \"growth equity\")",
+        "metadata": {
+          "category": "founder-origination",
+          "objective": "Verify the founder's prior investment or exit history, then identify new companies, boards, investments, advisory roles, and founder referrals that could reveal new investment opportunities.",
+          "queries": [
+            "\"Prof. Yu\" (\"Previsico\") (founder OR co-founder) (investment OR acquisition OR \"private equity\" OR \"growth equity\")",
+            "\"Prof. Yu\" (\"new company\" OR founded OR launched OR startup OR portfolio) after (\"Previsico\")",
+            "\"Prof. Yu\" (angel OR investor OR board OR advisor) (\"smart-water\")",
+            "(\"Previsico\") founder (investment OR acquisition OR funding)"
+          ],
+          "target_name": "Prof. Yu",
+          "target_organizations": [
+            "Previsico"
+          ],
+          "target_themes": [
+            "smart-water"
+          ],
+          "seed_source": "canonical-ex-founder",
+          "seed_candidate_id": null,
+          "canonical_expert_id": "prof-yu",
           "expected_outputs": [
             "verified_founder_profile",
             "past_investment_or_exit",
@@ -7051,6 +7192,41 @@
       }
     },
     {
+      "external_job_id": "founder-origination:ben-irons",
+      "job_type": "founder_origination",
+      "theme_id": "grid-infrastructure",
+      "priority": 82,
+      "query": "\"Ben Irons\" (\"Habitat Energy\") (founder OR co-founder) (investment OR acquisition OR \"private equity\" OR \"growth equity\")",
+      "metadata": {
+        "category": "founder-origination",
+        "objective": "Verify the founder's prior investment or exit history, then identify new companies, boards, investments, advisory roles, and founder referrals that could reveal new investment opportunities.",
+        "queries": [
+          "\"Ben Irons\" (\"Habitat Energy\") (founder OR co-founder) (investment OR acquisition OR \"private equity\" OR \"growth equity\")",
+          "\"Ben Irons\" (\"new company\" OR founded OR launched OR startup OR portfolio) after (\"Habitat Energy\")",
+          "\"Ben Irons\" (angel OR investor OR board OR advisor) (\"grid-infrastructure\")",
+          "(\"Habitat Energy\") founder (investment OR acquisition OR funding)"
+        ],
+        "target_name": "Ben Irons",
+        "target_organizations": [
+          "Habitat Energy"
+        ],
+        "target_themes": [
+          "grid-infrastructure"
+        ],
+        "seed_source": "canonical-ex-founder",
+        "seed_candidate_id": null,
+        "canonical_expert_id": "ben-irons",
+        "expected_outputs": [
+          "verified_founder_profile",
+          "past_investment_or_exit",
+          "new_company_opportunities",
+          "current_board_and_advisory_roles",
+          "investments_and_founder_referrals"
+        ],
+        "review_gated": true
+      }
+    },
+    {
       "external_job_id": "founder-origination:bob-currie",
       "job_type": "founder_origination",
       "theme_id": "grid-infrastructure",
@@ -7256,6 +7432,42 @@
         "seed_source": "canonical-ex-founder",
         "seed_candidate_id": null,
         "canonical_expert_id": "ali-vojdani",
+        "expected_outputs": [
+          "verified_founder_profile",
+          "past_investment_or_exit",
+          "new_company_opportunities",
+          "current_board_and_advisory_roles",
+          "investments_and_founder_referrals"
+        ],
+        "review_gated": true
+      }
+    },
+    {
+      "external_job_id": "founder-origination:erik-nygard",
+      "job_type": "founder_origination",
+      "theme_id": "grid-infrastructure",
+      "priority": 82,
+      "query": "\"Erik Nygard\" (\"Limejump\" OR \"Shell\") (founder OR co-founder) (investment OR acquisition OR \"private equity\" OR \"growth equity\")",
+      "metadata": {
+        "category": "founder-origination",
+        "objective": "Verify the founder's prior investment or exit history, then identify new companies, boards, investments, advisory roles, and founder referrals that could reveal new investment opportunities.",
+        "queries": [
+          "\"Erik Nygard\" (\"Limejump\" OR \"Shell\") (founder OR co-founder) (investment OR acquisition OR \"private equity\" OR \"growth equity\")",
+          "\"Erik Nygard\" (\"new company\" OR founded OR launched OR startup OR portfolio) after (\"Limejump\" OR \"Shell\")",
+          "\"Erik Nygard\" (angel OR investor OR board OR advisor) (\"grid-infrastructure\")",
+          "(\"Limejump\" OR \"Shell\") founder (investment OR acquisition OR funding)"
+        ],
+        "target_name": "Erik Nygard",
+        "target_organizations": [
+          "Limejump",
+          "Shell"
+        ],
+        "target_themes": [
+          "grid-infrastructure"
+        ],
+        "seed_source": "canonical-ex-founder",
+        "seed_candidate_id": null,
+        "canonical_expert_id": "erik-nygard-2",
         "expected_outputs": [
           "verified_founder_profile",
           "past_investment_or_exit",
@@ -7804,6 +8016,41 @@
       }
     },
     {
+      "external_job_id": "founder-origination:phil-robinson",
+      "job_type": "founder_origination",
+      "theme_id": "grid-infrastructure",
+      "priority": 82,
+      "query": "\"Phil Robinson\" (\"Habitat Energy\") (founder OR co-founder) (investment OR acquisition OR \"private equity\" OR \"growth equity\")",
+      "metadata": {
+        "category": "founder-origination",
+        "objective": "Verify the founder's prior investment or exit history, then identify new companies, boards, investments, advisory roles, and founder referrals that could reveal new investment opportunities.",
+        "queries": [
+          "\"Phil Robinson\" (\"Habitat Energy\") (founder OR co-founder) (investment OR acquisition OR \"private equity\" OR \"growth equity\")",
+          "\"Phil Robinson\" (\"new company\" OR founded OR launched OR startup OR portfolio) after (\"Habitat Energy\")",
+          "\"Phil Robinson\" (angel OR investor OR board OR advisor) (\"grid-infrastructure\")",
+          "(\"Habitat Energy\") founder (investment OR acquisition OR funding)"
+        ],
+        "target_name": "Phil Robinson",
+        "target_organizations": [
+          "Habitat Energy"
+        ],
+        "target_themes": [
+          "grid-infrastructure"
+        ],
+        "seed_source": "canonical-ex-founder",
+        "seed_candidate_id": null,
+        "canonical_expert_id": "phil-robinson",
+        "expected_outputs": [
+          "verified_founder_profile",
+          "past_investment_or_exit",
+          "new_company_opportunities",
+          "current_board_and_advisory_roles",
+          "investments_and_founder_referrals"
+        ],
+        "review_gated": true
+      }
+    },
+    {
       "external_job_id": "founder-origination:prakash-govindan",
       "job_type": "founder_origination",
       "theme_id": "smart-water",
@@ -7828,6 +8075,41 @@
         "seed_source": "canonical-ex-founder",
         "seed_candidate_id": null,
         "canonical_expert_id": "prakash-govindan",
+        "expected_outputs": [
+          "verified_founder_profile",
+          "past_investment_or_exit",
+          "new_company_opportunities",
+          "current_board_and_advisory_roles",
+          "investments_and_founder_referrals"
+        ],
+        "review_gated": true
+      }
+    },
+    {
+      "external_job_id": "founder-origination:prof-yu",
+      "job_type": "founder_origination",
+      "theme_id": "smart-water",
+      "priority": 82,
+      "query": "\"Prof. Yu\" (\"Previsico\") (founder OR co-founder) (investment OR acquisition OR \"private equity\" OR \"growth equity\")",
+      "metadata": {
+        "category": "founder-origination",
+        "objective": "Verify the founder's prior investment or exit history, then identify new companies, boards, investments, advisory roles, and founder referrals that could reveal new investment opportunities.",
+        "queries": [
+          "\"Prof. Yu\" (\"Previsico\") (founder OR co-founder) (investment OR acquisition OR \"private equity\" OR \"growth equity\")",
+          "\"Prof. Yu\" (\"new company\" OR founded OR launched OR startup OR portfolio) after (\"Previsico\")",
+          "\"Prof. Yu\" (angel OR investor OR board OR advisor) (\"smart-water\")",
+          "(\"Previsico\") founder (investment OR acquisition OR funding)"
+        ],
+        "target_name": "Prof. Yu",
+        "target_organizations": [
+          "Previsico"
+        ],
+        "target_themes": [
+          "smart-water"
+        ],
+        "seed_source": "canonical-ex-founder",
+        "seed_candidate_id": null,
+        "canonical_expert_id": "prof-yu",
         "expected_outputs": [
           "verified_founder_profile",
           "past_investment_or_exit",
