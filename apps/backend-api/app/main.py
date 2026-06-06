@@ -9,9 +9,16 @@ from app.services.embeddings_bge import embeddings
 
 app = FastAPI(title="TowerBrook Backend API", version="0.1.0")
 
+_settings = get_settings()
+_allowed_origins = [
+    origin.strip()
+    for origin in (_settings.cors_allowed_origins or "https://towerbrook-arun.vercel.app,http://localhost:3000").split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_allowed_origins or ["*"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],

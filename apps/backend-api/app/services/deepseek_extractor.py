@@ -125,6 +125,18 @@ class DeepSeekExtractor:
         names = sorted(set(re.findall(r"\b[A-Z][a-z]+ [A-Z][a-z]+\b", text)))[:5]
         orgs = sorted(set(re.findall(r"\b[A-Z][A-Za-z0-9&.\-]+(?: [A-Z][A-Za-z0-9&.\-]+){0,3}\b", text)))[:8]
 
+        acquisition_patterns = [
+            r"\b(?:acquires?|acquired|has acquired)\s+([A-Z][A-Za-z0-9&.,' -]{2,80}?)(?:\s+from|\s+for|\.|,|$)",
+            r"\bacquisition of\s+([A-Z][A-Za-z0-9&.,' -]{2,80}?)(?:\s+from|\s+for|\.|,|$)",
+            r"\bsale of\s+([A-Z][A-Za-z0-9&.,' -]{2,80}?)\s+to\b",
+        ]
+        target_name = None
+        for pattern in acquisition_patterns:
+            match = re.search(pattern, text, flags=re.IGNORECASE)
+            if match and match.group(1):
+                target_name = match.group(1).strip(" ,.")
+                break
+
         for name in names:
             people.append(
                 ExtractedPerson(
@@ -138,8 +150,19 @@ class DeepSeekExtractor:
                 )
             )
 
+        if target_name:
+            companies.append(
+                ExtractedCompany(
+                    name=target_name,
+                    category="target",
+                    theme_ids=[theme_id] if theme_id else [],
+                    description=f"Acquisition target mentioned in {title or 'uploaded source'}.",
+                    confidence=0.72,
+                )
+            )
+
         for org in orgs:
-            if org in names or len(org) < 4:
+            if org in names or len(org) < 4 or (target_name and org == target_name):
                 continue
             companies.append(
                 ExtractedCompany(
@@ -162,6 +185,19 @@ class DeepSeekExtractor:
                     theme_id=theme_id,  # type: ignore[arg-type]
                     evidence_text=evidence,
                     confidence=0.35,
+                )
+            )
+
+        if target_name:
+            facts.append(
+                ExtractedFact(
+                    subject_name=target_name,
+                    subject_type="company",
+                    fact_type="target_company",
+                    fact_value=target_name,
+                    evidence_text=evidence,
+                    theme_id=theme_id,  # type: ignore[arg-type]
+                    confidence=0.72,
                 )
             )
 

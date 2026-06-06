@@ -58,6 +58,7 @@ class Settings:
     keirolabs_max_requests_per_job: int = int(getenv("KEIROLABS_MAX_REQUESTS_PER_JOB", "12"))
     bge_model: str = getenv("BGE_MODEL", "BAAI/bge-small-en-v1.5")
     bge_vector_dimensions: int = int(getenv("BGE_VECTOR_DIMENSIONS", "384"))
+    cors_allowed_origins: str | None = getenv("CORS_ALLOWED_ORIGINS")
 
 
 @lru_cache
