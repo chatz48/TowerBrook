@@ -25,6 +25,8 @@ import {
 import { CallPrepChecklist } from "@/app/components/InvestorWorkflow";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
+import { companyReadiness, targetScorecard } from "@/lib/investment-readiness";
+import ReadinessBadge from "@/app/components/ReadinessBadge";
 
 export function generateStaticParams() {
   return getCompanies().map((c) => ({ id: c.id }));
@@ -40,6 +42,8 @@ export default async function CompanyPage({
   const company = companyWithLinks(id, includeTowerBrookEmployees);
   if (!company) notFound();
   const towerBrook = towerBrookCompanyScore(company, company.expertCount);
+  const readiness = companyReadiness(company);
+  const scorecard = targetScorecard(company);
   const relatedDeals = await listDealsForCompany(company.id);
 
   const similar = (company.similarCompanyIds ?? [])
@@ -117,6 +121,37 @@ export default async function CompanyPage({
             </div>
           </div>
         </header>
+
+        <section className="ee-panel mt-5 rounded-lg p-5">
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div>
+              <div className="ee-label text-accent">PE target scorecard</div>
+              <h2 className="mt-2 text-[18px] font-semibold tracking-tight">{scorecard.label}</h2>
+              <p className="mt-2 max-w-3xl text-[12px] leading-relaxed text-ink-soft">{scorecard.nextAction}</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <ReadinessBadge badge={readiness} />
+              <div className="rounded-lg border border-line bg-paper px-4 py-2 text-right">
+                <div className="text-[22px] font-semibold tabular-nums">{scorecard.total}/100</div>
+                <div className="text-[10px] uppercase tracking-[0.14em] text-ink-faint">PE readiness</div>
+              </div>
+            </div>
+          </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-3 xl:grid-cols-6">
+            <ScorePart label="Market fit" value={scorecard.components.marketFit} max={20} />
+            <ScorePart label="Ownership" value={scorecard.components.ownership} max={20} />
+            <ScorePart label="Expert validation" value={scorecard.components.expertValidation} max={20} />
+            <ScorePart label="Evidence" value={scorecard.components.evidence} max={15} />
+            <ScorePart label="Scale" value={scorecard.components.scale} max={12} />
+            <ScorePart label="TB path" value={scorecard.components.towerBrookPath} max={13} />
+          </div>
+          <div className="mt-4 rounded-md border border-line bg-[#fbfcff] p-3">
+            <div className="ee-label text-ink-faint">Open risks / verification tasks</div>
+            <ul className="mt-2 grid gap-1.5 text-[12px] text-ink-soft md:grid-cols-2">
+              {scorecard.risks.map((risk) => <li key={risk}>• {risk}</li>)}
+            </ul>
+          </div>
+        </section>
 
         <section className="mt-5 grid gap-5 md:grid-cols-3">
           <DecisionFact
@@ -389,5 +424,21 @@ function DecisionFact({
     <Link href={href} className="ee-panel rounded-lg p-5 hover:border-line-strong">{content}</Link>
   ) : (
     <section className="ee-panel rounded-lg p-5">{content}</section>
+  );
+}
+
+
+function ScorePart({ label, value, max }: { label: string; value: number; max: number }) {
+  const pct = Math.round((value / max) * 100);
+  return (
+    <div className="rounded-md border border-line bg-white p-3">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[11px] font-semibold text-ink">{label}</span>
+        <span className="text-[11px] tabular-nums text-ink-faint">{value}/{max}</span>
+      </div>
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#edf1f7]">
+        <div className="h-full rounded-full bg-accent" style={{ width: `${pct}%` }} />
+      </div>
+    </div>
   );
 }
