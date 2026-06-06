@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import type { AskResponse, ChatTurn, PageContext } from "@/app/components/copilot/types";
 import { readThemeFocusCookie } from "@/lib/theme-focus";
 import { readIncludeTowerBrookEmployeesCookie } from "@/lib/employee-scope";
+import { userFacingError } from "@/lib/user-errors";
 
 const DEFAULT_PROMPT = "What should I pay attention to on this page?";
 type PageChatMessage = { id: string; role: "user" | "assistant"; content: string; answer?: AskResponse };
@@ -18,6 +19,8 @@ export default function PageAwareChat() {
   const [loading, setLoading] = useState(false);
   const [progressStep, setProgressStep] = useState(0);
   const [error, setError] = useState("");
+  const [slowResponse, setSlowResponse] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
 
   const pageLabel = useMemo(() => labelForPath(pathname), [pathname]);
   const relationshipHref = useMemo(() => relationshipHrefForPath(pathname), [pathname]);
@@ -35,12 +38,19 @@ export default function PageAwareChat() {
     setLoading(true);
     setProgressStep(0);
     setError("");
+    setSlowResponse(false);
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const slowTimer = window.setTimeout(() => setSlowResponse(true), 30_000);
+    const timeoutTimer = window.setTimeout(() => controller.abort(), 90_000);
 
     try {
       const pageContext = collectPageContext(pathname);
       const res = await fetch("/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
           question: cleanQuestion,
           filters: {
@@ -67,10 +77,28 @@ export default function PageAwareChat() {
         },
       ]);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong");
+      setError(
+        userFacingError(
+          e,
+          controller.signal.aborted
+            ? "This is taking longer than expected. Try a shorter question or try again."
+            : "Something went wrong",
+        ),
+      );
     } finally {
+      window.clearTimeout(slowTimer);
+      window.clearTimeout(timeoutTimer);
+      abortRef.current = null;
       setLoading(false);
+      setSlowResponse(false);
     }
+  }
+
+  function cancelRequest() {
+    abortRef.current?.abort();
+    setLoading(false);
+    setSlowResponse(false);
+    setError("Request cancelled. Try a shorter question if needed.");
   }
 
   useEffect(() => {
@@ -130,15 +158,28 @@ export default function PageAwareChat() {
             />
             <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
               <div className="text-[11px] text-ink-faint">
-                Uses route, headings, selected text, and visible page text.
+                {slowResponse && loading
+                  ? "Taking longer than expected — you can wait or cancel."
+                  : "Uses route, headings, selected text, and visible page text."}
               </div>
-              <button
-                type="submit"
-                disabled={loading || !question.trim()}
-                className="rounded bg-accent px-3 py-2 text-xs font-semibold text-white hover:bg-accent-strong disabled:opacity-50"
-              >
-                {loading ? "Running" : "Ask"}
-              </button>
+              <div className="flex gap-2">
+                {loading ? (
+                  <button
+                    type="button"
+                    onClick={cancelRequest}
+                    className="rounded border border-line bg-white px-3 py-2 text-xs font-semibold text-ink-soft"
+                  >
+                    Cancel
+                  </button>
+                ) : null}
+                <button
+                  type="submit"
+                  disabled={loading || !question.trim()}
+                  className="rounded bg-accent px-3 py-2 text-xs font-semibold text-white hover:bg-accent-strong disabled:opacity-50"
+                >
+                  {loading ? "Running" : "Ask"}
+                </button>
+              </div>
             </div>
           </form>
 

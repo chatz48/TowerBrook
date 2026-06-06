@@ -23,6 +23,7 @@ import {
   ThemeTag,
 } from "@/app/components/ui";
 import ExpertActions from "@/app/components/ExpertActions";
+import CallNotesPanel from "@/app/components/CallNotesPanel";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import { expertReadiness } from "@/lib/investment-readiness";
 import ReadinessBadge from "@/app/components/ReadinessBadge";
@@ -116,6 +117,9 @@ export default async function ExpertPage({
                     </Link>
                     <Link href={`/ask?expert=${expert.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
                       Use in Copilot
+                    </Link>
+                    <Link href={`/reports?expert=${expert.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
+                      Use in report
                     </Link>
                   </div>
                 </div>
@@ -329,6 +333,7 @@ export default async function ExpertPage({
                 </>
               )}
             </section>
+            <CallNotesPanel expertId={expert.id} expertName={expert.name} />
             <div id="call-actions">
               <ExpertActions expertId={expert.id} expertName={expert.name} />
             </div>

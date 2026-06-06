@@ -263,7 +263,7 @@ function DiscoverPageContent() {
               disabled={loadingJob || !selectedLead}
               className="ee-button ee-button-primary disabled:opacity-50"
             >
-              {loadingJob ? "Checking..." : "Run live enrichment"}
+              {loadingJob ? "Checking..." : "Refresh research queue"}
             </button>
           </div>
         </header>
@@ -282,7 +282,7 @@ function DiscoverPageContent() {
           <InsightMetric
             label="Missing advisor names"
             value={DISCOVERY.coverage.advisor_gaps_with_no_named_expert}
-            detail="Research-gated coverage gaps"
+            detail="Needs verification before call-ready"
           />
           <InsightMetric
             label="Visible now"
@@ -395,8 +395,8 @@ function DiscoverPageContent() {
             <section className="ee-panel rounded-lg p-5">
               <div className="ee-label text-ink">Job status</div>
               <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">
-                Live enrichment checks public sources for identity resolution, more evidence, or a
-                named person behind an advisor organization. Static queues remain usable in demo mode.
+                Refresh uses public sources to find new experts and companies. When live discovery
+                is unavailable, you can still review the research queue below.
               </p>
               {jobError ? (
                 <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-[12px] leading-relaxed text-amber-800">

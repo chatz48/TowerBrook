@@ -5,16 +5,18 @@ import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
   { href: "/", label: "Command Centre", match: "/" },
-  { href: "/campaign", label: "Origination Desk", match: "/campaign" },
-  { href: "/experts", label: "Experts", match: "/experts" },
-  { href: "/companies", label: "Companies", match: "/companies" },
-  { href: "/ask", label: "AI Copilot", match: "/ask" },
+  { href: "/campaign", label: "Origination", match: "/campaign" },
+  { href: "/experts", label: "Explore", match: "/experts" },
+  { href: "/ask", label: "Copilot", match: "/ask" },
 ];
 
-const ADMIN_ITEMS = [
+const MORE_ITEMS = [
+  { href: "/companies", label: "Companies", match: "/companies" },
   { href: "/discover", label: "Research Queue", match: "/discover" },
+  { href: "/reports", label: "Meeting packs", match: "/reports" },
+  { href: "/graph", label: "Relationship graph", match: "/graph" },
+  { href: "/deals", label: "Deal evidence", match: "/deals" },
   { href: "/sources", label: "Sources", match: "/sources" },
-  { href: "/deals", label: "Deal Evidence", match: "/deals" },
   { href: "/ingest", label: "Ingest", match: "/ingest" },
 ];
 
@@ -33,7 +35,7 @@ export default function AppShellNav({ mobile = false }: { mobile?: boolean }) {
       {NAV_ITEMS.map((item) => (
         <NavLink key={item.href} item={item} pathname={pathname} mobile={mobile} />
       ))}
-      <AdminDropdown pathname={pathname} mobile={mobile} />
+      <MoreDropdown pathname={pathname} mobile={mobile} />
     </nav>
   );
 }
@@ -65,8 +67,8 @@ function NavLink({
   );
 }
 
-function AdminDropdown({ pathname, mobile }: { pathname: string; mobile: boolean }) {
-  const active = ADMIN_ITEMS.some(
+function MoreDropdown({ pathname, mobile }: { pathname: string; mobile: boolean }) {
+  const active = MORE_ITEMS.some(
     (item) => pathname === item.href || pathname.startsWith(item.match),
   );
 
@@ -77,7 +79,7 @@ function AdminDropdown({ pathname, mobile }: { pathname: string; mobile: boolean
           active ? "text-accent" : "text-ink hover:text-accent"
         }`}
       >
-        Admin
+        More
         <span className="ml-1 text-[10px] text-ink-faint"> v</span>
         {active ? (
           <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-accent" />
@@ -88,7 +90,7 @@ function AdminDropdown({ pathname, mobile }: { pathname: string; mobile: boolean
           mobile ? "left-2" : "right-0"
         }`}
       >
-        {ADMIN_ITEMS.map((item) => {
+        {MORE_ITEMS.map((item) => {
           const itemActive = pathname === item.href || pathname.startsWith(item.match);
           return (
             <Link

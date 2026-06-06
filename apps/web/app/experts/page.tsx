@@ -1,20 +1,16 @@
 import Link from "next/link";
 import { getCompanies, getExperts } from "@/lib/data";
 import { getAdvisorExpertGaps, getExpertDiscoveryCandidates } from "@/lib/expert-discovery";
-import { EXPERT_TYPE_LABEL } from "@/lib/labels";
 import { rankExperts } from "@/lib/score";
 import { THEME_BY_ID, THEMES, THEME_SPECIALTIES } from "@/lib/themes";
 import { towerBrookExpertScore } from "@/lib/towerbrook";
-import type { Expert } from "@/lib/types";
-import { Badge } from "@/app/components/ui";
-import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import { getThemeFocus } from "@/lib/theme-focus-server";
 import { isThemeFocus, matchesThemeFocus, type ThemeFocus } from "@/lib/theme-focus";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 import ExpertFilters from "./ExpertFilters";
 import { expertReadiness } from "@/lib/investment-readiness";
-import ReadinessBadge from "@/app/components/ReadinessBadge";
+import ExpertCallList from "./ExpertCallList";
 
 export default async function ExpertsPage({
   searchParams,
@@ -145,195 +141,25 @@ export default async function ExpertsPage({
               Fill gaps from research queue
             </Link>
           </div>
-          <div className="overflow-x-auto">
-            <table className="ee-table min-w-[1480px]">
-              <thead>
-                <tr>
-                  <th className="w-14">#</th>
-                  <th>Score</th>
-                  <th>Expert</th>
-                  <th>Specialty</th>
-                  <th>Why call</th>
-                  <th>Companies they can unlock</th>
-                  <th>Contact</th>
-                  <th>Readiness</th>
-                  <th>Relationship path</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ranked.slice(0, 36).map(({ expert, score }, index) => {
-                  const towerBrook = towerBrookExpertScore(expert, companiesById);
-                  const readiness = expertReadiness(expert);
-                  return (
-                    <tr key={expert.id}>
-                      <td>
-                        <span className="inline-grid h-8 w-8 place-items-center rounded bg-[#f1f4f9] text-[16px] font-semibold text-accent">
-                          {index + 1}
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap text-[11px] text-ink-soft">
-                        <div className="text-[15px] font-semibold tabular-nums text-ink">{score.total}</div>
-                        <div title={`Type ${score.base}; edges ${score.edges}; signals ${score.signals}; recency ${score.recency}; access ${score.access}; cross-theme ${score.crossTheme}`}>
-                          type {score.base} · edges {score.edges}
-                        </div>
-                      </td>
-                      <td className="min-w-[240px]">
-                        <Link href={`/experts/${expert.id}`} className="ee-link">
-                          {expert.name}
-                        </Link>
-                        <div className="mt-0.5 text-[11px] text-ink-soft">{expert.headline}</div>
-                        <div className="mt-0.5 text-[11px] text-ink-faint">{expert.org ?? expert.location ?? EXPERT_TYPE_LABEL[expert.type]}</div>
-                      </td>
-                      <td className="max-w-[220px] text-[11px] text-ink-soft">
-                        <span className="line-clamp-3">
-                          {(expert.specialties?.length ? expert.specialties : [EXPERT_TYPE_LABEL[expert.type]]).join(", ")}
-                        </span>
-                      </td>
-                      <td className="max-w-[340px] text-[11px] leading-relaxed text-ink-soft">
-                        <span className="line-clamp-3">
-                          {expert.news?.[0]?.headline ?? expert.signals?.[0] ?? expert.whyRelevant}
-                        </span>
-                      </td>
-                      <td className="max-w-[270px] text-[11px] text-ink-soft">
-                        <span className="line-clamp-3">
-                          {expert.companies
-                            .map((link) => companyNames[link.companyId] ?? link.companyId)
-                            .slice(0, 5)
-                            .join(", ") || "Ask for target introductions"}
-                        </span>
-                      </td>
-                      <td>
-                        <ContactLinks expert={expert} />
-                      </td>
-                      <td className="max-w-[170px]">
-                        <ReadinessBadge badge={readiness} compact />
-                        <div className="mt-1 line-clamp-2 text-[10px] leading-relaxed text-ink-faint">
-                          {readiness.reasons[0]}
-                        </div>
-                      </td>
-                      <td>
-                        <Badge
-                          className={
-                            towerBrook.isDirect
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                              : "border-line bg-white text-ink-soft"
-                          }
-                        >
-                          {towerBrook.isDirect ? towerBrook.label : "No public path mapped"}
-                        </Badge>
-                      </td>
-                      <td>
-                        <div className="flex flex-wrap gap-2">
-                          <Link href={`/experts/${expert.id}`} className="ee-button ee-button-primary min-h-8 px-3">
-                            Prepare
-                          </Link>
-                          <Link href={`/graph?focus=expert:${expert.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
-                            View relationships
-                          </Link>
-                          <WorkspaceActionButton
-                            item={{
-                              id: expert.id,
-                              kind: "call",
-                              name: expert.name,
-                              sub: expert.headline,
-                              href: `/experts/${expert.id}`,
-                              theme: expert.themes[0],
-                              note: expert.whyRelevant,
-                            }}
-                          >
-                            Save
-                          </WorkspaceActionButton>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <ExpertCallList
+            rows={ranked.slice(0, 36).map(({ expert, score }) => {
+              const towerBrook = towerBrookExpertScore(expert, companiesById);
+              return {
+                expert,
+                score,
+                readiness: expertReadiness(expert),
+                companyPreview:
+                  expert.companies
+                    .map((link) => companyNames[link.companyId] ?? link.companyId)
+                    .slice(0, 5)
+                    .join(", ") || "Ask for target introductions",
+                towerBrookLabel: towerBrook.label,
+                towerBrookDirect: towerBrook.isDirect,
+              };
+            })}
+          />
         </section>
       </div>
-    </div>
-  );
-}
-
-function ContactLinks({ expert }: { expert: Expert }) {
-  const contactFacts = expert.contactFacts ?? [];
-  const directLinks = [
-    expert.email ? { label: "Email", href: `mailto:${expert.email}`, kind: "email" as const } : null,
-    expert.linkedin ? { label: "LinkedIn", href: expert.linkedin, kind: "linkedin" as const } : null,
-  ].filter((link): link is { label: string; href: string; kind: "email" | "linkedin" } => Boolean(link));
-
-  const introFacts = contactFacts
-    .filter((fact) => fact.type === "intro_path" && fact.value)
-    .map((fact) => ({
-      label: fact.evidence ?? "Intro path",
-      value: fact.value!,
-      kind: "intro" as const,
-      confidence: fact.confidence,
-      status: fact.status,
-    }));
-
-  const websiteFacts = contactFacts
-    .filter((fact) => fact.type === "website" && fact.value)
-    .map((fact) => ({
-      label: "Website",
-      value: fact.value!,
-      kind: "website" as const,
-    }));
-
-  if (!directLinks.length && !introFacts.length && !websiteFacts.length) {
-    return (
-      <Link href={`/experts/${expert.id}#call-actions`} className="ee-link text-[12px]">
-        Draft outreach
-      </Link>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-1.5 text-[12px]">
-      {directLinks.map((link) => (
-        <a
-          key={link.label}
-          href={link.href}
-          target={link.href.startsWith("http") ? "_blank" : undefined}
-          rel="noreferrer"
-          className="inline-flex items-center gap-1.5 rounded border border-line bg-white px-2 py-1 text-[11px] font-medium text-accent hover:border-accent hover:bg-[#f4f8ff] transition-colors"
-        >
-          <span className="text-[10px]">
-            {link.kind === "email" ? "✉" : "in"}
-          </span>
-          {link.label}
-        </a>
-      ))}
-      {introFacts.map((fact, index) => (
-        <span
-          key={`intro-${index}`}
-          className="inline-flex items-center gap-1 rounded border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-700"
-          title={fact.status === "verified" ? "Verified intro path" : fact.status}
-        >
-          <span className="text-[10px]">↗</span>
-          {fact.label}
-          {fact.confidence !== undefined && (
-            <span className="text-[9px] text-emerald-500">
-              {Math.round(fact.confidence * 100)}%
-            </span>
-          )}
-        </span>
-      ))}
-      {websiteFacts.map((fact, index) => (
-        <a
-          key={`web-${index}`}
-          href={fact.value.startsWith("http") ? fact.value : `https://${fact.value}`}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-1.5 rounded border border-line bg-white px-2 py-1 text-[11px] font-medium text-ink-soft hover:border-accent hover:text-accent transition-colors"
-        >
-          <span className="text-[10px]">🌐</span>
-          {fact.label}
-        </a>
-      ))}
     </div>
   );
 }

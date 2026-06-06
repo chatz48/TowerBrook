@@ -68,13 +68,18 @@ export function WorkspaceActionButton({
       ...current.filter((existing) => !(existing.id === item.id && existing.kind === item.kind)),
     ].slice(0, 30);
     writeWorkspace(next);
+    pulseBasketCounter();
   }
 
   return (
-    <button type="button" onClick={save} className={className}>
-      {saved ? "Saved" : children}
+    <button type="button" onClick={save} className={className} aria-pressed={saved}>
+      {saved ? "✓ Saved" : children}
     </button>
   );
+}
+
+export function isWorkspaceSaved(id: string, kind: WorkspaceKind): boolean {
+  return readWorkspace().some((item) => item.id === id && item.kind === kind);
 }
 
 export default function InvestorWorkspaceTray() {
@@ -98,10 +103,37 @@ export default function InvestorWorkspaceTray() {
     const names = items.slice(0, 12).map((item) => `${KIND_LABEL[item.kind]}: ${item.name}`);
     return encodeURIComponent(
       names.length
-        ? `Use this saved basket to recommend next research, outreach and memo actions: ${names.join("; ")}`
+        ? `Prepare a call plan from the saved basket: call order, objective for each call, questions to ask, and what would raise or reduce conviction. Items: ${names.join("; ")}`
         : "Explain how to use the saved basket for expert calls, company validation and memo prep.",
     );
   }, [items]);
+
+  function exportCsv() {
+    const header = "Type,Name,Status,Theme,Note,Link";
+    const rows = items.map((item) =>
+      [
+        KIND_LABEL[item.kind],
+        item.name,
+        item.status,
+        item.theme ?? "",
+        item.note ?? item.sub ?? "",
+        item.href,
+      ]
+        .map((value) => `"${String(value).replaceAll('"', '""')}"`)
+        .join(","),
+    );
+    const blob = new Blob([[header, ...rows].join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "towerbrook-basket.csv";
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function clearAll() {
+    writeWorkspace([]);
+  }
 
   function clearKind(kind: WorkspaceKind) {
     writeWorkspace(items.filter((item) => item.kind !== kind));
@@ -142,16 +174,19 @@ export default function InvestorWorkspaceTray() {
             <WorkspaceCount label="Notes" value={counts.memo} />
           </div>
 
-          <div className="grid gap-2 border-b border-line p-3 sm:grid-cols-3">
+          <div className="grid gap-2 border-b border-line p-3 sm:grid-cols-2">
             <Link href="/campaign" className="ee-button ee-button-secondary min-h-8 px-2 text-[11px]">
-              Origination desk
+              Origination
             </Link>
             <Link href={`/ask?prompt=${basketPrompt}`} className="ee-button ee-button-primary min-h-8 px-2 text-[11px]">
-              Ask AI
+              Generate call plan
             </Link>
-            <Link href="/#theme-memo" className="ee-button ee-button-secondary min-h-8 px-2 text-[11px]">
-              Theme memo
-            </Link>
+            <button type="button" onClick={exportCsv} disabled={!items.length} className="ee-button ee-button-secondary min-h-8 px-2 text-[11px] disabled:opacity-50">
+              Export CSV
+            </button>
+            <button type="button" onClick={clearAll} disabled={!items.length} className="ee-button ee-button-secondary min-h-8 px-2 text-[11px] disabled:opacity-50">
+              Clear basket
+            </button>
           </div>
 
           <div className="max-h-[58vh] overflow-y-auto p-3">
@@ -177,10 +212,13 @@ export default function InvestorWorkspaceTray() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="flex items-center gap-2 rounded-full border border-line-strong bg-white px-4 py-2.5 text-sm font-semibold text-ink shadow-lg hover:border-accent hover:text-accent"
+          className="flex items-center gap-2 rounded-full border border-line-strong bg-white px-4 py-2.5 text-sm font-semibold text-ink shadow-lg transition hover:border-accent hover:text-accent"
         >
           Basket
-          <span className="rounded-full bg-accent px-2 py-0.5 text-[11px] text-white">
+          <span
+            id="towerbrook-basket-counter"
+            className="rounded-full bg-accent px-2 py-0.5 text-[11px] text-white transition-transform"
+          >
             {items.length}
           </span>
         </button>
@@ -289,6 +327,13 @@ function subscribeWorkspace(onStoreChange: () => void) {
 function writeWorkspace(items: WorkspaceItem[]) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   window.dispatchEvent(new Event(WORKSPACE_EVENT));
+}
+
+function pulseBasketCounter() {
+  const counter = document.getElementById("towerbrook-basket-counter");
+  if (!counter) return;
+  counter.classList.add("scale-125");
+  window.setTimeout(() => counter.classList.remove("scale-125"), 250);
 }
 
 function isWorkspaceItem(item: unknown): item is WorkspaceItem {

@@ -107,15 +107,33 @@ export default async function CompanyPage({
                     sub: company.whyInteresting ?? company.description,
                     href: `/companies/${company.id}`,
                     theme: company.themes[0],
+                    status: "watchlist",
                   }}
                 >
-                  Add to watchlist
+                  Promote to target
+                </WorkspaceActionButton>
+                <WorkspaceActionButton
+                  item={{
+                    id: `${company.id}-comparable`,
+                    kind: "target",
+                    name: company.name,
+                    sub: "Comparable only — not an active target",
+                    href: `/companies/${company.id}`,
+                    theme: company.themes[0],
+                    status: "comparable",
+                  }}
+                  className="ee-button ee-button-secondary min-h-8 px-3"
+                >
+                  Mark comparable
                 </WorkspaceActionButton>
                 <Link href={`/graph?focus=company:${company.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
                   View relationships
                 </Link>
                 <Link href={`/ask?company=${company.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
                   Use in Copilot
+                </Link>
+                <Link href={`/reports?company=${company.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
+                  Use in report
                 </Link>
               </div>
             </div>
