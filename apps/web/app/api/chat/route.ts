@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     });
     if (!response) {
       return Response.json(
-        { error: "Set BACKEND_API_URL to enable tool-based chat." },
+        { error: "Live Copilot is not connected in this demo. You can still browse experts, companies, and the research queue." },
         { status: 503 },
       );
     }

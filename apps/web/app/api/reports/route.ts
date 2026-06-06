@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     });
     if (!response) {
       return Response.json(
-        { error: "Set BACKEND_API_URL to enable source-backed report generation." },
+        { error: "Live report generation is not connected in this demo. Use the memo workspace with static graph data." },
         { status: 503 },
       );
     }

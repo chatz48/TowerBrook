@@ -32,8 +32,10 @@ Produce, using markdown-free plain text with clear headers:
 1. SNAPSHOT — one line on who they are and why they matter.
 2. WHY THIS CALL — 2-3 bullets on what unique insight they can give.
 3. SMART QUESTIONS — 4-5 specific questions tailored to their background${context ? " and the investor's angle" : ""}.
-4. WATCH-OUTS — anything to be sensitive about (e.g. recent exits, current employer).
-Keep it under 250 words.`;
+4. WHAT WOULD INCREASE CONVICTION — 3 bullets on signals that would make us more bullish after the call.
+5. WHAT WOULD REDUCE CONVICTION — 3 bullets on disconfirming signals to listen for.
+6. WATCH-OUTS — anything to be sensitive about (e.g. recent exits, current employer).
+Keep it under 320 words.`;
 
     const text = await complete(SYSTEM, user);
     return Response.json({ text, grounded: true });
@@ -78,7 +80,16 @@ SMART QUESTIONS
 - Which companies would you diligence first, and which would you avoid?
 - What evidence would prove this theme is investable rather than just active?
 - Who else should we be speaking to?
-- Which banker, lawyer, operator, or former founder sees the market most clearly?
+
+WHAT WOULD INCREASE CONVICTION
+- Named operators or buyers validating repeat purchase behavior
+- Evidence of pricing power or margin expansion in the segment
+- Introductions to 2-3 proprietary targets not obvious from public lists
+
+WHAT WOULD REDUCE CONVICTION
+- Market described as winner-take-all with entrenched incumbents
+- Long sales cycles with no budget owner identified
+- Expert cannot name recent transactions or credible comparables
 ${angle ? `- On the stated angle (${angle}): what would you de-risk first?` : ""}
 
 WATCH-OUTS

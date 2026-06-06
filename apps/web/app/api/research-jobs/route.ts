@@ -1,4 +1,5 @@
 import { callBackendApi } from "@/lib/backend-api";
+import { backendUnavailableMessage } from "@/lib/user-errors";
 
 export async function POST(request: Request) {
   try {
@@ -9,7 +10,7 @@ export async function POST(request: Request) {
     });
     if (!response) {
       return Response.json(
-        { error: "Set BACKEND_API_URL to create research jobs." },
+        { error: backendUnavailableMessage("Live enrichment"), demoMode: true },
         { status: 503 },
       );
     }
