@@ -17,7 +17,8 @@
     "origination:jobs": "node scripts/build-origination-research-jobs.mjs",
     "government-investment:census": "node scripts/build-government-investment-census.mjs",
     "db:seed": "node scripts/seed-supabase.mjs",
-    "db:seed:graph": "node scripts/seed-people-graph.mjs"
+    "db:seed:graph": "node scripts/seed-people-graph.mjs",
+    "product:score": "node scripts/score-product-readiness.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.100.1",

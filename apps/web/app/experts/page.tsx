@@ -13,6 +13,8 @@ import { getThemeFocus } from "@/lib/theme-focus-server";
 import { matchesThemeFocus } from "@/lib/theme-focus";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
+import { expertReadiness } from "@/lib/investment-readiness";
+import ReadinessBadge from "@/app/components/ReadinessBadge";
 
 const EXPERT_TYPES: ExpertType[] = [
   "ex-founder",
@@ -38,6 +40,7 @@ export default async function ExpertsPage({
   const selectedTheme = singleParam(params.theme);
   const selectedSpecialty = singleParam(params.specialty) ?? "all";
   const selectedType = singleParam(params.type) ?? "all";
+  const selectedReadiness = singleParam(params.readiness) ?? "all";
   const query = (singleParam(params.q) ?? "").trim().toLowerCase();
   const activeTheme =
     selectedTheme && selectedTheme !== "all" ? (selectedTheme as ThemeId) : themeFocus;
@@ -52,6 +55,12 @@ export default async function ExpertsPage({
   const filteredExperts = scopedExperts
     .filter((expert) => selectedType === "all" || expert.type === selectedType)
     .filter((expert) => selectedSpecialty === "all" || expert.specialties?.includes(selectedSpecialty))
+    .filter((expert) => {
+      const readiness = expertReadiness(expert);
+      if (selectedReadiness === "all") return true;
+      if (selectedReadiness === "actionable") return readiness.level === "call-ready" || readiness.level === "verify-contact";
+      return readiness.level === selectedReadiness;
+    })
     .filter((expert) => {
       if (!query) return true;
       return [
@@ -117,7 +126,7 @@ export default async function ExpertsPage({
         </header>
 
         <form className="ee-panel mb-5 rounded-lg p-4" action="/experts">
-          <div className="grid gap-3 md:grid-cols-[1.1fr_1.15fr_0.9fr_minmax(180px,1fr)_auto] md:items-end">
+          <div className="grid gap-3 md:grid-cols-[1.1fr_1.15fr_0.9fr_0.95fr_minmax(180px,1fr)_auto] md:items-end">
             <FilterSelect label="Theme" name="theme" value={activeTheme}>
               <option value="all">All three themes</option>
               {THEMES.map((theme) => (
@@ -141,6 +150,14 @@ export default async function ExpertsPage({
                   {EXPERT_TYPE_LABEL[type]}
                 </option>
               ))}
+            </FilterSelect>
+            <FilterSelect label="Readiness" name="readiness" value={selectedReadiness}>
+              <option value="all">All readiness states</option>
+              <option value="actionable">Actionable now</option>
+              <option value="call-ready">Call-ready</option>
+              <option value="verify-contact">Find contact path</option>
+              <option value="verify-identity">Verify identity</option>
+              <option value="research-needed">Research needed</option>
             </FilterSelect>
             <label className="block">
               <span className="ee-label text-ink-faint">Search people, firms or companies</span>
@@ -185,24 +202,33 @@ export default async function ExpertsPage({
               <thead>
                 <tr>
                   <th className="w-14">#</th>
+                  <th>Score</th>
                   <th>Expert</th>
                   <th>Specialty</th>
                   <th>Why call</th>
                   <th>Companies they can unlock</th>
                   <th>Contact</th>
+                  <th>Readiness</th>
                   <th>Relationship path</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {ranked.slice(0, 36).map(({ expert }, index) => {
+                {ranked.slice(0, 36).map(({ expert, score }, index) => {
                   const towerBrook = towerBrookExpertScore(expert, companiesById);
+                  const readiness = expertReadiness(expert);
                   return (
                     <tr key={expert.id}>
                       <td>
                         <span className="inline-grid h-8 w-8 place-items-center rounded bg-[#f1f4f9] text-[16px] font-semibold text-accent">
                           {index + 1}
                         </span>
+                      </td>
+                      <td className="whitespace-nowrap text-[11px] text-ink-soft">
+                        <div className="text-[15px] font-semibold tabular-nums text-ink">{score.total}</div>
+                        <div title={`Type ${score.base}; edges ${score.edges}; signals ${score.signals}; recency ${score.recency}; access ${score.access}; cross-theme ${score.crossTheme}`}>
+                          type {score.base} · edges {score.edges}
+                        </div>
                       </td>
                       <td className="min-w-[240px]">
                         <Link href={`/experts/${expert.id}`} className="ee-link">
@@ -231,6 +257,12 @@ export default async function ExpertsPage({
                       </td>
                       <td>
                         <ContactLinks expert={expert} />
+                      </td>
+                      <td className="max-w-[170px]">
+                        <ReadinessBadge badge={readiness} compact />
+                        <div className="mt-1 line-clamp-2 text-[10px] leading-relaxed text-ink-faint">
+                          {readiness.reasons[0]}
+                        </div>
                       </td>
                       <td>
                         <Badge

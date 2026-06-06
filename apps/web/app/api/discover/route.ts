@@ -1,5 +1,6 @@
 import { callBackendApi } from "@/lib/backend-api";
 import { getTheme } from "@/lib/themes";
+import { configuredSearchProviders, liveSearch } from "@/lib/live-search";
 
 export async function POST(request: Request) {
   try {
@@ -117,14 +118,18 @@ export async function POST(request: Request) {
     });
 
     if (!job) {
+      const providerSearch = await safeLiveSearch(query || defaultQueries[selectedJobType]);
       return Response.json(
         {
           error:
-            "Live enrichment is not connected in this demo. You can still review the static coverage queue and use the suggested searches.",
+            providerSearch.results.length > 0
+              ? "Backend enrichment is not connected, but configured live search returned sources for analyst review."
+              : "Live enrichment is not connected in this demo. You can still review the static coverage queue and use the suggested searches.",
           demoMode: true,
           candidates: [],
+          liveSearch: providerSearch,
         },
-        { status: 503 },
+        { status: providerSearch.results.length > 0 ? 200 : 503 },
       );
     }
 
@@ -229,5 +234,21 @@ function safeDomain(value: string) {
     return new URL(value).hostname.replace(/^www\./, "");
   } catch {
     return undefined;
+  }
+}
+
+async function safeLiveSearch(query: string) {
+  const providers = configuredSearchProviders();
+  if (!providers.length) return { configured: false, providers, results: [] };
+  try {
+    const results = await liveSearch(query, 6);
+    return { configured: true, providers, results };
+  } catch (error) {
+    return {
+      configured: true,
+      providers,
+      results: [],
+      error: error instanceof Error ? error.message : "Live search failed",
+    };
   }
 }
