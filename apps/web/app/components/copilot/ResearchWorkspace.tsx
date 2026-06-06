@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import type { AskResponse, CopilotFilters, SourceRecord } from "./types";
+import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
+import type { AskResponse, CopilotFilters, PageContext, SourceRecord } from "./types";
 import {
   isThemeFocus,
   publishThemeFocus,
@@ -96,6 +97,7 @@ export default function ResearchWorkspace({
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const workspaceItems = useWorkspaceItems();
 
   async function submit(nextQuestion = question, nextFilters = filters) {
     const cleanQuestion = nextQuestion.trim();
@@ -107,7 +109,11 @@ export default function ResearchWorkspace({
       const res = await fetch("/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: cleanQuestion, filters: nextFilters }),
+        body: JSON.stringify({
+          question: cleanQuestion,
+          filters: nextFilters,
+          pageContext: buildWorkspacePageContext(workspaceItems, nextFilters),
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Request failed");
@@ -124,11 +130,18 @@ export default function ResearchWorkspace({
     let cancelled = false;
 
     async function loadInitialAnswer() {
+      setQuestion(startingQuestion);
+      setLoading(true);
+      setError("");
       try {
         const res = await fetch("/api/ask", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ question: startingQuestion, filters: startingFilters }),
+          body: JSON.stringify({
+            question: startingQuestion,
+            filters: startingFilters,
+            pageContext: buildWorkspacePageContext(readWorkspaceItemsSnapshot(), startingFilters),
+          }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error ?? "Request failed");
@@ -170,8 +183,6 @@ export default function ResearchWorkspace({
     [initialTheme],
   );
 
-  const workspaceItems = useWorkspaceItems();
-
   return (
     <div className="min-h-[calc(100vh-3.5rem)] bg-[#f7f8fb] text-[#111827]">
       <div className="grid md:grid-cols-[220px_minmax(0,1fr)] 2xl:grid-cols-[260px_minmax(0,1fr)_320px]">
@@ -186,9 +197,9 @@ export default function ResearchWorkspace({
           <div className="border-b border-[#e6eaf0] px-5 py-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <h1 className="text-xl font-semibold tracking-tight">Research Copilot</h1>
+                <h1 className="text-xl font-semibold tracking-tight">AI Copilot</h1>
                 <p className="mt-1 text-xs text-[#667085]">
-                  Structured answers over the sourced expert and company graph.
+                  Ask questions, action the current basket, and save useful outputs back into the workflow.
                 </p>
               </div>
             </div>
@@ -253,6 +264,12 @@ export default function ResearchWorkspace({
 
           {tab === "ask" ? (
             <div className="space-y-3 px-5 py-4">
+              <BasketContextPanel
+                items={workspaceItems}
+                theme={filters.theme}
+                onOpenNotes={() => setTab("notes")}
+                onPrompt={(prompt) => submit(prompt)}
+              />
               <MessageFrame question={answer?.input_context.question ?? question} />
               {error ? (
                 <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
@@ -472,9 +489,11 @@ function StructuredAnswer({
   onSourceSelect: (sourceId: string) => void;
   onPrompt: (prompt: string) => void;
 }) {
+  const theme = themeLabel(answer.input_context.theme);
+
   return (
     <div className="space-y-3">
-      <div className="flex items-start gap-3">
+      <div className="flex flex-wrap items-start gap-3">
         <Avatar label="EE" active />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-xs">
@@ -486,6 +505,21 @@ function StructuredAnswer({
           </div>
           <p className="mt-1 text-sm text-[#344054]">{answer.answer_summary}</p>
         </div>
+        <WorkspaceActionButton
+          item={{
+            id: `copilot-${answer.generated_at}`,
+            kind: "memo",
+            name: `AI synthesis: ${theme}`,
+            sub: answer.input_context.question,
+            href: "/ask",
+            theme,
+            note: answer.answer_summary,
+            status: "memo input",
+          }}
+          className="rounded border border-[#d8dee8] bg-white px-3 py-2 text-xs font-semibold text-[#344054] transition hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
+        >
+          Save to basket
+        </WorkspaceActionButton>
       </div>
 
       <Panel
@@ -495,7 +529,7 @@ function StructuredAnswer({
         onSourceSelect={onSourceSelect}
       >
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] table-fixed border-collapse text-left text-xs">
+          <table className="w-full min-w-[760px] table-fixed border-collapse text-left text-xs">
             <thead>
               <tr className="border-b border-[#e6eaf0] bg-[#f8fafc] text-[10px] uppercase tracking-[0.12em] text-[#667085]">
                 <th className="w-11 px-3 py-2">#</th>
@@ -503,6 +537,7 @@ function StructuredAnswer({
                 <th className="w-[190px] px-3 py-2">Role & access</th>
                 <th className="px-3 py-2">Why top-ranked</th>
                 <th className="w-[90px] px-3 py-2">Evidence</th>
+                <th className="w-[82px] px-3 py-2">Basket</th>
               </tr>
             </thead>
             <tbody>
@@ -527,6 +562,23 @@ function StructuredAnswer({
                   <td className="px-3 py-2.5 text-[#344054]">
                     {expert.citations.length} cited source{expert.citations.length === 1 ? "" : "s"}
                   </td>
+                  <td className="px-3 py-2.5">
+                    <WorkspaceActionButton
+                      item={{
+                        id: expert.expert_id,
+                        kind: "call",
+                        name: expert.name,
+                        sub: `${expert.title}, ${expert.firm}`,
+                        href: `/experts/${expert.expert_id}`,
+                        theme,
+                        note: expert.why,
+                        status: "copilot shortlist",
+                      }}
+                      className="rounded border border-[#d8dee8] bg-white px-2 py-1.5 text-[11px] font-semibold text-[#344054] hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
+                    >
+                      Save
+                    </WorkspaceActionButton>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -543,7 +595,7 @@ function StructuredAnswer({
         <Panel title="2. Ranked companies" meta="Target evidence" citations={collectCitations(answer.ranked_companies)} onSourceSelect={onSourceSelect}>
           <div className="space-y-2">
             {answer.ranked_companies.map((company) => (
-              <div key={company.company_id} className="grid grid-cols-[26px_minmax(0,1fr)_58px] gap-2 border-b border-[#edf0f5] pb-2 last:border-0 last:pb-0">
+              <div key={company.company_id} className="grid grid-cols-[26px_minmax(0,1fr)_58px_70px] gap-2 border-b border-[#edf0f5] pb-2 last:border-0 last:pb-0">
                 <div className="grid h-6 place-items-center rounded bg-[#eef5ff] font-mono text-xs text-[#0b5bd3]">
                   {company.rank}
                 </div>
@@ -558,6 +610,23 @@ function StructuredAnswer({
                 <div className="text-right">
                   <div className="font-mono text-sm font-semibold">{company.expert_density}</div>
                   <div className="text-[10px] uppercase tracking-[0.12em] text-[#667085]">Edges</div>
+                </div>
+                <div className="text-right">
+                  <WorkspaceActionButton
+                    item={{
+                      id: company.company_id,
+                      kind: "target",
+                      name: company.name,
+                      sub: `${company.category} / ${company.stage}`,
+                      href: `/companies/${company.company_id}`,
+                      theme,
+                      note: company.why,
+                      status: "copilot target",
+                    }}
+                    className="rounded border border-[#d8dee8] bg-white px-2 py-1.5 text-[11px] font-semibold text-[#344054] hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
+                  >
+                    Save
+                  </WorkspaceActionButton>
                 </div>
               </div>
             ))}
@@ -770,6 +839,129 @@ function MessageFrame({ question }: { question: string }) {
   );
 }
 
+function BasketContextPanel({
+  items,
+  theme,
+  onOpenNotes,
+  onPrompt,
+}: {
+  items: WorkspaceItem[];
+  theme: string;
+  onOpenNotes: () => void;
+  onPrompt: (prompt: string) => void;
+}) {
+  const calls = items.filter((item) => item.kind === "call");
+  const targets = items.filter((item) => item.kind === "target");
+  const memos = items.filter((item) => item.kind === "memo");
+  const selectedItems = items.slice(0, 5);
+  const quickActions = [
+    {
+      label: "Gather research",
+      prompt: buildBasketPrompt(
+        items,
+        theme,
+        "Gather the next research needed for these saved experts, companies, and notes. Prioritise missing evidence, source checks, and companies to validate.",
+      ),
+    },
+    {
+      label: "Draft outreach",
+      prompt: buildBasketPrompt(
+        items,
+        theme,
+        "Draft concise expert outreach for the saved people and explain which saved companies or diligence questions each outreach should mention.",
+      ),
+    },
+    {
+      label: "Prepare calls",
+      prompt: buildBasketPrompt(
+        items,
+        theme,
+        "Prepare a call plan from the saved basket: call order, objective for each call, questions to ask, and what would raise or reduce conviction.",
+      ),
+    },
+    {
+      label: "Draft memo section",
+      prompt: buildBasketPrompt(
+        items,
+        theme,
+        "Draft a partner memo section using the saved basket. Include thesis, priority experts, target companies, evidence gaps, and recommended next actions.",
+      ),
+    },
+  ];
+
+  return (
+    <section className="rounded border border-[#cfd6e2] bg-[#f8fbff] p-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#344054]">
+            Basket context
+          </div>
+          <p className="mt-1 text-xs text-[#667085]">
+            Current saved context for {themeLabel(theme)} AI actions.
+          </p>
+        </div>
+        <div className="flex overflow-hidden rounded border border-[#d8dee8] bg-white">
+          <BasketStat label="Experts" value={calls.length} />
+          <BasketStat label="Companies" value={targets.length} />
+          <BasketStat label="Notes" value={memos.length} />
+        </div>
+      </div>
+
+      <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div>
+          {items.length ? (
+            <div className="flex flex-wrap gap-1.5">
+              {selectedItems.map((item) => (
+                <Link
+                  key={`${item.kind}:${item.id}`}
+                  href={item.href}
+                  className="rounded border border-[#d8dee8] bg-white px-2 py-1 text-[11px] font-medium text-[#344054] hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
+                >
+                  {workspaceKindLabel(item.kind)}: {item.name}
+                </Link>
+              ))}
+              {items.length > selectedItems.length ? (
+                <button
+                  type="button"
+                  onClick={onOpenNotes}
+                  className="rounded border border-[#d8dee8] bg-white px-2 py-1 text-[11px] font-medium text-[#667085] hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
+                >
+                  +{items.length - selectedItems.length} more
+                </button>
+              ) : null}
+            </div>
+          ) : (
+            <div className="rounded border border-dashed border-[#cfd6e2] bg-white px-3 py-2 text-xs text-[#667085]">
+              Basket is empty. Saved experts, companies, and AI notes will appear here.
+            </div>
+          )}
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {quickActions.map((action) => (
+            <button
+              key={action.label}
+              type="button"
+              onClick={() => onPrompt(action.prompt)}
+              className="rounded border border-[#0b5bd3] bg-white px-3 py-2 text-left text-xs font-semibold text-[#0b5bd3] hover:bg-[#eef5ff]"
+            >
+              {action.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function BasketStat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="border-r border-[#d8dee8] px-3 py-2 text-center last:border-r-0">
+      <div className="font-mono text-sm font-semibold text-[#111827]">{value}</div>
+      <div className="text-[10px] uppercase tracking-[0.12em] text-[#667085]">{label}</div>
+    </div>
+  );
+}
+
 function Panel({
   title,
   meta,
@@ -916,6 +1108,50 @@ function formatTime(value: string) {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+function buildWorkspacePageContext(
+  items: WorkspaceItem[],
+  filters: CopilotFilters,
+): PageContext {
+  const saved = items.slice(0, 16).map((item) => {
+    const detail = [workspaceKindLabel(item.kind), item.name, item.sub, item.note, item.status]
+      .filter(Boolean)
+      .join(" | ");
+    return `- ${detail}`;
+  });
+  return {
+    title: "AI Copilot",
+    pathname: "/ask",
+    headings: [
+      `Theme: ${themeLabel(filters.theme)}`,
+      `Objective: ${filters.objective}`,
+      `Saved basket items: ${items.length}`,
+    ],
+    visibleText: saved.length
+      ? `Current basket for this investment workflow:\n${saved.join("\n")}`
+      : "Current basket is empty.",
+  };
+}
+
+function buildBasketPrompt(items: WorkspaceItem[], theme: string, instruction: string): string {
+  const saved = items.length
+    ? items
+        .slice(0, 12)
+        .map((item) => `${workspaceKindLabel(item.kind)}: ${item.name}${item.sub ? ` (${item.sub})` : ""}`)
+        .join("; ")
+    : "No saved basket items yet.";
+  return `${instruction}\n\nTheme: ${themeLabel(theme)}\nBasket: ${saved}`;
+}
+
+function themeLabel(value: string): string {
+  return THEMES.find((theme) => theme.value === value)?.label ?? value;
+}
+
+function workspaceKindLabel(kind: string): string {
+  if (kind === "call") return "Expert";
+  if (kind === "target") return "Company";
+  return "Note";
+}
+
 // ---- Research Queue Tab ----
 
 function ResearchQueueTab({
@@ -939,7 +1175,7 @@ function ResearchQueueTab({
       <div>
         <h2 className="text-sm font-semibold">Research Queue</h2>
         <p className="mt-1 text-xs text-[#667085]">
-          Discovery candidates sourced from PE deal evidence, peer fund activity, and market mapping.
+          Discovery candidates for {themeLabel(theme)} sourced from PE deal evidence, peer fund activity, and market mapping.
           Review and action each candidate to build expert coverage.
         </p>
       </div>
@@ -1073,16 +1309,19 @@ interface WorkspaceItem {
   addedAt: string;
 }
 
+const WORKSPACE_STORAGE_KEY = "towerbrook-investor-workspace-v1";
+const WORKSPACE_EVENT = "towerbrook-investor-workspace-updated";
+
 function useWorkspaceItems(): WorkspaceItem[] {
   const snapshot = useSyncExternalStore(
     (callback) => {
       const handler = () => callback();
-      window.addEventListener("towerbrook-investor-workspace-updated", handler);
-      return () => window.removeEventListener("towerbrook-investor-workspace-updated", handler);
+      window.addEventListener(WORKSPACE_EVENT, handler);
+      return () => window.removeEventListener(WORKSPACE_EVENT, handler);
     },
     () => {
       try {
-        return localStorage.getItem("towerbrook-investor-workspace-v1") ?? "[]";
+        return localStorage.getItem(WORKSPACE_STORAGE_KEY) ?? "[]";
       } catch {
         return "[]";
       }
@@ -1091,12 +1330,25 @@ function useWorkspaceItems(): WorkspaceItem[] {
   );
 
   return useMemo(() => {
-    try {
-      return JSON.parse(snapshot);
-    } catch {
-      return [];
-    }
+    return parseWorkspaceItems(snapshot);
   }, [snapshot]);
+}
+
+function readWorkspaceItemsSnapshot(): WorkspaceItem[] {
+  try {
+    return parseWorkspaceItems(localStorage.getItem(WORKSPACE_STORAGE_KEY) ?? "[]");
+  } catch {
+    return [];
+  }
+}
+
+function parseWorkspaceItems(value: string): WorkspaceItem[] {
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
 }
 
 function NotesTab({ items }: { items: WorkspaceItem[] }) {

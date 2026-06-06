@@ -33,9 +33,9 @@ const DEFAULT_STATUS: Record<WorkspaceKind, string> = {
 };
 
 const KIND_LABEL: Record<WorkspaceKind, string> = {
-  call: "Call tray",
-  target: "Target watchlist",
-  memo: "Copilot notes",
+  call: "Experts to call",
+  target: "Companies to validate",
+  memo: "Memo notes",
 };
 
 export function WorkspaceActionButton({
@@ -94,6 +94,14 @@ export default function InvestorWorkspaceTray() {
     }),
     [items],
   );
+  const basketPrompt = useMemo(() => {
+    const names = items.slice(0, 12).map((item) => `${KIND_LABEL[item.kind]}: ${item.name}`);
+    return encodeURIComponent(
+      names.length
+        ? `Use this saved basket to recommend next research, outreach and memo actions: ${names.join("; ")}`
+        : "Explain how to use the saved basket for expert calls, company validation and memo prep.",
+    );
+  }, [items]);
 
   function clearKind(kind: WorkspaceKind) {
     writeWorkspace(items.filter((item) => item.kind !== kind));
@@ -112,10 +120,10 @@ export default function InvestorWorkspaceTray() {
           <div className="flex items-start justify-between gap-3 border-b border-line bg-[#fbfcfe] p-3">
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                Saved work
+                Current basket
               </div>
               <div className="mt-1 text-xs text-ink-faint">
-                Calls, targets, and Copilot notes saved from the command centre.
+                Experts, companies, and AI notes selected for this theme workflow.
               </div>
             </div>
             <button
@@ -134,6 +142,18 @@ export default function InvestorWorkspaceTray() {
             <WorkspaceCount label="Notes" value={counts.memo} />
           </div>
 
+          <div className="grid gap-2 border-b border-line p-3 sm:grid-cols-3">
+            <Link href="/campaign" className="ee-button ee-button-secondary min-h-8 px-2 text-[11px]">
+              Origination desk
+            </Link>
+            <Link href={`/ask?prompt=${basketPrompt}`} className="ee-button ee-button-primary min-h-8 px-2 text-[11px]">
+              Ask AI
+            </Link>
+            <Link href="/#theme-memo" className="ee-button ee-button-secondary min-h-8 px-2 text-[11px]">
+              Theme memo
+            </Link>
+          </div>
+
           <div className="max-h-[58vh] overflow-y-auto p-3">
             {items.length ? (
               (["call", "target", "memo"] as const).map((kind) => (
@@ -147,8 +167,8 @@ export default function InvestorWorkspaceTray() {
               ))
             ) : (
               <div className="rounded-md border border-line bg-paper p-4 text-[13px] leading-relaxed text-ink-soft">
-                Add experts to the call tray, companies to the target watchlist, or evidence to
-                Copilot notes from profile pages.
+                Add experts, companies, or AI notes from the workflow pages. The basket
+                becomes the shared context for Origination Desk, AI Copilot, and the theme memo.
               </div>
             )}
           </div>
@@ -159,7 +179,7 @@ export default function InvestorWorkspaceTray() {
           onClick={() => setOpen(true)}
           className="flex items-center gap-2 rounded-full border border-line-strong bg-white px-4 py-2.5 text-sm font-semibold text-ink shadow-lg hover:border-accent hover:text-accent"
         >
-          Saved work
+          Basket
           <span className="rounded-full bg-accent px-2 py-0.5 text-[11px] text-white">
             {items.length}
           </span>
@@ -189,44 +209,51 @@ function WorkspaceSection({
   onClear: (kind: WorkspaceKind) => void;
   onRemove: (item: WorkspaceItem) => void;
 }) {
-  if (!items.length) return null;
   return (
     <section className="mb-4 last:mb-0">
       <div className="mb-2 flex items-center justify-between gap-3">
         <h2 className="ee-label text-ink">{KIND_LABEL[kind]}</h2>
-        <button type="button" onClick={() => onClear(kind)} className="text-[12px] font-semibold text-accent">
-          Clear
-        </button>
+        {items.length ? (
+          <button type="button" onClick={() => onClear(kind)} className="text-[12px] font-semibold text-accent">
+            Clear
+          </button>
+        ) : null}
       </div>
       <div className="space-y-2">
-        {items.map((item) => (
-          <div key={`${item.kind}:${item.id}`} className="rounded-md border border-line bg-white p-3">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <Link href={item.href} className="ee-link font-semibold">
-                  {item.name}
-                </Link>
-                {item.sub ? (
-                  <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-ink-soft">
-                    {item.sub}
-                  </p>
-                ) : null}
-                <div className="mt-2 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.12em] text-ink-faint">
-                  <span>{item.status}</span>
-                  {item.theme ? <span>{item.theme}</span> : null}
+        {items.length ? (
+          items.map((item) => (
+            <div key={`${item.kind}:${item.id}`} className="rounded-md border border-line bg-white p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <Link href={item.href} className="ee-link font-semibold">
+                    {item.name}
+                  </Link>
+                  {item.sub ? (
+                    <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-ink-soft">
+                      {item.sub}
+                    </p>
+                  ) : null}
+                  <div className="mt-2 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.12em] text-ink-faint">
+                    <span>{item.status}</span>
+                    {item.theme ? <span>{item.theme}</span> : null}
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => onRemove(item)}
+                  className="grid h-7 w-7 shrink-0 place-items-center rounded border border-line bg-paper text-ink-faint hover:border-line-strong hover:text-ink"
+                  aria-label={`Remove ${item.name}`}
+                >
+                  x
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => onRemove(item)}
-                className="grid h-7 w-7 shrink-0 place-items-center rounded border border-line bg-paper text-ink-faint hover:border-line-strong hover:text-ink"
-                aria-label={`Remove ${item.name}`}
-              >
-                x
-              </button>
             </div>
+          ))
+        ) : (
+          <div className="rounded-md border border-dashed border-line bg-paper p-3 text-[12px] text-ink-faint">
+            No {KIND_LABEL[kind].toLowerCase()} saved yet.
           </div>
-        ))}
+        )}
       </div>
     </section>
   );

@@ -1,12 +1,52 @@
 import sourceRegister from "@/data/source-register.json";
+import warmPathData from "@/data/towerbrook-warm-paths.json";
 import candidates from "@/data/candidates.json";
 import deals from "@/data/deals.json";
 import { ConfidenceBars } from "@/app/components/ui";
+import { getExperts } from "@/lib/data";
 import { getThemeFocus } from "@/lib/theme-focus-server";
+
+type RegisteredSource = (typeof sourceRegister.sources)[number];
+
+function slug(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
 
 export default async function SourcesPage() {
   const themeFocus = await getThemeFocus();
-  const visibleSources = sourceRegister.sources.filter(
+  const expertsById = new Map(getExperts().map((expert) => [expert.id, expert]));
+  const warmPathSources = warmPathData.paths.flatMap((path) => {
+    const expert = expertsById.get(path.target_expert_id);
+    return path.sources.map((source, index): RegisteredSource => ({
+      source_id: `warm-path-${path.id}-${index + 1}-${slug(source.publisher ?? source.title)}`,
+      theme: expert?.themes[0] ?? "all",
+      title: source.title,
+      url: source.url,
+      source_type: "towerbrook-warm-path",
+      source_origin: "public",
+      publisher: source.publisher ?? "Source",
+      date: "2026-06-06",
+      why_useful: `Supports TowerBrook warm-intro path: ${path.intro_route}`,
+      expected_entities: ["expert", "advisor", "company"],
+      expected_relationships: ["warm_intro_path", path.path_type],
+      terminal_lane: "TowerBrook Warm Path",
+      priority: path.status === "verified" ? 1 : 2,
+      status: path.status === "verified" ? "done" : "needs_review",
+      graph_entity_refs: [
+        `expert:${path.target_expert_id}`,
+        ...(expert?.companies.map((link) => `company:${link.companyId}`) ?? []),
+      ],
+      mapped_deal_refs: [],
+    }));
+  });
+  const sourcesByUrl = new Map<string, RegisteredSource>();
+  for (const source of [...sourceRegister.sources, ...warmPathSources]) {
+    sourcesByUrl.set(source.url, source);
+  }
+  const visibleSources = [...sourcesByUrl.values()].filter(
     (source) => themeFocus === "all" || source.theme === themeFocus || source.theme === "all",
   );
   const candidateBySource = new Map(

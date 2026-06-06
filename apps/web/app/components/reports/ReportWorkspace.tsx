@@ -101,7 +101,7 @@ export default function ReportWorkspace({
               <div className="ee-label text-ink">Use this memo</div>
               <div className="mt-4 space-y-2">
                 <Link href={report.themeHref} className="ee-button ee-button-secondary w-full">
-                  Open theme workspace
+                  Open Command Centre
                 </Link>
                 <Link href="/experts" className="ee-button ee-button-secondary w-full">
                   Prepare expert calls

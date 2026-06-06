@@ -9,11 +9,16 @@ import {
   OWNERSHIP_LABEL,
   OWNERSHIP_STYLE,
 } from "@/lib/labels";
+import { THEME_BY_ID } from "@/lib/themes";
 import { Badge, ConfidenceBars } from "@/app/components/ui";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import { getThemeFocus } from "@/lib/theme-focus-server";
 import { matchesThemeFocus } from "@/lib/theme-focus";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
+
+function askHref(prompt: string) {
+  return `/ask?prompt=${encodeURIComponent(prompt)}`;
+}
 
 export default async function CompaniesPage() {
   const [themeFocus, includeTowerBrookEmployees] = await Promise.all([
@@ -34,7 +39,15 @@ export default async function CompaniesPage() {
   const derivedCandidates = getDerivedCompanyCandidates().filter((company) =>
     matchesThemeFocus(company.themes, themeFocus),
   );
+  const companyById = new Map(companies.map((company) => [company.id, company]));
   const dealCounts = await dealCoverage();
+  const themeLabel = themeFocus === "all" ? "All three themes" : THEME_BY_ID[themeFocus].name;
+  const targetReviewPrompt = [
+    `Prioritise the company validation workflow for ${themeLabel}.`,
+    `Actionable targets: ${actionableTargets.slice(0, 8).map((company) => `${company.name} (${company.expertCount} expert links)`).join("; ")}`,
+    `Research candidates awaiting review: ${derivedCandidates.slice(0, 8).map((company) => company.name).join("; ") || "None"}`,
+    "Recommend which companies should go into the basket, which experts to call first, and what evidence gaps block a memo.",
+  ].join("\n");
 
   return (
     <div className="ee-shell px-3 py-5 sm:px-5">
@@ -47,15 +60,18 @@ export default async function CompaniesPage() {
               validation paths, and investment relevance.
             </p>
           </div>
-          <div className="flex gap-2">
-            <Link href="/graph" className="ee-button ee-button-secondary">
-              Relationship graph
+          <div className="flex flex-wrap gap-2">
+            <Link href={askHref(targetReviewPrompt)} className="ee-button ee-button-primary">
+              Ask AI to rank targets
             </Link>
-            <Link href="/ask" className="ee-button ee-button-secondary">
-              Build in Copilot
+            <Link href="/campaign#targets" className="ee-button ee-button-secondary">
+              Add to plan
             </Link>
-            <Link href="/deals" className="ee-button ee-button-primary">
-              Review deal evidence
+            <Link href="/#theme-memo" className="ee-button ee-button-secondary">
+              Theme memo
+            </Link>
+            <Link href="/experts" className="ee-button ee-button-secondary">
+              Review experts
             </Link>
           </div>
         </header>
@@ -118,6 +134,14 @@ export default async function CompaniesPage() {
                           <Link href={`/graph?focus=company:${company.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
                             View relationships
                           </Link>
+                          <Link
+                            href={askHref(
+                              `Prepare a diligence brief for ${company.name} in ${themeLabel}. Explain why it is interesting, which named experts to call, what source evidence supports it, and what gaps block memo readiness.`,
+                            )}
+                            className="ee-button ee-button-secondary min-h-8 px-3"
+                          >
+                            Ask AI
+                          </Link>
                           <WorkspaceActionButton
                             item={{
                               id: company.id,
@@ -154,7 +178,7 @@ export default async function CompaniesPage() {
             </Link>
           </div>
           <div className="overflow-x-auto">
-            <table className="ee-table min-w-[1120px]">
+            <table className="ee-table min-w-[1240px]">
               <thead>
                 <tr>
                   <th>Company candidate</th>
@@ -163,38 +187,76 @@ export default async function CompaniesPage() {
                   <th>Named experts</th>
                   <th>PE deals</th>
                   <th>Why surfaced</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {derivedCandidates.slice(0, 40).map((company) => (
-                  <tr key={company.candidate_id} className="hover:bg-[#fbfcff]">
-                    <td className="min-w-[220px]">
-                      {company.canonical_match.company_id ? (
-                        <Link href={`/companies/${company.canonical_match.company_id}`} className="ee-link">
-                          {company.name}
-                        </Link>
-                      ) : (
-                        <span className="font-semibold">{company.name}</span>
-                      )}
-                      <div className="mt-0.5 text-[11px] text-ink-soft">{company.owner ?? "Ownership to verify"}</div>
-                    </td>
-                    <td>
-                      <Badge className={COMPANY_CATEGORY_STYLE[company.category]}>
-                        {COMPANY_CATEGORY_LABEL[company.category]}
-                      </Badge>
-                    </td>
-                    <td className="text-[11px] text-ink-soft">{company.ownership_status.replaceAll("-", " ")}</td>
-                    <td className="max-w-[280px] text-[11px] text-ink-soft">
-                      <span className="line-clamp-2">
-                        {company.expert_connections.map((expert) => expert.name).join(", ") || "No named expert yet"}
-                      </span>
-                    </td>
-                    <td className="font-semibold tabular-nums">{company.deal_connections.length}</td>
-                    <td className="max-w-[360px] text-[11px] text-ink-soft">
-                      <span className="line-clamp-2">{company.why_interesting}</span>
-                    </td>
-                  </tr>
-                ))}
+                {derivedCandidates.slice(0, 40).map((company) => {
+                  const canonicalCompany = company.canonical_match.company_id
+                    ? companyById.get(company.canonical_match.company_id)
+                    : undefined;
+                  return (
+                    <tr key={company.candidate_id} className="hover:bg-[#fbfcff]">
+                      <td className="min-w-[220px]">
+                        {canonicalCompany ? (
+                          <Link href={`/companies/${canonicalCompany.id}`} className="ee-link">
+                            {company.name}
+                          </Link>
+                        ) : (
+                          <span className="font-semibold">{company.name}</span>
+                        )}
+                        <div className="mt-0.5 text-[11px] text-ink-soft">{company.owner ?? "Ownership to verify"}</div>
+                      </td>
+                      <td>
+                        <Badge className={COMPANY_CATEGORY_STYLE[company.category]}>
+                          {COMPANY_CATEGORY_LABEL[company.category]}
+                        </Badge>
+                      </td>
+                      <td className="text-[11px] text-ink-soft">{company.ownership_status.replaceAll("-", " ")}</td>
+                      <td className="max-w-[280px] text-[11px] text-ink-soft">
+                        <span className="line-clamp-2">
+                          {company.expert_connections.map((expert) => expert.name).join(", ") || "No named expert yet"}
+                        </span>
+                      </td>
+                      <td className="font-semibold tabular-nums">{company.deal_connections.length}</td>
+                      <td className="max-w-[360px] text-[11px] text-ink-soft">
+                        <span className="line-clamp-2">{company.why_interesting}</span>
+                      </td>
+                      <td className="min-w-[150px]">
+                        <div className="flex flex-wrap gap-2">
+                          {canonicalCompany ? (
+                            <WorkspaceActionButton
+                              item={{
+                                id: canonicalCompany.id,
+                                kind: "target",
+                                name: canonicalCompany.name,
+                                sub: company.why_interesting,
+                                href: `/companies/${canonicalCompany.id}`,
+                                theme: canonicalCompany.themes[0],
+                                status: "research candidate",
+                              }}
+                              className="ee-button ee-button-secondary min-h-8 px-3"
+                            >
+                              Save
+                            </WorkspaceActionButton>
+                          ) : (
+                            <Link href="/discover" className="ee-button ee-button-secondary min-h-8 px-3">
+                              Verify
+                            </Link>
+                          )}
+                          <Link
+                            href={askHref(
+                              `Review company candidate ${company.name} for ${themeLabel}. It surfaced because: ${company.why_interesting}. Named experts: ${company.expert_connections.map((expert) => expert.name).join(", ") || "none"}. PE deal connections: ${company.deal_connections.length}. Recommend verification steps, experts to call, and whether it belongs in the target basket.`,
+                            )}
+                            className="ee-button ee-button-secondary min-h-8 px-3"
+                          >
+                            Ask AI
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

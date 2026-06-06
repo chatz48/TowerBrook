@@ -78,7 +78,7 @@ function AdminDropdown({ pathname, mobile }: { pathname: string; mobile: boolean
         }`}
       >
         Admin
-        <span className="ml-1 text-[10px] text-ink-faint">v</span>
+        <span className="ml-1 text-[10px] text-ink-faint"> v</span>
         {active ? (
           <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-accent" />
         ) : null}

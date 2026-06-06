@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
+import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import type {
   CompanyCategory,
   ExpertType,
@@ -87,6 +88,11 @@ export interface ExplorerEdge {
 }
 
 type ExplorerNode = ExplorerExpertNode | ExplorerCompanyNode | ExplorerDealNode;
+type MockupMode = "network" | "paths" | "matrix";
+
+function askHref(prompt: string) {
+  return `/ask?prompt=${encodeURIComponent(prompt)}`;
+}
 
 const RELATIONSHIP_ORDER: RelationshipType[] = [
   "founded",
@@ -225,6 +231,7 @@ export default function GraphExplorer({
   );
   const [confidenceFloor, setConfidenceFloor] = useState(0.72);
   const [pathView, setPathView] = useState(true);
+  const [mockupMode, setMockupMode] = useState<MockupMode>("network");
   const [expertDomain, setExpertDomain] = useState<string>("all");
   const [selectedKey, setSelectedKey] = useState(defaultSelected ?? experts[0]?.key ?? companies[0]?.key);
   const [history, setHistory] = useState<string[]>([]);
@@ -607,30 +614,6 @@ export default function GraphExplorer({
 
           <section className={styles.panelSection}>
             <div className={styles.sectionLine}>
-              <strong>Expert domain</strong>
-              <button
-                type="button"
-                onClick={() => setExpertDomain("all")}
-              >
-                All
-              </button>
-            </div>
-            <select
-              className={styles.select}
-              value={expertDomain}
-              onChange={(event) => setExpertDomain(event.target.value)}
-            >
-              <option value="all">All expert domains</option>
-              {expertDomainOptions(experts).map(({ value, label }) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </section>
-
-          <section className={styles.panelSection}>
-            <div className={styles.sectionLine}>
               <strong>Relationship types</strong>
               <button
                 type="button"
@@ -709,12 +692,65 @@ export default function GraphExplorer({
         </aside>
 
         <main ref={canvasColumnRef} className={styles.canvasColumn}>
+          <div className={styles.mockupTabs} aria-label="Relationship graph views">
+            <button
+              type="button"
+              className={mockupMode === "network" ? styles.activeMockupTab : undefined}
+              onClick={() => setMockupMode("network")}
+            >
+              <strong>Network Canvas</strong>
+              <span>Best for exploration</span>
+            </button>
+            <button
+              type="button"
+              className={mockupMode === "paths" ? styles.activeMockupTab : undefined}
+              onClick={() => setMockupMode("paths")}
+            >
+              <strong>Path Finder</strong>
+              <span>Best for warm intros</span>
+            </button>
+            <button
+              type="button"
+              className={mockupMode === "matrix" ? styles.activeMockupTab : undefined}
+              onClick={() => setMockupMode("matrix")}
+            >
+              <strong>Evidence Matrix</strong>
+              <span>Best for IC review</span>
+            </button>
+          </div>
+
           <div className={styles.graphToolbar}>
             <div className={styles.toolbarFocus}>
               <span>Focused on</span>
               <strong>{selectedNode?.name ?? "No matching node"}</strong>
             </div>
             <div className={styles.toolbarButtons}>
+              <select
+                className={styles.select}
+                value={expertDomain}
+                onChange={(event) => {
+                  const nextDomain = event.target.value;
+                  setExpertDomain(nextDomain);
+                  if (nextDomain !== "all") {
+                    const topExpert = experts
+                      .filter((e) => e.type === nextDomain && matchesThemeFocus(e.themes, theme))
+                      .sort((a, b) => {
+                        const aEdges = filteredEdges.filter((edge) => edge.from === a.key || edge.to === a.key).length;
+                        const bEdges = filteredEdges.filter((edge) => edge.from === b.key || edge.to === b.key).length;
+                        return bEdges - aEdges;
+                      })[0];
+                    if (topExpert) selectNode(topExpert.key);
+                  }
+                }}
+                style={{ minWidth: 160, height: 32, fontSize: 12 }}
+              >
+                <option value="all">All expert domains</option>
+                {expertDomainOptions(experts).map(({ value, label }) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
               <button
                 type="button"
                 className={!pathView ? styles.activeToolbarButton : undefined}
@@ -735,67 +771,48 @@ export default function GraphExplorer({
             </div>
           </div>
 
-          <section className={styles.graphCard} aria-label="Interactive graph canvas">
-            <div className={styles.legend}>
-              <LegendDot color="#075fe4" label="People" />
-              <LegendDot color="#10843e" label="Targets" />
-              <LegendDot color="#0a8b9b" label="Investors" />
-              <LegendDot color="#7248b9" label="Advisors" />
-              <LegendDot color="#f26a21" label="Acquirers" />
-            </div>
-            <GraphCanvas
-              nodes={visibleNodes}
-              edges={visibleEdges}
-              selectedKey={selectedNode?.key}
-              nodeByKey={nodeByKey}
-              onSelect={selectNode}
-            />
-            <PathStrip path={path} selectedNode={selectedNode} />
-          </section>
+          {mockupMode === "network" ? (
+            <>
+              <section className={styles.graphCard} aria-label="Interactive graph canvas">
+                <GraphLegend />
+                <GraphCanvas
+                  nodes={visibleNodes}
+                  edges={visibleEdges}
+                  selectedKey={selectedNode?.key}
+                  nodeByKey={nodeByKey}
+                  onSelect={selectNode}
+                />
+                <PathStrip path={path} selectedNode={selectedNode} />
+              </section>
 
-          <section className={styles.insights}>
-            <InsightCard
-              title="Bridge experts"
-              onFocus={selectNodeAndReveal}
-              items={metrics.bridgeExperts.map(({ expert, count }, index) => ({
-                id: expert.id,
-                rank: index + 1,
-                label: expert.name,
-                sub: `Connects ${count} mapped relationships`,
-                value: count,
-                focusKey: expert.key,
-              }))}
+              <GraphInsights
+                metrics={metrics}
+                onFocus={selectNodeAndReveal}
+              />
+            </>
+          ) : null}
+
+          {mockupMode === "paths" ? (
+            <PathWorkspaceMockup
+              selectedNode={selectedNode}
+              selectedEdges={selectedEdges}
+              visibleEdges={visibleEdges}
+              nodeByKey={nodeByKey}
+              path={path}
+              onSelect={selectNodeAndReveal}
             />
-            <InsightCard
-              title="Repeated relationship patterns"
-              items={metrics.repeatedAdvisors.map(({ relationship, label, count }) => ({
-                id: relationship,
-                label,
-                sub: `${count} mapped edge${count === 1 ? "" : "s"}`,
-                value: count,
-              }))}
+          ) : null}
+
+          {mockupMode === "matrix" ? (
+            <EvidenceMatrixMockup
+              selectedNode={selectedNode}
+              selectedEdges={selectedEdges}
+              filteredEdges={filteredEdges}
+              nodeByKey={nodeByKey}
+              sources={sources}
+              onSelect={selectNodeAndReveal}
             />
-            <InsightCard
-              title="High-density targets"
-              onFocus={selectNodeAndReveal}
-              items={metrics.denseTargets.map(({ company, count }) => ({
-                id: company.id,
-                label: company.name,
-                sub: `${count} linked expert${count === 1 ? "" : "s"}`,
-                value: count,
-                focusKey: company.key,
-              }))}
-            />
-            <InsightCard
-              title="Weak coverage areas"
-              items={(metrics.weakCoverage.length ? metrics.weakCoverage : ["Unmapped buyer interviews", "Recent exits", "Advisor overlap"]).map((label, index) => ({
-                id: label,
-                label,
-                sub: index === 0 ? "Needs another verified relationship" : "Limited visible coverage",
-                value: index === 0 ? 1 : 0,
-              }))}
-            />
-          </section>
+          ) : null}
         </main>
 
         <aside className={styles.inspector}>
@@ -894,6 +911,31 @@ export default function GraphExplorer({
                 <Link href={selectedNode.href} className={styles.primaryButton}>
                   Open {selectedNode.kind} profile
                 </Link>
+                {selectedNode.kind !== "deal" ? (
+                  <WorkspaceActionButton
+                    item={{
+                      id: selectedNode.id,
+                      kind: selectedNode.kind === "expert" ? "call" : "target",
+                      name: selectedNode.name,
+                      sub: selectedNode.subtitle,
+                      href: selectedNode.href,
+                      theme: selectedNode.themes[0],
+                      note: selectedNode.evidence,
+                      status: "graph shortlist",
+                    }}
+                    className={styles.secondaryButton}
+                  >
+                    Save to basket
+                  </WorkspaceActionButton>
+                ) : null}
+                <Link
+                  href={askHref(
+                    `Use the relationship graph to prepare next steps for ${selectedNode.name}. Summarise the mapped relationships, likely intro paths, evidence strength, and recommended outreach or diligence actions.`,
+                  )}
+                  className={styles.secondaryButton}
+                >
+                  Ask AI
+                </Link>
               </div>
             </>
           ) : (
@@ -932,8 +974,235 @@ function LegendDot({ color, label }: { color: string; label: string }) {
   );
 }
 
+function GraphLegend() {
+  return (
+    <div className={styles.legend}>
+      <LegendDot color="#075fe4" label="People" />
+      <LegendDot color="#10843e" label="Targets" />
+      <LegendDot color="#0a8b9b" label="Investors" />
+      <LegendDot color="#7248b9" label="Advisors" />
+      <LegendDot color="#f26a21" label="Acquirers" />
+    </div>
+  );
+}
+
+function GraphInsights({
+  metrics,
+  onFocus,
+}: {
+  metrics: {
+    bridgeExperts: { expert: ExplorerExpertNode; count: number }[];
+    denseTargets: { company: ExplorerCompanyNode; count: number }[];
+    repeatedAdvisors: { relationship: RelationshipType; label: string; count: number }[];
+    weakCoverage: string[];
+  };
+  onFocus: (key: string) => void;
+}) {
+  return (
+    <section className={styles.insights}>
+      <InsightCard
+        title="Bridge experts"
+        onFocus={onFocus}
+        items={metrics.bridgeExperts.map(({ expert, count }, index) => ({
+          id: expert.id,
+          rank: index + 1,
+          label: expert.name,
+          sub: `Connects ${count} mapped relationships`,
+          value: count,
+          focusKey: expert.key,
+        }))}
+      />
+      <InsightCard
+        title="Repeated relationship patterns"
+        items={metrics.repeatedAdvisors.map(({ relationship, label, count }) => ({
+          id: relationship,
+          label,
+          sub: `${count} mapped edge${count === 1 ? "" : "s"}`,
+          value: count,
+        }))}
+      />
+      <InsightCard
+        title="High-density targets"
+        onFocus={onFocus}
+        items={metrics.denseTargets.map(({ company, count }) => ({
+          id: company.id,
+          label: company.name,
+          sub: `${count} linked expert${count === 1 ? "" : "s"}`,
+          value: count,
+          focusKey: company.key,
+        }))}
+      />
+      <InsightCard
+        title="Weak coverage areas"
+        items={(metrics.weakCoverage.length ? metrics.weakCoverage : ["Unmapped buyer interviews", "Recent exits", "Advisor overlap"]).map((label, index) => ({
+          id: label,
+          label,
+          sub: index === 0 ? "Needs another verified relationship" : "Limited visible coverage",
+          value: index === 0 ? 1 : 0,
+        }))}
+      />
+    </section>
+  );
+}
+
 function SourceMarker({ id }: { id: string }) {
   return <a className={styles.sourceMarker} href={`#source-${id}`}>[{id}]</a>;
+}
+
+function PathWorkspaceMockup({
+  selectedNode,
+  selectedEdges,
+  visibleEdges,
+  nodeByKey,
+  path,
+  onSelect,
+}: {
+  selectedNode?: ExplorerNode;
+  selectedEdges: ExplorerEdge[];
+  visibleEdges: ExplorerEdge[];
+  nodeByKey: Map<string, ExplorerNode>;
+  path: ExplorerNode[];
+  onSelect: (key: string) => void;
+}) {
+  const introRows = selectedEdges.slice(0, 6).map((edge) => {
+    const neighbor = selectedNode ? nodeByKey.get(otherNode(edge, selectedNode.key)) : undefined;
+    const onward = neighbor
+      ? visibleEdges.find(
+          (candidate) =>
+            candidate.id !== edge.id &&
+            (candidate.from === neighbor.key || candidate.to === neighbor.key),
+        )
+      : undefined;
+    const third = onward && neighbor ? nodeByKey.get(otherNode(onward, neighbor.key)) : undefined;
+    return { edge, neighbor, third };
+  });
+
+  return (
+    <section className={styles.pathWorkspace}>
+      <div className={styles.pathHero}>
+        <div>
+          <span>Path finder</span>
+          <h2>Relationship Path Finder</h2>
+          <p>Use this view to identify the shortest credible path from TowerBrook context to a person, company, advisor, or transaction.</p>
+        </div>
+        <div className={styles.pathSummary}>
+          <Metric label="Direct paths" value={selectedEdges.length} />
+          <Metric label="Visible hops" value={path.length} />
+          <Metric label="Avg confidence" value={Math.round((selectedEdges[0]?.confidence ?? selectedNode?.confidence ?? 0.75) * 100)} />
+        </div>
+      </div>
+
+      <div className={styles.routeBoard}>
+        <article className={styles.routePrimary}>
+          <strong>Recommended path</strong>
+          <ol>
+            {path.map((node, index) => (
+              <li key={node.key}>
+                <span className={styles.pathNode} data-kind={node.kind}>{nodeBadgeText(node)}</span>
+                <div>
+                  <button type="button" onClick={() => onSelect(node.key)}>{node.name}</button>
+                  <small>{nodeKindName(node)} · {nodeTypeName(node)}</small>
+                </div>
+                {index < path.length - 1 ? <em>then</em> : <em>ask</em>}
+              </li>
+            ))}
+          </ol>
+        </article>
+
+        <article className={styles.routeList}>
+          <strong>Alternate warm-intro routes</strong>
+          <div>
+            {introRows.map(({ edge, neighbor, third }) => (
+              <button key={edge.id} type="button" onClick={() => neighbor && onSelect(neighbor.key)}>
+                <span style={{ "--edge-color": RELATIONSHIP_COLOR[edge.relationship] } as React.CSSProperties} />
+                <div>
+                  <b>{neighbor?.name ?? "Unknown node"}</b>
+                  <small>{edge.relationshipLabel}{third ? ` to ${third.name}` : ""}</small>
+                </div>
+                <em>{confidenceText(edge.confidence)}</em>
+              </button>
+            ))}
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function EvidenceMatrixMockup({
+  selectedNode,
+  selectedEdges,
+  filteredEdges,
+  nodeByKey,
+  sources,
+  onSelect,
+}: {
+  selectedNode?: ExplorerNode;
+  selectedEdges: ExplorerEdge[];
+  filteredEdges: ExplorerEdge[];
+  nodeByKey: Map<string, ExplorerNode>;
+  sources: ExplorerSource[];
+  onSelect: (key: string) => void;
+}) {
+  const sourceById = new Map(sources.map((source) => [source.id, source]));
+  const rows = selectedEdges.slice(0, 9).map((edge) => ({
+    edge,
+    node: selectedNode ? nodeByKey.get(otherNode(edge, selectedNode.key)) : undefined,
+    citations: edge.sourceIds.map((id) => sourceById.get(id)).filter((source): source is ExplorerSource => Boolean(source)),
+  }));
+  const relationshipCounts = RELATIONSHIP_ORDER.map((relationship) => ({
+    relationship,
+    count: filteredEdges.filter((edge) => edge.relationship === relationship).length,
+  })).filter((item) => item.count > 0).slice(0, 7);
+
+  return (
+    <section className={styles.matrixWorkspace}>
+      <div className={styles.matrixHeader}>
+        <div>
+          <span>Evidence review</span>
+          <h2>Evidence-First Relationship Matrix</h2>
+          <p>Review provenance, relationship confidence, and citation coverage before using the graph in diligence or outreach.</p>
+        </div>
+        <div className={styles.relationshipBars}>
+          {relationshipCounts.map(({ relationship, count }) => (
+            <div key={relationship}>
+              <span>{relationship}</span>
+              <i><b style={{ width: `${Math.min(100, count * 18)}%`, background: RELATIONSHIP_COLOR[relationship] }} /></i>
+              <em>{count}</em>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className={styles.matrixTableWrap}>
+        <table className={styles.matrixTable}>
+          <thead>
+            <tr>
+              <th>Related entity</th>
+              <th>Relationship</th>
+              <th>Confidence</th>
+              <th>Evidence</th>
+              <th>Citations</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(({ edge, node, citations }) => (
+              <tr key={edge.id}>
+                <td>
+                  {node ? <button type="button" onClick={() => onSelect(node.key)}>{node.name}</button> : "Unknown node"}
+                  <small>{node ? `${nodeKindName(node)} · ${nodeTypeName(node)}` : "Unresolved"}</small>
+                </td>
+                <td><span style={{ "--edge-color": RELATIONSHIP_COLOR[edge.relationship] } as React.CSSProperties}>{edge.relationshipLabel}</span></td>
+                <td>{confidenceText(edge.confidence)}</td>
+                <td>{edge.note}</td>
+                <td>{citations.slice(0, 2).map((source) => <a key={source.id} href={source.url} target="_blank" rel="noreferrer">[{source.id}]</a>)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
 }
 
 function nodeColor(node: ExplorerNode) {
@@ -997,6 +1266,12 @@ function GraphCanvas({
       return "Advisors, investors and deals";
     }
 
+    if (selected?.kind === "expert") {
+      if (node.kind === "company") return "Companies they work with";
+      if (node.kind === "deal") return "Connected deals";
+      return "Other connected experts";
+    }
+
     if (node.kind === "company") return "Companies";
     if (node.kind === "deal") return "Deals";
     if (node.kind === "expert" && (node.type === "advisor" || node.type === "banker" || node.type === "lawyer")) {
@@ -1010,6 +1285,12 @@ function GraphCanvas({
         "Founder layer": 190,
         "Operators and board": 306,
         "Advisors, investors and deals": 430,
+      }
+    : selected?.kind === "expert"
+    ? {
+        "Companies they work with": 190,
+        "Connected deals": 306,
+        "Other connected experts": 430,
       }
     : {
         Companies: 190,
@@ -1034,7 +1315,7 @@ function GraphCanvas({
     });
   }
   const layerLabels = [
-    selected ? { label: selected.kind === "company" ? "Company focus" : "Selected focus", y: 74 } : undefined,
+    selected ? { label: selected.kind === "company" ? "Company focus" : selected.kind === "expert" ? "Expert focus" : "Selected focus", y: 74 } : undefined,
     ...Object.entries(yByLayer).map(([label, y]) => ({ label, y })),
   ].filter((item): item is { label: string; y: number } => Boolean(item));
 

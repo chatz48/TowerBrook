@@ -137,7 +137,7 @@ export default async function Home() {
         <section className="ee-panel rounded-lg p-5 sm:p-6">
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_520px] xl:items-end">
             <div>
-              <div className="ee-label text-accent">Origination desk</div>
+              <div className="ee-label text-accent">Command centre</div>
               <h1 className="mt-2 max-w-3xl text-[30px] font-semibold tracking-tight">
                 Start with the next investment decision
               </h1>
@@ -181,7 +181,7 @@ export default async function Home() {
               </p>
             </div>
             <Link href="/campaign" className="ee-button ee-button-secondary">
-              Start assigned outreach
+              Open origination desk
             </Link>
           </div>
 
@@ -505,7 +505,7 @@ function GuidedWorkflow({
           <WorkflowCard
             step="04"
             title="Prepare meeting pack"
-            body="Convert sources, calls, targets, gaps and next steps into a review-ready memo workspace."
+            body="Convert sources, calls, targets, gaps and next steps into the theme memo."
             href="#theme-memo"
             action="Review memo"
           />

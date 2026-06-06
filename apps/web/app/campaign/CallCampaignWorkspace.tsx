@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 
 export interface CampaignMetric {
   label: string;
@@ -88,6 +89,10 @@ function severityClass(severity: CampaignGap["severity"]) {
   if (severity === "high") return "border-red-200 bg-red-50 text-red-700";
   if (severity === "medium") return "border-amber-200 bg-amber-50 text-amber-700";
   return "border-emerald-200 bg-emerald-50 text-emerald-700";
+}
+
+function askHref(prompt: string) {
+  return `/ask?prompt=${encodeURIComponent(prompt)}`;
 }
 
 export default function CallCampaignWorkspace({
@@ -221,6 +226,15 @@ export default function CallCampaignWorkspace({
     }
   }
 
+  const planReviewPrompt = [
+    `Review this TowerBrook origination plan for ${themeLabel}.`,
+    "Prioritise the next 5 actions, flag missing expert coverage, suggest which companies should be validated first, and draft partner-meeting talking points.",
+    `Experts: ${experts.slice(0, 6).map((expert) => expert.name).join("; ")}`,
+    `Companies: ${companies.slice(0, 6).map((company) => `${company.name} (${company.score}/100)`).join("; ")}`,
+    `Open gaps: ${gaps.filter((gap) => gap.severity !== "low").slice(0, 5).map((gap) => `${gap.archetype} ${gap.severity}`).join("; ") || "No high-priority gaps"}`,
+    `Progress: ${assignedCount} assigned or started, ${activeCount} active, ${closedCount} closed.`,
+  ].join("\n");
+
   return (
     <div className="ee-shell px-3 py-5 sm:px-5">
       <div className="mx-auto max-w-[1540px]">
@@ -241,6 +255,9 @@ export default function CallCampaignWorkspace({
               </div>
             </div>
             <div className="flex flex-wrap gap-2 lg:justify-end">
+              <Link href={askHref(planReviewPrompt)} className="ee-button ee-button-primary">
+                Ask AI to review plan
+              </Link>
               <button type="button" onClick={copyMeetingPack} className="ee-button ee-button-primary">
                 {copyState === "copied"
                   ? "Copied"
@@ -295,7 +312,7 @@ export default function CallCampaignWorkspace({
                 </p>
               </div>
               <div className="overflow-x-auto">
-                <table className="ee-table min-w-[1120px]">
+                <table className="ee-table min-w-[1240px]">
                   <thead>
                     <tr>
                       <th>Expert</th>
@@ -304,6 +321,7 @@ export default function CallCampaignWorkspace({
                       <th>Owner</th>
                       <th>Status</th>
                       <th>Notes / referral asks</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -355,6 +373,33 @@ export default function CallCampaignWorkspace({
                               className="h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[12px] text-ink outline-none focus:border-accent"
                             />
                           </td>
+                          <td className="min-w-[150px]">
+                            <div className="flex flex-wrap gap-2">
+                              <WorkspaceActionButton
+                                item={{
+                                  id: expert.id,
+                                  kind: "call",
+                                  name: expert.name,
+                                  sub: expert.headline,
+                                  href: expert.href,
+                                  theme: themeLabel,
+                                  note: `${expert.objective}${current.note ? ` Note: ${current.note}` : ""}`,
+                                  status: current.status === "Not started" ? "origination plan" : current.status.toLowerCase(),
+                                }}
+                                className="ee-button ee-button-secondary min-h-8 px-3"
+                              >
+                                Save
+                              </WorkspaceActionButton>
+                              <Link
+                                href={askHref(
+                                  `Prepare an expert call brief for ${expert.name} in ${themeLabel}. Objective: ${expert.objective}. Current owner: ${current.owner}. Current status: ${current.status}. Note: ${current.note || "None"}. Include outreach angle, questions, likely referrals, and companies to validate.`,
+                                )}
+                                className="ee-button ee-button-secondary min-h-8 px-3"
+                              >
+                                Ask AI
+                              </Link>
+                            </div>
+                          </td>
                         </tr>
                       );
                     })}
@@ -372,7 +417,7 @@ export default function CallCampaignWorkspace({
                 </p>
               </div>
               <div className="overflow-x-auto">
-                <table className="ee-table min-w-[1080px]">
+                <table className="ee-table min-w-[1220px]">
                   <thead>
                     <tr>
                       <th>Company</th>
@@ -381,6 +426,7 @@ export default function CallCampaignWorkspace({
                       <th>Owner</th>
                       <th>Status</th>
                       <th>Notes / blockers</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -431,6 +477,33 @@ export default function CallCampaignWorkspace({
                               placeholder="Add diligence blocker or next step"
                               className="h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[12px] text-ink outline-none focus:border-accent"
                             />
+                          </td>
+                          <td className="min-w-[150px]">
+                            <div className="flex flex-wrap gap-2">
+                              <WorkspaceActionButton
+                                item={{
+                                  id: company.id,
+                                  kind: "target",
+                                  name: company.name,
+                                  sub: `${company.score}/100 ${company.label}`,
+                                  href: company.href,
+                                  theme: themeLabel,
+                                  note: `${company.nextAction}${current.note ? ` Note: ${current.note}` : ""}`,
+                                  status: current.status === "Not started" ? "origination plan" : current.status.toLowerCase(),
+                                }}
+                                className="ee-button ee-button-secondary min-h-8 px-3"
+                              >
+                                Save
+                              </WorkspaceActionButton>
+                              <Link
+                                href={askHref(
+                                  `Prepare a company validation brief for ${company.name} in ${themeLabel}. PE score: ${company.score}/100 ${company.label}. Next diligence action: ${company.nextAction}. Current owner: ${current.owner}. Current status: ${current.status}. Note: ${current.note || "None"}. Include people to call, evidence gaps, and memo implications.`,
+                                )}
+                                className="ee-button ee-button-secondary min-h-8 px-3"
+                              >
+                                Ask AI
+                              </Link>
+                            </div>
                           </td>
                         </tr>
                       );
