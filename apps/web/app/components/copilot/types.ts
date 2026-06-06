@@ -27,6 +27,11 @@ export type SourceRecord = {
   confidence: number;
 };
 
+export type ChatTurn = {
+  role: "user" | "assistant";
+  content: string;
+};
+
 export type AskResponse = {
   intent: string;
   answer_summary: string;
