@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import type {
   CompanyCategory,
   ExpertType,
@@ -191,6 +192,26 @@ function expertDomainOptions(experts: ExplorerExpertNode[]): { value: string; la
   return options.sort((a, b) => a.label.localeCompare(b.label));
 }
 
+function sortDirectoryNodes(a: ExplorerNode, b: ExplorerNode) {
+  if (a.kind !== b.kind) {
+    const order: Record<ExplorerNode["kind"], number> = { expert: 0, company: 1, deal: 2 };
+    return order[a.kind] - order[b.kind];
+  }
+  return a.name.localeCompare(b.name);
+}
+
+function directoryCountText(nodes: ExplorerNode[]) {
+  const counts = nodes.reduce(
+    (memo, node) => ({
+      ...memo,
+      [node.kind]: memo[node.kind] + 1,
+    }),
+    { expert: 0, company: 0, deal: 0 } as Record<ExplorerNode["kind"], number>,
+  );
+
+  return `${counts.expert} experts · ${counts.company} companies · ${counts.deal} deals`;
+}
+
 export default function GraphExplorer({
   themes,
   experts,
@@ -298,8 +319,21 @@ export default function GraphExplorer({
         connections: filteredEdges.filter((edge) => edge.from === node.key || edge.to === node.key).length,
       }))
       .sort((a, b) => b.connections - a.connections || a.node.name.localeCompare(b.node.name))
-      .slice(0, 6);
+      .slice(0, 12);
   }, [allNodes, filteredEdges, nodeKinds, query, theme]);
+
+  const directoryNodes = useMemo(
+    () =>
+      allNodes
+        .filter((node) => matchesThemeFocus(node.themes, theme) && nodeKinds[node.kind])
+        .filter((node) => expertDomain === "all" || node.kind !== "expert" || node.type === expertDomain)
+        .map((node) => ({
+          node,
+          connections: filteredEdges.filter((edge) => edge.from === node.key || edge.to === node.key).length,
+        }))
+        .sort((a, b) => sortDirectoryNodes(a.node, b.node) || b.connections - a.connections),
+    [allNodes, expertDomain, filteredEdges, nodeKinds, theme],
+  );
 
   const visibleEdges = useMemo(() => {
     if (!selectedNode) return filteredEdges.slice(0, 10);
@@ -577,6 +611,31 @@ export default function GraphExplorer({
 
           <section className={styles.panelSection}>
             <div className={styles.sectionLine}>
+              <strong>Complete directory</strong>
+              <span className={styles.directoryMeta}>{directoryCountText(directoryNodes.map(({ node }) => node))}</span>
+            </div>
+            <div className={styles.directoryList} aria-label="Complete graph node directory">
+              {directoryNodes.map(({ node, connections }) => (
+                <button
+                  key={node.key}
+                  type="button"
+                  onClick={() => selectNode(node.key)}
+                  className={selectedNode?.key === node.key ? styles.activeDirectoryItem : undefined}
+                >
+                  <span className={styles.focusGlyph} data-kind={node.kind}>
+                    {nodeBadgeText(node)}
+                  </span>
+                  <span>
+                    <strong>{node.name}</strong>
+                    <small>{nodeKindName(node)} · {connections} relationship{connections === 1 ? "" : "s"}</small>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className={styles.panelSection}>
+            <div className={styles.sectionLine}>
               <strong>Node types</strong>
               <button
                 type="button"
@@ -661,7 +720,7 @@ export default function GraphExplorer({
                 />
                 <span
                   className={styles.edgeLegend}
-                  style={{ "--edge-color": RELATIONSHIP_COLOR[relationship] } as React.CSSProperties}
+                  style={{ "--edge-color": RELATIONSHIP_COLOR[relationship] } as CSSProperties}
                 />
                 {relationshipLabels.get(relationship) ?? relationship}
               </label>
@@ -743,13 +802,15 @@ export default function GraphExplorer({
               <LegendDot color="#7248b9" label="Advisors" />
               <LegendDot color="#f26a21" label="Acquirers" />
             </div>
-            <GraphCanvas
-              nodes={visibleNodes}
-              edges={visibleEdges}
-              selectedKey={selectedNode?.key}
-              nodeByKey={nodeByKey}
-              onSelect={selectNode}
-            />
+            <div className={styles.graphScroller}>
+              <GraphCanvas
+                nodes={visibleNodes}
+                edges={visibleEdges}
+                selectedKey={selectedNode?.key}
+                nodeByKey={nodeByKey}
+                onSelect={selectNode}
+              />
+            </div>
             <PathStrip path={path} selectedNode={selectedNode} />
           </section>
 
@@ -838,7 +899,7 @@ export default function GraphExplorer({
                       <li key={edge.id}>
                         <span
                           className={styles.edgeArrow}
-                          style={{ "--edge-color": RELATIONSHIP_COLOR[edge.relationship] } as React.CSSProperties}
+                          style={{ "--edge-color": RELATIONSHIP_COLOR[edge.relationship] } as CSSProperties}
                         />
                         <button
                           type="button"
@@ -958,12 +1019,9 @@ function GraphCanvas({
   nodeByKey: Map<string, ExplorerNode>;
   onSelect: (key: string) => void;
 }) {
-  const width = 960;
-  const height = 520;
   const selected = selectedKey ? nodeByKey.get(selectedKey) : undefined;
   const others = nodes.filter((node) => node.key !== selectedKey);
   const positions = new Map<string, { x: number; y: number }>();
-  if (selected) positions.set(selected.key, { x: width / 2, y: 74 });
 
   function edgeBetween(node: ExplorerNode) {
     if (!selected) return undefined;
@@ -997,6 +1055,12 @@ function GraphCanvas({
       return "Advisors, investors and deals";
     }
 
+    if (selected?.kind === "deal") {
+      if (node.kind === "company" && edge?.relationship === "acquired") return "Buyers and investors";
+      if (node.kind === "company") return "Companies and advisors";
+      return "People and leadership";
+    }
+
     if (node.kind === "company") return "Companies";
     if (node.kind === "deal") return "Deals";
     if (node.kind === "expert" && (node.type === "advisor" || node.type === "banker" || node.type === "lawyer")) {
@@ -1007,24 +1071,41 @@ function GraphCanvas({
 
   const yByLayer: Record<string, number> = selected?.kind === "company"
     ? {
-        "Founder layer": 190,
-        "Operators and board": 306,
-        "Advisors, investors and deals": 430,
+        "Founder layer": 238,
+        "Operators and board": 398,
+        "Advisors, investors and deals": 558,
       }
-    : {
-        Companies: 190,
-        "Other people": 306,
-        Advisors: 306,
-        Deals: 430,
-      };
+    : selected?.kind === "deal"
+      ? {
+          "Buyers and investors": 238,
+          "Companies and advisors": 398,
+          "People and leadership": 558,
+        }
+      : {
+          Companies: 238,
+          "Other people": 398,
+          Advisors: 398,
+          Deals: 558,
+        };
+
   const layers = new Map<string, ExplorerNode[]>();
   for (const node of others) {
     const layer = layerFor(node);
     layers.set(layer, [...(layers.get(layer) ?? []), node]);
   }
+
+  const maxLayerSize = Math.max(1, ...[...layers.values()].map((layerNodes) => layerNodes.length));
+  const width = Math.max(1120, maxLayerSize * 222 + 220);
+  const layerEntries = Object.entries(yByLayer).filter(([layer]) => layers.has(layer));
+  const lastLayerY = Math.max(238, ...layerEntries.map(([, y]) => y));
+  const height = lastLayerY + 122;
+  const rootY = 92;
+
+  if (selected) positions.set(selected.key, { x: width / 2, y: rootY });
+
   for (const [layer, layerNodes] of layers) {
-    const y = yByLayer[layer] ?? 430;
-    const gap = Math.min(176, 720 / Math.max(layerNodes.length - 1, 1));
+    const y = yByLayer[layer] ?? lastLayerY;
+    const gap = Math.min(222, (width - 260) / Math.max(layerNodes.length - 1, 1));
     const total = gap * (layerNodes.length - 1);
     layerNodes.forEach((node, index) => {
       positions.set(node.key, {
@@ -1033,13 +1114,21 @@ function GraphCanvas({
       });
     });
   }
+
   const layerLabels = [
-    selected ? { label: selected.kind === "company" ? "Company focus" : "Selected focus", y: 74 } : undefined,
+    selected ? { label: selected.kind === "company" ? "Company focus" : selected.kind === "deal" ? "Deal focus" : "Expert focus", y: rootY } : undefined,
     ...Object.entries(yByLayer).map(([label, y]) => ({ label, y })),
   ].filter((item): item is { label: string; y: number } => Boolean(item));
 
   return (
-    <svg className={styles.graphSvg} viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Mapped relationship graph">
+    <svg
+      className={styles.graphSvg}
+      viewBox={`0 0 ${width} ${height}`}
+      width={width}
+      height={height}
+      role="img"
+      aria-label="Mapped relationship graph with the selected node at the top and branches flowing downward"
+    >
       <defs>
         <filter id="graph-node-shadow" x="-20%" y="-30%" width="140%" height="170%">
           <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#0f172a" floodOpacity="0.1" />
@@ -1063,9 +1152,9 @@ function GraphCanvas({
       <g>
         {layerLabels.map((layer) => (
           <g key={layer.label}>
-            <line x1="48" y1={layer.y} x2={width - 48} y2={layer.y} stroke="#edf2f7" />
-            <rect x="56" y={layer.y - 17} width="154" height="22" rx="11" fill="#f8fafc" stroke="#e4eaf2" />
-            <text x="74" y={layer.y - 2} className={styles.layerText}>
+            <line x1="72" y1={layer.y} x2={width - 72} y2={layer.y} stroke="#edf2f7" />
+            <rect x="80" y={layer.y - 17} width="184" height="22" rx="11" fill="#f8fafc" stroke="#e4eaf2" />
+            <text x="98" y={layer.y - 2} className={styles.layerText}>
               {layer.label}
             </text>
           </g>
@@ -1075,23 +1164,24 @@ function GraphCanvas({
         const from = positions.get(edge.from);
         const to = positions.get(edge.to);
         if (!from || !to) return null;
-        const midX = (from.x + to.x) / 2;
-        const midY = (from.y + to.y) / 2;
+        const top = from.y <= to.y ? from : to;
+        const bottom = from.y <= to.y ? to : from;
+        const midY = (top.y + bottom.y) / 2;
         const color = RELATIONSHIP_COLOR[edge.relationship];
-        const bend = Math.abs(from.x - to.x) > 120 ? 42 : 20;
+        const bend = Math.abs(top.x - bottom.x) > 120 ? 42 : 20;
         return (
           <g key={edge.id}>
             <path
-              d={`M ${from.x} ${from.y + 34} C ${from.x} ${midY - bend}, ${to.x} ${midY + bend}, ${to.x} ${to.y - 34}`}
+              d={`M ${top.x} ${top.y + 38} C ${top.x} ${midY - bend}, ${bottom.x} ${midY + bend}, ${bottom.x} ${bottom.y - 38}`}
               fill="none"
               stroke={color}
               strokeWidth="1.55"
               markerEnd={`url(#arrow-${edge.relationship})`}
               opacity={edge.confidence >= 0.8 ? 0.92 : 0.58}
             />
-            <g transform={`translate(${midX - 36} ${midY - 15})`}>
-              <rect width="72" height="21" rx="10.5" fill="#ffffff" stroke="#e4e9f1" />
-              <text x="36" y="14" textAnchor="middle" className={styles.edgeText} fill={color}>
+            <g transform={`translate(${(top.x + bottom.x) / 2 - 42} ${midY - 15})`}>
+              <rect width="84" height="21" rx="10.5" fill="#ffffff" stroke="#e4e9f1" />
+              <text x="42" y="14" textAnchor="middle" className={styles.edgeText} fill={color}>
                 {edge.relationshipLabel}
               </text>
             </g>
@@ -1103,13 +1193,13 @@ function GraphCanvas({
         if (!point) return null;
         const selected = node.key === selectedKey;
         const color = nodeColor(node);
-        const cardWidth = selected ? 214 : 180;
-        const cardHeight = selected ? 80 : 68;
+        const cardWidth = selected ? 230 : 188;
+        const cardHeight = selected ? 84 : 72;
         const kindName = nodeKindName(node);
         const typeName = nodeTypeName(node);
         const displayName =
-          node.name.length > (selected ? 27 : 22)
-            ? `${node.name.slice(0, selected ? 25 : 20)}…`
+          node.name.length > (selected ? 29 : 23)
+            ? `${node.name.slice(0, selected ? 27 : 21)}…`
             : node.name;
         return (
           <g
@@ -1141,25 +1231,25 @@ function GraphCanvas({
               filter={selected ? "url(#graph-node-shadow)" : undefined}
             />
             <rect
-              x={-cardWidth / 2 + 11}
-              y={-16}
-              width="32"
-              height="32"
-              rx={node.kind === "deal" ? 5 : 16}
+              x={-cardWidth / 2 + 12}
+              y="-17"
+              width="34"
+              height="34"
+              rx={node.kind === "deal" ? 5 : 17}
               fill={color}
             />
             <text
-              x={-cardWidth / 2 + 27}
+              x={-cardWidth / 2 + 29}
               y="4"
               textAnchor="middle"
               className={styles.nodeBadge}
             >
               {node.kind === "expert" ? nodeInitials(node).slice(0, 2) : node.kind === "company" ? "CO" : "D"}
             </text>
-            <text x={-cardWidth / 2 + 52} y="-7" className={styles.nodeTitle}>
+            <text x={-cardWidth / 2 + 56} y="-8" className={styles.nodeTitle}>
               {displayName}
             </text>
-            <text x={-cardWidth / 2 + 52} y="12" className={styles.nodeSub}>
+            <text x={-cardWidth / 2 + 56} y="13" className={styles.nodeSub}>
               {kindName} · {typeName.length > 18 ? `${typeName.slice(0, 16)}…` : typeName}
             </text>
           </g>
