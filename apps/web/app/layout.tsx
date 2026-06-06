@@ -3,6 +3,7 @@ import Link from "next/link";
 import AppShellNav from "@/app/components/AppShellNav";
 import InvestorWorkspaceTray from "@/app/components/InvestorWorkspaceTray";
 import PageAwareChat from "@/app/components/PageAwareChat";
+import ScopeIndicator from "@/app/components/ScopeIndicator";
 import ThemeSwitcher from "@/app/components/ThemeSwitcher";
 import { getThemeFocus } from "@/lib/theme-focus-server";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
@@ -72,6 +73,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             />
           </div>
         </header>
+        <ScopeIndicator />
         <main>{children}</main>
         <InvestorWorkspaceTray />
         <PageAwareChat />

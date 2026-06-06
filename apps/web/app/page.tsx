@@ -150,16 +150,6 @@ export default async function Home() {
             <SearchBox index={index} scopeLabel="Full expert and company graph" />
           </div>
 
-          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line pt-4 text-[11px] text-ink-faint">
-            <span className="ee-label text-ink">Coverage snapshot</span>
-            <CoverageFact value={experts.length} label="expert profiles" />
-            <CoverageFact value={companies.length} label="companies" />
-            <CoverageFact value={sourceCount} label="source records" />
-            <CoverageFact
-              value={directExperts.length + directCompanies.length}
-              label="public TowerBrook paths"
-            />
-          </div>
         </section>
 
         <GuidedWorkflow
@@ -168,20 +158,47 @@ export default async function Home() {
           targetCount={Math.min(8, targetCount)}
           gapCount={gapCount}
           matrixRows={matrixRows}
+          themeFocus={themeFocus}
         />
 
-        <ThemeMemoPanel report={report} gapCount={gapCount} />
+        <BlankSpacesCard
+          matrixRows={matrixRows}
+          themeFocus={themeFocus}
+          visibleThemes={visibleThemes}
+        />
+
+        <details className="mt-5 ee-panel rounded-lg">
+          <summary className="cursor-pointer list-none px-5 py-4 marker:hidden">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-ink-faint">
+              <span className="ee-label text-ink">Coverage snapshot</span>
+              <CoverageFact value={experts.length} label="expert profiles" />
+              <CoverageFact value={companies.length} label="companies" />
+              <CoverageFact value={sourceCount} label="source records" />
+              <CoverageFact
+                value={directExperts.length + directCompanies.length}
+                label="public TowerBrook paths"
+              />
+              <span className="ml-auto text-[12px] font-semibold text-accent">Expand</span>
+            </div>
+          </summary>
+          <div className="border-t border-line px-5 pb-5 pt-2 text-[12px] text-ink-soft">
+            Use the guided workflow above for your next move. Expand this panel when you need
+            coverage counts before an IC or partner meeting.
+          </div>
+        </details>
+
+        <MemoSummaryCard report={report} gapCount={gapCount} />
 
         <section className="mt-5">
           <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-[18px] font-semibold tracking-tight">Theme command centre</h2>
+              <h2 className="text-[18px] font-semibold tracking-tight">Your week across themes</h2>
               <p className="mt-1 text-[12px] text-ink-soft">
-                Open a theme with a first call, a lead target, and a known research gap.
+                Top call, lead target, and coverage gap per theme — one panel instead of three cards.
               </p>
             </div>
             <Link href="/campaign" className="ee-button ee-button-secondary">
-              Open origination desk
+              Open origination
             </Link>
           </div>
 
@@ -305,7 +322,7 @@ function CoverageFact({ value, label }: { value: number; label: string }) {
   );
 }
 
-function ThemeMemoPanel({
+function MemoSummaryCard({
   report,
   gapCount,
 }: {
@@ -328,124 +345,75 @@ function ThemeMemoPanel({
         : "border-red-200 bg-red-50 text-red-700";
 
   return (
-    <section id="theme-memo" className="mt-5 ee-panel overflow-hidden rounded-lg scroll-mt-28">
-      <div className="grid gap-0 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="p-5 sm:p-6">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <div className="ee-label text-accent">Theme memo</div>
-              <h2 className="mt-2 text-[22px] font-semibold tracking-tight">
-                {report.themeName} IC pack
-              </h2>
-              <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
-                The memo is part of the Command Centre: it updates with the selected
-                theme and packages saved work, sourced experts, target companies,
-                evidence gaps and next actions into a partner-ready draft.
-              </p>
-            </div>
-            <span className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-semibold ${readinessClass}`}>
-              {readiness}
-            </span>
-          </div>
-
-          <div className="mt-5 grid gap-3 md:grid-cols-3">
-            <MemoMetric label="Sources" value={report.stats.sources} detail={`${report.stats.highConfidenceSources} high confidence`} />
-            <MemoMetric label="Experts" value={report.stats.experts} detail="Mapped into memo" />
-            <MemoMetric label="Open gaps" value={gapCount + needsEvidence} detail="Research or source checks" />
-          </div>
-
-          <div className="mt-5 overflow-x-auto rounded-md border border-line">
-            <table className="ee-table min-w-[760px]">
-              <thead>
-                <tr>
-                  <th>Memo section</th>
-                  <th>Status</th>
-                  <th>Evidence</th>
-                  <th>Next action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {report.sections.slice(0, 6).map((section) => (
-                  <tr key={section.id}>
-                    <td className="font-semibold">{section.title}</td>
-                    <td>
-                      <MemoStatusBadge status={section.status} />
-                    </td>
-                    <td className="text-[11px] text-ink-soft">
-                      {section.citations.length} citation{section.citations.length === 1 ? "" : "s"} /
-                      {" "}{Math.round(section.confidence * 100)}% confidence
-                    </td>
-                    <td className="text-[11px] text-ink-soft">
-                      {section.actions[0] ?? "Review before circulation"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+    <section id="theme-memo" className="mt-5 ee-panel rounded-lg p-5 scroll-mt-28">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div className="ee-label text-accent">Theme memo</div>
+          <h2 className="mt-2 text-[20px] font-semibold tracking-tight">
+            Your IC pack is ready
+          </h2>
+          <p className="mt-2 max-w-2xl text-[13px] leading-relaxed text-ink-soft">
+            {report.sections.length} sections · {report.stats.highConfidenceSources} high-confidence
+            sources · {report.stats.experts} experts mapped · {gapCount + needsEvidence} open gaps
+          </p>
         </div>
-
-        <aside className="border-t border-line bg-[#fbfcff] p-5 xl:border-l xl:border-t-0">
-          <div className="ee-label text-ink">Use this memo</div>
-          <div className="mt-4">
-            <ReportExportControls markdown={report.markdown} fileName={report.reportName} />
-          </div>
-          <div className="mt-4 grid gap-2">
-            <Link href="/ask?prompt=Strengthen%20the%20current%20theme%20memo%20using%20saved%20experts%2C%20companies%20and%20source%20gaps" className="ee-button ee-button-primary w-full">
-              Ask AI to strengthen
-            </Link>
-            <Link href="/discover" className="ee-button ee-button-secondary w-full">
-              Create research tasks
-            </Link>
-            <Link href="/reports" className="ee-button ee-button-secondary w-full">
-              Open full memo workspace
-            </Link>
-          </div>
-          <div className="mt-5 rounded-md border border-line bg-white p-3">
-            <div className="ee-label text-ink">What feeds it</div>
-            <ul className="mt-3 space-y-2 text-[12px] leading-relaxed text-ink-soft">
-              <li>Saved experts and target companies from the basket.</li>
-              <li>AI Copilot notes that were saved back to the memo stream.</li>
-              <li>Source-backed graph evidence and open research gaps.</li>
-            </ul>
-          </div>
-        </aside>
+        <span className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-semibold ${readinessClass}`}>
+          {readiness}
+        </span>
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Link href="/reports" className="ee-button ee-button-primary">
+          Open full memo
+        </Link>
+        <Link href="/ask?prompt=Strengthen%20the%20current%20theme%20memo" className="ee-button ee-button-secondary">
+          Ask AI to strengthen
+        </Link>
+        <ReportExportControls markdown={report.markdown} fileName={report.reportName} />
       </div>
     </section>
   );
 }
 
-function MemoMetric({
-  label,
-  value,
-  detail,
+function BlankSpacesCard({
+  matrixRows,
+  themeFocus,
+  visibleThemes,
 }: {
-  label: string;
-  value: number;
-  detail: string;
+  matrixRows: ReturnType<typeof coverageMatrix>;
+  themeFocus: ThemeId | "all";
+  visibleThemes: typeof THEMES;
 }) {
-  return (
-    <div className="rounded-md border border-line bg-white p-3">
-      <div className="text-[22px] font-semibold tabular-nums">{value}</div>
-      <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-soft">
-        {label}
-      </div>
-      <div className="mt-1 text-[11px] text-ink-faint">{detail}</div>
-    </div>
-  );
-}
+  const highGaps = matrixRows.filter((row) => row.gap === "high");
+  const themeLabel =
+    themeFocus === "all" ? "across all themes" : visibleThemes[0]?.name ?? "this theme";
 
-function MemoStatusBadge({ status }: { status: ReportModel["sections"][number]["status"] }) {
-  const className =
-    status === "Evidence-backed draft"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-      : status === "Ready for analyst review"
-        ? "border-amber-200 bg-amber-50 text-amber-700"
-        : "border-red-200 bg-red-50 text-red-700";
   return (
-    <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${className}`}>
-      {status}
-    </span>
+    <section className="mt-5 ee-panel rounded-lg p-5">
+      <div className="ee-label text-ink">Where we&apos;re thin</div>
+      <h2 className="mt-2 text-[18px] font-semibold tracking-tight">Coverage gaps to close</h2>
+      <ul className="mt-4 space-y-2 text-[12px] leading-relaxed text-ink-soft">
+        {highGaps.length ? (
+          highGaps.slice(0, 4).map((row) => (
+            <li key={row.type} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-line bg-white px-3 py-2">
+              <span>
+                No verified <strong className="text-ink">{EXPERT_TYPE_LABEL[row.type]}</strong> experts
+                {" "}{themeLabel}
+              </span>
+              <Link
+                href={`/discover?gap=${encodeURIComponent(EXPERT_TYPE_LABEL[row.type])}`}
+                className="ee-link text-[12px] font-semibold"
+              >
+                Find experts
+              </Link>
+            </li>
+          ))
+        ) : (
+          <li className="rounded-md border border-line bg-white px-3 py-2">
+            Core archetypes are covered {themeLabel}. Review source freshness in the research queue.
+          </li>
+        )}
+      </ul>
+    </section>
   );
 }
 
@@ -455,16 +423,19 @@ function GuidedWorkflow({
   targetCount,
   gapCount,
   matrixRows,
+  themeFocus,
 }: {
   themeLabel: string;
   callReadyCount: number;
   targetCount: number;
   gapCount: number;
   matrixRows: ReturnType<typeof coverageMatrix>;
+  themeFocus: ThemeId | "all";
 }) {
+  const themeQuery = themeFocus === "all" ? "" : `?theme=${themeFocus}`;
   return (
     <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.08fr)_minmax(420px,0.92fr)]">
-      <div className="ee-panel rounded-lg p-5 sm:p-6">
+      <div className="ee-panel rounded-lg border-2 border-accent/20 p-5 sm:p-6 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="ee-label text-ink">Guided investment workflow</div>
@@ -485,45 +456,44 @@ function GuidedWorkflow({
             step="01"
             title="Build my call list"
             body={`${callReadyCount || 8} call-ready or contact-verification experts, sequenced by evidence and company edges.`}
-            href="/campaign"
+            href={`/experts${themeQuery}${themeQuery ? "&" : "?"}readiness=actionable`}
             action="Start plan"
+            primary
           />
           <WorkflowCard
             step="02"
             title="Show target companies"
             body={`${targetCount || 8} priority targets with PE scorecards, ownership checks and linked experts.`}
-            href="/campaign#targets"
+            href={`/companies${themeQuery}${themeQuery ? "&" : "?"}category=target`}
             action="Add targets"
           />
           <WorkflowCard
             step="03"
             title="Fill coverage gaps"
             body={`${gapCount} expert archetype gap${gapCount === 1 ? "" : "s"} need more research before the map is complete.`}
-            href="/discover"
+            href={`/discover${themeQuery}${themeQuery ? "&" : "?"}severity=high`}
             action="Open queue"
           />
           <WorkflowCard
             step="04"
             title="Prepare meeting pack"
             body="Convert sources, calls, targets, gaps and next steps into the theme memo."
-            href="#theme-memo"
+            href="/reports"
             action="Review memo"
           />
         </div>
       </div>
 
-      <div className="ee-panel overflow-hidden rounded-lg">
-        <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
+      <details className="ee-panel overflow-hidden rounded-lg">
+        <summary className="flex cursor-pointer list-none items-start justify-between gap-4 border-b border-line px-5 py-4 marker:hidden">
           <div>
             <h2 className="ee-label text-ink">Coverage matrix</h2>
             <p className="mt-1 text-[11px] text-ink-faint">
-              Completeness by expert archetype.
+              Completeness by expert archetype — expand when needed.
             </p>
           </div>
-          <Link href="/discover" className="shrink-0 text-[12px] font-semibold text-accent">
-            Research gaps
-          </Link>
-        </div>
+          <span className="shrink-0 text-[12px] font-semibold text-accent">Expand</span>
+        </summary>
         <div className="overflow-x-auto">
           <table className="ee-table min-w-[520px]">
             <thead>
@@ -560,7 +530,7 @@ function GuidedWorkflow({
             </tbody>
           </table>
         </div>
-      </div>
+      </details>
     </section>
   );
 }
@@ -571,17 +541,21 @@ function WorkflowCard({
   body,
   href,
   action,
+  primary = false,
 }: {
   step: string;
   title: string;
   body: string;
   href: string;
   action: string;
+  primary?: boolean;
 }) {
   return (
     <Link
       href={href}
-      className="group block min-h-[190px] rounded-lg border border-line bg-white p-4 transition-colors hover:border-line-strong hover:bg-[#fbfcff]"
+      className={`group block min-h-[190px] rounded-lg border bg-white p-4 transition-colors hover:border-line-strong hover:bg-[#fbfcff] ${
+        primary ? "border-accent/40 shadow-sm" : "border-line"
+      }`}
     >
       <div className="text-[11px] font-semibold tracking-[0.12em] text-accent">
         {step}
