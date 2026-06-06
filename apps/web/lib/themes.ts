@@ -26,6 +26,7 @@ export const THEME_SPECIALTIES: Record<ThemeId, string[]> = {
     "Transmission & substations",
     "Smart metering",
     "Network analytics",
+    "M&A advisory",
   ],
   "smart-water": [
     "Leak detection",
@@ -36,6 +37,7 @@ export const THEME_SPECIALTIES: Record<ThemeId, string[]> = {
     "Digital twin & utility software",
     "Metering (AMI)",
     "Water reuse & desalination",
+    "M&A advisory",
   ],
 };
 
