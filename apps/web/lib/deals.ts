@@ -275,7 +275,10 @@ function inferTarget(text: string, title: string): string | undefined {
   const patterns = [
     /\b(?:acquires?|acquired|has acquired)\s+([A-Z][A-Za-z0-9&.,' -]{2,80}?)(?:\s+from|\s+for|\.|,|$)/i,
     /\bacquisition of\s+([A-Z][A-Za-z0-9&.,' -]{2,80}?)(?:\s+from|\s+for|\.|,|$)/i,
+    /\bsale of\s+([A-Z][A-Za-z0-9&.,' -]{2,80}?)\s+to\b/i,
+    /\bsells?\s+([A-Z][A-Za-z0-9&.,' -]{2,80}?)\s+to\b/i,
     /\binvest(?:s|ed)? in\s+([A-Z][A-Za-z0-9&.,' -]{2,80}?)(?:\s+from|\s+for|\.|,|$)/i,
+    /\badvised\s+([A-Z][A-Za-z0-9&.,' -]{2,80}?)\s+on\b/i,
   ];
   for (const pattern of patterns) {
     const match = text.match(pattern);

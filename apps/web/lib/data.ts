@@ -18,12 +18,14 @@ const COMPANIES = companiesRaw as Company[];
 const EXPERT_BY_ID = new Map(EXPERTS.map((e) => [e.id, e]));
 const COMPANY_BY_ID = new Map(COMPANIES.map((c) => [c.id, c]));
 
-export function getExperts(): Expert[] {
-  return EXPERTS;
+export function getExperts(limit?: number, offset = 0): Expert[] {
+  const slice = EXPERTS.slice(offset, limit === undefined ? undefined : offset + limit);
+  return slice;
 }
 
-export function getCompanies(): Company[] {
-  return COMPANIES;
+export function getCompanies(limit?: number, offset = 0): Company[] {
+  const slice = COMPANIES.slice(offset, limit === undefined ? undefined : offset + limit);
+  return slice;
 }
 
 export function getExpert(id: string): Expert | undefined {

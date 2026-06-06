@@ -79,7 +79,43 @@ ${input.text.slice(0, 18000)}`,
 
   const parsed = parseJson<ModelExtraction>(text);
   if (!parsed) return extractDealFromText(input);
-  return modelToExtraction(parsed, input);
+  return validateExtraction(modelToExtraction(parsed, input), input);
+}
+
+/** Fill gaps the LLM missed using deterministic heuristics (e.g. acquisition targets). */
+function validateExtraction(
+  result: DealExtractionResult,
+  input: { text: string; title?: string; url?: string },
+): DealExtractionResult {
+  const heuristic = extractDealFromText(input);
+  const targetParty = result.deal.parties.find((party) => party.role === "target");
+  const heuristicTarget = heuristic.deal.parties.find((party) => party.role === "target");
+
+  if (!targetParty?.name && heuristicTarget?.name) {
+    const targetName = heuristicTarget.name;
+    const parties = [
+      { role: "target" as const, name: targetName, sourceId: "submitted-1" },
+      ...result.deal.parties.filter((party) => party.role !== "target"),
+    ];
+    const facts = result.facts.map((fact) =>
+      fact.factType === "target_company" && (fact.factValue === "missing" || !fact.factValue)
+        ? { ...fact, factValue: targetName, reviewStatus: "needs_review" as const, confidence: 0.72 }
+        : fact,
+    );
+    const missingFacts = result.deal.missingFacts.filter((fact) => fact !== "target_company");
+    return {
+      ...result,
+      deal: {
+        ...result.deal,
+        parties,
+        missingFacts,
+        name: result.deal.name.includes("/") ? result.deal.name : heuristic.deal.name,
+      },
+      facts,
+    };
+  }
+
+  return result;
 }
 
 function modelToExtraction(parsed: ModelExtraction, input: { text: string; title?: string; url?: string }): DealExtractionResult {
