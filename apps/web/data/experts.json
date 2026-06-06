@@ -8089,5 +8089,2619 @@
       }
     ],
     "confidence": 0.7
+  },
+  {
+    "id": "michael-liebreich",
+    "name": "Michael Liebreich",
+    "type": "investor",
+    "headline": "Founder, BloombergNEF; Co-managing Partner, EcoPragma Capital",
+    "org": "EcoPragma Capital / Liebreich Associates",
+    "location": "London, UK",
+    "themes": [
+      "clean-energy-advisory",
+      "grid-infrastructure"
+    ],
+    "specialties": [
+      "Clean-energy finance",
+      "Grid flexibility",
+      "Climate infrastructure"
+    ],
+    "whyRelevant": "Founded the research platform that became BloombergNEF and now advises/invests around clean energy, smart infrastructure and climate finance; a high-signal connector for investors and operators.",
+    "bio": "Founded New Energy Finance in 2004, sold it to Bloomberg in 2009, remained CEO of Bloomberg New Energy Finance to 2014 and later co-founded EcoPragma Capital for growth-equity transition investing.",
+    "companies": [
+      {
+        "companyId": "bloombergnef",
+        "relationship": "founded",
+        "note": "Founded New Energy Finance/BloombergNEF, one of the core information networks for clean-energy investors."
+      },
+      {
+        "companyId": "ecopragma-capital",
+        "relationship": "co-founded",
+        "note": "Co-managing partner focused on growth-stage net-zero and grid-integration businesses."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Michael Liebreich biography",
+        "url": "https://www.liebreich.com/bio/",
+        "publisher": "Liebreich Associates"
+      },
+      {
+        "title": "EcoPragma Capital",
+        "url": "https://www.ecopragma.capital/",
+        "publisher": "EcoPragma Capital"
+      },
+      {
+        "title": "BloombergNEF Finds Global Energy Transition Investment Reached Record $2.3 Trillion in 2025",
+        "url": "https://about.bnef.com/insights/clean-energy/bloombergnef-finds-global-energy-transition-investment-reached-record-2-3-trillion-in-2025-up-8-from-2024/",
+        "publisher": "BloombergNEF"
+      }
+    ],
+    "confidence": 0.9,
+    "access": "obvious",
+    "signals": [
+      "Added in 2026 targeted expert expansion from high-signal PE, investment and theme-specific sources."
+    ]
+  },
+  {
+    "id": "meredith-annex",
+    "name": "Meredith Annex",
+    "type": "advisor",
+    "headline": "Head of Clean Power, BloombergNEF",
+    "org": "BloombergNEF",
+    "location": "New York, US",
+    "themes": [
+      "clean-energy-advisory",
+      "grid-infrastructure"
+    ],
+    "specialties": [
+      "Renewables investment",
+      "Clean power markets",
+      "Offshore wind"
+    ],
+    "whyRelevant": "BNEF clean-power lead quoted on 2025 capital reallocation and project-pipeline pressure; useful for market-map and financing-cycle diligence.",
+    "bio": "Head of Clean Power at BloombergNEF, cited in BNEF analysis of record first-half 2025 renewable investment and shifting investor capital allocation.",
+    "companies": [
+      {
+        "companyId": "bloombergnef",
+        "relationship": "led",
+        "note": "Leads clean-power research coverage used by investors to track renewables and grid-linked capital flows."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Record Renewable Energy Investment in 2025: Three Things to Know",
+        "url": "https://about.bnef.com/insights/clean-energy/record-renewable-energy-investment-in-2025-three-things-to-know/",
+        "publisher": "BloombergNEF"
+      },
+      {
+        "title": "BloombergNEF Finds Global Energy Transition Investment Reached Record $2.3 Trillion in 2025",
+        "url": "https://about.bnef.com/insights/clean-energy/bloombergnef-finds-global-energy-transition-investment-reached-record-2-3-trillion-in-2025-up-8-from-2024/",
+        "publisher": "BloombergNEF"
+      }
+    ],
+    "confidence": 0.86,
+    "access": "obvious",
+    "signals": [
+      "Added in 2026 targeted expert expansion from high-signal PE, investment and theme-specific sources."
+    ]
+  },
+  {
+    "id": "hadley-peer-marshall",
+    "name": "Hadley Peer Marshall",
+    "type": "investor",
+    "headline": "CFO, Brookfield Asset Management; Managing Partner, Infrastructure",
+    "org": "Brookfield Asset Management",
+    "location": "New York, US",
+    "themes": [
+      "grid-infrastructure",
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "Infrastructure credit",
+      "Project finance",
+      "AI power demand"
+    ],
+    "whyRelevant": "Brookfield CFO and infrastructure managing partner; Bloomberg cited her view that AI growth requires trillions of dollars of investment, directly tying PE capital to utilities and renewable power.",
+    "bio": "CFO of Brookfield Asset Management, member of Brookfield executive committee, and co-head of Brookfield infrastructure debt and structured solutions; previously co-head of Goldman Sachs project finance and infrastructure.",
+    "companies": [
+      {
+        "companyId": "brookfield-asset-management",
+        "relationship": "led",
+        "note": "CFO and infrastructure managing partner overseeing finance and infrastructure credit."
+      },
+      {
+        "companyId": "brookfield-global-transition-fund",
+        "relationship": "invested-in",
+        "note": "Senior Brookfield executive tied to large-scale transition and infrastructure capital deployment."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Hadley Peer Marshall",
+        "url": "https://www.brookfield.com/index.php/about-us/leadership/hadley-peer-marshall",
+        "publisher": "Brookfield"
+      },
+      {
+        "title": "AI power hunger drives record private equity deals",
+        "url": "https://www.bloomberg.com/professional/insights/artificial-intelligence/ai-power-hunger-drives-record-private-equity-deals/",
+        "publisher": "Bloomberg Professional Services"
+      }
+    ],
+    "confidence": 0.9,
+    "access": "obvious",
+    "signals": [
+      "Added in 2026 targeted expert expansion from high-signal PE, investment and theme-specific sources."
+    ]
+  },
+  {
+    "id": "bruce-hogg",
+    "name": "Bruce Hogg",
+    "type": "investor",
+    "headline": "Chair and Head of Transition Investing, Brookfield",
+    "org": "Brookfield Asset Management",
+    "location": "Toronto, Canada",
+    "themes": [
+      "clean-energy-advisory",
+      "grid-infrastructure"
+    ],
+    "specialties": [
+      "Transition investing",
+      "Renewables platforms",
+      "Infrastructure PE"
+    ],
+    "whyRelevant": "Named Brookfield leader on the $10bn first close of BGTF II; critical capital allocator for large clean-power, grid and decarbonization platforms.",
+    "bio": "Brookfield Chair and Head of Transition Investing, responsible for the strategy behind Brookfield Global Transition Fund capital formation and deployment.",
+    "companies": [
+      {
+        "companyId": "brookfield-global-transition-fund",
+        "relationship": "led",
+        "note": "Leads Brookfield transition investing and was named on BGTF II first-close materials."
+      },
+      {
+        "companyId": "brookfield-asset-management",
+        "relationship": "partner",
+        "note": "Senior Brookfield transition-investing leader."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Brookfield Announces $10 Billion First Closing for Second Brookfield Global Transition Fund",
+        "url": "https://bam.brookfield.com/press-releases/brookfield-announces-10-billion-first-closing-second-brookfield-global-transition",
+        "publisher": "Brookfield Asset Management"
+      }
+    ],
+    "confidence": 0.86,
+    "access": "obvious",
+    "signals": [
+      "Added in 2026 targeted expert expansion from high-signal PE, investment and theme-specific sources."
+    ]
+  },
+  {
+    "id": "greg-blank",
+    "name": "Greg Blank",
+    "type": "investor",
+    "headline": "CEO, Blackstone Infrastructure",
+    "org": "Blackstone Infrastructure",
+    "location": "New York, US",
+    "themes": [
+      "grid-infrastructure",
+      "clean-energy-advisory",
+      "smart-water"
+    ],
+    "specialties": [
+      "Infrastructure PE",
+      "Utilities",
+      "Water and waste"
+    ],
+    "whyRelevant": "CEO of Blackstone Infrastructure, whose platform explicitly targets energy transition infrastructure, transmission, utilities, contracted generation, water and waste.",
+    "bio": "Blackstone Infrastructure CEO quoted by Blackstone on infrastructure investing opportunities across transmission lines, utilities, pipelines and contracted generation.",
+    "companies": [
+      {
+        "companyId": "blackstone-infrastructure",
+        "relationship": "led",
+        "note": "CEO of Blackstone Infrastructure, an $84bn AUM infrastructure platform as of March 31, 2026."
+      },
+      {
+        "companyId": "invenergy",
+        "relationship": "invested-in",
+        "note": "Blackstone Infrastructure portfolio includes Invenergy Renewables, described by Blackstone as North America's largest private renewables developer."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Blackstone Infrastructure",
+        "url": "https://www.blackstone.com/our-businesses/infrastructure/",
+        "publisher": "Blackstone"
+      }
+    ],
+    "confidence": 0.88,
+    "access": "obvious",
+    "signals": [
+      "Added in 2026 targeted expert expansion from high-signal PE, investment and theme-specific sources."
+    ]
+  },
+  {
+    "id": "hans-kobler",
+    "name": "Hans Kobler",
+    "type": "investor",
+    "headline": "Founder and Managing Partner, Energy Impact Partners",
+    "org": "Energy Impact Partners",
+    "location": "New York, US",
+    "themes": [
+      "grid-infrastructure",
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "Utility-backed climate tech",
+      "Grid modernization",
+      "Growth equity"
+    ],
+    "whyRelevant": "Built EIP around utility and industrial LPs, creating a differentiated route into grid, distributed energy, microgrid and energy-software companies.",
+    "bio": "Founder and managing partner of Energy Impact Partners, a $4.5bn+ global investment firm specialized in technologies powering the future of energy; former Digital Power Capital founder and GE Equity energy-technology leader.",
+    "companies": [
+      {
+        "companyId": "energy-impact-partners",
+        "relationship": "founded",
+        "note": "Founded and leads EIP investment strategy across venture, growth and credit."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Energy Impact Partners Team",
+        "url": "https://www.energyimpactpartners.com/team/",
+        "publisher": "Energy Impact Partners"
+      },
+      {
+        "title": "Clean-tech VC exec sizes up landscape under Trump",
+        "url": "https://www.axios.com/2025/09/29/hans-kobler-tech-ai-energy-impact-partners-trump",
+        "publisher": "Axios"
+      }
+    ],
+    "confidence": 0.9,
+    "access": "obvious",
+    "signals": [
+      "Added in 2026 targeted expert expansion from high-signal PE, investment and theme-specific sources."
+    ]
+  },
+  {
+    "id": "shayle-kann",
+    "name": "Shayle Kann",
+    "type": "investor",
+    "headline": "Managing Partner, Frontier, Energy Impact Partners",
+    "org": "Energy Impact Partners",
+    "location": "San Francisco, US",
+    "themes": [
+      "grid-infrastructure",
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "Climate tech",
+      "Grid software",
+      "Frontier decarbonization"
+    ],
+    "whyRelevant": "Former Greentech Media/GTM Research leader now investing EIP Frontier capital into hard-to-abate and grid-relevant technologies; important expert for theme-specific market maps.",
+    "bio": "Managing Partner at Energy Impact Partners Frontier; previously built and led Greentech Media / GTM Research, a major research and intelligence platform for solar, storage and grid markets.",
+    "companies": [
+      {
+        "companyId": "energy-impact-partners",
+        "relationship": "partner",
+        "note": "Managing Partner for EIP Frontier, a strategy backing climate and grid-enabling technologies."
+      },
+      {
+        "companyId": "bloombergnef",
+        "relationship": "advised",
+        "note": "Comparable research-market authority through prior GTM Research leadership."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Energy Impact Partners Team",
+        "url": "https://www.energyimpactpartners.com/team/",
+        "publisher": "Energy Impact Partners"
+      }
+    ],
+    "confidence": 0.84,
+    "access": "obvious",
+    "signals": [
+      "Added in 2026 targeted expert expansion from high-signal PE, investment and theme-specific sources."
+    ]
+  },
+  {
+    "id": "christopher-gasson",
+    "name": "Christopher Gasson",
+    "type": "advisor",
+    "headline": "Owner and publisher, Global Water Intelligence",
+    "org": "Global Water Intelligence",
+    "location": "Oxford, UK",
+    "themes": [
+      "smart-water"
+    ],
+    "specialties": [
+      "Water-sector intelligence",
+      "Water investment",
+      "Desalination"
+    ],
+    "whyRelevant": "GWI is one of the highest-signal information and convening networks in water; Gasson is a key connector to investors, utility leaders, regulators and technology founders.",
+    "bio": "Owner/publisher associated with Global Water Intelligence and author/convenor in global water-market strategy and finance.",
+    "companies": [
+      {
+        "companyId": "global-water-intelligence",
+        "relationship": "led",
+        "note": "Owner/publisher and central water-market intelligence connector."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Global Water Summit: About",
+        "url": "https://www.watermeetsmoney.com/about/",
+        "publisher": "Global Water Intelligence"
+      },
+      {
+        "title": "Christopher Gasson is publisher of Global Water Intelligence",
+        "url": "https://idrawater.org/wp-content/uploads/2025/01/idanews_150708.pdf",
+        "publisher": "International Desalination Association"
+      }
+    ],
+    "confidence": 0.82,
+    "access": "proprietary",
+    "signals": [
+      "Added in 2026 targeted expert expansion from high-signal PE, investment and theme-specific sources."
+    ]
+  },
+  {
+    "id": "harry-seah",
+    "name": "Harry Seah",
+    "type": "operator",
+    "headline": "Former Deputy Chief Executive, PUB Singapore; former Chief Engineering & Technology Officer",
+    "org": "PUB Singapore",
+    "location": "Singapore",
+    "themes": [
+      "smart-water"
+    ],
+    "specialties": [
+      "Water R&D",
+      "NEWater",
+      "Desalination",
+      "Smart utilities"
+    ],
+    "whyRelevant": "WaterWorld named him a regular top global water leader; led PUB R&D areas including low-energy desalination, smart technologies and major infrastructure programs.",
+    "bio": "Longtime PUB Singapore engineering and technology leader associated with NEWater, smart technology adoption and the Deep Tunnel Sewerage System Phase 2.",
+    "companies": [
+      {
+        "companyId": "pub-singapore",
+        "relationship": "led",
+        "note": "Led engineering, technology and R&D work across PUB water innovation and infrastructure."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Top 25 Global Water Leaders",
+        "url": "https://www.waterworld.com/articles/wwi/print/volume-33/issue-1/headline/leader-focus/top-25-global-water-leaders.html/",
+        "publisher": "WaterWorld"
+      }
+    ],
+    "confidence": 0.86,
+    "access": "obvious",
+    "signals": [
+      "Added in 2026 targeted expert expansion from high-signal PE, investment and theme-specific sources."
+    ]
+  },
+  {
+    "id": "cindy-wallis-lage",
+    "name": "Cindy Wallis-Lage",
+    "type": "engineering-consultant",
+    "headline": "Former President, Water Business, Black & Veatch",
+    "org": "Black & Veatch",
+    "location": "Kansas City, US",
+    "themes": [
+      "smart-water"
+    ],
+    "specialties": [
+      "Water reuse",
+      "Water treatment",
+      "Engineering delivery"
+    ],
+    "whyRelevant": "WaterWorld top water leader with a 2,700-person water organization leadership role; strong diligence expert for utility engineering, reuse and treatment platforms.",
+    "bio": "Led Black & Veatch Water and was noted by WaterWorld for global municipal and industrial water-sector expertise and board roles.",
+    "companies": [
+      {
+        "companyId": "black-veatch",
+        "relationship": "led",
+        "note": "Led the global Water business at Black & Veatch."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Top 25 Global Water Leaders",
+        "url": "https://www.waterworld.com/articles/wwi/print/volume-33/issue-1/headline/leader-focus/top-25-global-water-leaders.html/",
+        "publisher": "WaterWorld"
+      }
+    ],
+    "confidence": 0.84,
+    "access": "obvious",
+    "signals": [
+      "Added in 2026 targeted expert expansion from high-signal PE, investment and theme-specific sources."
+    ]
+  },
+  {
+    "id": "menno-holterman",
+    "name": "Menno Holterman",
+    "type": "operator",
+    "headline": "Former CEO, Nijhuis Industries",
+    "org": "Nijhuis Industries",
+    "location": "Netherlands",
+    "themes": [
+      "smart-water"
+    ],
+    "specialties": [
+      "Industrial wastewater",
+      "Water treatment M&A",
+      "Resource recovery"
+    ],
+    "whyRelevant": "WaterWorld top global water leader; built and led industrial water-treatment businesses including Nijhuis and earlier Norit Clean Process Technologies through acquisition by Pentair.",
+    "bio": "Industrial water executive and former CEO of Nijhuis Industries; previously CEO of Norit Clean Process Technologies, acquired by Pentair in 2011.",
+    "companies": [
+      {
+        "companyId": "nijhuis-industries",
+        "relationship": "led",
+        "note": "Led Nijhuis Industries as CEO through major industrial wastewater projects."
+      },
+      {
+        "companyId": "pentair",
+        "relationship": "acquired",
+        "note": "Prior Norit Clean Process Technologies business was acquired by Pentair."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Top 25 Global Water Leaders",
+        "url": "https://www.waterworld.com/articles/wwi/print/volume-33/issue-1/headline/leader-focus/top-25-global-water-leaders.html/",
+        "publisher": "WaterWorld"
+      }
+    ],
+    "confidence": 0.83,
+    "access": "obvious",
+    "signals": [
+      "Added in 2026 targeted expert expansion from high-signal PE, investment and theme-specific sources."
+    ]
+  },
+  {
+    "id": "neil-campbell",
+    "name": "Neil Campbell",
+    "type": "lawyer",
+    "headline": "Partner, Finance practice, DLA Piper",
+    "org": "DLA Piper",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "lead finance partner"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named lead finance partner on TowerBrook JSM financing; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Neil Campbell in the DLA Piper team for TowerBrook JSM financing.",
+    "companies": [
+      {
+        "companyId": "dla-piper",
+        "relationship": "partner",
+        "note": "Named lead finance partner on TowerBrook JSM financing."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
+        "url": "https://www.dlapiper.com/en-de/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
+        "publisher": "DLA Piper"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "francesco-de-micheli",
+    "name": "Francesco De Micheli",
+    "type": "lawyer",
+    "headline": "Senior associate, DLA Piper",
+    "org": "DLA Piper",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "finance team member"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named finance team member on TowerBrook JSM financing; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Francesco De Micheli in the DLA Piper team for TowerBrook JSM financing.",
+    "companies": [
+      {
+        "companyId": "dla-piper",
+        "relationship": "partner",
+        "note": "Named finance team member on TowerBrook JSM financing."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
+        "url": "https://www.dlapiper.com/en-de/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
+        "publisher": "DLA Piper"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "radina-denkova",
+    "name": "Radina Denkova",
+    "type": "lawyer",
+    "headline": "Associate, DLA Piper",
+    "org": "DLA Piper",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "finance team member"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named finance team member on TowerBrook JSM financing; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Radina Denkova in the DLA Piper team for TowerBrook JSM financing.",
+    "companies": [
+      {
+        "companyId": "dla-piper",
+        "relationship": "partner",
+        "note": "Named finance team member on TowerBrook JSM financing."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
+        "url": "https://www.dlapiper.com/en-de/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
+        "publisher": "DLA Piper"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "brett-novick",
+    "name": "Brett Novick",
+    "type": "lawyer",
+    "headline": "Finance partner, Debevoise & Plimpton",
+    "org": "Debevoise & Plimpton",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "lead finance partner"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named lead finance partner on TowerBrook BRG debt financing; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Brett Novick in the Debevoise & Plimpton team for TowerBrook BRG debt financing.",
+    "companies": [
+      {
+        "companyId": "debevoise-plimpton",
+        "relationship": "partner",
+        "note": "Named lead finance partner on TowerBrook BRG debt financing."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Debevoise Advised TowerBrook in the Debt Financing Aspects of Its Strategic Investment in BRG",
+        "url": "https://www.debevoise.com/news/2025/03/debevoise-advised-towerbrook",
+        "publisher": "Debevoise & Plimpton"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "scott-selinger",
+    "name": "Scott Selinger",
+    "type": "lawyer",
+    "headline": "Finance partner, Debevoise & Plimpton",
+    "org": "Debevoise & Plimpton",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "lead finance partner"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named lead finance partner on TowerBrook BRG debt financing; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Scott Selinger in the Debevoise & Plimpton team for TowerBrook BRG debt financing.",
+    "companies": [
+      {
+        "companyId": "debevoise-plimpton",
+        "relationship": "partner",
+        "note": "Named lead finance partner on TowerBrook BRG debt financing."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Debevoise Advised TowerBrook in the Debt Financing Aspects of Its Strategic Investment in BRG",
+        "url": "https://www.debevoise.com/news/2025/03/debevoise-advised-towerbrook",
+        "publisher": "Debevoise & Plimpton"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "jessica-liss",
+    "name": "Jessica Liss",
+    "type": "lawyer",
+    "headline": "Associate, Debevoise & Plimpton",
+    "org": "Debevoise & Plimpton",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "finance team member"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named finance team member on TowerBrook BRG debt financing; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Jessica Liss in the Debevoise & Plimpton team for TowerBrook BRG debt financing.",
+    "companies": [
+      {
+        "companyId": "debevoise-plimpton",
+        "relationship": "partner",
+        "note": "Named finance team member on TowerBrook BRG debt financing."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Debevoise Advised TowerBrook in the Debt Financing Aspects of Its Strategic Investment in BRG",
+        "url": "https://www.debevoise.com/news/2025/03/debevoise-advised-towerbrook",
+        "publisher": "Debevoise & Plimpton"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "jonathon-yeung",
+    "name": "Jonathon Yeung",
+    "type": "lawyer",
+    "headline": "Associate, Debevoise & Plimpton",
+    "org": "Debevoise & Plimpton",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "finance team member"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named finance team member on TowerBrook BRG debt financing; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Jonathon Yeung in the Debevoise & Plimpton team for TowerBrook BRG debt financing.",
+    "companies": [
+      {
+        "companyId": "debevoise-plimpton",
+        "relationship": "partner",
+        "note": "Named finance team member on TowerBrook BRG debt financing."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Debevoise Advised TowerBrook in the Debt Financing Aspects of Its Strategic Investment in BRG",
+        "url": "https://www.debevoise.com/news/2025/03/debevoise-advised-towerbrook",
+        "publisher": "Debevoise & Plimpton"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "hanson-yu",
+    "name": "Hanson Yu",
+    "type": "lawyer",
+    "headline": "Associate, Debevoise & Plimpton",
+    "org": "Debevoise & Plimpton",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "finance team member"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named finance team member on TowerBrook BRG debt financing; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Hanson Yu in the Debevoise & Plimpton team for TowerBrook BRG debt financing.",
+    "companies": [
+      {
+        "companyId": "debevoise-plimpton",
+        "relationship": "partner",
+        "note": "Named finance team member on TowerBrook BRG debt financing."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Debevoise Advised TowerBrook in the Debt Financing Aspects of Its Strategic Investment in BRG",
+        "url": "https://www.debevoise.com/news/2025/03/debevoise-advised-towerbrook",
+        "publisher": "Debevoise & Plimpton"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "ravi-agarwal",
+    "name": "Ravi Agarwal",
+    "type": "lawyer",
+    "headline": "Corporate lawyer, Kirkland & Ellis",
+    "org": "Kirkland & Ellis",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "corporate lawyer"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named corporate lawyer on TowerBrook BRG investment; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Ravi Agarwal in the Kirkland & Ellis team for TowerBrook BRG investment.",
+    "companies": [
+      {
+        "companyId": "kirkland-ellis",
+        "relationship": "partner",
+        "note": "Named corporate lawyer on TowerBrook BRG investment."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Kirkland Advises Berkeley Research Group on Investment from TowerBrook",
+        "url": "https://www.kirkland.com/news/press-release/2025/02/kirkland-advises-berkeley-research-group-on-investment-from-towerbrook",
+        "publisher": "Kirkland & Ellis"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "ed-lee",
+    "name": "Ed Lee",
+    "type": "lawyer",
+    "headline": "Corporate lawyer, Kirkland & Ellis",
+    "org": "Kirkland & Ellis",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "corporate lawyer"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named corporate lawyer on TowerBrook BRG investment; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Ed Lee in the Kirkland & Ellis team for TowerBrook BRG investment.",
+    "companies": [
+      {
+        "companyId": "kirkland-ellis",
+        "relationship": "partner",
+        "note": "Named corporate lawyer on TowerBrook BRG investment."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Kirkland Advises Berkeley Research Group on Investment from TowerBrook",
+        "url": "https://www.kirkland.com/news/press-release/2025/02/kirkland-advises-berkeley-research-group-on-investment-from-towerbrook",
+        "publisher": "Kirkland & Ellis"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "rex-hupy",
+    "name": "Rex Hupy",
+    "type": "lawyer",
+    "headline": "Corporate lawyer, Kirkland & Ellis",
+    "org": "Kirkland & Ellis",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "corporate lawyer"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named corporate lawyer on TowerBrook BRG investment; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Rex Hupy in the Kirkland & Ellis team for TowerBrook BRG investment.",
+    "companies": [
+      {
+        "companyId": "kirkland-ellis",
+        "relationship": "partner",
+        "note": "Named corporate lawyer on TowerBrook BRG investment."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Kirkland Advises Berkeley Research Group on Investment from TowerBrook",
+        "url": "https://www.kirkland.com/news/press-release/2025/02/kirkland-advises-berkeley-research-group-on-investment-from-towerbrook",
+        "publisher": "Kirkland & Ellis"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "alice-billmire",
+    "name": "Alice Billmire",
+    "type": "lawyer",
+    "headline": "Corporate lawyer, Kirkland & Ellis",
+    "org": "Kirkland & Ellis",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "corporate lawyer"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named corporate lawyer on TowerBrook BRG investment; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Alice Billmire in the Kirkland & Ellis team for TowerBrook BRG investment.",
+    "companies": [
+      {
+        "companyId": "kirkland-ellis",
+        "relationship": "partner",
+        "note": "Named corporate lawyer on TowerBrook BRG investment."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Kirkland Advises Berkeley Research Group on Investment from TowerBrook",
+        "url": "https://www.kirkland.com/news/press-release/2025/02/kirkland-advises-berkeley-research-group-on-investment-from-towerbrook",
+        "publisher": "Kirkland & Ellis"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "douglas-dimedio",
+    "name": "Douglas DiMedio",
+    "type": "lawyer",
+    "headline": "Corporate partner, Kirkland & Ellis / Benesch source context",
+    "org": "Kirkland & Ellis",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "lead corporate partner"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named lead corporate partner on TowerBrook Langan minority investment; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Douglas DiMedio in the Kirkland & Ellis team for TowerBrook Langan minority investment.",
+    "companies": [
+      {
+        "companyId": "kirkland-ellis",
+        "relationship": "partner",
+        "note": "Named lead corporate partner on TowerBrook Langan minority investment."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Kirkland Represents TowerBrook Capital Partners on Minority Investment in Langan",
+        "url": "https://www.kirkland.com/news/press-release/2023/10/kirkland-represents-towerbrook-capital-partners-on-minority-investment-in-langan",
+        "publisher": "Kirkland & Ellis"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "jared-rusman",
+    "name": "Jared Rusman",
+    "type": "lawyer",
+    "headline": "Tax partner, Kirkland & Ellis",
+    "org": "Kirkland & Ellis",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "tax partner"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named tax partner on TowerBrook Langan minority investment; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Jared Rusman in the Kirkland & Ellis team for TowerBrook Langan minority investment.",
+    "companies": [
+      {
+        "companyId": "kirkland-ellis",
+        "relationship": "partner",
+        "note": "Named tax partner on TowerBrook Langan minority investment."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Kirkland Represents TowerBrook Capital Partners on Minority Investment in Langan",
+        "url": "https://www.kirkland.com/news/press-release/2023/10/kirkland-represents-towerbrook-capital-partners-on-minority-investment-in-langan",
+        "publisher": "Kirkland & Ellis"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "sehj-m-vather",
+    "name": "Sehj M. Vather",
+    "type": "lawyer",
+    "headline": "Tax lawyer, Kirkland & Ellis",
+    "org": "Kirkland & Ellis",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "tax lawyer"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named tax lawyer on TowerBrook Langan minority investment; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Sehj M. Vather in the Kirkland & Ellis team for TowerBrook Langan minority investment.",
+    "companies": [
+      {
+        "companyId": "kirkland-ellis",
+        "relationship": "partner",
+        "note": "Named tax lawyer on TowerBrook Langan minority investment."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Kirkland Represents TowerBrook Capital Partners on Minority Investment in Langan",
+        "url": "https://www.kirkland.com/news/press-release/2023/10/kirkland-represents-towerbrook-capital-partners-on-minority-investment-in-langan",
+        "publisher": "Kirkland & Ellis"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "boyd-greene",
+    "name": "Boyd Greene",
+    "type": "lawyer",
+    "headline": "Government contracts partner, Kirkland & Ellis",
+    "org": "Kirkland & Ellis",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "government contracts partner"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named government contracts partner on TowerBrook Langan minority investment; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Boyd Greene in the Kirkland & Ellis team for TowerBrook Langan minority investment.",
+    "companies": [
+      {
+        "companyId": "kirkland-ellis",
+        "relationship": "partner",
+        "note": "Named government contracts partner on TowerBrook Langan minority investment."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Kirkland Represents TowerBrook Capital Partners on Minority Investment in Langan",
+        "url": "https://www.kirkland.com/news/press-release/2023/10/kirkland-represents-towerbrook-capital-partners-on-minority-investment-in-langan",
+        "publisher": "Kirkland & Ellis"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "john-sheridan",
+    "name": "John Sheridan",
+    "type": "banker",
+    "headline": "Managing Partner, Clearwater",
+    "org": "Clearwater",
+    "themes": [
+      "smart-water"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "lead financial advisor"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named lead financial advisor on TowerBrook GMC investment; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names John Sheridan in the Clearwater team for TowerBrook GMC investment.",
+    "companies": [
+      {
+        "companyId": "clearwater",
+        "relationship": "partner",
+        "note": "Named lead financial advisor on TowerBrook GMC investment."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "GMC secures investment from TowerBrook Capital Partners",
+        "url": "https://www.clearwatercf.com/en-gb/experience/transactions/ire-gmc-on-its-investment-from-towerbrook-capital-partners/",
+        "publisher": "Clearwater"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "john-curtin",
+    "name": "John Curtin",
+    "type": "banker",
+    "headline": "Partner, Clearwater",
+    "org": "Clearwater",
+    "themes": [
+      "smart-water"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "financial advisor"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named financial advisor on TowerBrook GMC investment; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names John Curtin in the Clearwater team for TowerBrook GMC investment.",
+    "companies": [
+      {
+        "companyId": "clearwater",
+        "relationship": "partner",
+        "note": "Named financial advisor on TowerBrook GMC investment."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "GMC secures investment from TowerBrook Capital Partners",
+        "url": "https://www.clearwatercf.com/en-gb/experience/transactions/ire-gmc-on-its-investment-from-towerbrook-capital-partners/",
+        "publisher": "Clearwater"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "john-devine",
+    "name": "John Devine",
+    "type": "banker",
+    "headline": "Director, Clearwater",
+    "org": "Clearwater",
+    "themes": [
+      "smart-water"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "financial advisor"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named financial advisor on TowerBrook GMC investment; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names John Devine in the Clearwater team for TowerBrook GMC investment.",
+    "companies": [
+      {
+        "companyId": "clearwater",
+        "relationship": "partner",
+        "note": "Named financial advisor on TowerBrook GMC investment."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "GMC secures investment from TowerBrook Capital Partners",
+        "url": "https://www.clearwatercf.com/en-gb/experience/transactions/ire-gmc-on-its-investment-from-towerbrook-capital-partners/",
+        "publisher": "Clearwater"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "matthew-fee",
+    "name": "Matthew Fee",
+    "type": "banker",
+    "headline": "Senior Associate, Clearwater",
+    "org": "Clearwater",
+    "themes": [
+      "smart-water"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "financial advisor"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named financial advisor on TowerBrook GMC investment; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Matthew Fee in the Clearwater team for TowerBrook GMC investment.",
+    "companies": [
+      {
+        "companyId": "clearwater",
+        "relationship": "partner",
+        "note": "Named financial advisor on TowerBrook GMC investment."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "GMC secures investment from TowerBrook Capital Partners",
+        "url": "https://www.clearwatercf.com/en-gb/experience/transactions/ire-gmc-on-its-investment-from-towerbrook-capital-partners/",
+        "publisher": "Clearwater"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "george-kennedy",
+    "name": "George Kennedy",
+    "type": "lawyer",
+    "headline": "Partner, Squire Patton Boggs, Dublin",
+    "org": "Squire Patton Boggs",
+    "location": "Dublin / Ireland",
+    "themes": [
+      "smart-water"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "lead legal advisor"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named lead legal advisor on TowerBrook GMC investment; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names George Kennedy in the Squire Patton Boggs team for TowerBrook GMC investment.",
+    "companies": [
+      {
+        "companyId": "squire-patton-boggs",
+        "relationship": "partner",
+        "note": "Named lead legal advisor on TowerBrook GMC investment."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Squire Patton Boggs Advises Ireland’s GMC Utilities Group on Investment From TowerBrook Capital Partners",
+        "url": "https://www.squirepattonboggs.com/news/squire-patton-boggs-advises-irelands-gmc-utilities-group-on-investment-from-towerbrook-capital-partners/",
+        "publisher": "Squire Patton Boggs"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "james-mckay",
+    "name": "James McKay",
+    "type": "lawyer",
+    "headline": "Partner, Squire Patton Boggs, London",
+    "org": "Squire Patton Boggs",
+    "location": "London, UK",
+    "themes": [
+      "smart-water"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "legal advisor"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named legal advisor on TowerBrook GMC investment; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names James McKay in the Squire Patton Boggs team for TowerBrook GMC investment.",
+    "companies": [
+      {
+        "companyId": "squire-patton-boggs",
+        "relationship": "partner",
+        "note": "Named legal advisor on TowerBrook GMC investment."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Squire Patton Boggs Advises Ireland’s GMC Utilities Group on Investment From TowerBrook Capital Partners",
+        "url": "https://www.squirepattonboggs.com/news/squire-patton-boggs-advises-irelands-gmc-utilities-group-on-investment-from-towerbrook-capital-partners/",
+        "publisher": "Squire Patton Boggs"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "eva-giblin",
+    "name": "Eva Giblin",
+    "type": "lawyer",
+    "headline": "Senior Associate, Squire Patton Boggs, Dublin",
+    "org": "Squire Patton Boggs",
+    "location": "Dublin / Ireland",
+    "themes": [
+      "smart-water"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "legal advisor"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named legal advisor on TowerBrook GMC investment; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Eva Giblin in the Squire Patton Boggs team for TowerBrook GMC investment.",
+    "companies": [
+      {
+        "companyId": "squire-patton-boggs",
+        "relationship": "partner",
+        "note": "Named legal advisor on TowerBrook GMC investment."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Squire Patton Boggs Advises Ireland’s GMC Utilities Group on Investment From TowerBrook Capital Partners",
+        "url": "https://www.squirepattonboggs.com/news/squire-patton-boggs-advises-irelands-gmc-utilities-group-on-investment-from-towerbrook-capital-partners/",
+        "publisher": "Squire Patton Boggs"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "andrew-mcintyre",
+    "name": "Andrew McIntyre",
+    "type": "lawyer",
+    "headline": "Deal team member, William Fry",
+    "org": "William Fry",
+    "themes": [
+      "smart-water"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "TowerBrook legal advisor"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named TowerBrook legal advisor on TowerBrook GMC equity investment; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Andrew McIntyre in the William Fry team for TowerBrook GMC equity investment.",
+    "companies": [
+      {
+        "companyId": "william-fry",
+        "relationship": "partner",
+        "note": "Named TowerBrook legal advisor on TowerBrook GMC equity investment."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "William Fry Advises TowerBrook Capital Partners on its Equity Investment in GMC Utilities Group",
+        "url": "https://www.williamfry.com/knowledge/william-fry-advises-towerbrook-capital-partners-on-its-equity-investment-in-gmc-utilities-group/",
+        "publisher": "William Fry"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "james-mccabe",
+    "name": "James McCabe",
+    "type": "lawyer",
+    "headline": "Deal team member, William Fry",
+    "org": "William Fry",
+    "themes": [
+      "smart-water"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "TowerBrook legal advisor"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named TowerBrook legal advisor on TowerBrook GMC equity investment; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names James McCabe in the William Fry team for TowerBrook GMC equity investment.",
+    "companies": [
+      {
+        "companyId": "william-fry",
+        "relationship": "partner",
+        "note": "Named TowerBrook legal advisor on TowerBrook GMC equity investment."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "William Fry Advises TowerBrook Capital Partners on its Equity Investment in GMC Utilities Group",
+        "url": "https://www.williamfry.com/knowledge/william-fry-advises-towerbrook-capital-partners-on-its-equity-investment-in-gmc-utilities-group/",
+        "publisher": "William Fry"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "sean-cullen",
+    "name": "Sean Cullen",
+    "type": "lawyer",
+    "headline": "Deal team member, William Fry",
+    "org": "William Fry",
+    "themes": [
+      "smart-water"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "TowerBrook legal advisor"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named TowerBrook legal advisor on TowerBrook GMC equity investment; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Sean Cullen in the William Fry team for TowerBrook GMC equity investment.",
+    "companies": [
+      {
+        "companyId": "william-fry",
+        "relationship": "partner",
+        "note": "Named TowerBrook legal advisor on TowerBrook GMC equity investment."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "William Fry Advises TowerBrook Capital Partners on its Equity Investment in GMC Utilities Group",
+        "url": "https://www.williamfry.com/knowledge/william-fry-advises-towerbrook-capital-partners-on-its-equity-investment-in-gmc-utilities-group/",
+        "publisher": "William Fry"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "saya-sharma",
+    "name": "Saya Sharma",
+    "type": "lawyer",
+    "headline": "Corporate lawyer, Goodwin London",
+    "org": "Goodwin",
+    "location": "London, UK",
+    "themes": [
+      "grid-infrastructure",
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "corporate lawyer"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named corporate lawyer on TowerBrook Envevo stake acquisition; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Saya Sharma in the Goodwin team for TowerBrook Envevo stake acquisition.",
+    "companies": [
+      {
+        "companyId": "goodwin",
+        "relationship": "partner",
+        "note": "Named corporate lawyer on TowerBrook Envevo stake acquisition."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Goodwin Advises TowerBrook on Acquisition of Stake in Envevo",
+        "url": "https://www.goodwinlaw.com/en/news-and-events/news/2023/04/04_28-goodwin-advises-towerbrook-on-acquisition-of-stake-in-envevo",
+        "publisher": "Goodwin"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "george-fagan",
+    "name": "George Fagan",
+    "type": "lawyer",
+    "headline": "Corporate lawyer, Goodwin London",
+    "org": "Goodwin",
+    "location": "London, UK",
+    "themes": [
+      "grid-infrastructure",
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "corporate lawyer"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named corporate lawyer on TowerBrook Envevo stake acquisition; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names George Fagan in the Goodwin team for TowerBrook Envevo stake acquisition.",
+    "companies": [
+      {
+        "companyId": "goodwin",
+        "relationship": "partner",
+        "note": "Named corporate lawyer on TowerBrook Envevo stake acquisition."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Goodwin Advises TowerBrook on Acquisition of Stake in Envevo",
+        "url": "https://www.goodwinlaw.com/en/news-and-events/news/2023/04/04_28-goodwin-advises-towerbrook-on-acquisition-of-stake-in-envevo",
+        "publisher": "Goodwin"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "megan-gibson",
+    "name": "Megan Gibson",
+    "type": "lawyer",
+    "headline": "Corporate lawyer, Goodwin London",
+    "org": "Goodwin",
+    "location": "London, UK",
+    "themes": [
+      "grid-infrastructure",
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "corporate lawyer"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named corporate lawyer on TowerBrook Envevo stake acquisition; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Megan Gibson in the Goodwin team for TowerBrook Envevo stake acquisition.",
+    "companies": [
+      {
+        "companyId": "goodwin",
+        "relationship": "partner",
+        "note": "Named corporate lawyer on TowerBrook Envevo stake acquisition."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Goodwin Advises TowerBrook on Acquisition of Stake in Envevo",
+        "url": "https://www.goodwinlaw.com/en/news-and-events/news/2023/04/04_28-goodwin-advises-towerbrook-on-acquisition-of-stake-in-envevo",
+        "publisher": "Goodwin"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "patrick-clarke",
+    "name": "Patrick Clarke",
+    "type": "lawyer",
+    "headline": "Finance lawyer, Goodwin London",
+    "org": "Goodwin",
+    "location": "London, UK",
+    "themes": [
+      "grid-infrastructure",
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "finance lawyer"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named finance lawyer on TowerBrook Envevo stake acquisition; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Patrick Clarke in the Goodwin team for TowerBrook Envevo stake acquisition.",
+    "companies": [
+      {
+        "companyId": "goodwin",
+        "relationship": "partner",
+        "note": "Named finance lawyer on TowerBrook Envevo stake acquisition."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Goodwin Advises TowerBrook on Acquisition of Stake in Envevo",
+        "url": "https://www.goodwinlaw.com/en/news-and-events/news/2023/04/04_28-goodwin-advises-towerbrook-on-acquisition-of-stake-in-envevo",
+        "publisher": "Goodwin"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "sarah-jordan",
+    "name": "Sarah Jordan",
+    "type": "lawyer",
+    "headline": "Antitrust lawyer, Goodwin London",
+    "org": "Goodwin",
+    "location": "London, UK",
+    "themes": [
+      "grid-infrastructure",
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "antitrust lawyer"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named antitrust lawyer on TowerBrook Envevo stake acquisition; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Public matter source names Sarah Jordan in the Goodwin team for TowerBrook Envevo stake acquisition.",
+    "companies": [
+      {
+        "companyId": "goodwin",
+        "relationship": "partner",
+        "note": "Named antitrust lawyer on TowerBrook Envevo stake acquisition."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source; use as an intro connector, not necessarily as a sector expert."
+    ],
+    "sources": [
+      {
+        "title": "Goodwin Advises TowerBrook on Acquisition of Stake in Envevo",
+        "url": "https://www.goodwinlaw.com/en/news-and-events/news/2023/04/04_28-goodwin-advises-towerbrook-on-acquisition-of-stake-in-envevo",
+        "publisher": "Goodwin"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "joel-varner",
+    "name": "Joel Varner",
+    "type": "lawyer",
+    "headline": "Corporate partner, Benesch",
+    "org": "Benesch",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "lead corporate partner"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named lead corporate partner for TowerBrook BRG acquisition; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Benesch source supports this person-level path for TowerBrook BRG acquisition.",
+    "companies": [
+      {
+        "companyId": "benesch",
+        "relationship": "partner",
+        "note": "lead corporate partner for TowerBrook BRG acquisition."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source."
+    ],
+    "sources": [
+      {
+        "title": "Benesch Advises TowerBrook Capital Partners on Acquisition of Majority Stake in Berkeley Research Group",
+        "url": "https://www.beneschlaw.com/news/benesch-advises-towerbrook-capital-partners-on-acquisition-of-majority-stake-in-industry-leading-berkeley-research-group/",
+        "publisher": "Benesch"
+      }
+    ]
+  },
+  {
+    "id": "melissa-grim",
+    "name": "Melissa Grim",
+    "type": "lawyer",
+    "headline": "Executive Compensation and Employee Benefits partner, Benesch",
+    "org": "Benesch",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "executive compensation partner"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named executive compensation partner for TowerBrook BRG acquisition; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Benesch source supports this person-level path for TowerBrook BRG acquisition.",
+    "companies": [
+      {
+        "companyId": "benesch",
+        "relationship": "partner",
+        "note": "executive compensation partner for TowerBrook BRG acquisition."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source."
+    ],
+    "sources": [
+      {
+        "title": "Benesch Advises TowerBrook Capital Partners on Acquisition of Majority Stake in Berkeley Research Group",
+        "url": "https://www.beneschlaw.com/news/benesch-advises-towerbrook-capital-partners-on-acquisition-of-majority-stake-in-industry-leading-berkeley-research-group/",
+        "publisher": "Benesch"
+      }
+    ]
+  },
+  {
+    "id": "emily-morrison",
+    "name": "Emily Morrison",
+    "type": "lawyer",
+    "headline": "Executive Compensation and Employee Benefits partner, Benesch",
+    "org": "Benesch",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "executive compensation partner"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named executive compensation partner for TowerBrook BRG acquisition; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Benesch source supports this person-level path for TowerBrook BRG acquisition.",
+    "companies": [
+      {
+        "companyId": "benesch",
+        "relationship": "partner",
+        "note": "executive compensation partner for TowerBrook BRG acquisition."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source."
+    ],
+    "sources": [
+      {
+        "title": "Benesch Advises TowerBrook Capital Partners on Acquisition of Majority Stake in Berkeley Research Group",
+        "url": "https://www.beneschlaw.com/news/benesch-advises-towerbrook-capital-partners-on-acquisition-of-majority-stake-in-industry-leading-berkeley-research-group/",
+        "publisher": "Benesch"
+      }
+    ]
+  },
+  {
+    "id": "leah-beitner",
+    "name": "Leah Beitner",
+    "type": "lawyer",
+    "headline": "Tax partner, Benesch",
+    "org": "Benesch",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "tax partner"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named tax partner for TowerBrook BRG acquisition; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Benesch source supports this person-level path for TowerBrook BRG acquisition.",
+    "companies": [
+      {
+        "companyId": "benesch",
+        "relationship": "partner",
+        "note": "tax partner for TowerBrook BRG acquisition."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source."
+    ],
+    "sources": [
+      {
+        "title": "Benesch Advises TowerBrook Capital Partners on Acquisition of Majority Stake in Berkeley Research Group",
+        "url": "https://www.beneschlaw.com/news/benesch-advises-towerbrook-capital-partners-on-acquisition-of-majority-stake-in-industry-leading-berkeley-research-group/",
+        "publisher": "Benesch"
+      }
+    ]
+  },
+  {
+    "id": "reed-sirak",
+    "name": "Reed Sirak",
+    "type": "lawyer",
+    "headline": "Environmental partner, Benesch",
+    "org": "Benesch",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "environmental partner"
+    ],
+    "access": "proprietary",
+    "whyRelevant": "Named environmental partner for TowerBrook BRG acquisition; useful as a sourced warm-intro connector into TowerBrook-related transaction context.",
+    "bio": "Benesch source supports this person-level path for TowerBrook BRG acquisition.",
+    "companies": [
+      {
+        "companyId": "benesch",
+        "relationship": "partner",
+        "note": "environmental partner for TowerBrook BRG acquisition."
+      }
+    ],
+    "signals": [
+      "Named on a public TowerBrook-related transaction source."
+    ],
+    "sources": [
+      {
+        "title": "Benesch Advises TowerBrook Capital Partners on Acquisition of Majority Stake in Berkeley Research Group",
+        "url": "https://www.beneschlaw.com/news/benesch-advises-towerbrook-capital-partners-on-acquisition-of-majority-stake-in-industry-leading-berkeley-research-group/",
+        "publisher": "Benesch"
+      }
+    ]
+  },
+  {
+    "id": "josh-putnam",
+    "name": "Josh Putnam",
+    "type": "advisor",
+    "headline": "EY-Parthenon Global and Americas Corporate Finance Leader",
+    "org": "EY",
+    "themes": [
+      "grid-infrastructure",
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "EY M&A advisory practice lead"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Mapped EY M&A advisory practice lead for TowerBrook JSM EY advisory gap; useful as an organization-level intro research lead into TowerBrook-related transaction context.",
+    "bio": "EY source supports this organization-level path for TowerBrook JSM EY advisory gap.",
+    "companies": [
+      {
+        "companyId": "ey",
+        "relationship": "partner",
+        "note": "EY M&A advisory practice lead for TowerBrook JSM EY advisory gap."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate in CRM before treating as a warm introduction."
+    ],
+    "sources": [
+      {
+        "title": "M&A Advisory Services",
+        "url": "https://www.ey.com/en_us/services/strategy-transactions/buy-integrate",
+        "publisher": "EY"
+      }
+    ],
+    "confidence": 0.58
+  },
+  {
+    "id": "amyn-lakhani",
+    "name": "Amyn Lakhani",
+    "type": "advisor",
+    "headline": "Partner, Strategy and Transactions, EY-Parthenon",
+    "org": "EY",
+    "themes": [
+      "grid-infrastructure",
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "EY due diligence practice lead"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Mapped EY due diligence practice lead for TowerBrook JSM EY diligence gap; useful as an organization-level intro research lead into TowerBrook-related transaction context.",
+    "bio": "EY source supports this organization-level path for TowerBrook JSM EY diligence gap.",
+    "companies": [
+      {
+        "companyId": "ey",
+        "relationship": "partner",
+        "note": "EY due diligence practice lead for TowerBrook JSM EY diligence gap."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate in CRM before treating as a warm introduction."
+    ],
+    "sources": [
+      {
+        "title": "Due Diligence Services",
+        "url": "https://www.ey.com/en_us/services/strategy-transactions/mergers-acquisitions-due-diligence",
+        "publisher": "EY"
+      }
+    ],
+    "confidence": 0.56
+  },
+  {
+    "id": "bora-demiralan",
+    "name": "Bora Demiralan",
+    "type": "technical-dd",
+    "headline": "Expert in Technical Advisory, Baringa",
+    "org": "Baringa",
+    "themes": [
+      "grid-infrastructure",
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "technical advisory expert"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Mapped technical advisory expert for TowerBrook JSM Baringa technical diligence gap; useful as an organization-level intro research lead into TowerBrook-related transaction context.",
+    "bio": "Baringa source supports this organization-level path for TowerBrook JSM Baringa technical diligence gap.",
+    "companies": [
+      {
+        "companyId": "baringa",
+        "relationship": "partner",
+        "note": "technical advisory expert for TowerBrook JSM Baringa technical diligence gap."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate in CRM before treating as a warm introduction."
+    ],
+    "sources": [
+      {
+        "title": "Technical Advisory",
+        "url": "https://www.baringa.com/en/insights/low-carbon-capital/technical-advisory/",
+        "publisher": "Baringa"
+      }
+    ],
+    "confidence": 0.55
+  },
+  {
+    "id": "alan-duckworth",
+    "name": "Alan Duckworth",
+    "type": "technical-dd",
+    "headline": "Expert in technical advisory and technical due diligence, Baringa",
+    "org": "Baringa",
+    "themes": [
+      "grid-infrastructure",
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "technical due diligence expert"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Mapped technical due diligence expert for TowerBrook JSM Baringa technical diligence gap; useful as an organization-level intro research lead into TowerBrook-related transaction context.",
+    "bio": "Baringa source supports this organization-level path for TowerBrook JSM Baringa technical diligence gap.",
+    "companies": [
+      {
+        "companyId": "baringa",
+        "relationship": "partner",
+        "note": "technical due diligence expert for TowerBrook JSM Baringa technical diligence gap."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate in CRM before treating as a warm introduction."
+    ],
+    "sources": [
+      {
+        "title": "Technical Advisory",
+        "url": "https://www.baringa.com/en/insights/low-carbon-capital/technical-advisory/",
+        "publisher": "Baringa"
+      }
+    ],
+    "confidence": 0.55
+  },
+  {
+    "id": "nick-neil-boss",
+    "name": "Nick Neil-Boss",
+    "type": "technical-dd",
+    "headline": "Partner Strategy, Eight Advisory",
+    "org": "Eight Advisory",
+    "themes": [
+      "grid-infrastructure",
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "Eight Advisory infrastructure strategy lead"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Mapped Eight Advisory infrastructure strategy lead for TowerBrook JSM Eight Advisory technical diligence gap; useful as an organization-level intro research lead into TowerBrook-related transaction context.",
+    "bio": "Eight Advisory source supports this organization-level path for TowerBrook JSM Eight Advisory technical diligence gap.",
+    "companies": [
+      {
+        "companyId": "eight-advisory",
+        "relationship": "partner",
+        "note": "Eight Advisory infrastructure strategy lead for TowerBrook JSM Eight Advisory technical diligence gap."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate in CRM before treating as a warm introduction."
+    ],
+    "sources": [
+      {
+        "title": "Infrastructure, Energy & Project Finance Consulting Services",
+        "url": "https://www.8advisory.com/en/expertises/infrastructure-energy-project-finance-consulting-services-en/",
+        "publisher": "Eight Advisory"
+      }
+    ],
+    "confidence": 0.54
+  },
+  {
+    "id": "sven-kleindienst",
+    "name": "Sven Kleindienst",
+    "type": "commercial-dd",
+    "headline": "Senior Partner, Roland Berger",
+    "org": "Roland Berger",
+    "themes": [
+      "grid-infrastructure",
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "commercial and digital diligence expert"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Mapped commercial and digital diligence expert for TowerBrook JSM Roland Berger commercial diligence gap; useful as an organization-level intro research lead into TowerBrook-related transaction context.",
+    "bio": "Roland Berger source supports this organization-level path for TowerBrook JSM Roland Berger commercial diligence gap.",
+    "companies": [
+      {
+        "companyId": "roland-berger",
+        "relationship": "partner",
+        "note": "commercial and digital diligence expert for TowerBrook JSM Roland Berger commercial diligence gap."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate in CRM before treating as a warm introduction."
+    ],
+    "sources": [
+      {
+        "title": "Private Equity & Strategic Investors Consulting Services",
+        "url": "https://www.rolandberger.com/en/Expertise/Industries/Private-Equity-Strategic-Investors/Consulting-Services/",
+        "publisher": "Roland Berger"
+      }
+    ],
+    "confidence": 0.54
+  },
+  {
+    "id": "houlihan-lokey-capital-markets-group",
+    "name": "Houlihan Lokey Capital Markets Group",
+    "type": "banker",
+    "headline": "Lead financial advisor and placement agent team, Houlihan Lokey",
+    "org": "Houlihan Lokey",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory",
+      "lead financial advisor team"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Mapped lead financial advisor team for TowerBrook Langan transaction; useful as an organization-level intro research lead into TowerBrook-related transaction context.",
+    "bio": "Houlihan Lokey source supports this organization-level path for TowerBrook Langan transaction.",
+    "companies": [
+      {
+        "companyId": "houlihan-lokey",
+        "relationship": "partner",
+        "note": "lead financial advisor team for TowerBrook Langan transaction."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate in CRM before treating as a warm introduction."
+    ],
+    "sources": [
+      {
+        "title": "Houlihan Lokey Advises Langan Engineering & Environmental Services",
+        "url": "https://hl.com/about-us/transactions/langan-engineering-environmental-services/",
+        "publisher": "Houlihan Lokey"
+      }
+    ],
+    "confidence": 0.62
+  },
+  {
+    "id": "jefferies-towerbrook-brg-acquisition-team",
+    "name": "Jefferies TowerBrook BRG acquisition team",
+    "type": "banker",
+    "headline": "Organization-level financial advisor / financing provider",
+    "org": "Jefferies",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Organization-level connector",
+      "financial advisor / financing provider"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Organization-level warm-intro route for TowerBrook BRG acquisition; public sources name Jefferies as financial advisor / financing provider, but do not name the individual team in free indexed sources.",
+    "bio": "Use this as a routing placeholder for Jefferies's TowerBrook BRG acquisition matter team until a named banker/lawyer/advisor is verified.",
+    "companies": [
+      {
+        "companyId": "jefferies",
+        "relationship": "banked",
+        "note": "financial advisor / financing provider on TowerBrook BRG acquisition."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate named individual through internal CRM or advisor contacts before outreach."
+    ],
+    "sources": [
+      {
+        "title": "TowerBrook Capital Partners Announces Strategic Investment in BRG",
+        "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-strategic-investment-in-brg/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.62
+  },
+  {
+    "id": "royal-bank-of-canada-towerbrook-brg-acquisition-team",
+    "name": "Royal Bank of Canada TowerBrook BRG acquisition team",
+    "type": "banker",
+    "headline": "Organization-level financial advisor / financing provider",
+    "org": "Royal Bank of Canada",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Organization-level connector",
+      "financial advisor / financing provider"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Organization-level warm-intro route for TowerBrook BRG acquisition; public sources name Royal Bank of Canada as financial advisor / financing provider, but do not name the individual team in free indexed sources.",
+    "bio": "Use this as a routing placeholder for Royal Bank of Canada's TowerBrook BRG acquisition matter team until a named banker/lawyer/advisor is verified.",
+    "companies": [
+      {
+        "companyId": "royal-bank-of-canada",
+        "relationship": "banked",
+        "note": "financial advisor / financing provider on TowerBrook BRG acquisition."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate named individual through internal CRM or advisor contacts before outreach."
+    ],
+    "sources": [
+      {
+        "title": "TowerBrook Capital Partners Announces Strategic Investment in BRG",
+        "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-strategic-investment-in-brg/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.62
+  },
+  {
+    "id": "deutsche-bank-towerbrook-brg-acquisition-team",
+    "name": "Deutsche Bank TowerBrook BRG acquisition team",
+    "type": "banker",
+    "headline": "Organization-level financial advisor / financing provider",
+    "org": "Deutsche Bank",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Organization-level connector",
+      "financial advisor / financing provider"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Organization-level warm-intro route for TowerBrook BRG acquisition; public sources name Deutsche Bank as financial advisor / financing provider, but do not name the individual team in free indexed sources.",
+    "bio": "Use this as a routing placeholder for Deutsche Bank's TowerBrook BRG acquisition matter team until a named banker/lawyer/advisor is verified.",
+    "companies": [
+      {
+        "companyId": "deutsche-bank",
+        "relationship": "banked",
+        "note": "financial advisor / financing provider on TowerBrook BRG acquisition."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate named individual through internal CRM or advisor contacts before outreach."
+    ],
+    "sources": [
+      {
+        "title": "TowerBrook Capital Partners Announces Strategic Investment in BRG",
+        "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-strategic-investment-in-brg/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.62
+  },
+  {
+    "id": "wells-fargo-towerbrook-brg-acquisition-team",
+    "name": "Wells Fargo TowerBrook BRG acquisition team",
+    "type": "banker",
+    "headline": "Organization-level financial advisor / financing provider",
+    "org": "Wells Fargo",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Organization-level connector",
+      "financial advisor / financing provider"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Organization-level warm-intro route for TowerBrook BRG acquisition; public sources name Wells Fargo as financial advisor / financing provider, but do not name the individual team in free indexed sources.",
+    "bio": "Use this as a routing placeholder for Wells Fargo's TowerBrook BRG acquisition matter team until a named banker/lawyer/advisor is verified.",
+    "companies": [
+      {
+        "companyId": "wells-fargo",
+        "relationship": "banked",
+        "note": "financial advisor / financing provider on TowerBrook BRG acquisition."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate named individual through internal CRM or advisor contacts before outreach."
+    ],
+    "sources": [
+      {
+        "title": "TowerBrook Capital Partners Announces Strategic Investment in BRG",
+        "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-strategic-investment-in-brg/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.62
+  },
+  {
+    "id": "td-towerbrook-brg-acquisition-team",
+    "name": "TD TowerBrook BRG acquisition team",
+    "type": "banker",
+    "headline": "Organization-level financial advisor / financing provider",
+    "org": "TD",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Organization-level connector",
+      "financial advisor / financing provider"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Organization-level warm-intro route for TowerBrook BRG acquisition; public sources name TD as financial advisor / financing provider, but do not name the individual team in free indexed sources.",
+    "bio": "Use this as a routing placeholder for TD's TowerBrook BRG acquisition matter team until a named banker/lawyer/advisor is verified.",
+    "companies": [
+      {
+        "companyId": "td",
+        "relationship": "banked",
+        "note": "financial advisor / financing provider on TowerBrook BRG acquisition."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate named individual through internal CRM or advisor contacts before outreach."
+    ],
+    "sources": [
+      {
+        "title": "TowerBrook Capital Partners Announces Strategic Investment in BRG",
+        "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-strategic-investment-in-brg/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.62
+  },
+  {
+    "id": "smbc-towerbrook-brg-acquisition-team",
+    "name": "SMBC TowerBrook BRG acquisition team",
+    "type": "banker",
+    "headline": "Organization-level financial advisor / financing provider",
+    "org": "SMBC",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Organization-level connector",
+      "financial advisor / financing provider"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Organization-level warm-intro route for TowerBrook BRG acquisition; public sources name SMBC as financial advisor / financing provider, but do not name the individual team in free indexed sources.",
+    "bio": "Use this as a routing placeholder for SMBC's TowerBrook BRG acquisition matter team until a named banker/lawyer/advisor is verified.",
+    "companies": [
+      {
+        "companyId": "smbc",
+        "relationship": "banked",
+        "note": "financial advisor / financing provider on TowerBrook BRG acquisition."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate named individual through internal CRM or advisor contacts before outreach."
+    ],
+    "sources": [
+      {
+        "title": "TowerBrook Capital Partners Announces Strategic Investment in BRG",
+        "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-strategic-investment-in-brg/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.62
+  },
+  {
+    "id": "jpmorgan-towerbrook-brg-acquisition-team",
+    "name": "JPMorgan TowerBrook BRG acquisition team",
+    "type": "banker",
+    "headline": "Organization-level seller financial advisor",
+    "org": "JPMorgan",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Organization-level connector",
+      "seller financial advisor"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Organization-level warm-intro route for TowerBrook BRG acquisition; public sources name JPMorgan as seller financial advisor, but do not name the individual team in free indexed sources.",
+    "bio": "Use this as a routing placeholder for JPMorgan's TowerBrook BRG acquisition matter team until a named banker/lawyer/advisor is verified.",
+    "companies": [
+      {
+        "companyId": "jpmorgan",
+        "relationship": "banked",
+        "note": "seller financial advisor on TowerBrook BRG acquisition."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate named individual through internal CRM or advisor contacts before outreach."
+    ],
+    "sources": [
+      {
+        "title": "TowerBrook Capital Partners Announces Strategic Investment in BRG",
+        "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-strategic-investment-in-brg/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.62
+  },
+  {
+    "id": "american-discovery-capital-towerbrook-brg-acquisition-team",
+    "name": "American Discovery Capital TowerBrook BRG acquisition team",
+    "type": "banker",
+    "headline": "Organization-level seller financial advisor",
+    "org": "American Discovery Capital",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Organization-level connector",
+      "seller financial advisor"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Organization-level warm-intro route for TowerBrook BRG acquisition; public sources name American Discovery Capital as seller financial advisor, but do not name the individual team in free indexed sources.",
+    "bio": "Use this as a routing placeholder for American Discovery Capital's TowerBrook BRG acquisition matter team until a named banker/lawyer/advisor is verified.",
+    "companies": [
+      {
+        "companyId": "american-discovery-capital",
+        "relationship": "banked",
+        "note": "seller financial advisor on TowerBrook BRG acquisition."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate named individual through internal CRM or advisor contacts before outreach."
+    ],
+    "sources": [
+      {
+        "title": "TowerBrook Capital Partners Announces Strategic Investment in BRG",
+        "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-strategic-investment-in-brg/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.62
+  },
+  {
+    "id": "canaccord-genuity-towerbrook-jsm-acquisition-team",
+    "name": "Canaccord Genuity TowerBrook JSM acquisition team",
+    "type": "banker",
+    "headline": "Organization-level buyer financial advisor",
+    "org": "Canaccord Genuity",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Organization-level connector",
+      "buyer financial advisor"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Organization-level warm-intro route for TowerBrook JSM acquisition; public sources name Canaccord Genuity as buyer financial advisor, but do not name the individual team in free indexed sources.",
+    "bio": "Use this as a routing placeholder for Canaccord Genuity's TowerBrook JSM acquisition matter team until a named banker/lawyer/advisor is verified.",
+    "companies": [
+      {
+        "companyId": "canaccord-genuity",
+        "relationship": "banked",
+        "note": "buyer financial advisor on TowerBrook JSM acquisition."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate named individual through internal CRM or advisor contacts before outreach."
+    ],
+    "sources": [
+      {
+        "title": "TowerBrook Capital Partners Announces Investment in JSM",
+        "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.62
+  },
+  {
+    "id": "fried-frank-towerbrook-jsm-acquisition-team",
+    "name": "Fried Frank TowerBrook JSM acquisition team",
+    "type": "lawyer",
+    "headline": "Organization-level buyer legal counsel",
+    "org": "Fried Frank",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Organization-level connector",
+      "buyer legal counsel"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Organization-level warm-intro route for TowerBrook JSM acquisition; public sources name Fried Frank as buyer legal counsel, but do not name the individual team in free indexed sources.",
+    "bio": "Use this as a routing placeholder for Fried Frank's TowerBrook JSM acquisition matter team until a named banker/lawyer/advisor is verified.",
+    "companies": [
+      {
+        "companyId": "fried-frank",
+        "relationship": "legal-counsel",
+        "note": "buyer legal counsel on TowerBrook JSM acquisition."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate named individual through internal CRM or advisor contacts before outreach."
+    ],
+    "sources": [
+      {
+        "title": "Fried Frank congratulates TowerBrook on its majority investment in JSM",
+        "url": "https://www.linkedin.com/posts/friedfrank_congratulations-to-towerbrook-capital-partners-activity-7224797010380419072-hl7b",
+        "publisher": "Fried Frank"
+      }
+    ],
+    "confidence": 0.62
+  },
+  {
+    "id": "pwc-towerbrook-jsm-acquisition-team",
+    "name": "PwC TowerBrook JSM acquisition team",
+    "type": "lawyer",
+    "headline": "Organization-level buyer legal counsel",
+    "org": "PwC",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Organization-level connector",
+      "buyer legal counsel"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Organization-level warm-intro route for TowerBrook JSM acquisition; public sources name PwC as buyer legal counsel, but do not name the individual team in free indexed sources.",
+    "bio": "Use this as a routing placeholder for PwC's TowerBrook JSM acquisition matter team until a named banker/lawyer/advisor is verified.",
+    "companies": [
+      {
+        "companyId": "pwc",
+        "relationship": "legal-counsel",
+        "note": "buyer legal counsel on TowerBrook JSM acquisition."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate named individual through internal CRM or advisor contacts before outreach."
+    ],
+    "sources": [
+      {
+        "title": "TowerBrook Capital Partners Announces Investment in JSM",
+        "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.62
+  },
+  {
+    "id": "vista-insurance-towerbrook-jsm-acquisition-team",
+    "name": "Vista Insurance TowerBrook JSM acquisition team",
+    "type": "advisor",
+    "headline": "Organization-level technical diligence / insurance advisor",
+    "org": "Vista Insurance",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Organization-level connector",
+      "technical diligence / insurance advisor"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Organization-level warm-intro route for TowerBrook JSM acquisition; public sources name Vista Insurance as technical diligence / insurance advisor, but do not name the individual team in free indexed sources.",
+    "bio": "Use this as a routing placeholder for Vista Insurance's TowerBrook JSM acquisition matter team until a named banker/lawyer/advisor is verified.",
+    "companies": [
+      {
+        "companyId": "vista-insurance",
+        "relationship": "advised",
+        "note": "technical diligence / insurance advisor on TowerBrook JSM acquisition."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate named individual through internal CRM or advisor contacts before outreach."
+    ],
+    "sources": [
+      {
+        "title": "TowerBrook Capital Partners Announces Investment in JSM",
+        "url": "https://www.towerbrook.com/towerbrook-capital-partners-announces-investment-in-jsm/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.62
+  },
+  {
+    "id": "baird-capital-markets-towerbrook-langan-transaction-team",
+    "name": "Baird TowerBrook Langan transaction team",
+    "type": "banker",
+    "headline": "Organization-level supporting financial advisor",
+    "org": "Baird",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Organization-level connector",
+      "supporting financial advisor"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Organization-level warm-intro route for TowerBrook Langan transaction; public sources name Baird as supporting financial advisor, but do not name the individual team in free indexed sources.",
+    "bio": "Use this as a routing placeholder for Baird's TowerBrook Langan transaction matter team until a named banker/lawyer/advisor is verified.",
+    "companies": [
+      {
+        "companyId": "baird-capital-markets",
+        "relationship": "banked",
+        "note": "supporting financial advisor on TowerBrook Langan transaction."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate named individual through internal CRM or advisor contacts before outreach."
+    ],
+    "sources": [
+      {
+        "title": "Langan announces partnership with TowerBrook Capital Partners",
+        "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.62
+  },
+  {
+    "id": "cleary-gottlieb-towerbrook-langan-transaction-team",
+    "name": "Cleary Gottlieb TowerBrook Langan transaction team",
+    "type": "lawyer",
+    "headline": "Organization-level seller legal counsel",
+    "org": "Cleary Gottlieb",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Organization-level connector",
+      "seller legal counsel"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Organization-level warm-intro route for TowerBrook Langan transaction; public sources name Cleary Gottlieb as seller legal counsel, but do not name the individual team in free indexed sources.",
+    "bio": "Use this as a routing placeholder for Cleary Gottlieb's TowerBrook Langan transaction matter team until a named banker/lawyer/advisor is verified.",
+    "companies": [
+      {
+        "companyId": "cleary-gottlieb",
+        "relationship": "legal-counsel",
+        "note": "seller legal counsel on TowerBrook Langan transaction."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate named individual through internal CRM or advisor contacts before outreach."
+    ],
+    "sources": [
+      {
+        "title": "Langan announces partnership with TowerBrook Capital Partners",
+        "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.62
+  },
+  {
+    "id": "cpp-investments-towerbrook-langan-transaction-team",
+    "name": "CPP Investments TowerBrook Langan transaction team",
+    "type": "banker",
+    "headline": "Organization-level financing provider",
+    "org": "CPP Investments",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Organization-level connector",
+      "financing provider"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Organization-level warm-intro route for TowerBrook Langan transaction; public sources name CPP Investments as financing provider, but do not name the individual team in free indexed sources.",
+    "bio": "Use this as a routing placeholder for CPP Investments's TowerBrook Langan transaction matter team until a named banker/lawyer/advisor is verified.",
+    "companies": [
+      {
+        "companyId": "cpp-investments",
+        "relationship": "banked",
+        "note": "financing provider on TowerBrook Langan transaction."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate named individual through internal CRM or advisor contacts before outreach."
+    ],
+    "sources": [
+      {
+        "title": "Langan announces partnership with TowerBrook Capital Partners",
+        "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.62
+  },
+  {
+    "id": "smbc-towerbrook-langan-transaction-team",
+    "name": "SMBC TowerBrook Langan transaction team",
+    "type": "banker",
+    "headline": "Organization-level financing provider",
+    "org": "SMBC",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "specialties": [
+      "TowerBrook warm path",
+      "Organization-level connector",
+      "financing provider"
+    ],
+    "access": "obvious",
+    "whyRelevant": "Organization-level warm-intro route for TowerBrook Langan transaction; public sources name SMBC as financing provider, but do not name the individual team in free indexed sources.",
+    "bio": "Use this as a routing placeholder for SMBC's TowerBrook Langan transaction matter team until a named banker/lawyer/advisor is verified.",
+    "companies": [
+      {
+        "companyId": "smbc",
+        "relationship": "banked",
+        "note": "financing provider on TowerBrook Langan transaction."
+      }
+    ],
+    "signals": [
+      "Organization-level path; validate named individual through internal CRM or advisor contacts before outreach."
+    ],
+    "sources": [
+      {
+        "title": "Langan announces partnership with TowerBrook Capital Partners",
+        "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.62
   }
 ]

@@ -3268,19 +3268,9 @@
     "website": "https://isleutilities.com",
     "sources": [
       {
-        "title": "Dr Piers Clark — Isle Group",
-        "url": "https://www.utilityweeklive.co.uk/innovation-advisory-board/dr-piers-clark-executive-chairman-isle-group",
-        "publisher": "Utility Week Live"
-      },
-      {
-        "title": "Piers Clark (PhD) | Isle Utilities",
-        "url": "https://isleutilities.com/team-member/piers-clark-phd/",
-        "publisher": "isleutilities.com"
-      },
-      {
-        "title": "Piers Clark - World Water-Tech Innovation Summit 2026",
-        "url": "https://www.worldwatertechinnovation.com/full-speaker-list/piers-clark",
-        "publisher": "worldwatertechinnovation.com"
+        "title": "Isle Utilities appoints Ian McAulay as new chairman",
+        "url": "https://smartwatermagazine.com/news/isle-utilities/isle-utilities-appoints-ian-mcaulay-new-chairman",
+        "publisher": "Smart Water Magazine"
       }
     ],
     "confidence": 0.86,
@@ -8172,5 +8162,701 @@
       }
     ],
     "confidence": 0.7
+  },
+  {
+    "id": "bloombergnef",
+    "name": "BloombergNEF",
+    "themes": [
+      "clean-energy-advisory",
+      "grid-infrastructure"
+    ],
+    "category": "advisory",
+    "description": "Research and market-intelligence platform for clean energy, power grids, transport and transition finance.",
+    "whyInteresting": "Investment-grade energy-transition research source used by investors to track capital allocation, deployment and market structure.",
+    "specialties": [
+      "Energy-transition finance",
+      "Grid infrastructure"
+    ],
+    "stage": "Institutional platform",
+    "ownershipStatus": "active platform",
+    "website": "https://about.bnef.com",
+    "sources": [
+      {
+        "title": "BloombergNEF Finds Global Energy Transition Investment Reached Record $2.3 Trillion in 2025",
+        "url": "https://about.bnef.com/insights/clean-energy/bloombergnef-finds-global-energy-transition-investment-reached-record-2-3-trillion-in-2025-up-8-from-2024/",
+        "publisher": "BloombergNEF"
+      }
+    ],
+    "confidence": 0.86
+  },
+  {
+    "id": "ecopragma-capital",
+    "name": "EcoPragma Capital",
+    "themes": [
+      "clean-energy-advisory",
+      "grid-infrastructure"
+    ],
+    "category": "investor",
+    "description": "Growth-equity investor and advisory firm focused on commercially scaling net-zero and grid-integration technologies.",
+    "whyInteresting": "Expert-led transition investor founded by Michael Liebreich; relevant for growth-stage clean-energy and grid-flexibility origination.",
+    "specialties": [
+      "Energy-transition finance",
+      "Grid infrastructure"
+    ],
+    "stage": "Institutional platform",
+    "ownershipStatus": "active platform",
+    "website": "https://www.ecopragma.capital/",
+    "sources": [
+      {
+        "title": "EcoPragma Capital",
+        "url": "https://www.ecopragma.capital/",
+        "publisher": "EcoPragma Capital"
+      }
+    ],
+    "confidence": 0.86
+  },
+  {
+    "id": "blackstone-infrastructure",
+    "name": "Blackstone Infrastructure",
+    "themes": [
+      "grid-infrastructure",
+      "clean-energy-advisory",
+      "smart-water"
+    ],
+    "category": "investor",
+    "description": "Blackstone infrastructure platform investing across energy transition infrastructure, transport, digital infrastructure, water and waste.",
+    "whyInteresting": "Large-scale PE infrastructure investor with explicit exposure to transmission lines, utilities, contracted generation, renewables and water/waste assets.",
+    "specialties": [
+      "Grid infrastructure",
+      "Energy-transition finance",
+      "Water investment intelligence"
+    ],
+    "stage": "Institutional platform",
+    "ownershipStatus": "active platform",
+    "website": "https://www.blackstone.com/our-businesses/infrastructure/",
+    "sources": [
+      {
+        "title": "Blackstone Infrastructure",
+        "url": "https://www.blackstone.com/our-businesses/infrastructure/",
+        "publisher": "Blackstone"
+      }
+    ],
+    "confidence": 0.86
+  },
+  {
+    "id": "global-water-intelligence",
+    "name": "Global Water Intelligence",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "advisory",
+    "description": "Water-sector business intelligence, investor convening and Global Water Summit organizer.",
+    "whyInteresting": "High-signal source and network node for water-sector investors, utility CEOs, regulators, technology experts and desalination specialists.",
+    "specialties": [
+      "Water investment intelligence"
+    ],
+    "stage": "Institutional platform",
+    "ownershipStatus": "active platform",
+    "website": "https://www.watermeetsmoney.com/about/",
+    "sources": [
+      {
+        "title": "Global Water Summit: About",
+        "url": "https://www.watermeetsmoney.com/about/",
+        "publisher": "Global Water Intelligence"
+      }
+    ],
+    "confidence": 0.86
+  },
+  {
+    "id": "brookfield-global-transition-fund",
+    "name": "Brookfield Global Transition Fund",
+    "themes": [
+      "clean-energy-advisory",
+      "grid-infrastructure"
+    ],
+    "category": "investor",
+    "description": "Brookfield transition-investing strategy deploying large-scale capital into clean power and industrial decarbonization.",
+    "whyInteresting": "Major PE/infrastructure capital pool whose first BGTF II closing was $10bn and whose strategy anchors clean-energy platform deal flow.",
+    "specialties": [
+      "Energy-transition finance",
+      "Grid infrastructure"
+    ],
+    "stage": "Institutional platform",
+    "ownershipStatus": "active platform",
+    "website": "https://bam.brookfield.com/press-releases/brookfield-announces-10-billion-first-closing-second-brookfield-global-transition",
+    "sources": [
+      {
+        "title": "Brookfield Announces $10 Billion First Closing for Second Brookfield Global Transition Fund",
+        "url": "https://bam.brookfield.com/press-releases/brookfield-announces-10-billion-first-closing-second-brookfield-global-transition",
+        "publisher": "Brookfield Asset Management"
+      }
+    ],
+    "confidence": 0.86
+  },
+  {
+    "id": "invenergy",
+    "name": "Invenergy",
+    "themes": [
+      "clean-energy-advisory",
+      "grid-infrastructure"
+    ],
+    "category": "target",
+    "description": "Large privately held renewables, storage and transmission developer.",
+    "whyInteresting": "Blackstone Infrastructure portfolio company described by Blackstone as the largest private renewables developer in North America.",
+    "specialties": [
+      "Renewables development",
+      "Transmission",
+      "Storage"
+    ],
+    "stage": "Scaled platform",
+    "ownershipStatus": "Blackstone Infrastructure portfolio exposure",
+    "website": "https://invenergy.com",
+    "sources": [
+      {
+        "title": "Blackstone Infrastructure",
+        "url": "https://www.blackstone.com/our-businesses/infrastructure/",
+        "publisher": "Blackstone"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "pub-singapore",
+    "name": "PUB Singapore",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "incumbent",
+    "description": "Singapore national water agency and global benchmark for water reuse, desalination and smart water infrastructure.",
+    "whyInteresting": "Home of NEWater and major R&D programs, including low-energy desalination and smart water technologies.",
+    "specialties": [
+      "Water reuse",
+      "Desalination",
+      "Smart utility infrastructure"
+    ],
+    "stage": "Public utility",
+    "ownershipStatus": "government agency",
+    "website": "https://www.pub.gov.sg",
+    "sources": [
+      {
+        "title": "Top 25 Global Water Leaders",
+        "url": "https://www.waterworld.com/articles/wwi/print/volume-33/issue-1/headline/leader-focus/top-25-global-water-leaders.html/",
+        "publisher": "WaterWorld"
+      }
+    ],
+    "confidence": 0.86
+  },
+  {
+    "id": "black-veatch",
+    "name": "Black & Veatch",
+    "themes": [
+      "smart-water",
+      "grid-infrastructure",
+      "clean-energy-advisory"
+    ],
+    "category": "service-provider",
+    "description": "Global engineering, consulting and construction firm with major water, energy and infrastructure practices.",
+    "whyInteresting": "Deep bench of water engineering and infrastructure diligence experts, including former Water business president Cindy Wallis-Lage.",
+    "specialties": [
+      "Water engineering",
+      "Infrastructure consulting",
+      "Energy infrastructure"
+    ],
+    "stage": "Scaled professional-services platform",
+    "ownershipStatus": "independent",
+    "website": "https://www.bv.com",
+    "sources": [
+      {
+        "title": "Top 25 Global Water Leaders",
+        "url": "https://www.waterworld.com/articles/wwi/print/volume-33/issue-1/headline/leader-focus/top-25-global-water-leaders.html/",
+        "publisher": "WaterWorld"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "nijhuis-industries",
+    "name": "Nijhuis Industries",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "target",
+    "description": "Industrial wastewater treatment, resource recovery and process water technology business.",
+    "whyInteresting": "Industrial water-treatment platform associated with Menno Holterman and major wastewater projects.",
+    "specialties": [
+      "Industrial wastewater",
+      "Resource recovery",
+      "Treatment technology"
+    ],
+    "stage": "Strategic platform",
+    "ownershipStatus": "part of Saur",
+    "website": "https://nijhuisindustries.com",
+    "sources": [
+      {
+        "title": "Top 25 Global Water Leaders",
+        "url": "https://www.waterworld.com/articles/wwi/print/volume-33/issue-1/headline/leader-focus/top-25-global-water-leaders.html/",
+        "publisher": "WaterWorld"
+      }
+    ],
+    "confidence": 0.82
+  },
+  {
+    "id": "pentair",
+    "name": "Pentair",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "incumbent",
+    "description": "Water treatment and fluid solutions company with history of acquiring water-treatment technology assets.",
+    "whyInteresting": "Strategic buyer context for water-treatment exits, including Norit Clean Process Technologies.",
+    "specialties": [
+      "Water treatment",
+      "Filtration",
+      "Strategic M&A"
+    ],
+    "stage": "Public strategic",
+    "ownershipStatus": "public company",
+    "website": "https://www.pentair.com",
+    "sources": [
+      {
+        "title": "Top 25 Global Water Leaders",
+        "url": "https://www.waterworld.com/articles/wwi/print/volume-33/issue-1/headline/leader-focus/top-25-global-water-leaders.html/",
+        "publisher": "WaterWorld"
+      }
+    ],
+    "confidence": 0.8
+  },
+  {
+    "id": "dla-piper",
+    "name": "DLA Piper",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "advisory",
+    "description": "Global law firm; DLA Piper advised Bridgepoint Credit and super senior lenders on the financing package for TowerBrook's JSM acquisition.",
+    "whyInteresting": "TowerBrook warm-path connector from a public transaction or matter page.",
+    "specialties": [
+      "Private equity transactions",
+      "Transaction advisory",
+      "Warm intro connector"
+    ],
+    "stage": "Professional services platform",
+    "ownershipStatus": "independent",
+    "website": null,
+    "sources": [
+      {
+        "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
+        "url": "https://www.dlapiper.com/en-de/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
+        "publisher": "DLA Piper"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "benesch",
+    "name": "Benesch",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "advisory",
+    "description": "Law firm that advised TowerBrook on its majority stake acquisition in Berkeley Research Group.",
+    "whyInteresting": "TowerBrook warm-path connector from a public transaction or matter page.",
+    "specialties": [
+      "Private equity transactions",
+      "Transaction advisory",
+      "Warm intro connector"
+    ],
+    "stage": "Professional services platform",
+    "ownershipStatus": "independent",
+    "website": null,
+    "sources": [
+      {
+        "title": "Benesch Advises TowerBrook Capital Partners on Acquisition of Majority Stake in Berkeley Research Group",
+        "url": "https://www.beneschlaw.com/news/benesch-advises-towerbrook-capital-partners-on-acquisition-of-majority-stake-in-industry-leading-berkeley-research-group/",
+        "publisher": "Benesch"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "goodwin",
+    "name": "Goodwin",
+    "themes": [
+      "grid-infrastructure",
+      "clean-energy-advisory"
+    ],
+    "category": "advisory",
+    "description": "Law firm whose London private equity team advised TowerBrook on its Envevo stake acquisition.",
+    "whyInteresting": "TowerBrook warm-path connector from a public transaction or matter page.",
+    "specialties": [
+      "Private equity transactions",
+      "Transaction advisory",
+      "Warm intro connector"
+    ],
+    "stage": "Professional services platform",
+    "ownershipStatus": "independent",
+    "website": null,
+    "sources": [
+      {
+        "title": "Goodwin Advises TowerBrook on Acquisition of Stake in Envevo",
+        "url": "https://www.goodwinlaw.com/en/news-and-events/news/2023/04/04_28-goodwin-advises-towerbrook-on-acquisition-of-stake-in-envevo",
+        "publisher": "Goodwin"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "william-fry",
+    "name": "William Fry",
+    "themes": [
+      "smart-water"
+    ],
+    "category": "advisory",
+    "description": "Irish law firm that worked with Fried Frank advising TowerBrook on its equity investment in GMC Utilities Group.",
+    "whyInteresting": "TowerBrook warm-path connector from a public transaction or matter page.",
+    "specialties": [
+      "Private equity transactions",
+      "Transaction advisory",
+      "Warm intro connector"
+    ],
+    "stage": "Professional services platform",
+    "ownershipStatus": "independent",
+    "website": null,
+    "sources": [
+      {
+        "title": "William Fry Advises TowerBrook Capital Partners on its Equity Investment in GMC Utilities Group",
+        "url": "https://www.williamfry.com/knowledge/william-fry-advises-towerbrook-capital-partners-on-its-equity-investment-in-gmc-utilities-group/",
+        "publisher": "William Fry"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "bridgepoint-credit",
+    "name": "Bridgepoint Credit",
+    "themes": [
+      "grid-infrastructure"
+    ],
+    "category": "advisory",
+    "description": "Credit manager that provided financing support around TowerBrook's JSM acquisition.",
+    "whyInteresting": "TowerBrook warm-path connector from a public transaction or matter page.",
+    "specialties": [
+      "Private equity transactions",
+      "Transaction advisory",
+      "Warm intro connector"
+    ],
+    "stage": "Professional services platform",
+    "ownershipStatus": "independent",
+    "website": null,
+    "sources": [
+      {
+        "title": "DLA Piper advises Bridgepoint Credit and super senior lenders on financing for acquisition of JSM by TowerBrook",
+        "url": "https://www.dlapiper.com/en-de/news/2024/10/dla-piper-advises-bridgepoint-credit-on-acquisition-of-jsm-by-towerbrook",
+        "publisher": "DLA Piper"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "cleary-gottlieb",
+    "name": "Cleary Gottlieb",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "advisory",
+    "description": "Law firm that represented Langan in its sale of a minority interest to TowerBrook.",
+    "whyInteresting": "TowerBrook warm-path connector from a public transaction or matter page.",
+    "specialties": [
+      "Private equity transactions",
+      "Transaction advisory",
+      "Warm intro connector"
+    ],
+    "stage": "Professional services platform",
+    "ownershipStatus": "independent",
+    "website": null,
+    "sources": [
+      {
+        "title": "Langan to Sell Minority Interest to TowerBrook",
+        "url": "https://www.clearygottlieb.com/news-and-insights/news-listing/langan-to-sell-minority-interest-to-towerbrook",
+        "publisher": "Cleary Gottlieb"
+      }
+    ],
+    "confidence": 0.84
+  },
+  {
+    "id": "jefferies",
+    "name": "Jefferies",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "investor",
+    "description": "Investment bank listed as TowerBrook-side advisor/financing provider in BRG data and a broader financing/advisory connector.",
+    "whyInteresting": "TowerBrook warm-path connector or unresolved advisor organization from public transaction evidence.",
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory"
+    ],
+    "stage": "Professional services platform",
+    "ownershipStatus": "independent",
+    "website": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+    "sources": [
+      {
+        "title": "Langan announces partnership with TowerBrook Capital Partners",
+        "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.8
+  },
+  {
+    "id": "royal-bank-of-canada",
+    "name": "Royal Bank of Canada",
+    "themes": [
+      "clean-energy-advisory",
+      "smart-water"
+    ],
+    "category": "investor",
+    "description": "Bank/financing provider tracked as a TowerBrook transaction advisor or financing-party connector.",
+    "whyInteresting": "TowerBrook warm-path connector or unresolved advisor organization from public transaction evidence.",
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory"
+    ],
+    "stage": "Professional services platform",
+    "ownershipStatus": "independent",
+    "website": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+    "sources": [
+      {
+        "title": "Langan announces partnership with TowerBrook Capital Partners",
+        "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.8
+  },
+  {
+    "id": "deutsche-bank",
+    "name": "Deutsche Bank",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "investor",
+    "description": "Bank/financing provider tracked as a TowerBrook transaction advisor or financing-party connector.",
+    "whyInteresting": "TowerBrook warm-path connector or unresolved advisor organization from public transaction evidence.",
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory"
+    ],
+    "stage": "Professional services platform",
+    "ownershipStatus": "independent",
+    "website": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+    "sources": [
+      {
+        "title": "Langan announces partnership with TowerBrook Capital Partners",
+        "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.8
+  },
+  {
+    "id": "wells-fargo",
+    "name": "Wells Fargo",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "investor",
+    "description": "Bank/financing provider tracked as a TowerBrook transaction advisor or financing-party connector.",
+    "whyInteresting": "TowerBrook warm-path connector or unresolved advisor organization from public transaction evidence.",
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory"
+    ],
+    "stage": "Professional services platform",
+    "ownershipStatus": "independent",
+    "website": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+    "sources": [
+      {
+        "title": "Langan announces partnership with TowerBrook Capital Partners",
+        "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.8
+  },
+  {
+    "id": "td",
+    "name": "TD",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "investor",
+    "description": "Bank/financing provider tracked as a TowerBrook transaction advisor or financing-party connector.",
+    "whyInteresting": "TowerBrook warm-path connector or unresolved advisor organization from public transaction evidence.",
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory"
+    ],
+    "stage": "Professional services platform",
+    "ownershipStatus": "independent",
+    "website": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+    "sources": [
+      {
+        "title": "Langan announces partnership with TowerBrook Capital Partners",
+        "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.8
+  },
+  {
+    "id": "smbc",
+    "name": "SMBC",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "investor",
+    "description": "Financing provider on TowerBrook/Langan and BRG transaction contexts.",
+    "whyInteresting": "TowerBrook warm-path connector or unresolved advisor organization from public transaction evidence.",
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory"
+    ],
+    "stage": "Professional services platform",
+    "ownershipStatus": "independent",
+    "website": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+    "sources": [
+      {
+        "title": "Langan announces partnership with TowerBrook Capital Partners",
+        "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.8
+  },
+  {
+    "id": "jpmorgan",
+    "name": "JPMorgan",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "investor",
+    "description": "Investment bank appearing in TowerBrook/BRG transaction advisor context.",
+    "whyInteresting": "TowerBrook warm-path connector or unresolved advisor organization from public transaction evidence.",
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory"
+    ],
+    "stage": "Professional services platform",
+    "ownershipStatus": "independent",
+    "website": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+    "sources": [
+      {
+        "title": "Langan announces partnership with TowerBrook Capital Partners",
+        "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.8
+  },
+  {
+    "id": "american-discovery-capital",
+    "name": "American Discovery Capital",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "advisory",
+    "description": "Financial advisor appearing in TowerBrook/BRG seller-side advisor context.",
+    "whyInteresting": "TowerBrook warm-path connector or unresolved advisor organization from public transaction evidence.",
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory"
+    ],
+    "stage": "Professional services platform",
+    "ownershipStatus": "independent",
+    "website": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+    "sources": [
+      {
+        "title": "Langan announces partnership with TowerBrook Capital Partners",
+        "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.8
+  },
+  {
+    "id": "baird-capital-markets",
+    "name": "Baird",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "advisory",
+    "description": "Baird supported Houlihan Lokey on Langan/TowerBrook transaction advisory.",
+    "whyInteresting": "TowerBrook warm-path connector or unresolved advisor organization from public transaction evidence.",
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory"
+    ],
+    "stage": "Professional services platform",
+    "ownershipStatus": "independent",
+    "website": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+    "sources": [
+      {
+        "title": "Langan announces partnership with TowerBrook Capital Partners",
+        "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.8
+  },
+  {
+    "id": "blackstone-credit",
+    "name": "Blackstone Credit",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "investor",
+    "description": "Financing provider supporting TowerBrook/Langan minority investment.",
+    "whyInteresting": "TowerBrook warm-path connector or unresolved advisor organization from public transaction evidence.",
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory"
+    ],
+    "stage": "Professional services platform",
+    "ownershipStatus": "independent",
+    "website": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+    "sources": [
+      {
+        "title": "Langan announces partnership with TowerBrook Capital Partners",
+        "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.8
+  },
+  {
+    "id": "cpp-investments",
+    "name": "CPP Investments",
+    "themes": [
+      "clean-energy-advisory"
+    ],
+    "category": "investor",
+    "description": "CPPIB Credit Investments provided additional financing for TowerBrook/Langan.",
+    "whyInteresting": "TowerBrook warm-path connector or unresolved advisor organization from public transaction evidence.",
+    "specialties": [
+      "TowerBrook warm path",
+      "Transaction advisory"
+    ],
+    "stage": "Professional services platform",
+    "ownershipStatus": "independent",
+    "website": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+    "sources": [
+      {
+        "title": "Langan announces partnership with TowerBrook Capital Partners",
+        "url": "https://www.towerbrook.com/us/langan-announces-partnership-with-towerbrook-capital-partners/",
+        "publisher": "TowerBrook"
+      }
+    ],
+    "confidence": 0.8
   }
 ]
