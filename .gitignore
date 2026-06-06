@@ -48,5 +48,5 @@ next-env.d.ts
 # docs
 /docs/*
 !docs/SEARCH_DISCOVERY_STRATEGY.md
-/research-screenshots/*
+/research-screenshots/
 VIDEO_SCRIPT.md
