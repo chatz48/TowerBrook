@@ -86,7 +86,7 @@ export default function ThemeSwitcher({
         Theme focus
       </span>
       <span className="hidden shrink-0 text-[11px] text-ink-faint lg:inline">
-        Filters counts, call tray, Copilot, and graph
+        Filters origination desk, experts, companies, and AI
       </span>
       {OPTIONS.map((theme) => {
         const active = activeFocus === theme.id;
