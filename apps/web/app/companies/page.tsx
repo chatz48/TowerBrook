@@ -96,6 +96,7 @@ export default async function CompaniesPage({
       />
 
       <CompaniesFilterForm
+        activeTheme={activeTheme}
         query={singleParam(params.q) ?? ""}
         selectedCategory={selectedCategory}
         selectedReadiness={selectedReadiness}
