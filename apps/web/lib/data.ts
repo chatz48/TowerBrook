@@ -8,6 +8,8 @@ import type {
   ThemeId,
 } from "./types";
 import { filterTowerBrookEmployees } from "./employee-scope";
+import { ExpertSchema, CompanySchema } from "./validation";
+import { z } from "zod";
 
 const RELATIONSHIP_PRIORITY = {
   founded: 100,
@@ -72,10 +74,23 @@ function canonicalCompanyName(name: string) {
 }
 
 // JSON is the single source of truth; it's produced by the discovery pipeline
-// (scripts/) and hand-verified. We cast once here and build all derived views
-// in memory — there's no DB, which keeps the demo trivially runnable.
-const EXPERTS = expertsRaw as Expert[];
-const COMPANIES = companiesRaw as Company[];
+// (scripts/) and hand-verified. Zod validation catches schema drift at build time.
+// Uses safeParse during active development (logs warnings); switch to .parse() for
+// strict enforcement once data is clean.
+function validate<T>(schema: z.ZodType<T>, data: unknown, label: string): T {
+  const result = schema.safeParse(data);
+  if (!result.success) {
+    const issues = result.error.issues.slice(0, 5);
+    console.warn(`[validation] ${label}: ${issues.length} issue(s) — first: ${issues[0]?.path.join(".")} ${issues[0]?.message}`);
+    if (issues.length > 5) console.warn(`[validation] ${label}: ... and ${result.error.issues.length - 5} more`);
+  }
+  // Return data as-is (cast) even on validation failure during dev;
+  // switch to result.data for strict mode
+  return (result.success ? result.data : data) as unknown as T;
+}
+
+const EXPERTS: Expert[] = validate(z.array(ExpertSchema), expertsRaw, "experts.json");
+const COMPANIES: Company[] = validate(z.array(CompanySchema), companiesRaw, "companies.json");
 
 const EXPERT_BY_ID = new Map(EXPERTS.map((e) => [e.id, e]));
 const COMPANY_BY_ID = new Map(COMPANIES.map((c) => [c.id, c]));

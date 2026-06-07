@@ -281,13 +281,12 @@ export default function CallCampaignWorkspace({
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
             <div>
               <div className="ee-label text-accent">Origination desk</div>
-              <h1 className="mt-2 max-w-4xl text-[22px] font-semibold tracking-tight">
+              <h1 className="mt-1 max-w-4xl text-[20px] font-semibold tracking-tight">
                 Turn the map into an assigned origination plan
               </h1>
-              <p className="mt-2 max-w-4xl text-[12px] leading-relaxed text-ink-soft">
+              <p className="mt-1.5 max-w-4xl text-[11px] leading-relaxed text-ink-soft">
                 Assign owners, track outreach status, capture notes, and export a
-                Monday-ready origination pack. This closes the loop from expert discovery
-                to calls, referrals, company validation, and memo prep.
+                Monday-ready origination pack.
               </p>
               <div className="mt-3 text-[11px] font-semibold text-ink-soft">
                 Scope: {themeLabel}
@@ -404,11 +403,10 @@ export default function CallCampaignWorkspace({
                       {phaseExperts.length ? (
                         <>
                           <div className="hidden overflow-x-auto lg:block">
-                            <table className="ee-table min-w-[1180px]">
+                            <table className="ee-table min-w-[1020px]">
                               <thead>
                                 <tr>
                                   <th>Expert</th>
-                                  <th>Readiness</th>
                                   <th>Call objective</th>
                                   <th>Owner</th>
                                   <th>Status</th>
@@ -517,12 +515,12 @@ export default function CallCampaignWorkspace({
                               onChange={(status) => update(id, { status })}
                             />
                           </td>
-                          <td className="min-w-[260px]">
+                          <td className="min-w-[240px]">
                             <input
                               value={current.note}
                               onChange={(event) => update(id, { note: event.target.value })}
                               placeholder="Add diligence blocker or next step"
-                              className="h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[12px] text-ink outline-none focus:border-accent"
+                              className="h-8 w-full rounded-md border border-line-strong bg-white px-2 text-[11px] text-ink outline-none focus:border-accent"
                             />
                           </td>
                           <td className="min-w-[150px]">
@@ -576,23 +574,7 @@ export default function CallCampaignWorkspace({
           </main>
 
           <aside className="space-y-5">
-            <section className="ee-panel rounded-lg p-4">
-              <div className="ee-label text-ink">Coverage gaps to close</div>
-              <div className="mt-3 space-y-2">
-                {gaps.filter((gap) => gap.severity !== "low").length ? (
-                  gaps
-                    .filter((gap) => gap.severity !== "low")
-                    .map((gap) => <GapCard key={gap.archetype} gap={gap} />)
-                ) : (
-                  <div className="rounded-md border border-line bg-white p-3 text-[12px] text-ink-soft">
-                    No high-priority taxonomy gaps flagged in this scope.
-                  </div>
-                )}
-              </div>
-              <Link href="/discover" className="ee-button ee-button-secondary mt-4 w-full">
-                Open research queue
-              </Link>
-            </section>
+
 
             <section className="ee-panel overflow-hidden rounded-lg">
               <div className="border-b border-line px-4 py-3">
@@ -631,12 +613,12 @@ export default function CallCampaignWorkspace({
 
 function MetricCard({ metric }: { metric: CampaignMetric }) {
   return (
-    <div className="rounded-lg border border-line bg-white p-4">
-      <div className="text-[24px] font-semibold tabular-nums">{metric.value}</div>
-      <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-soft">
+    <div className="rounded-lg border border-line bg-white p-3">
+      <div className="text-[20px] font-semibold tabular-nums">{metric.value}</div>
+      <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-soft">
         {metric.label}
       </div>
-      <div className="mt-2 text-[11px] text-ink-faint">{metric.detail}</div>
+      <div className="mt-1.5 text-[10px] text-ink-faint">{metric.detail}</div>
     </div>
   );
 }
@@ -656,7 +638,7 @@ function ExpertPlanRow({
 }) {
   return (
     <tr className={pinned ? "bg-[#f8fbff]" : undefined}>
-      <td className="min-w-[260px]">
+      <td className="min-w-[220px]">
         <Link href={expert.href} className="ee-link">
           {expert.name}
         </Link>
@@ -667,11 +649,7 @@ function ExpertPlanRow({
         ) : null}
         <div className="mt-0.5 text-[11px] text-ink-soft">{expert.headline}</div>
       </td>
-      <td className="min-w-[170px]">
-        <div className="text-[12px] font-semibold text-ink">{expert.readiness}</div>
-        <div className="mt-1 text-[11px] text-ink-faint">{expert.confidence}</div>
-      </td>
-      <td className="max-w-[330px] text-[11px] leading-relaxed text-ink-soft">{expert.objective}</td>
+      <td className="min-w-[400px] max-w-[520px] text-[11px] leading-relaxed text-ink-soft">{expert.objective}</td>
       <td>
         <SelectControl value={current.owner} options={OWNERS} label={`Owner for ${expert.name}`} onChange={(owner) => onUpdate({ owner })} />
       </td>
@@ -710,12 +688,7 @@ function ExpertPlanCard({
         </div>
         {pinned ? <span className="rounded-full border border-accent/25 bg-[#eef5ff] px-2 py-1 text-[10px] font-semibold text-accent">Pinned</span> : null}
       </div>
-      <div className="mt-3 grid gap-2 text-[12px] sm:grid-cols-2">
-        <div>
-          <div className="ee-label text-ink-faint">Readiness</div>
-          <div className="mt-1 font-semibold">{expert.readiness}</div>
-          <div className="text-[11px] text-ink-faint">{expert.confidence}</div>
-        </div>
+      <div className="mt-3 grid gap-2 text-[12px] sm:grid-cols-1">
         <div>
           <div className="ee-label text-ink-faint">Edges</div>
           <div className="mt-1 font-semibold">{expert.companyEdges} companies · {expert.sourceCount} sources</div>
@@ -850,7 +823,7 @@ function SelectControl({
       value={value}
       onChange={(event) => onChange(event.target.value)}
       aria-label={label}
-      className="h-10 min-w-[150px] w-full rounded-md border border-line-strong bg-white px-3 text-[12px] text-ink outline-none focus:border-accent"
+      className="h-8 min-w-[120px] w-full rounded-md border border-line-strong bg-white px-2 text-[11px] text-ink outline-none focus:border-accent"
     >
       {options.map((option) => (
         <option key={option} value={option}>
@@ -875,7 +848,7 @@ function NoteInput({
       value={value}
       onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
-      className="h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[12px] text-ink outline-none focus:border-accent"
+      className="h-8 w-full rounded-md border border-line-strong bg-white px-2 text-[11px] text-ink outline-none focus:border-accent"
     />
   );
 }

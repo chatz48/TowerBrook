@@ -94,6 +94,10 @@ export interface Source {
   title: string;
   url: string;
   publisher?: string;
+  /** Distinguishes verified evidence (articles, press releases, company pages)
+   *  from contact references (LinkedIn, email finders). Only 'evidence' sources
+   *  contribute to confidence scoring. */
+  sourceType?: "evidence" | "contact";
 }
 
 export interface DealFact {
@@ -192,6 +196,10 @@ export interface CompanyLink {
 export interface Expert {
   id: string;
   name: string;
+  /** Alternate names, former names, or common variations used in sources.
+   *  The canonical `id` is the single source of truth; aliases exist only
+   *  to aid search and deduplication. Never reference an expert by alias. */
+  aliases?: string[];
   type: ExpertType;
   /** "Co-founder & ex-CEO, OpenSolar" — the at-a-glance line. */
   headline: string;

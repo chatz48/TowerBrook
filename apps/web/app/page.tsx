@@ -97,10 +97,10 @@ export default async function Home() {
           <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_520px] xl:items-end">
             <div>
               <div className="ee-label text-accent">Command Centre</div>
-              <h1 className="mt-1.5 max-w-3xl text-[22px] font-semibold tracking-tight">
+              <h1 className="mt-1 max-w-3xl text-[20px] font-semibold tracking-tight">
                 Start with the next investment decision
               </h1>
-              <p className="mt-2 max-w-3xl text-[12px] leading-relaxed text-ink-soft">
+              <p className="mt-1.5 max-w-3xl text-[11px] leading-relaxed text-ink-soft">
                 Identify the people worth calling, the companies they can
                 unlock, and the evidence or coverage gap that should shape the
                 next diligence step.
@@ -155,9 +155,9 @@ export default async function Home() {
         <section className="mt-5">
           <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-[16px] font-semibold tracking-tight">Your week across themes</h2>
-              <p className="mt-1 text-[11px] text-ink-soft">
-                Top call, lead target, and coverage gap per theme — one panel instead of three cards.
+              <h2 className="text-[15px] font-semibold tracking-tight">Your week across themes</h2>
+              <p className="mt-0.5 text-[11px] text-ink-soft">
+                Top call, lead target, and coverage gap per theme.
               </p>
             </div>
             <Link href="/campaign" className="ee-button ee-button-secondary">
@@ -311,10 +311,10 @@ function MemoSummaryCard({
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="ee-label text-accent">Theme memo</div>
-          <h2 className="mt-1.5 text-[17px] font-semibold tracking-tight">
+          <h2 className="mt-1 text-[16px] font-semibold tracking-tight">
             Your IC pack is ready
           </h2>
-          <p className="mt-1.5 max-w-2xl text-[12px] leading-relaxed text-ink-soft">
+          <p className="mt-1 max-w-2xl text-[11px] leading-relaxed text-ink-soft">
             {report.sections.length} sections · {report.stats.highConfidenceSources} high-confidence
             sources · {report.stats.experts} experts mapped · {gapCount + needsEvidence} open gaps
           </p>
@@ -352,7 +352,7 @@ function BlankSpacesCard({
   return (
     <section className="mt-4 ee-panel rounded-lg p-4">
       <div className="ee-label text-ink">Where we&apos;re thin</div>
-      <h2 className="mt-1.5 text-[16px] font-semibold tracking-tight">Coverage gaps to close</h2>
+      <h2 className="mt-1 text-[15px] font-semibold tracking-tight">Coverage gaps to close</h2>
       <ul className="mt-3 space-y-1.5 text-[11px] leading-relaxed text-ink-soft">
         {openGaps.length ? (
           openGaps.slice(0, 4).map((row) => (
@@ -401,10 +401,10 @@ function GuidedWorkflow({
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="ee-label text-ink">Guided investment workflow</div>
-            <h2 className="mt-1.5 max-w-2xl text-[18px] font-semibold tracking-tight">
+            <h2 className="mt-1 max-w-2xl text-[16px] font-semibold tracking-tight">
               What do you need by the next IC / Monday meeting?
             </h2>
-            <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ink-soft">
+            <p className="mt-1.5 max-w-2xl text-[11px] leading-relaxed text-ink-soft">
               Pick the job. Your theme scope, saved work, and call targets stay with you
               across every step.
             </p>
@@ -519,18 +519,18 @@ function WorkflowCard({
   return (
     <Link
       href={href}
-      className={`group block min-h-[160px] rounded-lg border bg-white p-3.5 transition-colors hover:border-line-strong hover:bg-[#fbfcff] ${
+      className={`group block rounded-lg border bg-white p-3 transition-colors hover:border-line-strong hover:bg-[#fbfcff] ${
         primary ? "border-accent/40 shadow-sm" : "border-line"
       }`}
     >
       <div className="text-[10px] font-semibold tracking-[0.12em] text-accent">
         {step}
       </div>
-      <h3 className="mt-3 text-[14px] font-semibold tracking-tight text-ink">
+      <h3 className="mt-2 text-[13px] font-semibold tracking-tight text-ink">
         {title}
       </h3>
-      <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">{body}</p>
-      <div className="mt-4 text-[12px] font-semibold text-accent group-hover:underline">
+      <p className="mt-1.5 text-[11px] leading-relaxed text-ink-soft">{body}</p>
+      <div className="mt-3 text-[12px] font-semibold text-accent group-hover:underline">
         {action}{" "}-&gt;
       </div>
     </Link>

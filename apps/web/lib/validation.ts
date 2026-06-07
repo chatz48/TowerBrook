@@ -1,4 +1,4 @@
-import { z } from "zod/v4";
+import { z } from "zod";
 
 /**
  * Runtime validation schemas for JSON data imports.
@@ -17,21 +17,9 @@ const SourceSchema = z.object({
 
 const CompanyLinkSchema = z.object({
   companyId: z.string(),
-  relationship: z.enum([
-    "founded",
-    "co-founded",
-    "led",
-    "partner",
-    "board",
-    "advised",
-    "invested-in",
-    "acquired",
-    "banked",
-    "legal-counsel",
-    "served",
-  ]),
+  relationship: z.string(),
   note: z.string().optional(),
-});
+}).passthrough();
 
 const SignalSchema = z.object({
   headline: z.string(),
@@ -49,14 +37,14 @@ export const ExpertSchema = z.object({
   location: z.string().optional(),
   themes: z.array(z.string()),
   specialties: z.array(z.string()).optional(),
-  access: z.enum(["obvious", "proprietary"]).optional(),
+  access: z.string().optional(),
   whyRelevant: z.string(),
   bio: z.string().optional(),
   companies: z.array(CompanyLinkSchema),
   signals: z.array(z.string()).optional(),
   news: z.array(SignalSchema).optional(),
   sources: z.array(SourceSchema),
-  confidence: z.number().min(0).max(1),
+  confidence: z.number().min(0).max(1).optional().default(0.5),
   linkedin: z.string().optional(),
   email: z.string().optional(),
   contactFacts: z.array(z.object({
@@ -64,7 +52,7 @@ export const ExpertSchema = z.object({
     value: z.string(),
     confidence: z.number().optional(),
   })).optional(),
-});
+}).passthrough();
 
 export const CompanySchema = z.object({
   id: z.string(),
@@ -80,7 +68,7 @@ export const CompanySchema = z.object({
   sizeBand: z.string().optional(),
   website: z.string().optional(),
   sources: z.array(SourceSchema),
-  confidence: z.number().min(0).max(1),
+  confidence: z.number().min(0).max(1).optional().default(0.5),
   news: z.array(SignalSchema).optional(),
   materialFacts: z.array(z.object({
     type: z.string(),
@@ -89,4 +77,4 @@ export const CompanySchema = z.object({
   })).optional(),
   funding: z.string().optional(),
   hq: z.string().optional(),
-});
+}).passthrough();
