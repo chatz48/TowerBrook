@@ -113,7 +113,7 @@ export function computeVisibleGraph(
     .sort((a, b) => b.confidence - a.confidence || b.sourceIds.length - a.sourceIds.length);
 
   const pathView = options.pathView ?? true;
-  const firstHop = selectedEdges.slice(0, pathView ? 7 : 12);
+  const firstHop = selectedEdges.slice(0, pathView ? 6 : 10);
   const visibleEdges = (() => {
     if (!selectedNode) return filteredEdges.slice(0, 10);
     if (!pathView) return firstHop;
@@ -127,7 +127,7 @@ export function computeVisibleGraph(
       )
       .filter((edge) => edge.from !== selectedKey && edge.to !== selectedKey)
       .sort((a, b) => b.confidence - a.confidence)
-      .slice(0, 5);
+      .slice(0, 3);
 
     return [...firstHop, ...secondHop];
   })();

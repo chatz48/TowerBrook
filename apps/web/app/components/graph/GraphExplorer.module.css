@@ -96,7 +96,7 @@
 }
 
 .panelHeader {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .panelHeader h1 {
@@ -318,6 +318,142 @@
   border-top: 1px solid #e0e6ef;
   padding: 6px;
   background: #fff;
+}
+
+.filterStack {
+  display: grid;
+  gap: 8px;
+}
+
+.filterGroup {
+  border: 1px solid #e0e6ef;
+  border-radius: 7px;
+  background: #fbfcff;
+  overflow: hidden;
+}
+
+.filterGroup summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 10px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.filterGroup summary::-webkit-details-marker {
+  display: none;
+}
+
+.filterGroup summary span {
+  color: #334155;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.filterGroup summary small {
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.filterGroup > div {
+  border-top: 1px solid #e0e6ef;
+  padding: 8px 10px 10px;
+  background: #fff;
+}
+
+.filterHint {
+  margin: 0 0 8px;
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.filterActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 6px;
+}
+
+.filterActions button {
+  border: 0;
+  background: transparent;
+  color: #075fe4;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.filterScroll {
+  display: grid;
+  gap: 2px;
+  max-height: 220px;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.quickJumpList {
+  display: grid;
+  gap: 4px;
+}
+
+.quickJumpList button {
+  display: grid;
+  grid-template-columns: 30px 1fr auto;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  border: 1px solid #e0e6ef;
+  border-radius: 7px;
+  background: #fff;
+  color: inherit;
+  padding: 7px 9px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.quickJumpList button:hover,
+.quickJumpList .activeQuickJump {
+  border-color: #9bbcf0;
+  background: #f7faff;
+}
+
+.quickJumpList strong,
+.quickJumpList small {
+  display: block;
+}
+
+.quickJumpList strong {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quickJumpList small {
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 11px;
+}
+
+.quickJumpList em {
+  flex-shrink: 0;
+  color: #075fe4;
+  border: 1px solid #dbe7ff;
+  border-radius: 50%;
+  min-width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
 }
 
 .directoryList button {
@@ -715,6 +851,33 @@
   justify-content: space-between;
   gap: 14px;
   margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.graphNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  border: 1px solid #dbe7ff;
+  border-radius: 7px;
+  background: #f4f8ff;
+  padding: 8px 12px;
+  color: #334155;
+  font-size: 12px;
+}
+
+.graphNotice button {
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: #075fe4;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .toolbarFocus {
@@ -783,7 +946,7 @@
 .graphCard {
   position: relative;
   overflow: hidden;
-  min-height: 710px;
+  min-height: 640px;
 }
 
 .graphScroller {
@@ -799,6 +962,29 @@
   height: 42px;
   padding: 0 18px;
   border-bottom: 1px solid #eef2f6;
+}
+
+.legendCompact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.legendCompact span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #64748b;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.legendCompact i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
 }
 
 .legend span {

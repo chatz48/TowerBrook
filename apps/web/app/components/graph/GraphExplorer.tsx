@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
-import type { CSSProperties } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import type { ExpertType, RelationshipType } from "@/lib/types";
 import {
@@ -96,7 +97,7 @@ function quickJumpNodes(
     }))
     .filter((item) => item.count > 0)
     .sort((a, b) => b.count - a.count)
-    .slice(0, 6);
+    .slice(0, 4);
 }
 
 function expertDomainOptions(experts: ExplorerExpertNode[]): { value: string; label: string }[] {
@@ -168,8 +169,13 @@ export default function GraphExplorer({
   };
   variant?: "full" | "embed";
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [theme, setTheme] = useState<ThemeFocus>(defaultTheme);
   const [query, setQuery] = useState("");
+  const [highlightedEdgeId, setHighlightedEdgeId] = useState<string | null>(null);
   const [nodeKinds, setNodeKinds] = useState<Record<ExplorerNode["kind"], boolean>>({
     expert: true,
     company: true,
@@ -188,7 +194,36 @@ export default function GraphExplorer({
   const [history, setHistory] = useState<string[]>([]);
   const canvasColumnRef = useRef<HTMLElement>(null);
 
+  useEffect(() => {
+    setTheme(defaultTheme);
+  }, [defaultTheme]);
+
+  useEffect(() => {
+    if (variant !== "full") return;
+    function onKeyDown(event: KeyboardEvent) {
+      const target = event.target as HTMLElement;
+      const typing =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.tagName === "SELECT" ||
+        target.isContentEditable;
+      if (event.key === "/" && !typing) {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+      }
+      if (event.key === "Escape" && document.activeElement === searchInputRef.current) {
+        setQuery("");
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [variant]);
+
   const allNodes = useMemo(() => [...experts, ...companies, ...deals], [companies, deals, experts]);
+  const themeLabel = useMemo(
+    () => themes.find((item) => item.id === theme)?.name ?? (theme === "all" ? "All themes" : theme),
+    [theme, themes],
+  );
   const nodeByKey = useMemo(
     () => new Map(allNodes.map((node) => [node.key, node])),
     [allNodes],
@@ -270,6 +305,26 @@ export default function GraphExplorer({
     [allNodes, expertDomain, filteredEdges, nodeKinds, theme],
   );
   const groupedDirectoryNodes = useMemo(() => directoryGroups(directoryNodes), [directoryNodes]);
+  const quickJumpItems = useMemo(
+    () =>
+      quickJumpNodes(allNodes, filteredEdges, theme).filter((item) => item.node.key !== selectedKey),
+    [allNodes, filteredEdges, selectedKey, theme],
+  );
+  const availableRelationships = useMemo(
+    () =>
+      RELATIONSHIP_ORDER.filter((relationship) =>
+        edges.some((edge) => edge.relationship === relationship),
+      ),
+    [edges],
+  );
+  const activeNodeKindCount = useMemo(
+    () => (["expert", "company", "deal"] as const).filter((kind) => nodeKinds[kind]).length,
+    [nodeKinds],
+  );
+  const activeRelationshipCount = useMemo(
+    () => availableRelationships.filter((relationship) => relationships[relationship]).length,
+    [availableRelationships, relationships],
+  );
   const connectedPreview = useMemo(
     () =>
       selectedEdges
@@ -284,6 +339,17 @@ export default function GraphExplorer({
 
   const visibleEdges = visibleGraph.visibleEdges;
   const visibleNodes = visibleGraph.visibleNodes;
+  const hiddenDirectEdges = useMemo(() => {
+    const shown = visibleEdges.filter(
+      (edge) => edge.from === selectedKey || edge.to === selectedKey,
+    ).length;
+    return Math.max(0, selectedEdges.length - shown);
+  }, [selectedEdges.length, selectedKey, visibleEdges]);
+
+  const starterSuggestions = useMemo(
+    () => quickJumpNodes(allNodes, filteredEdges, theme).slice(0, 3),
+    [allNodes, filteredEdges, theme],
+  );
 
   const metrics = useMemo(() => {
     const bridgeExperts = experts
@@ -329,12 +395,51 @@ export default function GraphExplorer({
     };
   }, [companies, experts, filteredEdges, relationshipLabels, visibleNodes]);
 
+  const suggestedNext = useMemo(() => {
+    const items: { key: string; node: ExplorerNode; reason: string; count?: number }[] = [];
+    const seen = new Set<string>();
+
+    function add(node: ExplorerNode, reason: string, count?: number) {
+      if (node.key === selectedKey || seen.has(node.key)) return;
+      seen.add(node.key);
+      items.push({ key: node.key, node, reason, count });
+    }
+
+    for (const { expert, count } of metrics.bridgeExperts) {
+      add(expert, "Bridge expert", count);
+    }
+    for (const { company, count } of metrics.denseTargets) {
+      add(company, "High-density target", count);
+    }
+    for (const { node, count } of quickJumpItems) {
+      add(node, "Well connected", count);
+    }
+
+    return items.slice(0, 6);
+  }, [metrics.bridgeExperts, metrics.denseTargets, quickJumpItems, selectedKey]);
+
+  function syncFocusToUrl(key: string) {
+    if (variant !== "full") return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("focus", key);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }
+
   function selectNode(key: string) {
     setSelectedKey((current) => {
       if (current && current !== key) setHistory((items) => [...items.slice(-5), current]);
       return key;
     });
     setQuery("");
+    setHighlightedEdgeId(null);
+    syncFocusToUrl(key);
+  }
+
+  function highlightRelationship(edgeId: string) {
+    setHighlightedEdgeId(edgeId);
+    window.requestAnimationFrame(() => {
+      canvasColumnRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }
 
   function selectNodeAndReveal(key: string) {
@@ -363,8 +468,11 @@ export default function GraphExplorer({
     setConfidenceFloor(DEFAULT_CONFIDENCE_FLOOR);
     setPathView(true);
     setExpertDomain("all");
-    setSelectedKey(defaultSelected ?? experts[0]?.key ?? companies[0]?.key ?? deals[0]?.key);
+    const resetKey = defaultSelected ?? experts[0]?.key ?? companies[0]?.key ?? deals[0]?.key;
+    setSelectedKey(resetKey);
     setHistory([]);
+    setHighlightedEdgeId(null);
+    if (resetKey) syncFocusToUrl(resetKey);
   }
 
   function runQuery() {
@@ -423,81 +531,17 @@ export default function GraphExplorer({
       <div className={variant === "embed" ? styles.embedWorkspace : styles.workspace}>
         {variant === "full" ? (
         <aside className={styles.queryPanel}>
-          <PanelHeader title="Relationship Graph" caption="Start with a company or person, then follow the relationship layers that matter." />
+          <PanelHeader
+            title="Relationship Graph"
+            caption="Search for a person or company, then follow connection paths on the map."
+          />
 
           <section className={styles.panelSection}>
-            <div className={styles.sectionLine}>
-              <strong>Focus</strong>
-              <button type="button" onClick={resetExplorer}>
-                Reset
-              </button>
-            </div>
-            {selectedNode ? (
-              <div className={styles.currentFocus}>
-                <span className={styles.focusGlyph} data-kind={selectedNode.kind}>
-                  {nodeBadgeText(selectedNode)}
-                </span>
-                <div>
-                  <small>Current focus</small>
-                  <strong>{selectedNode.name}</strong>
-                  <span>{selectedEdges.length} direct mapped relationship{selectedEdges.length === 1 ? "" : "s"}</span>
-                </div>
-              </div>
-            ) : null}
-
-            <div className="mt-3">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
-                Quick jump
-              </span>
-              <div className="mt-2 grid gap-1.5">
-                {quickJumpNodes(allNodes, filteredEdges, theme).map(({ node, count }) => (
-                  <button
-                    key={node.key}
-                    type="button"
-                    onClick={() => selectNode(node.key)}
-                    className={`flex items-center gap-2 rounded border px-2.5 py-2 text-left text-[12px] transition-colors ${
-                      selectedNode?.key === node.key
-                        ? "border-accent bg-[#f4f8ff]"
-                        : "border-line bg-white hover:border-line-strong"
-                    }`}
-                  >
-                    <span
-                      className="grid h-6 w-6 shrink-0 place-items-center rounded text-[10px] font-bold"
-                      style={{
-                        backgroundColor: node.kind === "company" ? "#e6f4ea" : "#eef5ff",
-                        color: node.kind === "company" ? "#11843b" : "#075fe4",
-                      }}
-                    >
-                      {nodeBadgeText(node)}
-                    </span>
-                    <span className="min-w-0 flex-1 truncate font-medium">{node.name}</span>
-                    <span className="shrink-0 text-[10px] text-ink-faint">{count}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <label className={styles.fieldLabel} htmlFor="graph-theme">
-              Theme
-            </label>
-            <select
-              id="graph-theme"
-              className={styles.select}
-              value={theme}
-              onChange={(event) => {
-                changeTheme(event.target.value as ThemeFocus);
-              }}
-            >
-              {themes.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
             <label className={styles.fieldLabel} htmlFor="graph-query">
-              Change focus
+              Search graph
             </label>
             <input
+              ref={searchInputRef}
               id="graph-query"
               className={styles.select}
               value={query}
@@ -507,6 +551,7 @@ export default function GraphExplorer({
               }}
               placeholder="Find a person, company, or deal"
             />
+            <p className={styles.searchHint}>Press <kbd>/</kbd> to focus search</p>
             {query.trim() ? (
               <div className={styles.focusMatches}>
                 {focusMatches.length ? (
@@ -525,154 +570,231 @@ export default function GraphExplorer({
                   <p>No matching nodes in this theme.</p>
                 )}
               </div>
-            ) : null}
-          </section>
-
-          <section className={styles.panelSection}>
-            <div className={styles.sectionLine}>
-              <strong>Nearest nodes</strong>
-              <span className={styles.directoryMeta}>{directoryCountText(directoryNodes.map(({ node }) => node))}</span>
-            </div>
-            <p className={styles.directoryHint}>
-              Search for the full graph. This panel caps each type so the default view stays path-led.
-            </p>
-            <div className={styles.directoryList} aria-label="Grouped graph node shortlist">
-              {groupedDirectoryNodes.map((group) => (
-                <details key={group.kind} open={group.kind !== "deal"} className={styles.directoryGroup}>
-                  <summary>
-                    <span>{group.label}</span>
-                    <small>{group.items.length} shown / {group.total}</small>
-                  </summary>
-                  <div>
-                    {group.items.map(({ node, connections }) => (
-                      <button
-                        key={node.key}
-                        type="button"
-                        onClick={() => selectNode(node.key)}
-                        className={selectedNode?.key === node.key ? styles.activeDirectoryItem : undefined}
-                      >
+            ) : (
+              <div className={styles.starterPrompt}>
+                <p>Search for an expert or company, or pick a suggested hub.</p>
+                {starterSuggestions.length ? (
+                  <div className={styles.quickJumpList}>
+                    {starterSuggestions.map(({ node, count }) => (
+                      <button key={node.key} type="button" onClick={() => selectNode(node.key)}>
                         <span className={styles.focusGlyph} data-kind={node.kind}>
                           {nodeBadgeText(node)}
                         </span>
                         <span>
                           <strong>{node.name}</strong>
-                          <small>{nodeKindName(node)} · {connections} relationship{connections === 1 ? "" : "s"}</small>
+                          <small>
+                            {nodeKindName(node)} · {count} relationship{count === 1 ? "" : "s"}
+                          </small>
                         </span>
+                        <em>{count}</em>
                       </button>
                     ))}
                   </div>
-                </details>
-              ))}
-            </div>
+                ) : null}
+              </div>
+            )}
           </section>
 
           <section className={styles.panelSection}>
-            <div className={styles.sectionLine}>
-              <strong>Node types</strong>
-              <button
-                type="button"
-                onClick={() => setNodeKinds({ expert: true, company: true, deal: true })}
-              >
-                Select all
-              </button>
-            </div>
-            {(["expert", "company", "deal"] as const).map((kind) => (
-              <label key={kind} className={styles.checkRow}>
-                <input
-                  type="checkbox"
-                  checked={nodeKinds[kind]}
-                  onChange={(event) =>
-                    setNodeKinds((current) => ({
-                      ...current,
-                      [kind]: event.target.checked,
-                    }))
-                  }
-                />
-                <span className={styles.nodeGlyph} data-kind={kind}>
-                  {kind === "expert" ? "P" : kind === "deal" ? "D" : "CO"}
+            {selectedNode ? (
+              <div className={styles.currentFocus}>
+                <span className={styles.focusGlyph} data-kind={selectedNode.kind}>
+                  {nodeBadgeText(selectedNode)}
                 </span>
-                {NODE_KIND_LABEL[kind]}
-              </label>
-            ))}
+                <div>
+                  <small>Current focus</small>
+                  <strong>{selectedNode.name}</strong>
+                  <span>{selectedEdges.length} direct connection{selectedEdges.length === 1 ? "" : "s"}</span>
+                </div>
+              </div>
+            ) : null}
+            <p className={styles.scopeReadout}>
+              Scoped to <strong>{themeLabel}</strong>
+              <span className={styles.scopeReadoutHint}>Change scope in the header above.</span>
+            </p>
           </section>
 
           <section className={styles.panelSection}>
-            <div className={styles.sectionLine}>
-              <strong>Relationship types</strong>
-              <button
-                type="button"
-                onClick={() =>
-                  setRelationships(
-                    Object.fromEntries(
-                      RELATIONSHIP_ORDER.map((relationship) => [relationship, true]),
-                    ) as Record<RelationshipType, boolean>,
-                  )
-                }
-              >
-                Select all
-              </button>
-            </div>
-            {RELATIONSHIP_ORDER.filter((relationship) =>
-              edges.some((edge) => edge.relationship === relationship),
-            ).map((relationship) => (
-              <label key={relationship} className={styles.checkRow}>
-                <input
-                  type="checkbox"
-                  checked={relationships[relationship]}
-                  onChange={(event) =>
-                    setRelationships((current) => ({
-                      ...current,
-                      [relationship]: event.target.checked,
-                    }))
-                  }
-                />
-                <span
-                  className={styles.edgeLegend}
-                  style={{ "--edge-color": RELATIONSHIP_COLOR[relationship] } as CSSProperties}
-                />
-                {relationshipLabels.get(relationship) ?? relationship}
-              </label>
-            ))}
+            <SidebarDetails
+              title="Suggested next"
+              meta={suggestedNext.length ? `${suggestedNext.length} nodes` : "None"}
+              defaultOpen
+            >
+              <p className={styles.filterHint}>Well-connected hubs and bridge paths worth exploring next.</p>
+              {suggestedNext.length ? (
+                <div className={styles.quickJumpList}>
+                  {suggestedNext.map(({ key, node, reason, count }) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => selectNode(node.key)}
+                      className={selectedNode?.key === node.key ? styles.activeQuickJump : undefined}
+                    >
+                      <span className={styles.focusGlyph} data-kind={node.kind}>
+                        {nodeBadgeText(node)}
+                      </span>
+                      <span>
+                        <strong>{node.name}</strong>
+                        <small>
+                          {reason}
+                          {count ? ` · ${count} relationship${count === 1 ? "" : "s"}` : ""}
+                        </small>
+                      </span>
+                      {count ? <em>{count}</em> : null}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className={styles.filterHint}>No additional suggestions in this theme.</p>
+              )}
+            </SidebarDetails>
           </section>
 
           <section className={styles.panelSection}>
-            <label className={styles.fieldLabel} htmlFor="confidence">
-              Source confidence
-            </label>
-            <input
-              id="confidence"
-              className={styles.range}
-              type="range"
-              min="0.6"
-              max="0.95"
-              step="0.01"
-              value={confidenceFloor}
-              onChange={(event) => setConfidenceFloor(Number(event.target.value))}
-            />
-            <div className={styles.rangeScale}>
-              <span>All</span>
-              <span>Low</span>
-              <span>Medium</span>
-              <span>High</span>
-            </div>
+            <SidebarDetails
+              title="Browse by type"
+              meta={directoryCountText(directoryNodes.map(({ node }) => node))}
+            >
+              <p className={styles.filterHint}>Shortlist by type — search above for the full graph.</p>
+              <div className={styles.directoryList} aria-label="Grouped graph node shortlist">
+                {groupedDirectoryNodes.map((group) => (
+                  <details key={group.kind} open={group.kind === "expert"} className={styles.directoryGroup}>
+                    <summary>
+                      <span>{group.label}</span>
+                      <small>{group.items.length} shown / {group.total}</small>
+                    </summary>
+                    <div>
+                      {group.items.map(({ node, connections }) => (
+                        <button
+                          key={node.key}
+                          type="button"
+                          onClick={() => selectNode(node.key)}
+                          className={selectedNode?.key === node.key ? styles.activeDirectoryItem : undefined}
+                        >
+                          <span className={styles.focusGlyph} data-kind={node.kind}>
+                            {nodeBadgeText(node)}
+                          </span>
+                          <span>
+                            <strong>{node.name}</strong>
+                            <small>{nodeKindName(node)} · {connections} relationship{connections === 1 ? "" : "s"}</small>
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </SidebarDetails>
           </section>
 
           <section className={styles.panelSection}>
-            <div className={styles.statsGrid}>
-              <Metric label="Nodes" value={graphStats.nodes} />
-              <Metric label="Edges" value={graphStats.edges} />
-              <Metric label="Sources" value={graphStats.sources} />
-            </div>
+            <SidebarDetails
+              title="Filters"
+              meta={`${activeNodeKindCount}/3 types · ${activeRelationshipCount}/${availableRelationships.length} edges`}
+            >
+              <div className={styles.filterStack}>
+                <div>
+                  <div className={styles.filterActions}>
+                    <span className={styles.filterGroupLabel}>Node types</span>
+                    <button
+                      type="button"
+                      onClick={() => setNodeKinds({ expert: true, company: true, deal: true })}
+                    >
+                      Select all
+                    </button>
+                  </div>
+                  {(["expert", "company", "deal"] as const).map((kind) => (
+                    <label key={kind} className={styles.checkRow}>
+                      <input
+                        type="checkbox"
+                        checked={nodeKinds[kind]}
+                        onChange={(event) =>
+                          setNodeKinds((current) => ({
+                            ...current,
+                            [kind]: event.target.checked,
+                          }))
+                        }
+                      />
+                      <span className={styles.nodeGlyph} data-kind={kind}>
+                        {kind === "expert" ? "P" : kind === "deal" ? "D" : "CO"}
+                      </span>
+                      {NODE_KIND_LABEL[kind]}
+                    </label>
+                  ))}
+                </div>
+                <div>
+                  <div className={styles.filterActions}>
+                    <span className={styles.filterGroupLabel}>Relationship types</span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setRelationships(
+                          Object.fromEntries(
+                            RELATIONSHIP_ORDER.map((relationship) => [relationship, true]),
+                          ) as Record<RelationshipType, boolean>,
+                        )
+                      }
+                    >
+                      Select all
+                    </button>
+                  </div>
+                  <div className={styles.filterScroll}>
+                    {availableRelationships.map((relationship) => (
+                      <label key={relationship} className={styles.checkRow}>
+                        <input
+                          type="checkbox"
+                          checked={relationships[relationship]}
+                          onChange={(event) =>
+                            setRelationships((current) => ({
+                              ...current,
+                              [relationship]: event.target.checked,
+                            }))
+                          }
+                        />
+                        <span
+                          className={styles.edgeLegend}
+                          style={{ "--edge-color": RELATIONSHIP_COLOR[relationship] } as CSSProperties}
+                        />
+                        {relationshipLabels.get(relationship) ?? relationship}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <span className={styles.filterGroupLabel}>Source confidence</span>
+                  <input
+                    id="confidence"
+                    className={styles.range}
+                    type="range"
+                    min="0.6"
+                    max="0.95"
+                    step="0.01"
+                    value={confidenceFloor}
+                    onChange={(event) => setConfidenceFloor(Number(event.target.value))}
+                  />
+                  <div className={styles.rangeScale}>
+                    <span>All</span>
+                    <span>Low</span>
+                    <span>Medium</span>
+                    <span>High</span>
+                  </div>
+                  <div className={`${styles.statsGrid} mt-3`}>
+                    <Metric label="Nodes" value={graphStats.nodes} />
+                    <Metric label="Edges" value={graphStats.edges} />
+                    <Metric label="Sources" value={graphStats.sources} />
+                  </div>
+                  <div className={`${styles.panelActions} mt-3`}>
+                    <button type="button" className={styles.primaryButton} onClick={runQuery} disabled={!focusMatches.length}>
+                      Focus top match
+                    </button>
+                    <button type="button" className={styles.secondaryButton} onClick={resetExplorer}>
+                      Reset map
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </SidebarDetails>
           </section>
-
-          <div className={styles.panelActions}>
-            <button type="button" className={styles.primaryButton} onClick={runQuery} disabled={!focusMatches.length}>
-              Focus top match
-            </button>
-            <button type="button" className={styles.secondaryButton} onClick={resetExplorer}>
-              Reset
-            </button>
-          </div>
         </aside>
         ) : null}
 
@@ -697,10 +819,7 @@ export default function GraphExplorer({
           ) : null}
 
           <div className={variant === "embed" ? styles.embedGraphToolbar : styles.graphToolbar}>
-            <div className={styles.toolbarFocus}>
-              <span>Focused on</span>
-              <strong>{selectedNode?.name ?? "No matching node"}</strong>
-            </div>
+            <GraphLegend compact />
             <div className={styles.toolbarButtons}>
               {variant === "full" ? (
                 <select
@@ -750,8 +869,22 @@ export default function GraphExplorer({
             </div>
           </div>
 
+          {hiddenDirectEdges > 0 ? (
+            <div className={styles.graphNotice}>
+              <span>
+                Showing {visibleEdges.filter((edge) => edge.from === selectedKey || edge.to === selectedKey).length} of{" "}
+                {selectedEdges.length} direct connections
+                {pathView ? " in layered map" : ""}.
+              </span>
+              {pathView ? (
+                <button type="button" onClick={() => setPathView(false)}>
+                  Show direct network
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+
           <section className={styles.graphCard} aria-label="Interactive graph canvas">
-            <GraphLegend />
             <div className={styles.graphScroller}>
               <GraphCanvas
                 nodes={visibleNodes}
@@ -912,6 +1045,28 @@ function PanelHeader({ title, caption }: { title: string; caption: string }) {
   );
 }
 
+function SidebarDetails({
+  title,
+  meta,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  meta?: string;
+  defaultOpen?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <details className={styles.filterGroup} open={defaultOpen}>
+      <summary>
+        <span>{title}</span>
+        {meta ? <small>{meta}</small> : null}
+      </summary>
+      <div>{children}</div>
+    </details>
+  );
+}
+
 function Metric({ label, value }: { label: string; value: number }) {
   return (
     <div>
@@ -930,9 +1085,9 @@ function LegendDot({ color, label }: { color: string; label: string }) {
   );
 }
 
-function GraphLegend() {
+function GraphLegend({ compact = false }: { compact?: boolean }) {
   return (
-    <div className={styles.legend}>
+    <div className={compact ? styles.legendCompact : styles.legend}>
       <LegendDot color="#075fe4" label="People" />
       <LegendDot color="#10843e" label="Targets" />
       <LegendDot color="#0a8b9b" label="Investors" />
@@ -1072,6 +1227,51 @@ function nodeColor(node: ExplorerNode) {
   return "#f26a21";
 }
 
+const LAYOUT_CARD_WIDTH = 204;
+const LAYOUT_ROW_HEIGHT = 96;
+const LAYOUT_MAX_PER_ROW = 5;
+const LAYOUT_LAYER_GAP = 132;
+
+function layerSequenceFor(selected?: ExplorerNode) {
+  if (selected?.kind === "company") {
+    return ["Founder layer", "Operators and board", "Advisors, investors and deals"];
+  }
+  if (selected?.kind === "expert") {
+    return ["Companies they work with", "Connected deals", "Other connected experts"];
+  }
+  if (selected?.kind === "deal") {
+    return ["Buyers and investors", "Companies and advisors", "People and leadership"];
+  }
+  return ["Companies", "Other people", "Advisors", "Deals"];
+}
+
+function focusLayerLabel(selected: ExplorerNode) {
+  if (selected.kind === "company") return "Company focus";
+  if (selected.kind === "expert") return "Expert focus";
+  if (selected.kind === "deal") return "Deal focus";
+  return "Selected focus";
+}
+
+function layoutNodesInRows(
+  nodes: ExplorerNode[],
+  startY: number,
+  canvasWidth: number,
+  positions: Map<string, { x: number; y: number }>,
+) {
+  if (!nodes.length) return 0;
+  const rowCount = Math.ceil(nodes.length / LAYOUT_MAX_PER_ROW);
+  for (let rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
+    const row = nodes.slice(rowIndex * LAYOUT_MAX_PER_ROW, (rowIndex + 1) * LAYOUT_MAX_PER_ROW);
+    const rowWidth = row.length <= 1 ? LAYOUT_CARD_WIDTH : (row.length - 1) * LAYOUT_CARD_WIDTH + LAYOUT_CARD_WIDTH;
+    const startX = canvasWidth / 2 - rowWidth / 2 + LAYOUT_CARD_WIDTH / 2;
+    const y = startY + rowIndex * LAYOUT_ROW_HEIGHT;
+    row.forEach((node, index) => {
+      positions.set(node.key, { x: startX + index * LAYOUT_CARD_WIDTH, y });
+    });
+  }
+  return rowCount;
+}
+
 function GraphCanvas({
   nodes,
   edges,
@@ -1141,57 +1341,37 @@ function GraphCanvas({
     return "Other people";
   }
 
-  const yByLayer: Record<string, number> = selected?.kind === "company"
-    ? {
-        "Founder layer": 238,
-        "Operators and board": 398,
-        "Advisors, investors and deals": 558,
-      }
-    : selected?.kind === "expert"
-    ? {
-        "Companies they work with": 238,
-        "Connected deals": 398,
-        "Other connected experts": 558,
-      }
-    : selected?.kind === "deal"
-      ? {
-          "Buyers and investors": 238,
-          "Companies and advisors": 398,
-          "People and leadership": 558,
-        }
-      : {
-          Companies: 238,
-          "Other people": 398,
-          Advisors: 398,
-          Deals: 558,
-        };
   const layers = new Map<string, ExplorerNode[]>();
   for (const node of others) {
     const layer = layerFor(node);
     layers.set(layer, [...(layers.get(layer) ?? []), node]);
   }
 
-  const maxLayerSize = Math.max(1, ...[...layers.values()].map((layerNodes) => layerNodes.length));
-  const width = Math.max(1120, maxLayerSize * 222 + 220);
-  const height = 680;
+  const layerOrder = layerSequenceFor(selected);
+  const maxNodesInRow = Math.max(
+    1,
+    ...layerOrder.map((layerName) => Math.min((layers.get(layerName) ?? []).length, LAYOUT_MAX_PER_ROW)),
+  );
+  const width = Math.max(1120, maxNodesInRow * LAYOUT_CARD_WIDTH + 280);
+  const focusY = 96;
 
-  if (selected) positions.set(selected.key, { x: width / 2, y: 98 });
+  if (selected) positions.set(selected.key, { x: width / 2, y: focusY });
 
-  for (const [layer, layerNodes] of layers) {
-    const y = yByLayer[layer] ?? 558;
-    const gap = Math.min(176, 720 / Math.max(layerNodes.length - 1, 1));
-    const total = gap * (layerNodes.length - 1);
-    layerNodes.forEach((node, index) => {
-      positions.set(node.key, {
-        x: width / 2 - total / 2 + index * gap,
-        y,
-      });
-    });
+  const layerLabels: { label: string; y: number }[] = [];
+  if (selected) {
+    layerLabels.push({ label: focusLayerLabel(selected), y: focusY });
   }
-  const layerLabels = [
-    selected ? { label: selected.kind === "company" ? "Company focus" : selected.kind === "expert" ? "Expert focus" : selected.kind === "deal" ? "Deal focus" : "Selected focus", y: 98 } : undefined,
-    ...Object.entries(yByLayer).map(([label, y]) => ({ label, y })),
-  ].filter((item): item is { label: string; y: number } => Boolean(item));
+
+  let yCursor = 220;
+  for (const layerName of layerOrder) {
+    const layerNodes = [...(layers.get(layerName) ?? [])].sort((a, b) => a.name.localeCompare(b.name));
+    if (!layerNodes.length) continue;
+    const rowCount = layoutNodesInRows(layerNodes, yCursor, width, positions);
+    layerLabels.push({ label: layerName, y: yCursor });
+    yCursor += LAYOUT_LAYER_GAP + Math.max(0, rowCount - 1) * LAYOUT_ROW_HEIGHT;
+  }
+
+  const height = Math.max(680, yCursor + 110);
 
   return (
     <svg className={styles.graphSvg} viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Mapped relationship graph">
