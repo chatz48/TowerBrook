@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import type { ExpertType, RelationshipType } from "@/lib/types";
@@ -196,6 +196,11 @@ export default function GraphExplorer({
   const searchParams = useSearchParams();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [theme, setTheme] = useState<ThemeFocus>(defaultTheme);
+  const [prevDefaultTheme, setPrevDefaultTheme] = useState(defaultTheme);
+  if (defaultTheme !== prevDefaultTheme) {
+    setPrevDefaultTheme(defaultTheme);
+    setTheme(defaultTheme);
+  }
   const [query, setQuery] = useState("");
   const [highlightedEdgeId, setHighlightedEdgeId] = useState<string | null>(null);
   const [nodeKinds, setNodeKinds] = useState<Record<ExplorerNode["kind"], boolean>>({
@@ -215,10 +220,6 @@ export default function GraphExplorer({
   const [selectedKey, setSelectedKey] = useState(defaultSelected ?? experts[0]?.key ?? companies[0]?.key);
   const [history, setHistory] = useState<string[]>([]);
   const canvasColumnRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    setTheme(defaultTheme);
-  }, [defaultTheme]);
 
   useEffect(() => {
     if (variant !== "full") return;
@@ -321,12 +322,17 @@ export default function GraphExplorer({
     ],
   );
 
+  const safeExpertDomain =
+    expertDomain !== "all" && !focusExpertDomainOptions.some((option) => option.value === expertDomain)
+      ? "all"
+      : expertDomain;
+
   useEffect(() => {
-    if (expertDomain === "all") return;
-    if (!focusExpertDomainOptions.some((option) => option.value === expertDomain)) {
-      setExpertDomain("all");
-    }
-  }, [expertDomain, focusExpertDomainOptions]);
+    if (safeExpertDomain === expertDomain) return;
+    startTransition(() => {
+      setExpertDomain(safeExpertDomain);
+    });
+  }, [expertDomain, safeExpertDomain]);
 
   const focusMatches = useMemo(() => {
     const searchText = query.trim().toLowerCase();
@@ -347,13 +353,13 @@ export default function GraphExplorer({
     () =>
       allNodes
         .filter((node) => matchesThemeFocus(node.themes, theme) && nodeKinds[node.kind])
-        .filter((node) => expertDomain === "all" || node.kind !== "expert" || node.type === expertDomain)
+        .filter((node) => safeExpertDomain === "all" || node.kind !== "expert" || node.type === safeExpertDomain)
         .map((node) => ({
           node,
           connections: filteredEdges.filter((edge) => edge.from === node.key || edge.to === node.key).length,
         }))
         .sort((a, b) => sortDirectoryNodes(a.node, b.node) || b.connections - a.connections),
-    [allNodes, expertDomain, filteredEdges, nodeKinds, theme],
+    [allNodes, filteredEdges, nodeKinds, safeExpertDomain, theme],
   );
   const groupedDirectoryNodes = useMemo(() => directoryGroups(directoryNodes), [directoryNodes]);
   const quickJumpItems = useMemo(
@@ -827,7 +833,7 @@ export default function GraphExplorer({
               {variant === "full" && focusExpertDomainOptions.length > 0 ? (
                 <select
                   className={`${styles.select} ${styles.toolbarSelect}`}
-                  value={expertDomain}
+                  value={safeExpertDomain}
                   onChange={(event) => setExpertDomain(event.target.value as ExpertType | "all")}
                   aria-label="Filter experts shown on the map"
                   title="Filters which expert types appear — does not change your current focus"

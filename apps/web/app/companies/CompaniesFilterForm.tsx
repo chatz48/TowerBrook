@@ -26,12 +26,22 @@ export default function CompaniesFilterForm({
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState(initialCategory);
   const [readiness, setReadiness] = useState(initialReadiness);
+  const [syncedFromUrl, setSyncedFromUrl] = useState({
+    initialQuery,
+    initialCategory,
+    initialReadiness,
+  });
 
-  useEffect(() => {
+  if (
+    syncedFromUrl.initialQuery !== initialQuery ||
+    syncedFromUrl.initialCategory !== initialCategory ||
+    syncedFromUrl.initialReadiness !== initialReadiness
+  ) {
+    setSyncedFromUrl({ initialQuery, initialCategory, initialReadiness });
     setQuery(initialQuery);
     setCategory(initialCategory);
     setReadiness(initialReadiness);
-  }, [initialCategory, initialQuery, initialReadiness]);
+  }
 
   useEffect(() => {
     return () => {

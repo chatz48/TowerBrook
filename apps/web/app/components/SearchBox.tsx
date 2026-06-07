@@ -35,6 +35,7 @@ export default function SearchBox({
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [apiResults, setApiResults] = useState<ApiSearchResult[]>([]);
+  const [apiQuery, setApiQuery] = useState("");
   const router = useRouter();
 
   const localResults = useMemo(() => {
@@ -47,19 +48,23 @@ export default function SearchBox({
 
   useEffect(() => {
     const query = q.trim();
-    if (query.length < 2) {
-      setApiResults([]);
-      return;
-    }
+    if (query.length < 2) return;
+
     let cancelled = false;
     const timer = setTimeout(async () => {
       try {
         const params = new URLSearchParams({ q: query, theme, limit: "8" });
         const res = await fetch(`/api/search?${params}`);
         const data = (await res.json()) as { results?: ApiSearchResult[] };
-        if (!cancelled) setApiResults(data.results ?? []);
+        if (!cancelled) {
+          setApiQuery(query);
+          setApiResults(data.results ?? []);
+        }
       } catch {
-        if (!cancelled) setApiResults([]);
+        if (!cancelled) {
+          setApiQuery(query);
+          setApiResults([]);
+        }
       }
     }, 250);
     return () => {
@@ -69,7 +74,9 @@ export default function SearchBox({
   }, [q, theme]);
 
   const results = useMemo(() => {
-    if (apiResults.length > 0) {
+    const query = q.trim();
+    if (query.length < 2) return localResults;
+    if (apiQuery === query && apiResults.length > 0) {
       return apiResults.map((item) => ({
         id: item.id,
         name: item.name,
@@ -79,7 +86,7 @@ export default function SearchBox({
       }));
     }
     return localResults;
-  }, [apiResults, localResults]);
+  }, [apiQuery, apiResults, localResults, q]);
 
   function go(href: string) {
     setOpen(false);

@@ -56,18 +56,39 @@ export default function ExpertFilters({
   const [type, setType] = useState(initialType);
   const [readiness, setReadiness] = useState(initialReadiness ?? "all");
   const [query, setQuery] = useState(initialQuery);
+  const [syncedFromUrl, setSyncedFromUrl] = useState({
+    initialTheme,
+    initialSpecialty,
+    initialType,
+    initialReadiness: initialReadiness ?? "all",
+    initialQuery,
+  });
 
   const specialtyOptions = useMemo(() => specialtiesForTheme(theme), [theme]);
   const safeSpecialty =
     specialty !== "all" && !specialtyOptions.includes(specialty) ? "all" : specialty;
 
-  useEffect(() => {
+  const resolvedInitialReadiness = initialReadiness ?? "all";
+  if (
+    syncedFromUrl.initialTheme !== initialTheme ||
+    syncedFromUrl.initialSpecialty !== initialSpecialty ||
+    syncedFromUrl.initialType !== initialType ||
+    syncedFromUrl.initialReadiness !== resolvedInitialReadiness ||
+    syncedFromUrl.initialQuery !== initialQuery
+  ) {
+    setSyncedFromUrl({
+      initialTheme,
+      initialSpecialty,
+      initialType,
+      initialReadiness: resolvedInitialReadiness,
+      initialQuery,
+    });
     setTheme(initialTheme);
     setSpecialty(initialSpecialty);
     setType(initialType);
-    setReadiness(initialReadiness ?? "all");
+    setReadiness(resolvedInitialReadiness);
     setQuery(initialQuery);
-  }, [initialTheme, initialSpecialty, initialType, initialReadiness, initialQuery]);
+  }
 
   useEffect(() => {
     return () => {
