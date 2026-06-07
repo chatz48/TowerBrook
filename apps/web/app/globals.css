@@ -43,7 +43,7 @@
 html {
   background: var(--paper);
   color: var(--ink);
-  font-size: 14px;
+  font-size: 15px;
 }
 
 body {
@@ -138,11 +138,17 @@ textarea {
   background: #f9fbff;
 }
 
+.ee-table-wrap {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: auto;
+}
+
 .ee-table {
-  width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 11px;
+  font-size: 13px;
+  line-height: 1.45;
+  width: 100%;
 }
 
 .ee-table th {
@@ -152,8 +158,8 @@ textarea {
   color: var(--ink-soft);
   font-size: 11px;
   font-weight: 650;
-  letter-spacing: 0.025em;
-  padding: 11px 12px;
+  letter-spacing: 0.03em;
+  padding: 10px 14px;
   text-align: left;
   text-transform: uppercase;
   white-space: nowrap;
@@ -167,12 +173,116 @@ textarea {
 .ee-table td {
   border-bottom: 1px solid var(--line);
   border-right: 1px solid var(--line);
-  padding: 12px;
+  font-size: 13px;
+  padding: 11px 14px;
   vertical-align: top;
+}
+
+.ee-table tbody tr:hover td {
+  background: #fbfcff;
 }
 
 .ee-table tr:last-child td {
   border-bottom: 0;
+}
+
+.ee-table-dense th {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 7px 10px;
+}
+
+.ee-table-dense td {
+  font-size: 12px;
+  line-height: 1.35;
+  padding: 5px 10px;
+  vertical-align: middle;
+}
+
+.ee-table-dense tbody tr:nth-child(even) td {
+  background: #fcfdff;
+}
+
+.ee-table-dense tbody tr:hover td {
+  background: #f4f8ff;
+}
+
+.ee-table-dense .ee-cell-input {
+  background: #fff;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  color: var(--ink);
+  font-size: 11px;
+  height: 28px;
+  min-width: 0;
+  padding: 0 8px;
+  width: 100%;
+}
+
+.ee-table-dense .ee-cell-input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.ee-type-pill {
+  border-radius: 3px;
+  border-width: 1px;
+  border-style: solid;
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+
+.ee-row-expand {
+  border-left: 2px solid var(--accent);
+  padding: 8px 12px;
+}
+
+.ee-row-expand textarea {
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.4;
+  min-height: 44px;
+  padding: 6px 8px;
+  resize: vertical;
+  width: 100%;
+}
+
+.ee-row-expand textarea:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.ee-score-pill {
+  border-radius: 3px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  display: inline-block;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.25;
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+
+.ee-data-page-title {
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.ee-data-page-meta {
+  color: var(--ink-faint);
+  font-size: 13px;
 }
 
 .ee-metric-bar {
@@ -202,7 +312,7 @@ textarea {
 
 .ee-insight-metric {
   border-bottom: 1px solid var(--line);
-  padding: 16px 18px;
+  padding: 10px 12px;
 }
 
 .ee-insight-metric:last-child {

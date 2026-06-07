@@ -39,7 +39,7 @@ export function PageShell({
   innerClassName?: string;
 }) {
   return (
-    <div className={`ee-shell px-3 py-3 sm:px-4 ${className}`}>
+    <div className={`ee-shell px-3 py-2 sm:px-4 ${className}`}>
       <div className={innerClassName}>{children}</div>
     </div>
   );
@@ -53,10 +53,130 @@ export function PanelHeader({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-line px-4 py-3">
+    <div className="flex items-center justify-between border-b border-line px-3 py-2">
       <h2 className="ee-label text-ink">{title}</h2>
       {action ? <div className="text-[12px]">{action}</div> : null}
     </div>
+  );
+}
+
+/** Single-line panel title row — label, heading, optional hint, optional trailing badge/actions. */
+export function PanelIntro({
+  label,
+  title,
+  hint,
+  trailing,
+  labelClassName = "text-accent",
+  titleClassName = "text-[13px]",
+}: {
+  label: string;
+  title?: string;
+  hint?: string;
+  trailing?: React.ReactNode;
+  labelClassName?: string;
+  titleClassName?: string;
+}) {
+  return (
+    <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+      <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
+        <div className={`ee-label ${labelClassName}`}>{label}</div>
+        {title ? (
+          <h2 className={`font-semibold tracking-tight text-ink ${titleClassName}`}>{title}</h2>
+        ) : null}
+        {hint ? <p className="text-[10px] text-ink-soft">{hint}</p> : null}
+      </div>
+      {trailing}
+    </div>
+  );
+}
+
+/** Data-first page header — consistent title scale for table-heavy views. */
+export function DataPageHeader({
+  title,
+  meta,
+  actions,
+  className = "",
+}: {
+  title: string;
+  meta?: string;
+  actions?: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <header
+      className={`mb-3 flex flex-col gap-2 border-b border-line pb-3 sm:flex-row sm:items-end sm:justify-between ${className}`}
+    >
+      <div className="min-w-0">
+        <h1 className="ee-data-page-title text-ink">{title}</h1>
+        {meta ? <p className="ee-data-page-meta mt-1">{meta}</p> : null}
+      </div>
+      {actions ? <div className="flex shrink-0 flex-wrap gap-2">{actions}</div> : null}
+    </header>
+  );
+}
+
+/** Scrollable table shell with consistent min-width scaling. */
+export function DataTable({
+  children,
+  minWidth = 960,
+  className = "",
+  dense = false,
+}: {
+  children: React.ReactNode;
+  minWidth?: number;
+  className?: string;
+  dense?: boolean;
+}) {
+  return (
+    <div className={`ee-table-wrap ${className}`}>
+      <table className={`ee-table ${dense ? "ee-table-dense" : ""}`} style={{ minWidth }}>
+        {children}
+      </table>
+    </div>
+  );
+}
+
+export function GraphLink({
+  href,
+  label = "Graph",
+  className = "ee-button ee-button-secondary min-h-8 px-3",
+}: {
+  href: string;
+  label?: string;
+  className?: string;
+}) {
+  return (
+    <Link href={href} className={className} title="View in relationship graph">
+      {label}
+    </Link>
+  );
+}
+
+/** Compact page hero — keeps primary content above the fold on list/workspace pages. */
+export function PageHeader({
+  label,
+  title,
+  description,
+  actions,
+  className = "",
+}: {
+  label?: string;
+  title: string;
+  description?: string;
+  actions?: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <header className={`ee-panel mb-3 rounded-lg px-3 py-2.5 ${className}`}>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          {label ? <div className="ee-label text-accent">{label}</div> : null}
+          <h1 className="text-[15px] font-semibold tracking-tight text-ink">{title}</h1>
+          {description ? <p className="text-[11px] text-ink-soft">{description}</p> : null}
+        </div>
+        {actions ? <div className="flex shrink-0 flex-wrap gap-2">{actions}</div> : null}
+      </div>
+    </header>
   );
 }
 
