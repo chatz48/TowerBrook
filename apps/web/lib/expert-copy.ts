@@ -1,4 +1,40 @@
+import { EXPERT_TYPE_LABEL } from "./labels";
 import type { Expert } from "./types";
+
+export interface ExpertRoleDisplay {
+  company: string;
+  role: string;
+}
+
+/** Split headline into company-first display parts for dense tables. */
+export function expertRoleDisplay(
+  expert: Pick<Expert, "headline" | "org" | "type">,
+  companyName?: string,
+): ExpertRoleDisplay {
+  const headline = expert.headline?.trim() ?? "";
+  const commaIdx = headline.indexOf(", ");
+
+  if (commaIdx > 0) {
+    const role = headline.slice(0, commaIdx).trim();
+    let company = headline.slice(commaIdx + 2).trim();
+    const semiIdx = company.indexOf(";");
+    if (semiIdx > 0) company = company.slice(0, semiIdx).trim();
+    if (company) return { company, role };
+  }
+
+  const orgCompany = expert.org?.replace(/\s*\([^)]*\)\s*$/, "").trim() ?? "";
+  const company = companyName || orgCompany;
+  const role =
+    commaIdx > 0 ? headline.slice(0, commaIdx).trim() : headline || EXPERT_TYPE_LABEL[expert.type];
+
+  if (company) return { company, role };
+  return { company: "", role: headline || EXPERT_TYPE_LABEL[expert.type] };
+}
+
+export function formatExpertRoleLine(display: ExpertRoleDisplay): string {
+  if (display.company && display.role) return `${display.company} — ${display.role}`;
+  return display.company || display.role;
+}
 
 /** Campaign call-phase assignment derived from expert archetype. */
 export type CallPhase = "Market orientation" | "Buyer validation" | "Deal intelligence";
@@ -38,7 +74,7 @@ export function expertCallAngle(expert: Expert): string {
   if (expert.type === "lawyer") {
     return `${expert.headline}${org}. Use the call to verify deal parties, diligence issues, and counsel-level transaction evidence.`;
   }
-  if (expert.type === "investor" || expert.type === "lender-credit") {
+  if (expert.type === "investor") {
     return `${expert.headline}${org}. Test sponsor appetite, valuation pressure, and financing constraints across the current theme.`;
   }
   if (companyCount > 0) {
@@ -68,7 +104,7 @@ export function callObjective(expert: Expert): string {
   if (expert.type === "banker") {
     return "Ask which assets are actionable now, who owns the buyer dialogue and which advisers control warm introductions.";
   }
-  if (expert.type === "investor" || expert.type === "lender-credit") {
+  if (expert.type === "investor") {
     return `Test sponsor appetite, leverage constraints and valuation signals for ${specialty ?? "the theme"} targets.`;
   }
   if (expert.type === "lawyer") {
@@ -87,7 +123,7 @@ export function callPhase(expert: Expert): CallPhase {
   if (expert.type === "ex-founder" || expert.type === "operator") {
     return "Market orientation";
   }
-  if (expert.type === "banker" || expert.type === "investor" || expert.type === "lender-credit") {
+  if (expert.type === "banker" || expert.type === "investor") {
     return "Buyer validation";
   }
   return "Deal intelligence";

@@ -1,20 +1,25 @@
-import Link from "next/link";
-import { getCompanies, getExperts } from "@/lib/data";
-import { getAdvisorExpertGaps, getExpertDiscoveryCandidates } from "@/lib/expert-discovery";
+import { dedupeCompanyLinks, getCompanies, getExperts } from "@/lib/data";
+import { buildCompanyCanonicalMap, canonicalCompanyId } from "@/lib/graph-normalize";
 import { rankExperts } from "@/lib/score";
 import { THEME_BY_ID, THEMES, THEME_SPECIALTIES } from "@/lib/themes";
-import { towerBrookExpertScore } from "@/lib/towerbrook";
 import { getThemeFocus } from "@/lib/theme-focus-server";
 import { isThemeFocus, matchesThemeFocus, type ThemeFocus } from "@/lib/theme-focus";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
-import ExpertFilters from "./ExpertFilters";
+import ExpertFilters, { EXPERT_FILTER_TYPES } from "./ExpertFilters";
 import { expertReadiness } from "@/lib/investment-readiness";
+import { callObjective, expertRoleDisplay } from "@/lib/expert-copy";
+import { outreachStorageKey } from "@/lib/outreach-plan";
 import ExpertCallList from "./ExpertCallList";
-import OperatorWorkflowRail from "@/app/components/OperatorWorkflowRail";
+import ExpertFilterChips from "./ExpertFilterChips";
+import { DataPageHeader, PageShell } from "@/app/components/ui";
+import type { ExpertsFilterParams } from "@/lib/experts-url";
 import { singleParam } from "@/lib/url-params";
-import { PageShell } from "@/app/components/ui";
-import { expertCallAngle } from "@/lib/expert-copy";
+
+function expertSpecialty(specialties?: string[]) {
+  if (!specialties?.length) return "—";
+  return specialties.slice(0, 2).join(" · ");
+}
 
 export default async function ExpertsPage({
   searchParams,
@@ -27,10 +32,20 @@ export default async function ExpertsPage({
   ]);
   const params: Record<string, string | string[] | undefined> = (await searchParams) ?? {};
   const selectedTheme = singleParam(params.theme);
-  const selectedType = singleParam(params.type) ?? "all";
+  const rawSelectedType = singleParam(params.type) ?? "all";
+  const selectedType =
+    rawSelectedType === "all" ||
+    EXPERT_FILTER_TYPES.includes(rawSelectedType as (typeof EXPERT_FILTER_TYPES)[number])
+      ? rawSelectedType
+      : "all";
   const selectedReadiness = singleParam(params.readiness) ?? "all";
   const query = (singleParam(params.q) ?? "").trim().toLowerCase();
   const activeTheme: ThemeFocus = isThemeFocus(selectedTheme) ? selectedTheme : themeFocus;
+  const pinnedExpertIds = (singleParam(params.experts) ?? "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+  const pinnedSet = new Set(pinnedExpertIds);
   const specialties =
     activeTheme === "all"
       ? Array.from(new Set(THEMES.flatMap((theme) => THEME_SPECIALTIES[theme.id]))).sort()
@@ -42,8 +57,14 @@ export default async function ExpertsPage({
       : "all";
 
   const companies = getCompanies();
+  const canonicalMap = buildCompanyCanonicalMap(companies);
   const companyNames = Object.fromEntries(companies.map((company) => [company.id, company.name]));
   const companiesById = new Map(companies.map((company) => [company.id, company]));
+
+  function companyLabel(companyId: string) {
+    const canonicalId = canonicalCompanyId(companyId, canonicalMap);
+    return companiesById.get(canonicalId)?.name ?? companyNames[canonicalId] ?? companyId;
+  }
   const scopedExperts = filterTowerBrookEmployees(
     getExperts().filter((expert) => matchesThemeFocus(expert.themes, activeTheme)),
     includeTowerBrookEmployees,
@@ -66,124 +87,85 @@ export default async function ExpertsPage({
         expert.location ?? "",
         expert.whyRelevant,
         expert.specialties?.join(" ") ?? "",
-        expert.companies.map((link) => companyNames[link.companyId] ?? link.companyId).join(" "),
+        dedupeCompanyLinks(expert)
+          .map((link) => companyLabel(link.companyId))
+          .join(" "),
       ]
         .join(" ")
         .toLowerCase()
         .includes(query);
     });
-  const ranked = rankExperts(filteredExperts);
-  const firstCall = ranked[0]?.expert;
-  const advisorGaps = getAdvisorExpertGaps().filter((gap) => matchesThemeFocus(gap.themes, activeTheme));
-  const candidateCount = getExpertDiscoveryCandidates().filter((candidate) =>
-    matchesThemeFocus(candidate.themes, activeTheme),
-  ).length;
+  const ranked = rankExperts(filteredExperts).sort((a, b) => {
+    const aPinned = pinnedSet.has(a.expert.id) ? 1 : 0;
+    const bPinned = pinnedSet.has(b.expert.id) ? 1 : 0;
+    return bPinned - aPinned || b.score.total - a.score.total;
+  });
+  const themeLabel = activeTheme === "all" ? "All themes" : THEME_BY_ID[activeTheme]?.name ?? "Selected theme";
+  const callReadyCount = ranked.filter(({ expert }) => {
+    const readiness = expertReadiness(expert);
+    return readiness.level === "call-ready" || readiness.level === "verify-contact";
+  }).length;
+  const storageKey = outreachStorageKey(activeTheme, includeTowerBrookEmployees);
+  const filterParams: ExpertsFilterParams = {
+    theme: isThemeFocus(selectedTheme) ? selectedTheme : undefined,
+    specialty: selectedSpecialty !== "all" ? selectedSpecialty : undefined,
+    type: selectedType !== "all" ? selectedType : undefined,
+    readiness: selectedReadiness !== "all" ? selectedReadiness : undefined,
+    q: singleParam(params.q),
+    experts: pinnedExpertIds.length ? pinnedExpertIds.join(",") : undefined,
+  };
 
   return (
-    <PageShell>
-        <header className="mb-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
-          <div>
-            <h1 className="text-[26px] font-semibold tracking-tight">Expert Call List</h1>
-            <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
-              {ranked.length} matches in scope · {candidateCount} research candidates · {advisorGaps.length} advisor gaps.
-            </p>
-          </div>
-          <div className="ee-panel rounded-lg p-4">
-            <div className="ee-label text-ink">This week&apos;s first call</div>
-            <div className="mt-2 text-[15px] font-semibold">
-              {firstCall?.name ?? "No matching expert"}
-            </div>
-            <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-ink-soft">
-              {firstCall?.signals?.[0] ?? (firstCall ? expertCallAngle(firstCall) : "Broaden the filters or open the research queue to fill the coverage gap.")}
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {firstCall ? (
-                <>
-                  <Link href={`/experts/${firstCall.id}`} className="ee-button ee-button-primary min-h-8 px-3">
-                    Prepare call
-                  </Link>
-                  <Link href={`/graph?focus=expert:${firstCall.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
-                    View relationships
-                  </Link>
-                </>
-              ) : (
-                <Link href="/discover" className="ee-button ee-button-primary min-h-8 px-3">
-                  Open research queue
-                </Link>
-              )}
-            </div>
-          </div>
-        </header>
+    <PageShell className="!py-1">
+      <DataPageHeader
+        title="Call list"
+        meta={`${ranked.length} matches · ${callReadyCount} call-ready · ${themeLabel}`}
+        className="mb-2 gap-1 border-b border-line pb-2 [&_.ee-data-page-meta]:text-[12px] [&_.ee-data-page-title]:text-[18px]"
+      />
 
+      <section className="ee-panel overflow-hidden rounded-lg">
         <ExpertFilters
+          compact
+          embedded
           initialTheme={activeTheme}
           initialSpecialty={selectedSpecialty}
           initialType={selectedType}
           initialReadiness={selectedReadiness}
           initialQuery={singleParam(params.q) ?? ""}
         />
-        <OperatorWorkflowRail
-          title="Build a call slate, then move it into execution"
-          subtitle="Use this page to choose the best first calls, verify evidence quality, and hand the selected people into the origination plan."
-          steps={[
-            {
-              label: "Select",
-              detail: "Pick founder, operator and advisor coverage that explains the market.",
-            },
-            {
-              label: "Sequence",
-              detail: "Send selected experts into campaign phases with the theme already scoped.",
-            },
-            {
-              label: "Close gaps",
-              detail: "Open the research queue when a needed archetype is missing or thin.",
-            },
-          ]}
-          actions={[
-            { label: "Open campaign", href: "/campaign", primary: true },
-            { label: "Fill gaps", href: "/discover" },
-            { label: "Meeting memo", href: "/reports" },
-          ]}
-        />
-        <div className="ee-panel mb-5 rounded-lg px-4 py-3">
-          <div className="flex flex-wrap gap-x-5 gap-y-2 text-[11px] text-ink-faint">
-            <span><strong className="text-ink">{ranked.length}</strong> call-ready matches</span>
-            <span><strong className="text-ink">{candidateCount}</strong> research candidates in queue</span>
-            <span><strong className="text-ink">{advisorGaps.length}</strong> advisor-name gaps</span>
-            <span>{activeTheme === "all" ? "All themes" : THEME_BY_ID[activeTheme]?.name}</span>
-          </div>
-        </div>
 
-        <section className="ee-panel overflow-hidden rounded-lg">
-          <div className="flex items-start justify-between gap-4 border-b border-line px-4 py-3">
-            <div>
-              <h2 className="ee-label text-ink">Call-ready experts</h2>
-              <p className="mt-1 text-[11px] text-ink-faint">
-                Pick the calls that can change the next investment decision.
-              </p>
-            </div>
-            <Link href="/discover" className="ee-link text-[12px]">
-              Fill gaps from research queue
-            </Link>
-          </div>
-          <ExpertCallList
-            rows={ranked.slice(0, 36).map(({ expert, score }) => {
-              const towerBrook = towerBrookExpertScore(expert, companiesById);
-              return {
+        <ExpertFilterChips
+          embedded
+          params={filterParams}
+          pinnedCount={pinnedExpertIds.length}
+        />
+
+        <ExpertCallList
+          themeLabel={themeLabel}
+          storageKey={storageKey}
+          totalCount={ranked.length}
+          rows={ranked.map(({ expert, score }) => {
+            const primaryLink = dedupeCompanyLinks(expert)[0];
+            const primaryCompanyId = primaryLink
+              ? canonicalCompanyId(primaryLink.companyId, canonicalMap)
+              : undefined;
+            return {
+              expert,
+              score: score.total,
+              readiness: expertReadiness(expert),
+              callObjective: callObjective(expert),
+              graphHref: `/graph?focus=${encodeURIComponent(`expert:${expert.id}`)}`,
+              companyHref: primaryCompanyId ? `/companies/${primaryCompanyId}` : undefined,
+              currentRole: expertRoleDisplay(
                 expert,
-                score,
-                readiness: expertReadiness(expert),
-                companyPreview:
-                  expert.companies
-                    .map((link) => companyNames[link.companyId] ?? link.companyId)
-                    .slice(0, 5)
-                    .join(", ") || "Ask for target introductions",
-                towerBrookLabel: towerBrook.label,
-                towerBrookDirect: towerBrook.isDirect,
-              };
-            })}
-          />
-        </section>
+                primaryCompanyId ? companyLabel(primaryCompanyId) : undefined,
+              ),
+              specialty: expertSpecialty(expert.specialties),
+              pinned: pinnedSet.has(expert.id),
+            };
+          })}
+        />
+      </section>
     </PageShell>
   );
 }

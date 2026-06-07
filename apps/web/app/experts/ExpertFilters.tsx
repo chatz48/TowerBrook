@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { EXPERT_TYPE_LABEL } from "@/lib/labels";
+import { expertsFilterHref } from "@/lib/experts-url";
 import { THEME_SPECIALTIES, THEMES } from "@/lib/themes";
 import type { ExpertType, ThemeId } from "@/lib/types";
 
-const EXPERT_TYPES: ExpertType[] = [
+export const EXPERT_FILTER_TYPES: ExpertType[] = [
   "ex-founder",
   "operator",
   "advisor",
@@ -14,8 +16,9 @@ const EXPERT_TYPES: ExpertType[] = [
   "lawyer",
   "investor",
   "technical-dd",
-  "lender-credit",
 ];
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 function specialtiesForTheme(theme: ThemeId | "all") {
   if (theme === "all") {
@@ -39,36 +42,116 @@ export default function ExpertFilters({
   initialType,
   initialReadiness,
   initialQuery,
+  compact = false,
+  embedded = false,
 }: {
   initialTheme: ThemeId | "all";
   initialSpecialty: string;
   initialType: string;
   initialReadiness?: string;
   initialQuery: string;
+  compact?: boolean;
+  embedded?: boolean;
 }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pinnedExperts = searchParams.get("experts") ?? undefined;
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [theme, setTheme] = useState<ThemeId | "all">(initialTheme);
   const [specialty, setSpecialty] = useState(initialSpecialty);
+  const [type, setType] = useState(initialType);
+  const [readiness, setReadiness] = useState(initialReadiness ?? "all");
+  const [query, setQuery] = useState(initialQuery);
+
   const specialtyOptions = useMemo(() => specialtiesForTheme(theme), [theme]);
   const safeSpecialty =
     specialty !== "all" && !specialtyOptions.includes(specialty) ? "all" : specialty;
 
+  useEffect(() => {
+    setTheme(initialTheme);
+    setSpecialty(initialSpecialty);
+    setType(initialType);
+    setReadiness(initialReadiness ?? "all");
+    setQuery(initialQuery);
+  }, [initialTheme, initialSpecialty, initialType, initialReadiness, initialQuery]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  const navigate = useCallback(
+    (overrides: {
+      theme?: ThemeId | "all";
+      specialty?: string;
+      type?: string;
+      readiness?: string;
+      q?: string;
+    }) => {
+      const href = expertsFilterHref({
+        theme: overrides.theme ?? theme,
+        specialty: overrides.specialty ?? safeSpecialty,
+        type: overrides.type ?? type,
+        readiness: overrides.readiness ?? readiness,
+        q: overrides.q ?? query,
+        experts: pinnedExperts,
+      });
+      startTransition(() => {
+        router.push(href);
+      });
+    },
+    [pinnedExperts, query, readiness, router, safeSpecialty, theme, type],
+  );
+
+  const fieldClass = compact
+    ? "mt-0.5 h-8 w-full rounded-md border border-line-strong bg-white px-2.5 text-[12px] outline-none focus:border-accent"
+    : "mt-1 h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[13px] outline-none focus:border-accent";
+  const buttonClass = compact
+    ? "ee-button h-8 px-3 text-[12px]"
+    : "ee-button h-10 px-4";
+
+  function onQueryChange(value: string) {
+    setQuery(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      navigate({ q: value });
+    }, SEARCH_DEBOUNCE_MS);
+  }
+
   return (
-    <form className="ee-panel mb-5 rounded-lg p-4" action="/experts">
-      <div className="grid gap-3 md:grid-cols-[1.1fr_1.15fr_0.9fr_0.95fr_minmax(180px,1fr)_auto] md:items-end">
-        <label className="block">
-          <span className="ee-label text-ink-faint">Theme</span>
+    <div
+      className={
+        embedded
+          ? "border-b border-line bg-[#fbfcff] px-3 py-2"
+          : `ee-panel rounded-lg ${compact ? "mb-2 p-2.5" : "mb-5 p-4"}`
+      }
+    >
+      <div
+        className={
+          embedded && compact
+            ? "flex flex-wrap items-end gap-x-2 gap-y-1.5 xl:flex-nowrap"
+            : `grid md:grid-cols-[1.1fr_1.15fr_0.9fr_0.95fr_minmax(140px,1fr)_auto] md:items-end ${
+                compact ? "gap-2" : "gap-3"
+              }`
+        }
+      >
+        <label className={`block min-w-0 ${embedded && compact ? "w-[148px] shrink-0 xl:flex-1 xl:basis-0" : ""}`}>
+          <span className="ee-label whitespace-nowrap text-ink-faint">Theme</span>
           <select
             name="theme"
             value={theme}
             onChange={(event) => {
               const nextTheme = event.target.value as ThemeId | "all";
               const nextSpecialties = specialtiesForTheme(nextTheme);
+              const nextSpecialty =
+                specialty !== "all" && !nextSpecialties.includes(specialty) ? "all" : specialty;
               setTheme(nextTheme);
-              if (specialty !== "all" && !nextSpecialties.includes(specialty)) {
-                setSpecialty("all");
-              }
+              setSpecialty(nextSpecialty);
+              navigate({ theme: nextTheme, specialty: nextSpecialty });
             }}
-            className="mt-1 h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[13px] outline-none focus:border-accent"
+            className={fieldClass}
           >
             <option value="all">All three themes</option>
             {THEMES.map((item) => (
@@ -79,13 +162,17 @@ export default function ExpertFilters({
           </select>
         </label>
 
-        <label className="block">
-          <span className="ee-label text-ink-faint">Specialty</span>
+        <label className={`block min-w-0 ${embedded && compact ? "w-[148px] shrink-0 xl:flex-1 xl:basis-0" : ""}`}>
+          <span className="ee-label whitespace-nowrap text-ink-faint">Specialty</span>
           <select
             name="specialty"
             value={safeSpecialty}
-            onChange={(event) => setSpecialty(event.target.value)}
-            className="mt-1 h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[13px] outline-none focus:border-accent"
+            onChange={(event) => {
+              const nextSpecialty = event.target.value;
+              setSpecialty(nextSpecialty);
+              navigate({ specialty: nextSpecialty });
+            }}
+            className={fieldClass}
           >
             <option value="all">All specialties</option>
             {specialtyOptions.map((option) => (
@@ -96,28 +183,38 @@ export default function ExpertFilters({
           </select>
         </label>
 
-        <label className="block">
-          <span className="ee-label text-ink-faint">Expert type</span>
+        <label className={`block min-w-0 ${embedded && compact ? "w-[132px] shrink-0 xl:flex-1 xl:basis-0" : ""}`}>
+          <span className="ee-label whitespace-nowrap text-ink-faint">Type</span>
           <select
             name="type"
-            defaultValue={initialType}
-            className="mt-1 h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[13px] outline-none focus:border-accent"
+            value={type}
+            onChange={(event) => {
+              const nextType = event.target.value;
+              setType(nextType);
+              navigate({ type: nextType });
+            }}
+            className={fieldClass}
           >
             <option value="all">All expert types</option>
-            {EXPERT_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {EXPERT_TYPE_LABEL[type]}
+            {EXPERT_FILTER_TYPES.map((expertType) => (
+              <option key={expertType} value={expertType}>
+                {EXPERT_TYPE_LABEL[expertType]}
               </option>
             ))}
           </select>
         </label>
 
-        <label className="block">
-          <span className="ee-label text-ink-faint">Readiness</span>
+        <label className={`block min-w-0 ${embedded && compact ? "w-[132px] shrink-0 xl:flex-1 xl:basis-0" : ""}`}>
+          <span className="ee-label whitespace-nowrap text-ink-faint">Readiness</span>
           <select
             name="readiness"
-            defaultValue={initialReadiness ?? "all"}
-            className="mt-1 h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[13px] outline-none focus:border-accent"
+            value={readiness}
+            onChange={(event) => {
+              const nextReadiness = event.target.value;
+              setReadiness(nextReadiness);
+              navigate({ readiness: nextReadiness });
+            }}
+            className={fieldClass}
           >
             {READINESS_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -127,25 +224,30 @@ export default function ExpertFilters({
           </select>
         </label>
 
-        <label className="block">
-          <span className="ee-label text-ink-faint">Search people, firms or companies</span>
+        <label className={`block min-w-0 ${embedded && compact ? "min-w-[160px] flex-[1.15] xl:basis-0" : ""}`}>
+          <span className="ee-label whitespace-nowrap text-ink-faint">Search experts or companies</span>
           <input
             name="q"
-            defaultValue={initialQuery}
-            placeholder="e.g. banker, BESS, leak detection"
-            className="mt-1 h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[13px] outline-none focus:border-accent"
+            value={query}
+            onChange={(event) => onQueryChange(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                if (debounceRef.current) clearTimeout(debounceRef.current);
+                navigate({ q: query });
+              }
+            }}
+            placeholder="banker, BESS…"
+            className={fieldClass}
           />
         </label>
 
-        <div className="flex gap-2">
-          <button className="ee-button ee-button-primary h-10 px-4" type="submit">
-            Search
-          </button>
-          <Link href="/experts" className="ee-button ee-button-secondary h-10 px-4">
+        <div className={`flex shrink-0 gap-1.5 ${embedded && compact ? "pb-0" : ""}`}>
+          <Link href="/experts" className={`${buttonClass} ee-button-secondary`}>
             Reset
           </Link>
         </div>
       </div>
-    </form>
+    </div>
   );
 }

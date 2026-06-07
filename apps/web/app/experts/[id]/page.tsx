@@ -51,7 +51,7 @@ export default async function ExpertPage({
   const relatedDeals = await listDealsForExpert(expert.id);
   return (
     <PageShell>
-        <BackLink href="/experts">Back to call tray</BackLink>
+        <BackLink href="/experts">Back to call list</BackLink>
 
         <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
           <main className="min-w-0 space-y-5">
@@ -111,7 +111,7 @@ export default async function ExpertPage({
                         note: expert.whyRelevant,
                       }}
                     >
-                      Add to call tray
+                      Add to plan
                     </WorkspaceActionButton>
                     <Link href={`/graph?focus=expert:${expert.id}`} className="ee-button ee-button-secondary min-h-8 px-3">
                       View relationships
