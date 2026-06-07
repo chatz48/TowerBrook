@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 from app.schemas.domain import Citation, ToolTrace
 from app.services.copilot.claim_verification import verify_synthesis
 from app.services.copilot.context import CopilotContext
@@ -20,16 +22,17 @@ async def synthesize_answer(
     user_payload = {
         "context": ctx.to_prompt_block(),
         "intent": intent,
-        "citations": [c.model_dump() for c in citations[:10]],
-        "tool_trace": [t.model_dump() for t in tool_calls],
+        "citations": [c.model_dump(mode="json") for c in citations[:10]],
+        "tool_trace": [t.model_dump(mode="json") for t in tool_calls],
     }
+    user_json = json.dumps(user_payload, ensure_ascii=False)
 
     synthesis: CopilotSynthesis | None = None
     if llm.configured:
         try:
             synthesis = await llm.structured(
                 f"{SYNTHESIS_BASE}\n\n{instruction}",
-                str(user_payload),
+                user_json,
                 CopilotSynthesis,
                 model=model,
                 max_tokens=1800 if model.endswith("pro") else 1200,

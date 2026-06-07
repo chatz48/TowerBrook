@@ -71,9 +71,18 @@ async def run_pipeline(
             *[run_tool(name, ctx, citations, search_query) for name in retrieval],
             return_exceptions=True,
         )
-        for item in results:
+        for name, item in zip(retrieval, results, strict=True):
             if isinstance(item, ToolTrace):
                 traces.append(item)
+            elif isinstance(item, BaseException):
+                traces.append(
+                    ToolTrace(
+                        tool_name=name,
+                        input={"query": search_query},
+                        output={"error": str(item)[:300]},
+                        status="failed",
+                    )
+                )
 
     for name in sequential:
         trace = await run_tool(name, ctx, citations, search_query)

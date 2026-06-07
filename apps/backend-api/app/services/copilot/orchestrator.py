@@ -197,7 +197,7 @@ def _persist_chat(
                 "session_id": session_id,
                 "role": "assistant",
                 "content": answer,
-                "citations": [citation.model_dump() for citation in citations],
+                "citations": [citation.model_dump(mode="json") for citation in citations],
                 "metadata": {"intent": intent, "model_used": model_used, "request_id": request_id},
             }
         ).execute().data[0]

@@ -153,7 +153,13 @@ class DeepSeekExtractor:
                         "model": self.settings.deepseek_model,
                         "messages": [
                             {"role": "system", "content": "Write concise, source-grounded investment research output. Do not invent facts."},
-                            {"role": "user", "content": json.dumps({"instruction": instruction, "context": context})},
+                            {
+                                "role": "user",
+                                "content": json.dumps(
+                                    {"instruction": instruction, "context": context},
+                                    default=str,
+                                ),
+                            },
                         ],
                     },
                 )
