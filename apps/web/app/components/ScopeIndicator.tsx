@@ -1,15 +1,11 @@
 import { companiesWithLinks, getCompanies, getExperts } from "@/lib/data";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
-import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
 import { matchesThemeFocus } from "@/lib/theme-focus";
-import { getThemeFocus } from "@/lib/theme-focus-server";
+import { getPageScope } from "@/lib/page-scope";
 import { THEMES } from "@/lib/themes";
 
 export default async function ScopeIndicator() {
-  const [themeFocus, includeTowerBrookEmployees] = await Promise.all([
-    getThemeFocus(),
-    getIncludeTowerBrookEmployees(),
-  ]);
+  const { themeFocus, includeTowerBrookEmployees } = await getPageScope();
   const experts = filterTowerBrookEmployees(
     getExperts().filter((expert) => matchesThemeFocus(expert.themes, themeFocus)),
     includeTowerBrookEmployees,

@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import AppShellNav from "@/app/components/AppShellNav";
+import SearchBox from "@/app/components/SearchBox";
+import ScopeIndicator from "@/app/components/ScopeIndicator";
 import InvestorWorkspaceTray from "@/app/components/InvestorWorkspaceTray";
 import AppErrorBoundary from "@/app/components/AppErrorBoundary";
 import ThemeSwitcher from "@/app/components/ThemeSwitcher";
 import { companiesWithLinks, getCompanies, getExperts } from "@/lib/data";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
-import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
 import { coverageMatrix } from "@/lib/investment-readiness";
 import { matchesThemeFocus } from "@/lib/theme-focus";
-import { getThemeFocus } from "@/lib/theme-focus-server";
+import { getPageScope } from "@/lib/page-scope";
+import { THEME_BY_ID } from "@/lib/themes";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -22,10 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const [themeFocus, includeTowerBrookEmployees] = await Promise.all([
-    getThemeFocus(),
-    getIncludeTowerBrookEmployees(),
-  ]);
+  const { themeFocus, includeTowerBrookEmployees } = await getPageScope();
 
   const experts = filterTowerBrookEmployees(
     getExperts().filter((expert) => matchesThemeFocus(expert.themes, themeFocus)),
@@ -43,6 +42,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const gapCount = coverageMatrix(themeFocus, includeTowerBrookEmployees).filter(
     (row) => row.gapSeverity !== "low",
   ).length;
+  const scopeLabel =
+    themeFocus === "all" ? "All three themes" : THEME_BY_ID[themeFocus]?.name ?? "Selected theme";
 
   return (
     <html lang="en" className="h-full antialiased">
@@ -65,19 +66,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
               </span>
             </Link>
             <AppShellNav />
-            <Link
-              href="/ask"
-              className="ml-auto hidden min-w-[240px] max-w-[400px] flex-1 items-center rounded-md border border-line-strong bg-white px-3 py-2 hover:border-line-dark hover:bg-[#fbfcff] xl:flex"
-            >
-              <span className="text-muted" aria-hidden="true">
-                <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
-                  <path d="m17 17-3.4-3.4m1.8-4.1a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                </svg>
-              </span>
-              <span className="ml-2 flex-1 text-[13px] text-muted">Ask Copilot…</span>
-            </Link>
+            <div className="ml-auto hidden min-w-[240px] max-w-[400px] flex-1 xl:block">
+              <SearchBox index={[]} scopeLabel={scopeLabel} theme={themeFocus} compact />
+            </div>
           </div>
           <AppShellNav mobile />
+          <ScopeIndicator />
           <ThemeSwitcher
             initialFocus={themeFocus}
             initialIncludeTowerBrookEmployees={includeTowerBrookEmployees}

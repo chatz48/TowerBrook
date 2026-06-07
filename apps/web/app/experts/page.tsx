@@ -1,13 +1,12 @@
 import { dedupeCompanyLinks, getCompanies, getExperts } from "@/lib/data";
 import { buildCompanyCanonicalMap, canonicalCompanyId } from "@/lib/graph-normalize";
 import { rankExperts } from "@/lib/score";
-import { THEME_BY_ID, THEMES, THEME_SPECIALTIES } from "@/lib/themes";
-import { getThemeFocus } from "@/lib/theme-focus-server";
+import { specialtiesForTheme, THEME_BY_ID } from "@/lib/themes";
 import { isThemeFocus, matchesThemeFocus, type ThemeFocus } from "@/lib/theme-focus";
-import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
+import { getPageScope } from "@/lib/page-scope";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 import ExpertFilters, { EXPERT_FILTER_TYPES } from "./ExpertFilters";
-import { expertReadiness } from "@/lib/investment-readiness";
+import { expertReadiness, matchesActionableReadiness } from "@/lib/investment-readiness";
 import { callObjective, expertRoleDisplay } from "@/lib/expert-copy";
 import { outreachStorageKey } from "@/lib/outreach-plan";
 import ExpertCallList from "./ExpertCallList";
@@ -26,10 +25,7 @@ export default async function ExpertsPage({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const [themeFocus, includeTowerBrookEmployees] = await Promise.all([
-    getThemeFocus(),
-    getIncludeTowerBrookEmployees(),
-  ]);
+  const { themeFocus, includeTowerBrookEmployees } = await getPageScope();
   const params: Record<string, string | string[] | undefined> = (await searchParams) ?? {};
   const selectedTheme = singleParam(params.theme);
   const rawSelectedType = singleParam(params.type) ?? "all";
@@ -46,10 +42,7 @@ export default async function ExpertsPage({
     .map((id) => id.trim())
     .filter(Boolean);
   const pinnedSet = new Set(pinnedExpertIds);
-  const specialties =
-    activeTheme === "all"
-      ? Array.from(new Set(THEMES.flatMap((theme) => THEME_SPECIALTIES[theme.id]))).sort()
-      : THEME_SPECIALTIES[activeTheme];
+  const specialties = specialtiesForTheme(activeTheme);
   const rawSelectedSpecialty = singleParam(params.specialty) ?? "all";
   const selectedSpecialty =
     rawSelectedSpecialty === "all" || specialties.includes(rawSelectedSpecialty)
@@ -75,7 +68,7 @@ export default async function ExpertsPage({
     .filter((expert) => {
       const readiness = expertReadiness(expert);
       if (selectedReadiness === "all") return true;
-      if (selectedReadiness === "actionable") return readiness.level === "call-ready" || readiness.level === "verify-contact";
+      if (selectedReadiness === "actionable") return matchesActionableReadiness("expert", readiness.level);
       return readiness.level === selectedReadiness;
     })
     .filter((expert) => {

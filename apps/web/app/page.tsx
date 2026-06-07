@@ -7,9 +7,8 @@ import {
   expertsForTheme,
 } from "@/lib/data";
 import { buildBrief } from "@/lib/brief";
-import { getThemeFocus } from "@/lib/theme-focus-server";
 import { matchesThemeFocus } from "@/lib/theme-focus";
-import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
+import { getPageScope } from "@/lib/page-scope";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 import {
   isTowerBrookWorkedWithCompany,
@@ -23,10 +22,7 @@ import ReportExportControls from "./components/reports/ReportExportControls";
 import { Badge, PageShell } from "./components/ui";
 
 export default async function Home() {
-  const [themeFocus, includeTowerBrookEmployees] = await Promise.all([
-    getThemeFocus(),
-    getIncludeTowerBrookEmployees(),
-  ]);
+  const { themeFocus, includeTowerBrookEmployees } = await getPageScope();
   const report = await buildReport(themeFocus, includeTowerBrookEmployees);
   const experts = filterTowerBrookEmployees(
     getExperts().filter((expert) => matchesThemeFocus(expert.themes, themeFocus)),
