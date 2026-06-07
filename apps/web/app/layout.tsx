@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import AppShellNav from "@/app/components/AppShellNav";
 import SearchBox from "@/app/components/SearchBox";
-import ScopeIndicator from "@/app/components/ScopeIndicator";
 import InvestorWorkspaceTray from "@/app/components/InvestorWorkspaceTray";
+import { buildSearchIndex } from "@/lib/search-index";
 import AppErrorBoundary from "@/app/components/AppErrorBoundary";
 import ThemeSwitcher from "@/app/components/ThemeSwitcher";
 import { companiesWithLinks, getCompanies, getExperts } from "@/lib/data";
@@ -44,6 +44,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   ).length;
   const scopeLabel =
     themeFocus === "all" ? "All three themes" : THEME_BY_ID[themeFocus]?.name ?? "Selected theme";
+  const searchIndex = buildSearchIndex(themeFocus, includeTowerBrookEmployees);
 
   return (
     <html lang="en" className="h-full antialiased">
@@ -66,13 +67,16 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
               </span>
             </Link>
             <AppShellNav />
-            <div className="ml-auto hidden min-w-[240px] max-w-[400px] flex-1 xl:block">
-              <SearchBox index={[]} scopeLabel={scopeLabel} theme={themeFocus} compact />
+            <div className="ml-auto hidden min-w-[200px] max-w-[400px] flex-1 md:block">
+              <SearchBox index={searchIndex} scopeLabel={scopeLabel} theme={themeFocus} compact />
             </div>
           </div>
+          <div className="border-t border-line px-3 py-2 md:hidden">
+            <SearchBox index={searchIndex} scopeLabel={scopeLabel} theme={themeFocus} compact />
+          </div>
           <AppShellNav mobile />
-          <ScopeIndicator />
           <ThemeSwitcher
+            scopeLabel={scopeLabel}
             initialFocus={themeFocus}
             initialIncludeTowerBrookEmployees={includeTowerBrookEmployees}
             scopeStats={{

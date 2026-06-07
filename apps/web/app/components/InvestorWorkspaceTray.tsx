@@ -140,7 +140,7 @@ export default function InvestorWorkspaceTray() {
           <div className="flex items-start justify-between gap-3 border-b border-line bg-[#fbfcfe] p-3">
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                Outreach plan
+                Research basket
               </div>
               <div className="mt-1 text-xs text-ink-faint">
                 Experts and targets selected for this week&apos;s calls and validation.

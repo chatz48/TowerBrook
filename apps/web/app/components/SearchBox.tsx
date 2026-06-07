@@ -94,7 +94,15 @@ export default function SearchBox({
           compact ? "rounded-lg px-2.5 py-1.5" : "rounded-xl px-4 py-3"
         }`}
       >
-        <span className="shrink-0 text-ink-faint" aria-hidden="true">🔎</span>
+        <svg
+          className="h-3.5 w-3.5 shrink-0 text-ink-faint"
+          viewBox="0 0 20 20"
+          fill="none"
+          aria-hidden="true"
+        >
+          <circle cx="8.5" cy="8.5" r="5.75" stroke="currentColor" strokeWidth="1.5" />
+          <path d="M13 13l4.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
         <input
           value={q}
           onChange={(e) => {
@@ -116,7 +124,7 @@ export default function SearchBox({
           <kbd className="shrink-0 whitespace-nowrap text-[10px] text-ink-faint border border-line rounded px-1.5 py-0.5">
             {results.length} match{results.length === 1 ? "" : "es"}
           </kbd>
-        ) : compact ? (
+        ) : compact && index.length > 0 ? (
           <span
             className="shrink-0 whitespace-nowrap text-[10px] tabular-nums text-ink-faint"
             title={`${index.length} searchable records`}

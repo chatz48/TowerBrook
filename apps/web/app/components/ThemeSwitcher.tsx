@@ -29,10 +29,12 @@ export interface ScopeStats {
 }
 
 export default function ThemeSwitcher({
+  scopeLabel,
   initialFocus,
   initialIncludeTowerBrookEmployees,
   scopeStats,
 }: {
+  scopeLabel: string;
   initialFocus: ThemeFocus;
   initialIncludeTowerBrookEmployees: boolean;
   scopeStats: ScopeStats;
@@ -75,7 +77,7 @@ export default function ThemeSwitcher({
 
     startTransition(() => {
       if (pathname.startsWith("/themes/")) {
-        router.push(nextFocus === "all" ? "/" : `/themes/${nextFocus}`);
+        router.push(nextFocus === "all" ? "/" : `/?theme=${nextFocus}`);
         return;
       }
       router.refresh();
@@ -102,6 +104,10 @@ export default function ThemeSwitcher({
         aria-label="Switch investment theme"
         className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 px-4 py-1.5"
       >
+        <span className="shrink-0 text-[11px] text-ink-soft">
+          <span className="font-semibold text-ink">Scope:</span> {scopeLabel}
+        </span>
+        <span className="hidden h-4 w-px bg-line sm:inline" aria-hidden="true" />
         <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
           Theme
         </span>

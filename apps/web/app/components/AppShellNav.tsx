@@ -5,16 +5,16 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Home", match: "/" },
-  { href: "/experts", label: "Call list", match: "/experts" },
-  { href: "/companies", label: "Targets", match: "/companies" },
-  { href: "/reports", label: "Memo", match: "/reports" },
+  { href: "/", label: "Home", shortLabel: "Home", match: "/" },
+  { href: "/experts", label: "Call list", shortLabel: "Calls", match: "/experts" },
+  { href: "/companies", label: "Targets", shortLabel: "Targets", match: "/companies" },
+  { href: "/ask", label: "Copilot", shortLabel: "Copilot", match: "/ask" },
+  { href: "/reports", label: "Memo", shortLabel: "Memo", match: "/reports" },
 ];
 
 const TOOLS_ITEMS = [
   { href: "/graph", label: "Relationship graph", match: "/graph" },
   { href: "/discover", label: "Coverage gaps", match: "/discover" },
-  { href: "/ask", label: "Copilot", match: "/ask" },
   { href: "/deals", label: "Deal evidence", match: "/deals" },
   { href: "/sources", label: "Sources", match: "/sources" },
   { href: "/ingest", label: "Add source text", match: "/ingest" },
@@ -45,7 +45,7 @@ function NavLink({
   pathname,
   mobile,
 }: {
-  item: { href: string; label: string; match: string };
+  item: { href: string; label: string; shortLabel?: string; match: string };
   pathname: string;
   mobile: boolean;
 }) {
@@ -55,11 +55,11 @@ function NavLink({
   return (
     <Link
       href={item.href}
-      className={`relative flex h-full shrink-0 items-center ${mobile ? "px-3 text-[12px]" : "px-4 text-[13px]"} font-medium transition-colors ${
+      className={`relative flex h-full shrink-0 items-center ${mobile ? "px-2.5 text-[11px]" : "px-4 text-[13px]"} font-medium transition-colors ${
         active ? "text-accent" : "text-ink hover:text-accent"
       }`}
     >
-      {item.label}
+      {mobile ? (item.shortLabel ?? item.label) : item.label}
       {active ? (
         <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-accent" />
       ) : null}
