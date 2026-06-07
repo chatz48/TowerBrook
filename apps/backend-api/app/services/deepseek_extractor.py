@@ -508,8 +508,16 @@ class DeepSeekExtractor:
 
     def _fallback_synthesis(self, instruction: str, context: dict[str, Any]) -> str:
         citations = context.get("citations") or []
-        citation_text = "\n".join(f"- {item.get('title', 'Source')}: {item.get('evidence', '')}" for item in citations[:5])
-        return f"{instruction}\n\nGrounded context:\n{citation_text or 'No configured model context available.'}"
+        if not citations:
+            return (
+                "Structured synthesis is unavailable without DEEPSEEK_API_KEY. "
+                "Use the ranked experts and citations from the baseline answer."
+            )
+        titles = [str(item.get("title") or "Source") for item in citations[:3]]
+        return (
+            f"Research surfaced {len(citations)} grounded source(s), including "
+            f"{', '.join(titles)}. Review citations and ranked experts for call sequencing."
+        )
 
 
 extractor = DeepSeekExtractor()

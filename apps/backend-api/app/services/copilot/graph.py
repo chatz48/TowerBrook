@@ -7,7 +7,8 @@ from langgraph.graph import END, START, StateGraph
 from app.schemas.domain import Citation, ToolTrace
 from app.services.copilot.context import CopilotContext
 from app.services.copilot.intent import RoutedIntent, route_intent
-from app.services.copilot.synthesis import CopilotSynthesis, synthesize_answer
+from app.services.copilot.models import CopilotSynthesis
+from app.services.copilot.synthesis import synthesize_answer
 from app.services.copilot.tools import run_pipeline
 
 

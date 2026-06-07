@@ -37,6 +37,16 @@ test.describe("Copilot page", () => {
     await expect(page.locator("a:has-text('Open Discover')")).toBeVisible();
   });
 
+  test("streams baseline before final answer", async ({ page }) => {
+    await page.goto("/ask");
+    const textbox = page.locator('[role="textbox"], input[type="text"], textarea').first();
+    await textbox.fill("Who should I call first for grid interconnection?");
+    await textbox.press("Enter");
+
+    await expect(page.locator("text=Directory baseline")).toBeVisible({ timeout: 45_000 });
+    await expect(page.locator("text=Ranked experts")).toBeVisible({ timeout: 120_000 });
+  }, 150_000);
+
   test("generates a response for a simple query", async ({ page }) => {
     await page.goto("/ask");
 

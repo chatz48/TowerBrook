@@ -120,10 +120,15 @@ export function AskAnswerPanel({
               Live research unavailable: {answer.backend_error}
             </p>
           ) : null}
-          {answer.refine_failed ? (
-            <p className="mt-2 text-[11px] text-amber-800">
-              Model refinement failed — directory baseline retained.
-            </p>
+          {answer.request_id ? (
+            <p className="mt-2 font-mono text-[10px] text-ink-faint">Request {answer.request_id}</p>
+          ) : null}
+          {answer.verification_warnings?.length ? (
+            <div className="mt-2 rounded border border-amber-200 bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900">
+              {answer.verification_warnings.map((warning) => (
+                <p key={warning}>{warning}</p>
+              ))}
+            </div>
           ) : null}
         </div>
         <WorkspaceActionButton

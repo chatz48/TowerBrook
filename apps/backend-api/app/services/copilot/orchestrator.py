@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from collections.abc import AsyncIterator
 from typing import Any
 from uuid import uuid4
@@ -32,11 +33,27 @@ def _initial_state(request: ChatRequest) -> dict[str, Any]:
     }
 
 
-def _build_response(session_id: str, final: dict[str, Any]) -> ChatResponse:
+def _build_response(
+    session_id: str,
+    final: dict[str, Any],
+    *,
+    request_id: str,
+    node_timings_ms: dict[str, int],
+) -> ChatResponse:
     citations: list[Citation] = final.get("citations") or []
     tool_calls: list[ToolTrace] = final.get("tool_calls") or []
     intent: str = final.get("intent") or "find_experts"
-    model_used: str = final.get("model_used") or "deepseek-v4-flash"
+    structured = final.get("structured") or {}
+    verification_warnings: list[str] = []
+    if isinstance(structured, dict):
+        notes = structured.get("uncertainty_notes")
+        if isinstance(notes, str) and "Removed unverified" in notes:
+            verification_warnings = [
+                part.strip()
+                for part in notes.split(";")
+                if "Removed unverified" in part or "limited citation overlap" in part
+            ]
+
     return ChatResponse(
         session_id=session_id,
         answer=final.get("answer") or "No synthesis produced.",
@@ -44,30 +61,62 @@ def _build_response(session_id: str, final: dict[str, Any]) -> ChatResponse:
         tool_calls=tool_calls,
         confidence=final.get("confidence") or 0.5,
         intent=intent if intent in VALID_INTENTS else "find_experts",
-        model_used=model_used,
-        structured=final.get("structured"),
+        model_used=final.get("model_used") or "deepseek-v4-flash",
+        structured=structured,
+        request_id=request_id,
+        verification_warnings=verification_warnings,
+        node_timings_ms=node_timings_ms,
     )
 
 
-def _phase_payload(node: str, patch: dict[str, Any]) -> dict[str, Any]:
+def _phase_payload(node: str, patch: dict[str, Any], elapsed_ms: int) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "phase": node,
         "label": PHASE_LABELS.get(node, node),
+        "elapsed_ms": elapsed_ms,
     }
     if node == "route" and patch.get("intent"):
         payload["intent"] = patch["intent"]
         payload["model_used"] = patch.get("model_used")
     if node == "research" and patch.get("tool_calls"):
-        payload["tools_completed"] = len(patch["tool_calls"])
+        tool_calls = patch["tool_calls"]
+        payload["tools_completed"] = len(tool_calls)
         payload["citations_found"] = len(patch.get("citations") or [])
+        for call in tool_calls:
+            name = call.tool_name if isinstance(call, ToolTrace) else call.get("tool_name")
+            output = call.output if isinstance(call, ToolTrace) else call.get("output", {})
+            if name == "web_search" and output.get("keiro_live"):
+                payload["keiro_live"] = True
+                break
     return payload
 
 
-async def run_copilot(request: ChatRequest) -> ChatResponse:
+async def run_copilot(request: ChatRequest, request_id: str | None = None) -> ChatResponse:
+    rid = request_id or str(uuid4())
     session_id = request.session_id or str(uuid4())
     graph = get_copilot_graph()
-    final = await graph.ainvoke(_initial_state(request))
-    response = _build_response(session_id, final)
+    node_timings_ms: dict[str, int] = {}
+    accumulated: dict[str, Any] = {}
+    started = time.perf_counter()
+
+    async for update in graph.astream(_initial_state(request), stream_mode="updates"):
+        for node, patch in update.items():
+            node_timings_ms[node] = int((time.perf_counter() - started) * 1000)
+            accumulated.update(patch)
+
+    response = _build_response(session_id, accumulated, request_id=rid, node_timings_ms=node_timings_ms)
+    logger.info(
+        "copilot_complete",
+        extra={
+            "request_id": rid,
+            "intent": response.intent,
+            "model": response.model_used,
+            "tools": len(response.tool_calls),
+            "citations": len(response.citations),
+            "confidence": response.confidence,
+            "timings_ms": node_timings_ms,
+        },
+    )
     _persist_chat(
         session_id,
         request.message,
@@ -77,29 +126,34 @@ async def run_copilot(request: ChatRequest) -> ChatResponse:
         request.theme_id,
         response.intent or "find_experts",
         response.model_used or "deepseek-v4-flash",
+        rid,
     )
     return response
 
 
-async def run_copilot_stream(request: ChatRequest) -> AsyncIterator[str]:
-    """SSE stream: phase updates per LangGraph node, then complete ChatResponse."""
+async def run_copilot_stream(request: ChatRequest, request_id: str | None = None) -> AsyncIterator[str]:
+    rid = request_id or str(uuid4())
     session_id = request.session_id or str(uuid4())
     graph = get_copilot_graph()
     accumulated: dict[str, Any] = {}
+    node_timings_ms: dict[str, int] = {}
+    started = time.perf_counter()
 
-    yield _sse("started", {"session_id": session_id})
+    yield _sse("started", {"session_id": session_id, "request_id": rid})
 
     try:
         async for update in graph.astream(_initial_state(request), stream_mode="updates"):
             for node, patch in update.items():
+                elapsed = int((time.perf_counter() - started) * 1000)
+                node_timings_ms[node] = elapsed
                 accumulated.update(patch)
-                yield _sse("phase", _phase_payload(node, patch))
+                yield _sse("phase", _phase_payload(node, patch, elapsed))
     except Exception as exc:
-        logger.exception("Copilot stream failed")
-        yield _sse("error", {"message": str(exc)})
+        logger.exception("Copilot stream failed", extra={"request_id": rid})
+        yield _sse("error", {"message": str(exc), "request_id": rid})
         return
 
-    response = _build_response(session_id, accumulated)
+    response = _build_response(session_id, accumulated, request_id=rid, node_timings_ms=node_timings_ms)
     _persist_chat(
         session_id,
         request.message,
@@ -109,6 +163,7 @@ async def run_copilot_stream(request: ChatRequest) -> AsyncIterator[str]:
         request.theme_id,
         response.intent or "find_experts",
         response.model_used or "deepseek-v4-flash",
+        rid,
     )
     yield _sse("complete", response.model_dump(mode="json"))
 
@@ -126,6 +181,7 @@ def _persist_chat(
     theme_id: str | None,
     intent: str,
     model_used: str,
+    request_id: str,
 ) -> None:
     if not repo.client:
         return
@@ -142,7 +198,7 @@ def _persist_chat(
                 "role": "assistant",
                 "content": answer,
                 "citations": [citation.model_dump() for citation in citations],
-                "metadata": {"intent": intent, "model_used": model_used},
+                "metadata": {"intent": intent, "model_used": model_used, "request_id": request_id},
             }
         ).execute().data[0]
         for call in tool_calls:
@@ -157,4 +213,4 @@ def _persist_chat(
                 }
             ).execute()
     except Exception:
-        logger.exception("Failed to persist chat session")
+        logger.exception("Failed to persist chat session", extra={"request_id": request_id})

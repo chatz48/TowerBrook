@@ -195,6 +195,9 @@ class ChatResponse(BaseModel):
     intent: str | None = None
     model_used: str | None = None
     structured: CopilotStructuredAnswer | dict[str, Any] | None = None
+    request_id: str | None = None
+    verification_warnings: list[str] = Field(default_factory=list)
+    node_timings_ms: dict[str, int] = Field(default_factory=dict)
 
 
 class ReportRequest(BaseModel):

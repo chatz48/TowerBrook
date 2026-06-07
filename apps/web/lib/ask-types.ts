@@ -116,7 +116,9 @@ export type AskResponse = {
   backend_error?: string;
   vector_retrieval_failed?: boolean;
   enrichment_warnings?: string[];
+  verification_warnings?: string[];
   request_id?: string;
+  node_timings_ms?: Record<string, number>;
   model: string;
   intent?: string;
   model_used?: string;

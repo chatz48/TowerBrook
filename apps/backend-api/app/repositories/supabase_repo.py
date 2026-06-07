@@ -269,6 +269,22 @@ class SupabaseRepository:
         if rows and self.client:
             self.client.table(table).upsert(rows).execute()
 
+    def list_source_chunks(self, offset: int = 0, limit: int = 64) -> list[dict[str, Any]]:
+        if not self.client:
+            return []
+        return (
+            self.client.table("source_chunks")
+            .select("id,content")
+            .order("id")
+            .range(offset, offset + max(limit - 1, 0))
+            .execute()
+            .data
+        )
+
+    def update_chunk_embedding(self, chunk_id: str, embedding: list[float]) -> None:
+        if self.client:
+            self.client.table("source_chunks").update({"embedding": embedding}).eq("id", chunk_id).execute()
+
     def search_sources(self, query_embedding: list[float], theme_id: str | None, limit: int = 8) -> list[dict[str, Any]]:
         if not self.client:
             return []

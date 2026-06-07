@@ -133,19 +133,25 @@ async def _rag_search_entities(ctx: CopilotContext, citations: list[Citation], q
 
 
 async def _web_search(ctx: CopilotContext, citations: list[Citation], query: str) -> ToolTrace:
+    from app.config import get_settings
+
+    settings = get_settings()
+    provider = "keiro" if settings.keirolabs_api_key else "fallback"
     results = await keiro.search(query, limit=5)
     for item in results:
+        metadata = item.get("metadata") if isinstance(item.get("metadata"), dict) else {}
+        item_provider = metadata.get("provider") or provider
         citations.append(
             Citation(
                 title=item.get("title") or "Web result",
                 url=item.get("url"),
-                evidence=(item.get("snippet") or "")[:500],
+                evidence=(item.get("snippet") or item.get("content") or "")[:500],
             )
         )
     return ToolTrace(
         tool_name="web_search",
-        input={"query": query, "provider": "keiro"},
-        output={"count": len(results)},
+        input={"query": query, "provider": provider},
+        output={"count": len(results), "provider": provider, "keiro_live": bool(settings.keirolabs_api_key)},
     )
 
 

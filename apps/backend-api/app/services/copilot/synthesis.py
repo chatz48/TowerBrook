@@ -1,21 +1,12 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
-
 from app.schemas.domain import Citation, ToolTrace
+from app.services.copilot.claim_verification import verify_synthesis
 from app.services.copilot.context import CopilotContext
+from app.services.copilot.models import CopilotSynthesis
 from app.services.copilot.prompts import INTENT_SYNTHESIS_PROMPTS, SYNTHESIS_BASE
 from app.services.deepseek_extractor import extractor
 from app.services.deepseek_llm import llm
-
-
-class CopilotSynthesis(BaseModel):
-    answer_summary: str
-    key_findings: list[str] = Field(default_factory=list)
-    gaps: list[str] = Field(default_factory=list)
-    risks: list[str] = Field(default_factory=list)
-    follow_ups: list[str] = Field(default_factory=list)
-    uncertainty_notes: str = ""
 
 
 async def synthesize_answer(
@@ -33,9 +24,10 @@ async def synthesize_answer(
         "tool_trace": [t.model_dump() for t in tool_calls],
     }
 
+    synthesis: CopilotSynthesis | None = None
     if llm.configured:
         try:
-            return await llm.structured(
+            synthesis = await llm.structured(
                 f"{SYNTHESIS_BASE}\n\n{instruction}",
                 str(user_payload),
                 CopilotSynthesis,
@@ -43,18 +35,25 @@ async def synthesize_answer(
                 max_tokens=1800 if model.endswith("pro") else 1200,
             )
         except Exception:
-            pass
+            synthesis = None
 
-    # Fallback: legacy extractor synthesize → wrap in structured shape.
-    prose = await extractor.synthesize(
-        f"{SYNTHESIS_BASE}\n\n{instruction}",
-        user_payload,
-    )
-    return CopilotSynthesis(
-        answer_summary=prose[:1200],
-        key_findings=[],
-        gaps=["Model structured synthesis unavailable — review citations directly."],
-        risks=[],
-        follow_ups=[],
-        uncertainty_notes="Fallback synthesis path used.",
-    )
+    if synthesis is None:
+        prose = await extractor.synthesize(
+            f"{SYNTHESIS_BASE}\n\n{instruction}",
+            user_payload,
+        )
+        synthesis = CopilotSynthesis(
+            answer_summary=prose[:1200],
+            key_findings=[],
+            gaps=["Model structured synthesis unavailable — review citations directly."],
+            risks=[],
+            follow_ups=[],
+            uncertainty_notes="Fallback synthesis path used.",
+        )
+
+    verified, warnings = verify_synthesis(synthesis, citations)
+    if warnings:
+        verified.uncertainty_notes = (
+            f"{verified.uncertainty_notes} {'; '.join(warnings[:3])}".strip()
+        )
+    return verified

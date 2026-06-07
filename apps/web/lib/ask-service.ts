@@ -53,6 +53,9 @@ type BackendChatResult = {
   model_used?: string;
   structured?: AskResponse["structured"];
   citations?: { title: string; evidence: string; url?: string }[];
+  request_id?: string;
+  verification_warnings?: string[];
+  node_timings_ms?: Record<string, number>;
 };
 
 function wantsStream(request: Request): boolean {
@@ -237,7 +240,9 @@ async function prepareAskContext(body: AskRequest): Promise<
 }
 
 async function fetchBackendStream(message: string, themeId?: string): Promise<Response> {
-  const baseUrl = process.env.BACKEND_API_URL?.replace(/\/$/, "");
+  const baseUrl =
+    process.env.BACKEND_API_URL?.replace(/\/$/, "") ??
+    (process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : null);
   if (!baseUrl) throw new Error("BACKEND_API_URL is not configured");
 
   return fetch(`${baseUrl}/chat/stream`, {
@@ -292,6 +297,17 @@ async function maybeAskIntelligenceApi(
   }
 }
 
+function looksLikePromptLeak(text: string | undefined): boolean {
+  if (!text) return false;
+  const markers = [
+    "TowerBrook's research copilot",
+    "Return strict JSON",
+    "JSON schema:",
+    "Ground every claim in the supplied evidence",
+  ];
+  return markers.some((marker) => text.includes(marker));
+}
+
 function mergeBackendIntoBaseline(baseline: AskResponse, backend: BackendChatResult): AskResponse {
   const structured = backend.structured;
   const mergedGaps = [...new Set([...(structured?.gaps ?? []), ...baseline.gaps])].slice(0, 8);
@@ -304,7 +320,8 @@ function mergeBackendIntoBaseline(baseline: AskResponse, backend: BackendChatRes
       }))
     : baseline.risks;
 
-  const synthesisSummary = structured?.answer_summary || backend.answer;
+  const rawSummary = structured?.answer_summary || backend.answer;
+  const synthesisSummary = looksLikePromptLeak(rawSummary) ? baseline.answer_summary : rawSummary;
   const enrichmentWarnings: string[] = [];
   if (structured?.uncertainty_notes) {
     enrichmentWarnings.push(structured.uncertainty_notes);
@@ -320,10 +337,18 @@ function mergeBackendIntoBaseline(baseline: AskResponse, backend: BackendChatRes
     tool_calls: backend.tool_calls,
     intent: backend.intent,
     model_used: backend.model_used,
+    request_id: backend.request_id,
+    verification_warnings: backend.verification_warnings,
+    node_timings_ms: backend.node_timings_ms,
     model: `langgraph/${backend.model_used ?? "deepseek"} (${backend.intent ?? "copilot"})`,
     grounded: false,
     backend_enriched: true,
-    enrichment_warnings: enrichmentWarnings.length ? enrichmentWarnings : undefined,
+    enrichment_warnings: [
+      ...enrichmentWarnings,
+      ...(backend.verification_warnings ?? []),
+    ].filter(Boolean).length
+      ? [...enrichmentWarnings, ...(backend.verification_warnings ?? [])]
+      : undefined,
     confidence: backend.confidence
       ? {
           score: backend.confidence,

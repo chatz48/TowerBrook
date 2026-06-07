@@ -1,4 +1,6 @@
-from fastapi import APIRouter
+from uuid import uuid4
+
+from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 
 from app.schemas.domain import ChatRequest, ChatResponse
@@ -8,17 +10,19 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 
 
 @router.post("", response_model=ChatResponse)
-async def chat(request: ChatRequest) -> ChatResponse:
+async def chat(http_request: Request, request: ChatRequest) -> ChatResponse:
     """LangGraph copilot: intent router → Keiro/DeepSeek workflow → structured synthesis."""
-    return await run_copilot(request)
+    request_id = http_request.headers.get("x-request-id") or str(uuid4())
+    return await run_copilot(request, request_id=request_id)
 
 
 @router.post("/stream")
-async def chat_stream(request: ChatRequest) -> StreamingResponse:
+async def chat_stream(http_request: Request, request: ChatRequest) -> StreamingResponse:
     """SSE stream with per-node phase updates, then final ChatResponse."""
+    request_id = http_request.headers.get("x-request-id") or str(uuid4())
 
     async def event_generator():
-        async for chunk in run_copilot_stream(request):
+        async for chunk in run_copilot_stream(request, request_id=request_id):
             yield chunk
 
     return StreamingResponse(
@@ -28,5 +32,6 @@ async def chat_stream(request: ChatRequest) -> StreamingResponse:
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
             "X-Accel-Buffering": "no",
+            "X-Request-Id": request_id,
         },
     )

@@ -133,11 +133,17 @@ export async function POST(request: Request) {
       );
     }
 
-    const processing = job.id
-      ? await callBackendApi(`/jobs/process/${job.id}`, { method: "POST" })
-      : null;
+    // Async: return job immediately; client polls /api/research-jobs/{id}
+    if (job.id) {
+      void callBackendApi(`/jobs/process/${job.id}`, { method: "POST" }).catch(() => undefined);
+    }
 
-    return Response.json({ job, processing, candidates: [] });
+    return Response.json({
+      job,
+      async: true,
+      pollUrl: job.id ? `/api/research-jobs/${job.id}` : null,
+      candidates: [],
+    });
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "Discovery failed" },
