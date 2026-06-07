@@ -25,7 +25,7 @@
     "government-investment:census": "pnpm --dir apps/web government-investment:census",
     "db:seed": "pnpm --dir apps/web db:seed",
     "db:seed:graph": "pnpm --dir apps/web db:seed:graph",
-    "api:dev": "cd apps/backend-api && PY=$([ -x .venv/bin/python ] && echo .venv/bin/python || echo python3) && $PY -m uvicorn app.main:app --reload --port 8000",
+    "api:dev": "cd apps/backend-api && PY=$([ -x .venv/bin/python ] && echo .venv/bin/python || echo python3) && $PY -m uvicorn app.main:app --reload --port 8001",
     "api:test": "cd apps/backend-api && PY=$([ -x .venv/bin/python ] && echo .venv/bin/python || echo python3) && $PY -m pytest",
     "api:evaluate": "cd apps/backend-api && PY=$([ -x .venv/bin/python ] && echo .venv/bin/python || echo python3) && $PY -m app.cli.evaluate",
     "discovery:dry-run": "cd apps/backend-api && PY=$([ -x .venv/bin/python ] && echo .venv/bin/python || echo python3) && $PY -m app.cli.discovery --theme grid-infrastructure --dry-run",
