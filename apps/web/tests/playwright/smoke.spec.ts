@@ -21,6 +21,11 @@ test("campaign route redirects to call list", async ({ page }) => {
   await expect(page).toHaveURL(/\/experts/);
 });
 
+test("legacy theme route redirects to scoped home", async ({ page }) => {
+  await page.goto("/themes/clean-energy-advisory");
+  await expect(page).toHaveURL(/\?theme=clean-energy-advisory/);
+});
+
 for (const { path, label } of PAGES) {
   test(`${label} (${path}) loads and shows content`, async ({ page }) => {
     const response = await page.goto(path);
@@ -65,6 +70,7 @@ test("Expert profile loads with key sections", async ({ page }) => {
   // Should have action buttons
   await expect(page.locator("text=Prepare call")).toBeVisible();
   await expect(page.locator("text=View relationships")).toBeVisible();
+  await expect(page.locator("text=Call list outreach")).toBeVisible();
 
   // Should show companies
   await expect(page.locator("text=Augusta")).toBeVisible();
