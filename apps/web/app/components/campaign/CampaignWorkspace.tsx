@@ -4,7 +4,7 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import type { ExpertType, ThemeId } from "@/lib/types";
 import type { ThemeFocus } from "@/lib/investment-readiness";
-import { PageShell } from "@/app/components/ui";
+import { PageHeader, PageShell } from "@/app/components/ui";
 
 type CampaignStatus = "not-started" | "owner-assigned" | "outreach-sent" | "scheduled" | "completed" | "promoted" | "rejected";
 
@@ -117,38 +117,33 @@ export default function CampaignWorkspace({
 
   return (
     <PageShell>
-        <header className="ee-panel rounded-lg p-5">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <div className="ee-label text-accent">Call campaign</div>
-              <h1 className="mt-2 text-[28px] font-semibold tracking-tight">Turn the map into an assigned outreach plan</h1>
-              <p className="mt-2 max-w-4xl text-[13px] leading-relaxed text-ink-soft">
-                Assign owners, track outreach status, capture notes, and export a Monday-ready campaign pack.
-                This closes the loop from expert discovery to calls, referrals, company validation, and memo prep.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
+        <PageHeader
+          label="Call campaign"
+          title="Assigned outreach plan"
+          description="Track owners, outreach status, notes, and export a Monday-ready pack."
+          actions={
+            <>
               <button type="button" onClick={copyPack} className="ee-button ee-button-primary">
-                {copied ? "Copied" : "Copy meeting pack"}
+                {copied ? "Copied" : "Copy pack"}
               </button>
               <a href={csvHref} download={`towerbrook-campaign-${theme}.csv`} className="ee-button ee-button-secondary">
-                Export CSV
+                CSV
               </a>
               <button type="button" onClick={resetCampaign} className="ee-button ee-button-secondary">
-                Reset statuses
+                Reset
               </button>
-            </div>
-          </div>
-          <div className="mt-5 grid gap-3 sm:grid-cols-4">
-            <Metric label="Campaign items" value={stats.total} detail="Calls and targets" />
-            <Metric label="Assigned / started" value={stats.assigned} detail="Owner or status set" />
-            <Metric label="Outreach active" value={stats.outreach} detail="Sent, scheduled or done" />
-            <Metric label="Closed loop" value={stats.completed} detail="Completed / promoted / rejected" />
-          </div>
-        </header>
+            </>
+          }
+        />
+        <section className="ee-insight-strip mb-3">
+          <Metric label="Items" value={stats.total} detail="Calls and targets" />
+          <Metric label="Assigned" value={stats.assigned} detail="Owner or status set" />
+          <Metric label="Outreach" value={stats.outreach} detail="Sent, scheduled or done" />
+          <Metric label="Closed" value={stats.completed} detail="Completed / promoted / rejected" />
+        </section>
 
-        <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
-          <main className="space-y-5 min-w-0">
+        <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_380px]">
+          <main className="space-y-3 min-w-0">
             <CampaignTable
               title="1. Expert calls to run this week"
               description="Prioritised by readiness, source confidence and company edges. Capture owner, status and the ask for each call."
@@ -160,8 +155,8 @@ export default function CampaignWorkspace({
             <TargetTable rows={targetRows} state={state} onUpdate={updateItem} />
           </main>
 
-          <aside className="space-y-5 xl:sticky xl:top-24 xl:self-start">
-            <section className="ee-panel rounded-lg p-5">
+          <aside className="space-y-3 xl:sticky xl:top-24 xl:self-start">
+            <section className="ee-panel rounded-lg p-3">
               <div className="ee-label text-ink">Coverage gaps to close</div>
               <ul className="mt-3 space-y-2 text-[12px] leading-relaxed text-ink-soft">
                 {(gaps.length ? gaps : ["No high-priority taxonomy gaps flagged in this scope."]).slice(0, 8).map((gap) => (
@@ -171,7 +166,7 @@ export default function CampaignWorkspace({
               <Link href="/discover" className="ee-button ee-button-secondary mt-4 w-full">Open research queue</Link>
             </section>
 
-            <section className="ee-panel rounded-lg p-5">
+            <section className="ee-panel rounded-lg p-3">
               <div className="ee-label text-ink">Coverage by archetype</div>
               <div className="mt-3 space-y-2">
                 {coverage.map((row) => (
@@ -188,7 +183,7 @@ export default function CampaignWorkspace({
               </div>
             </section>
 
-            <section className="ee-panel rounded-lg p-5">
+            <section className="ee-panel rounded-lg p-3">
               <div className="ee-label text-ink">Meeting pack checklist</div>
               <ol className="mt-3 space-y-2 text-[12px] leading-relaxed text-ink-soft">
                 {nextSteps.map((step, index) => (
@@ -338,10 +333,10 @@ function NoteInput({ value, onChange }: { value: string; onChange: (value: strin
 
 function Metric({ label, value, detail }: { label: string; value: number; detail: string }) {
   return (
-    <div className="rounded-md border border-line bg-white p-3">
-      <div className="text-[22px] font-semibold tabular-nums">{value}</div>
-      <div className="mt-1 text-[10px] uppercase tracking-[0.12em] text-ink-faint">{label}</div>
-      <div className="mt-1 text-[11px] text-ink-soft">{detail}</div>
+    <div className="ee-insight-metric">
+      <div className="ee-label">{label}</div>
+      <div className="mt-1 text-[22px] font-semibold tabular-nums">{value}</div>
+      <p className="mt-0.5 text-[11px] text-ink-soft">{detail}</p>
     </div>
   );
 }

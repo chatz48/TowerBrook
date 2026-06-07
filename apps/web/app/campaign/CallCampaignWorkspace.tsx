@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
-import OperatorWorkflowRail from "@/app/components/OperatorWorkflowRail";
 import { PageShell } from "@/app/components/ui";
 
 export interface CampaignMetric {
@@ -343,30 +342,6 @@ export default function CallCampaignWorkspace({
             />
           </div>
         </section>
-
-        <OperatorWorkflowRail
-          title="Run the week, then feed the evidence back"
-          subtitle="The campaign is the execution layer: assign each call or target, record the result, and turn completed work into memo evidence or new research gaps."
-          steps={[
-            {
-              label: "Assign",
-              detail: "Put an owner and status on every call or company before outreach.",
-            },
-            {
-              label: "Capture",
-              detail: "Use notes to record referrals, target claims and objections.",
-            },
-            {
-              label: "Decide",
-              detail: "Promote, reject or return items to research before the meeting pack.",
-            },
-          ]}
-          actions={[
-            { label: "Review with AI", href: askHref(planReviewPrompt), primary: true },
-            { label: "Open memo", href: "/reports" },
-            { label: "Research gaps", href: "/discover?severity=high" },
-          ]}
-        />
 
         <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
           <main className="space-y-5">
