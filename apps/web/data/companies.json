@@ -449,11 +449,7 @@
         "label": "Launch date",
         "value": "2010",
         "status": "partial",
-        "source": {
-          "title": "Autogrid company information, funding & investors",
-          "url": "https://radar-innovation.dealroom.co/companies/autogrid",
-          "publisher": "radar-innovation.dealroom.co"
-        },
+        "source": "https://radar-innovation.dealroom.co/companies/autogrid",
         "evidence": "2010"
       }
     ]
@@ -784,11 +780,7 @@
         "label": "Launch date",
         "value": "2001-04-06",
         "status": "partial",
-        "source": {
-          "title": "blackrock global funds - sustainable energy fund class a2 (usd ...",
-          "url": "https://www.hangseng.com/en-hk/fundsupermart/fund/fundinfo/?fundCode=U42756",
-          "publisher": "hangseng.com"
-        },
+        "source": "https://www.hangseng.com/en-hk/fundsupermart/fund/fundinfo/?fundCode=U42756",
         "evidence": "2001-04-06"
       }
     ]
@@ -931,11 +923,7 @@
           }
         ],
         "label": "Launch date",
-        "source": {
-          "title": "What is Brief History of Brookfield Renewable Partners ...",
-          "url": "https://matrixbcg.com/blogs/brief-history/bep?srsltid=AfmBOopxlM7uQBYczKN41Iq0nVGziDhHqe6bOtXn0296VQx7Jw9FEgZt",
-          "publisher": "matrixbcg.com"
-        },
+        "source": "https://matrixbcg.com/blogs/brief-history/bep?srsltid=AfmBOopxlM7uQBYczKN41Iq0nVGziDhHqe6bOtXn0296VQx7Jw9FEgZt",
         "evidence": "November 28, 2011"
       }
     ]
@@ -1075,11 +1063,7 @@
         "label": "Launch date",
         "value": "2001",
         "status": "partial",
-        "source": {
-          "title": "The Andorra startup ecosystem | Startups & scaleups",
-          "url": "https://ecosystem.andorra-startup.com/companies/calpine_energy_solutions/portfolio",
-          "publisher": "ecosystem.andorra-startup.com"
-        },
+        "source": "https://ecosystem.andorra-startup.com/companies/calpine_energy_solutions/portfolio",
         "evidence": "2001"
       }
     ]
@@ -1303,11 +1287,7 @@
         "label": "Launch date",
         "value": "June 1, 2025",
         "status": "partial",
-        "source": {
-          "title": "NEWS: With antitrust settlement, Constellation set to become ...",
-          "url": "https://www.energycentral.com/energy-biz/post/news-with-antitrust-settlement-constellation-set-to-become-largest-us-GK7vFB7EjMnUMyw",
-          "publisher": "energycentral.com"
-        },
+        "source": "https://www.energycentral.com/energy-biz/post/news-with-antitrust-settlement-constellation-set-to-become-largest-us-GK7vFB7EjMnUMyw",
         "evidence": "June 1, 2025"
       },
       {
@@ -1315,11 +1295,7 @@
         "label": "Product live",
         "value": "live",
         "status": "partial",
-        "source": {
-          "title": "NEWS: With antitrust settlement, Constellation set to become ...",
-          "url": "https://www.energycentral.com/energy-biz/post/news-with-antitrust-settlement-constellation-set-to-become-largest-us-GK7vFB7EjMnUMyw",
-          "publisher": "energycentral.com"
-        },
+        "source": "https://www.energycentral.com/energy-biz/post/news-with-antitrust-settlement-constellation-set-to-become-largest-us-GK7vFB7EjMnUMyw",
         "evidence": "live"
       }
     ]
@@ -1690,11 +1666,7 @@
         "label": "Launch date",
         "value": "2005",
         "status": "verified",
-        "source": {
-          "title": "ADQ and Energy Capital Partners to establish a USD 25 ...",
-          "url": "https://www.ecpgp.com/about/news-and-insights/press-releases/2025/adq-and-energy-capital-partners-to-establish-a-usd-25-billion-us",
-          "publisher": "ecpgp.com"
-        },
+        "source": "https://www.ecpgp.com/about/news-and-insights/press-releases/2025/adq-and-energy-capital-partners-to-establish-a-usd-25-billion-us",
         "evidence": "2005"
       }
     ]
@@ -1869,11 +1841,7 @@
         "label": "Launch date",
         "value": "1994",
         "status": "partial",
-        "source": {
-          "title": "EQT Group investor portfolio, rounds & team - Dealroom.co",
-          "url": "https://app.dealroom.co/investors/eqt_private_equity",
-          "publisher": "app.dealroom.co"
-        },
+        "source": "https://app.dealroom.co/investors/eqt_private_equity",
         "evidence": "1994"
       }
     ]
@@ -2110,11 +2078,7 @@
         "label": "Product live",
         "value": "launched",
         "status": "partial",
-        "source": {
-          "title": "FIDO Direct launched as end-to-end solution to solve water loss",
-          "url": "https://smartwatermagazine.com/news/fido-tech/fido-direct-launched-end-end-solution-solve-water-loss",
-          "publisher": "smartwatermagazine.com"
-        },
+        "source": "https://smartwatermagazine.com/news/fido-tech/fido-direct-launched-end-end-solution-solve-water-loss",
         "evidence": "The article states that 'A game-changing solution combining everything water utilities need to solve water leakage has been launched by UK company FIDO Tech.'"
       }
     ]
@@ -2467,11 +2431,7 @@
         "label": "Launch date",
         "value": "1998",
         "status": "partial",
-        "source": {
-          "title": "Alexandria National Company For Financial Investments",
-          "url": "https://www.african-markets.com/en/stock-markets/egx/listed-companies/company?code=ANFI",
-          "publisher": "african-markets.com"
-        },
+        "source": "https://www.african-markets.com/en/stock-markets/egx/listed-companies/company?code=ANFI",
         "evidence": "1998"
       }
     ]
@@ -2630,11 +2590,7 @@
         "label": "Last funding",
         "value": "€52M Series C",
         "status": "partial",
-        "source": {
-          "title": "GridBeyond closes €52M Series C funding round to continue ...",
-          "url": "https://www.theade.co.uk/news/gridbeyond-closes-52m-series-c-funding-round-to-continue-its-platform-evolution-and-invest-in-new-existing-markets",
-          "publisher": "theade.co.uk"
-        },
+        "source": "https://www.theade.co.uk/news/gridbeyond-closes-52m-series-c-funding-round-to-continue-its-platform-evolution-and-invest-in-new-existing-markets",
         "evidence": "https://www.theade.co.uk/news/gridbeyond-closes-52m-series-c-funding-round-to-continue-its-platform-evolution-and-invest-in-new-existing-markets"
       },
       {
@@ -2642,11 +2598,7 @@
         "label": "Launch date",
         "value": "2010",
         "status": "verified",
-        "source": {
-          "title": "An award-winning provider of AI-powered ... - GridBeyond",
-          "url": "https://gridbeyond.com/about-us-2/",
-          "publisher": "gridbeyond.com"
-        },
+        "source": "https://gridbeyond.com/about-us-2/",
         "evidence": "2010"
       }
     ]
@@ -2742,11 +2694,7 @@
         "label": "Product live",
         "value": "EV charging network live; Electric Freightway HGV charging project in development",
         "status": "partial",
-        "source": {
-          "title": "Project introduction and approach - Electric Freightway Report 1",
-          "url": "https://www.gridserve.com/wp-content/uploads/2024/02/ElectricFreightwayIntroductionAndApproach_v1.1.pdf",
-          "publisher": "GRIDSERVE"
-        },
+        "source": "https://www.gridserve.com/wp-content/uploads/2024/02/ElectricFreightwayIntroductionAndApproach_v1.1.pdf",
         "evidence": "GRIDSERVE public project report describes High Power chargers to be installed at public and private sites."
       }
     ]
@@ -2830,11 +2778,7 @@
           }
         ],
         "label": "Launch date",
-        "source": {
-          "title": "H2O America (HTO) Stock Price, News, Quote & History",
-          "url": "https://finance.yahoo.com/quote/HTO/",
-          "publisher": "finance.yahoo.com"
-        },
+        "source": "https://finance.yahoo.com/quote/HTO/",
         "evidence": "May 2025"
       }
     ]
@@ -3180,11 +3124,7 @@
         "label": "Launch date",
         "value": "1978",
         "status": "partial",
-        "source": {
-          "title": "Inframark - 2026 Company Profile & Team - Tracxn",
-          "url": "https://tracxn.com/d/companies/inframark/__4pOje0zlYBx6bUewcGu5gJReRGp3AymqhnxP3USZ5Cg",
-          "publisher": "tracxn.com"
-        },
+        "source": "https://tracxn.com/d/companies/inframark/__4pOje0zlYBx6bUewcGu5gJReRGp3AymqhnxP3USZ5Cg",
         "evidence": "1978"
       }
     ]
@@ -3403,11 +3343,7 @@
         "label": "Launch date",
         "value": "1998",
         "status": "partial",
-        "source": {
-          "title": "JSM Group Services Ltd. works with clients to problem-solve ...",
-          "url": "https://ccemagazine.com/news/jsm-group-services-ltd-works-with-clients-to-problem-solve-and-develop-innovative-end-to-end-utility-infrastructure-solutions/",
-          "publisher": "ccemagazine.com"
-        },
+        "source": "https://ccemagazine.com/news/jsm-group-services-ltd-works-with-clients-to-problem-solve-and-develop-innovative-end-to-end-utility-infrastructure-solutions/",
         "evidence": "1998"
       }
     ]
@@ -4061,11 +3997,7 @@
         "label": "Launch date",
         "value": "1990",
         "status": "partial",
-        "source": {
-          "title": "LS Power - LinkedIn",
-          "url": "https://www.linkedin.com/company/ls-power",
-          "publisher": "linkedin.com"
-        },
+        "source": "https://www.linkedin.com/company/ls-power",
         "evidence": "1990"
       }
     ]
@@ -4541,11 +4473,7 @@
         "label": "Launch date",
         "value": "2022",
         "status": "partial",
-        "source": {
-          "title": "Press Release : Doosan Group | Doosan Corporation",
-          "url": "https://www.doosan.com/en/media-center/press-release_view?id=20172443",
-          "publisher": "doosan.com"
-        },
+        "source": "https://www.doosan.com/en/media-center/press-release_view?id=20172443",
         "evidence": "2022"
       }
     ]
@@ -5065,11 +4993,7 @@
         "label": "Product live",
         "value": "Live",
         "status": "partial",
-        "source": {
-          "title": "Start New Service - CustomerConnect For Quadvest",
-          "url": "https://quadvest.customerconnectportal.com/moving/start-service",
-          "publisher": "quadvest.customerconnectportal.com"
-        },
+        "source": "https://quadvest.customerconnectportal.com/moving/start-service",
         "evidence": "Live"
       }
     ]
@@ -5136,11 +5060,7 @@
         "label": "Total funding",
         "value": "$2,600,000",
         "status": "partial",
-        "source": {
-          "title": "Qualus Revenue, Funding & Valuation - Prospeo",
-          "url": "https://prospeo.io/c/qualus-revenue",
-          "publisher": "prospeo.io"
-        },
+        "source": "https://prospeo.io/c/qualus-revenue",
         "evidence": "$2,600,000"
       }
     ]
@@ -5193,11 +5113,7 @@
           }
         ],
         "label": "Launch date",
-        "source": {
-          "title": "Quinbrook Infrastructure Partners 2026 Company Profile",
-          "url": "https://pitchbook.com/profiles/company/181121-14",
-          "publisher": "pitchbook.com"
-        },
+        "source": "https://pitchbook.com/profiles/company/181121-14",
         "evidence": "2015"
       }
     ]
@@ -5561,11 +5477,7 @@
         "label": "Launch date",
         "value": "2026-03",
         "status": "partial",
-        "source": {
-          "title": "Renewable energy project on Yakama Nation sacred site ...",
-          "url": "https://www.facebook.com/groups/UAINE/posts/10162989498782631/",
-          "publisher": "facebook.com"
-        },
+        "source": "https://www.facebook.com/groups/UAINE/posts/10162989498782631/",
         "evidence": "2026-03"
       },
       {
@@ -5573,11 +5485,7 @@
         "label": "Product live",
         "value": "expected launch in March 2026",
         "status": "partial",
-        "source": {
-          "title": "Renewable energy project on Yakama Nation sacred site ...",
-          "url": "https://www.facebook.com/groups/UAINE/posts/10162989498782631/",
-          "publisher": "facebook.com"
-        },
+        "source": "https://www.facebook.com/groups/UAINE/posts/10162989498782631/",
         "evidence": "expected launch in March 2026"
       }
     ]
@@ -5851,11 +5759,7 @@
         "label": "Launch date",
         "value": "Aug 2008",
         "status": "partial",
-        "source": {
-          "title": "Kenyan Startup Ecosystem | Team - Premium Feature",
-          "url": "https://kenya.dealroom.co/companies/smarter_grid_solutions/team",
-          "publisher": "kenya.dealroom.co"
-        },
+        "source": "https://kenya.dealroom.co/companies/smarter_grid_solutions/team",
         "evidence": "https://kenya.dealroom.co/companies/smarter_grid_solutions/team"
       }
     ]
@@ -6665,11 +6569,7 @@
           }
         ],
         "label": "Launch date",
-        "source": {
-          "title": "What is Brief History of Xylem Company? - PESTEL Analysis",
-          "url": "https://pestel-analysis.com/blogs/brief-history/xylem",
-          "publisher": "pestel-analysis.com"
-        },
+        "source": "https://pestel-analysis.com/blogs/brief-history/xylem",
         "evidence": "2011"
       }
     ]

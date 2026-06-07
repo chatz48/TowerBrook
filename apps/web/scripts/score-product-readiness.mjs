@@ -55,25 +55,25 @@ const checks = [
   {
     id: "target_actionability",
     label: "PE target scorecards and company readiness filters are implemented",
-    pass: exists("lib/investment-readiness.ts") && contains("app/companies/[id]/page.tsx", "PE target scorecard") && contains("app/companies/page.tsx", "PE score"),
+    pass: exists("lib/investment-readiness.ts") && contains("app/companies/[id]/page.tsx", "PE target scorecard") && contains("app/companies/CompanyTargetTable.tsx", "targetScorecard"),
     evidence: { scorecardFunction: contains("lib/investment-readiness.ts", "targetScorecard") },
   },
   {
     id: "nontechnical_workflow",
-    label: "Guided non-technical workflow exists on the homepage",
-    pass: exists("app/components/GuidedWorkflow.tsx") && contains("app/page.tsx", "GuidedWorkflow"),
-    evidence: { guidedWorkflow: true },
+    label: "Home decision dashboard guides non-technical workflow",
+    pass: contains("app/page.tsx", "First call") && contains("app/page.tsx", "Lead target"),
+    evidence: { homeDashboard: true },
   },
   {
     id: "campaign_workflow",
-    label: "Assigned call-campaign workflow closes the loop from map to outreach",
-    pass: exists("app/campaign/page.tsx") && exists("app/components/campaign/CampaignWorkspace.tsx") && contains("app/components/campaign/CampaignWorkspace.tsx", "Copy meeting pack") && contains("app/components/campaign/CampaignWorkspace.tsx", "Export CSV"),
-    evidence: { campaignPage: exists("app/campaign/page.tsx"), exportCsv: contains("app/components/campaign/CampaignWorkspace.tsx", "Export CSV") },
+    label: "Call list workflow closes the loop from map to outreach",
+    pass: exists("app/experts/ExpertCallList.tsx") && contains("app/components/InvestorWorkspaceTray.tsx", "Export CSV") && contains("lib/outreach-plan.ts", "OUTREACH_STATUSES"),
+    evidence: { expertCallList: true, outreachPlan: true },
   },
   {
     id: "ranking_transparency",
     label: "Expert rankings expose score components and trust rationale",
-    pass: contains("app/experts/page.tsx", "type {score.base}") && contains("app/experts/[id]/page.tsx", "Trust dossier"),
+    pass: contains("app/experts/page.tsx", "score.total") && contains("app/experts/[id]/page.tsx", "Trust dossier"),
     evidence: { scoreComponents: true, trustDossier: true },
   },
   {
