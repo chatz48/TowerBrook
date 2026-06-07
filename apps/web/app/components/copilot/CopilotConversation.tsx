@@ -45,13 +45,13 @@ export function CopilotConversationInput({
       <input
         value={question}
         onChange={(event) => onQuestionChange(event.target.value)}
-        className="min-w-0 flex-1 rounded border border-[#cfd6e2] bg-[#fbfcfe] px-3 py-2.5 text-sm outline-none transition focus:border-[#0b5bd3] focus:bg-white"
+        className="min-w-0 flex-1 rounded-md border border-line-strong bg-paper px-3 py-2.5 text-sm outline-none transition focus:border-accent focus:bg-card"
         placeholder="Ask over experts, companies, relationships, and sources..."
       />
       <button
         type="submit"
         disabled={loading || !question.trim()}
-        className="rounded bg-[#0b5bd3] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#084aa9] disabled:opacity-50"
+        className="ee-button ee-button-primary min-h-10 px-4 disabled:opacity-50"
       >
         {loading ? "Running" : "Ask"}
       </button>
@@ -82,8 +82,12 @@ export function CopilotConversation({
   onSourceSelect,
   onOpenNotes,
 }: Omit<CopilotConversationProps, "onSubmit" | "onCancel">) {
+  const latestAssistantId = [...conversation]
+    .reverse()
+    .find((message) => message.role === "assistant" && message.answer)?.id;
+
   return (
-    <div className="space-y-3 px-5 py-4">
+    <div className="space-y-3 px-3 py-4 sm:px-5">
         <BasketContextPanel
           items={workspaceItems}
           theme={filtersTheme}
@@ -106,6 +110,7 @@ export function CopilotConversation({
                             answer={message.answer}
                             onSourceSelect={onSourceSelect}
                             onPrompt={onPrompt}
+                            compact={message.id !== latestAssistantId}
                           />
                         )
                       : message.content}

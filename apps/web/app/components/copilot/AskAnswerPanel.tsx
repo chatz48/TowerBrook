@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import { PROMPTS } from "./constants";
@@ -11,12 +11,48 @@ export function AskAnswerPanel({
   answer,
   onSourceSelect,
   onPrompt,
+  compact = false,
 }: {
   answer: AskResponse;
   onSourceSelect: (sourceId: string) => void;
   onPrompt: (prompt: string) => void;
+  compact?: boolean;
 }) {
   const theme = themeLabel(answer.input_context.theme);
+  const [copied, setCopied] = useState(false);
+
+  async function copyCallPack() {
+    const lines = [
+      answer.answer_summary,
+      "",
+      "Ranked experts:",
+      ...answer.ranked_experts.slice(0, 8).map((expert) => `${expert.rank}. ${expert.name} — ${expert.why}`),
+      "",
+      "Call sequence:",
+      ...answer.call_sequence.map((step, index) => `${index + 1}. ${step.phase}: ${step.goal}`),
+    ];
+    try {
+      await navigator.clipboard.writeText(lines.join("\n"));
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  if (compact) {
+    return (
+      <div className="rounded-md border border-line bg-paper px-3 py-2">
+        <p className="text-[13px] leading-relaxed text-ink-soft">{answer.answer_summary}</p>
+        <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
+          <span className="text-ink-faint">{answer.ranked_experts.length} experts ranked</span>
+          <Link href="/experts?readiness=actionable" className="font-semibold text-accent hover:underline">
+            Open call list
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
@@ -25,8 +61,8 @@ export function AskAnswerPanel({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="font-semibold">Expert Engine</span>
-            <span className="text-[#667085]">{formatTime(answer.generated_at)}</span>
-            <span className="rounded-full border border-[#d8dee8] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[#667085]">
+            <span className="text-ink-faint">{formatTime(answer.generated_at)}</span>
+            <span className="rounded-full border border-line px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-ink-faint">
               {answer.model_refined
                 ? "Model refined"
                 : answer.backend_enriched
@@ -34,15 +70,30 @@ export function AskAnswerPanel({
                   : "Directory synthesis"}
             </span>
           </div>
-          <p className="mt-1 text-sm text-[#344054]">{answer.answer_summary}</p>
+          <p className="mt-1 text-sm text-ink-soft">{answer.answer_summary}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link href="/experts?readiness=actionable" className="ee-button ee-button-secondary min-h-7 px-2.5 text-[11px]">
+              Add to call list
+            </Link>
+            <button
+              type="button"
+              onClick={() => void copyCallPack()}
+              className="ee-button ee-button-secondary min-h-7 px-2.5 text-[11px]"
+            >
+              {copied ? "Copied" : "Copy call pack"}
+            </button>
+            <Link href="/reports" className="ee-button ee-button-primary min-h-7 px-2.5 text-[11px]">
+              Open memo
+            </Link>
+          </div>
           {answer.agentic_answer ? (
-            <div className="mt-3 rounded-lg border border-[#d8dee8] bg-[#f8fafc] p-3">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#667085]">
+            <div className="mt-3 rounded-lg border border-line bg-paper p-3">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
                 Live research synthesis
               </div>
-              <p className="mt-1 text-sm leading-relaxed text-[#344054]">{answer.agentic_answer}</p>
+              <p className="mt-1 text-sm leading-relaxed text-ink-soft">{answer.agentic_answer}</p>
               {answer.tool_calls?.length ? (
-                <p className="mt-2 text-[11px] text-[#667085]">
+                <p className="mt-2 text-[11px] text-ink-faint">
                   Tools used: {answer.tool_calls.length} backend research step
                   {answer.tool_calls.length === 1 ? "" : "s"}
                 </p>
@@ -66,7 +117,7 @@ export function AskAnswerPanel({
             note: answer.answer_summary,
             status: "memo input",
           }}
-          className="rounded border border-[#d8dee8] bg-white px-3 py-2 text-xs font-semibold text-[#344054] transition hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
+          className="ee-button ee-button-secondary min-h-8 px-3 text-xs"
         >
           Save to basket
         </WorkspaceActionButton>
@@ -77,6 +128,7 @@ export function AskAnswerPanel({
         meta={`${answer.ranked_experts.length} candidates`}
         citations={collectCitations(answer.ranked_experts)}
         onSourceSelect={onSourceSelect}
+        defaultOpen
       >
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] table-fixed border-collapse text-left text-xs">
@@ -281,26 +333,31 @@ function Panel({
   citations,
   children,
   onSourceSelect,
+  defaultOpen = false,
 }: {
   title: string;
   meta?: string;
   citations?: string[];
   children: ReactNode;
   onSourceSelect?: (sourceId: string) => void;
+  defaultOpen?: boolean;
 }) {
   return (
-    <section className="rounded border border-[#dfe3eb] bg-white">
-      <div className="flex min-h-9 items-center gap-3 border-b border-[#e6eaf0] px-3">
+    <details className="ee-panel overflow-hidden rounded-lg" open={defaultOpen}>
+      <summary className="flex min-h-9 cursor-pointer list-none items-center gap-3 border-b border-line px-3 py-2 marker:hidden">
         <h2 className="text-sm font-semibold">{title}</h2>
-        {meta ? <span className="text-[11px] text-[#667085]">{meta}</span> : null}
-        {citations?.length && onSourceSelect ? (
-          <div className="ml-auto">
-            <CitationList citations={citations} onSourceSelect={onSourceSelect} />
-          </div>
-        ) : null}
-      </div>
+        {meta ? <span className="text-[11px] text-ink-faint">{meta}</span> : null}
+        <div className="ml-auto flex items-center gap-2">
+          {citations?.length && onSourceSelect ? (
+            <div onClick={(event) => event.stopPropagation()}>
+              <CitationList citations={citations} onSourceSelect={onSourceSelect} />
+            </div>
+          ) : null}
+          <span className="text-[11px] font-semibold text-accent">Expand</span>
+        </div>
+      </summary>
       <div className="p-3">{children}</div>
-    </section>
+    </details>
   );
 }
 

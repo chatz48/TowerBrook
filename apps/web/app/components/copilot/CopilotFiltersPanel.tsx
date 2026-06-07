@@ -12,12 +12,16 @@ export function CopilotFiltersPanel({
   onFiltersChange,
   onQuestionChange,
   onRun,
+  skipBasketAutoRun = false,
+  onSkipBasketAutoRunChange,
 }: {
   filters: CopilotFilters;
   resetFilters: CopilotFilters;
   onFiltersChange: (filters: CopilotFilters) => void;
   onQuestionChange: (question: string) => void;
   onRun: (filters: CopilotFilters) => void;
+  skipBasketAutoRun?: boolean;
+  onSkipBasketAutoRunChange?: (skip: boolean) => void;
 }) {
   function patch(patchFilters: Partial<CopilotFilters>) {
     const next = { ...filters, ...patchFilters };
@@ -33,7 +37,7 @@ export function CopilotFiltersPanel({
   }
 
   return (
-    <aside className="space-y-7 border-b border-[#dfe3eb] bg-[#fbfcfe] p-4 md:min-h-[calc(100vh-6.5rem)] md:border-b-0">
+    <aside className="max-h-[min(52vh,420px)] space-y-5 overflow-y-auto border-b border-line bg-paper p-3 sm:space-y-7 sm:p-4 md:max-h-none md:min-h-[calc(100vh-6.5rem)] md:border-b-0">
       <RailSection title="Session objective">
         <div className="space-y-2">
           {OBJECTIVES.map((objective) => (
@@ -45,8 +49,8 @@ export function CopilotFiltersPanel({
               }}
               className={`flex w-full items-center justify-between rounded border px-3 py-2 text-left text-xs transition ${
                 filters.objective === objective.value
-                  ? "border-[#0b5bd3] bg-white text-[#0b5bd3] shadow-sm"
-                  : "border-[#e0e5ed] bg-white text-[#344054] hover:border-[#c8d0dc]"
+                  ? "border-accent bg-card text-accent shadow-sm"
+                  : "border-line bg-card text-ink-soft hover:border-line-strong"
               }`}
             >
               <span>{objective.label}</span>
@@ -65,7 +69,7 @@ export function CopilotFiltersPanel({
               onRun(resetFilters);
               if (isThemeFocus(resetFilters.theme)) publishThemeFocus(resetFilters.theme);
             }}
-            className="text-[11px] font-medium text-[#0b5bd3]"
+            className="text-[11px] font-medium text-accent"
           >
             Reset
           </button>
@@ -79,7 +83,7 @@ export function CopilotFiltersPanel({
               onRun(next);
               if (isThemeFocus(event.target.value)) publishThemeFocus(event.target.value);
             }}
-            className="w-full rounded border border-[#d8dee8] bg-white px-3 py-2 text-xs outline-none"
+            className="w-full rounded-md border border-line-strong bg-card px-3 py-2 text-xs outline-none focus:border-accent"
           >
             {THEMES.map((theme) => (
               <option key={theme.value} value={theme.value}>
@@ -95,7 +99,7 @@ export function CopilotFiltersPanel({
               const next = patch({ geography: event.target.value });
               onRun(next);
             }}
-            className="w-full rounded border border-[#d8dee8] bg-white px-3 py-2 text-xs outline-none"
+            className="w-full rounded-md border border-line-strong bg-card px-3 py-2 text-xs outline-none focus:border-accent"
           >
             <option>Europe / North America</option>
             <option>UK / Europe only</option>
@@ -110,8 +114,8 @@ export function CopilotFiltersPanel({
                 onClick={() => toggleArchetype(type.value)}
                 className={`rounded border px-2 py-1.5 text-xs ${
                   filters.archetypes.includes(type.value)
-                    ? "border-[#0b5bd3] bg-[#eef5ff] text-[#0b5bd3]"
-                    : "border-[#e0e5ed] bg-white text-[#344054]"
+                    ? "border-accent bg-[#f4f8ff] text-accent"
+                    : "border-line bg-card text-ink-soft"
                 }`}
               >
                 {type.label}
@@ -126,7 +130,7 @@ export function CopilotFiltersPanel({
               const next = patch({ sourceScope: event.target.value });
               onRun(next);
             }}
-            className="w-full rounded border border-[#d8dee8] bg-white px-3 py-2 text-xs outline-none"
+            className="w-full rounded-md border border-line-strong bg-card px-3 py-2 text-xs outline-none focus:border-accent"
           >
             <option>Premium sourced directory</option>
             <option>Primary sources first</option>
@@ -135,40 +139,61 @@ export function CopilotFiltersPanel({
         </ControlLabel>
       </RailSection>
 
-      <section className="rounded border border-[#dfe3eb] bg-white p-3">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#344054]">
+      {onSkipBasketAutoRunChange ? (
+        <section className="ee-panel rounded-lg p-3">
+          <label className="flex cursor-pointer items-start gap-2">
+            <input
+              type="checkbox"
+              checked={skipBasketAutoRun}
+              onChange={(event) => onSkipBasketAutoRunChange(event.target.checked)}
+              className="mt-0.5 h-3.5 w-3.5"
+            />
+            <span>
+              <span className="block text-[11px] font-semibold text-ink-soft">
+                Don&apos;t auto-run basket
+              </span>
+              <span className="mt-0.5 block text-[10px] leading-relaxed text-ink-faint">
+                When saved items exist, Copilot waits for your question instead of auto-asking.
+              </span>
+            </span>
+          </label>
+        </section>
+      ) : null}
+
+      <section className="ee-panel rounded-lg p-3">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-soft">
           Evidence standard
         </div>
-        <p className="mt-2 text-[11px] leading-relaxed text-[#667085]">
+        <p className="mt-2 text-[11px] leading-relaxed text-ink-faint">
           Use Copilot to prioritize calls and identify gaps. Open the underlying
           profiles and sources before outreach or circulation.
         </p>
       </section>
 
-      <section className="rounded border border-[#dfe3eb] bg-white p-3">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#344054]">
+      <section className="ee-panel rounded-lg p-3">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-soft">
           Memo and follow-up
         </div>
         <div className="mt-3 grid gap-2">
           <button
             type="button"
             onClick={() => onRun(patch({ objective: "Prepare calls" }))}
-            className="rounded border border-[#d8dee8] bg-[#fbfcfe] px-3 py-2 text-left text-xs font-medium text-[#344054] hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
+            className="ee-button ee-button-secondary min-h-8 justify-start px-3 text-xs"
           >
             Build call brief from current answer
           </button>
           <button
             type="button"
             onClick={() => onRun(patch({ objective: "Red-team thesis" }))}
-            className="rounded border border-[#d8dee8] bg-[#fbfcfe] px-3 py-2 text-left text-xs font-medium text-[#344054] hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
+            className="ee-button ee-button-secondary min-h-8 justify-start px-3 text-xs"
           >
             Draft partner memo risks and gaps
           </button>
-          <Link
-            href="/discover"
-            className="rounded border border-[#d8dee8] bg-[#fbfcfe] px-3 py-2 text-left text-xs font-medium text-[#344054] hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
-          >
+          <Link href="/discover" className="ee-button ee-button-secondary min-h-8 justify-start px-3 text-xs">
             Review Discover candidates
+          </Link>
+          <Link href="/reports" className="ee-button ee-button-primary min-h-8 justify-start px-3 text-xs">
+            Open memo
           </Link>
         </div>
       </section>
@@ -188,7 +213,7 @@ function RailSection({
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#344054]">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-soft">
           {title}
         </h2>
         {action}
@@ -201,7 +226,7 @@ function RailSection({
 function ControlLabel({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="mb-3 block last:mb-0">
-      <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#667085]">
+      <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
         {label}
       </span>
       {children}

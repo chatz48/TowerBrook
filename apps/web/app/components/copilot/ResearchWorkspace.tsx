@@ -15,6 +15,13 @@ import { CopilotConversation, CopilotConversationInput } from "./CopilotConversa
 import { CopilotFiltersPanel } from "./CopilotFiltersPanel";
 import type { AskResponse, CopilotFilters, SourceRecord } from "./types";
 import {
+  readSkipBasketAutoRun,
+  subscribeCopilotPreferences,
+  writeSkipBasketAutoRun,
+} from "@/lib/copilot-preferences";
+import { outreachStorageKey, readOutreachState } from "@/lib/outreach-plan";
+import {
+  buildBasketPrompt,
   buildWorkspacePageContext,
   formatSourceId,
   mergePageContext,
@@ -57,7 +64,23 @@ export default function ResearchWorkspace({
   const [progressStep, setProgressStep] = useState(0);
   const [error, setError] = useState("");
   const activeRequest = useRef<AbortController | null>(null);
+  const basketBootstrapped = useRef(false);
   const workspaceItems = useWorkspaceItems();
+  const [skipBasketAutoRun, setSkipBasketAutoRun] = useState(() => readSkipBasketAutoRun());
+
+  useEffect(() => {
+    return subscribeCopilotPreferences(() => setSkipBasketAutoRun(readSkipBasketAutoRun()));
+  }, []);
+
+  function pageContextFor(filters: CopilotFilters) {
+    const outreachState = readOutreachState(
+      outreachStorageKey(filters.theme, filters.includeTowerBrookEmployees),
+    );
+    return mergePageContext(
+      initialFocusContext,
+      buildWorkspacePageContext(workspaceItems, filters, outreachState),
+    );
+  }
 
   async function submit(nextQuestion = question, nextFilters = filters) {
     const cleanQuestion = nextQuestion.trim();
@@ -86,10 +109,7 @@ export default function ResearchWorkspace({
           question: cleanQuestion,
           filters: nextFilters,
           chatHistory,
-          pageContext: mergePageContext(
-            initialFocusContext,
-            buildWorkspacePageContext(workspaceItems, nextFilters),
-          ),
+          pageContext: pageContextFor(nextFilters),
         }),
       });
       const data = (await safeJson(res)) as AskResponse;
@@ -168,7 +188,16 @@ export default function ResearchWorkspace({
             chatHistory: [],
             pageContext: mergePageContext(
               initialFocusContext,
-              buildWorkspacePageContext(readWorkspace(), startingFilters),
+              buildWorkspacePageContext(
+                readWorkspace(),
+                startingFilters,
+                readOutreachState(
+                  outreachStorageKey(
+                    startingFilters.theme,
+                    startingFilters.includeTowerBrookEmployees,
+                  ),
+                ),
+              ),
             ),
           }),
         });
@@ -211,6 +240,26 @@ export default function ResearchWorkspace({
   }, [autoRunInitial, initialFocusContext, startingFilters, startingQuestion]);
 
   useEffect(() => {
+    if (
+      autoRunInitial ||
+      initialPrompt ||
+      skipBasketAutoRun ||
+      basketBootstrapped.current ||
+      !workspaceItems.length
+    ) {
+      return;
+    }
+    basketBootstrapped.current = true;
+    const prompt = buildBasketPrompt(
+      workspaceItems,
+      startingFilters.theme,
+      "Review my saved basket and recommend the next research, calls, and diligence actions.",
+    );
+    setQuestion(prompt);
+    void submit(prompt, startingFilters);
+  }, [autoRunInitial, initialPrompt, skipBasketAutoRun, startingFilters, workspaceItems]);
+
+  useEffect(() => {
     if (!loading) return;
     const timers = [900, 2400, 5200].map((delay, index) =>
       window.setTimeout(() => setProgressStep(index + 1), delay),
@@ -231,28 +280,30 @@ export default function ResearchWorkspace({
   const discoveryQueueCount = expertDiscoveryCount();
 
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] bg-[#f7f8fb] text-[#111827]">
-      <div className="grid md:grid-cols-[220px_minmax(0,1fr)] 2xl:grid-cols-[260px_minmax(0,1fr)_320px]">
+    <div className="min-h-[calc(100vh-3.5rem)] bg-paper text-ink">
+      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,200px)_minmax(0,1fr)] lg:grid-cols-[220px_minmax(0,1fr)] 2xl:grid-cols-[260px_minmax(0,1fr)_320px]">
         <CopilotFiltersPanel
           filters={filters}
           resetFilters={startingFilters}
           onFiltersChange={setFilters}
           onQuestionChange={setQuestion}
           onRun={runWithFilters}
+          skipBasketAutoRun={skipBasketAutoRun}
+          onSkipBasketAutoRunChange={writeSkipBasketAutoRun}
         />
 
-        <main className="min-w-0 border-x border-[#dfe3eb] bg-white">
-          <div className="border-b border-[#e6eaf0] px-5 py-4">
+        <main className="min-w-0 border-x border-line bg-card">
+          <div className="border-b border-line px-3 py-4 sm:px-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h1 className="text-xl font-semibold tracking-tight">AI Copilot</h1>
-                <p className="mt-1 text-xs text-[#667085]">
+                <p className="mt-1 text-xs text-ink-faint">
                   Ask questions, action the current basket, and save useful outputs back into the workflow.
                 </p>
               </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-end justify-between gap-3 border-b border-[#e6eaf0] pb-0">
+            <div className="mt-3 flex flex-wrap items-end justify-between gap-3 border-b border-line pb-0">
               <div className="flex gap-1">
               {([
                 ["ask", "Ask"],
@@ -264,20 +315,20 @@ export default function ResearchWorkspace({
                   onClick={() => setTab(key)}
                   className={`px-4 py-2 text-[13px] font-medium border-b-2 -mb-px transition-colors ${
                     tab === key
-                      ? "border-[#0b5bd3] text-[#0b5bd3]"
-                      : "border-transparent text-[#667085] hover:text-[#344054]"
+                      ? "border-accent text-accent"
+                      : "border-transparent text-ink-faint hover:text-ink-soft"
                   }`}
                 >
                   {label}
                   {key === "notes" && workspaceItems.length > 0 && (
-                    <span className="ml-1.5 rounded-full bg-[#eef5ff] px-1.5 py-0.5 text-[10px] text-[#0b5bd3]">
+                    <span className="ml-1.5 rounded-full bg-[#f4f8ff] px-1.5 py-0.5 text-[10px] text-accent">
                       {workspaceItems.length}
                     </span>
                   )}
                 </button>
               ))}
               </div>
-              <Link href="/discover" className="pb-2 text-xs font-semibold text-[#0b5bd3] hover:underline">
+              <Link href="/discover" className="pb-2 text-xs font-semibold text-accent hover:underline">
                 Open Discover ({discoveryQueueCount})
               </Link>
             </div>
@@ -338,7 +389,7 @@ function EvidenceInspector({
   if (!sources.length) return null;
 
   return (
-    <aside className="bg-[#fbfcfe] p-4 md:col-span-2 2xl:col-span-1 2xl:min-h-[calc(100vh-6.5rem)]">
+    <aside className="hidden bg-paper p-4 2xl:block 2xl:min-h-[calc(100vh-6.5rem)]">
       <div className="mb-4 flex items-center justify-between">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#344054]">
