@@ -46,10 +46,10 @@ test.describe("Data consistency", () => {
 
 test.describe("Navigation", () => {
   const NAV_ITEMS = [
-    { label: "Command Centre", url: "/" },
-    { label: "Origination", url: "/campaign" },
-    { label: "Explore", url: "/experts" },
-    { label: "Copilot", url: "/ask" },
+    { label: "Home", url: "/" },
+    { label: "Call list", url: "/experts" },
+    { label: "Targets", url: "/companies" },
+    { label: "Memo", url: "/reports" },
   ];
 
   for (const { label, url } of NAV_ITEMS) {

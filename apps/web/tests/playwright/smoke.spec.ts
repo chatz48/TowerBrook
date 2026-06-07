@@ -8,7 +8,6 @@ const PAGES = [
   { path: "/", label: "Command Centre" },
   { path: "/experts", label: "Expert Call List" },
   { path: "/companies", label: "Company Explorer" },
-  { path: "/campaign", label: "Origination Desk" },
   { path: "/ask", label: "AI Copilot" },
   { path: "/graph", label: "Relationship Graph" },
   { path: "/discover", label: "Research Queue" },
@@ -16,6 +15,11 @@ const PAGES = [
   { path: "/deals", label: "Deal Intelligence" },
   { path: "/sources", label: "Source Register" },
 ];
+
+test("campaign route redirects to call list", async ({ page }) => {
+  await page.goto("/campaign");
+  await expect(page).toHaveURL(/\/experts/);
+});
 
 for (const { path, label } of PAGES) {
   test(`${label} (${path}) loads and shows content`, async ({ page }) => {
