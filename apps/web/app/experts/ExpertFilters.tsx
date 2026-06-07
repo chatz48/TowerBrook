@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { EXPERT_TYPE_LABEL } from "@/lib/labels";
 import { expertsFilterHref } from "@/lib/experts-url";
-import { THEME_SPECIALTIES, THEMES } from "@/lib/themes";
+import { specialtiesForTheme, THEMES } from "@/lib/themes";
 import type { ExpertType, ThemeId } from "@/lib/types";
 
 export const EXPERT_FILTER_TYPES: ExpertType[] = [
@@ -19,13 +19,6 @@ export const EXPERT_FILTER_TYPES: ExpertType[] = [
 ];
 
 const SEARCH_DEBOUNCE_MS = 300;
-
-function specialtiesForTheme(theme: ThemeId | "all") {
-  if (theme === "all") {
-    return Array.from(new Set(THEMES.flatMap((item) => THEME_SPECIALTIES[item.id]))).sort();
-  }
-  return THEME_SPECIALTIES[theme];
-}
 
 const READINESS_OPTIONS = [
   { value: "all", label: "All readiness states" },

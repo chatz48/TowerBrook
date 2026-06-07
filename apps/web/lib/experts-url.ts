@@ -20,20 +20,7 @@ export function expertsPageHref(
   return query ? `/experts?${query}` : "/experts";
 }
 
-export function expertsFilterHref(filters: {
-  theme?: string;
-  specialty?: string;
-  type?: string;
-  readiness?: string;
-  q?: string;
-  experts?: string;
-}): string {
-  return expertsPageHref({
-    theme: filters.theme && filters.theme !== "all" ? filters.theme : undefined,
-    specialty: filters.specialty && filters.specialty !== "all" ? filters.specialty : undefined,
-    type: filters.type && filters.type !== "all" ? filters.type : undefined,
-    readiness: filters.readiness && filters.readiness !== "all" ? filters.readiness : undefined,
-    q: filters.q?.trim() || undefined,
-    experts: filters.experts,
-  });
+/** @deprecated Use expertsPageHref — it already omits "all" values. */
+export function expertsFilterHref(filters: ExpertsFilterParams): string {
+  return expertsPageHref(filters);
 }

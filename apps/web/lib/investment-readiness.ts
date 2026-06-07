@@ -1,9 +1,11 @@
 import { companiesWithLinks, getCompanies, getExperts } from "./data";
 import { THEME_BY_ID, THEME_SPECIALTIES, THEMES } from "./themes";
 import { isTowerBrookWorkedWithCompany, isTowerBrookWorkedWithExpert, towerBrookCompanyScore, towerBrookExpertScore } from "./towerbrook";
+import { EXPERT_TYPE_LABEL } from "./labels";
+import type { ThemeFocus } from "./theme-focus";
 import type { Company, CompanyWithLinks, Expert, ExpertType, ThemeId } from "./types";
 
-export type ThemeFocus = ThemeId | "all";
+export type { ThemeFocus };
 export type ReadinessLevel = "call-ready" | "verify-contact" | "verify-identity" | "research-needed";
 export type CompanyReadinessLevel = "target-ready" | "verify-ownership" | "verify-scale" | "monitor" | "research-needed";
 
@@ -51,21 +53,6 @@ export interface SearchResult {
   reasons: string[];
 }
 
-const EXPERT_TYPE_LABELS: Record<ExpertType, string> = {
-  "ex-founder": "Ex-founder",
-  operator: "Operator",
-  advisor: "Advisor",
-  "strategy-consultant": "Strategy consultant",
-  "commercial-dd": "Commercial diligence",
-  "technical-dd": "Technical diligence",
-  "engineering-consultant": "Engineering consultant",
-  "regulatory-policy": "Regulatory / policy",
-  banker: "Banker",
-  lawyer: "Lawyer",
-  "service-provider": "Service provider",
-  investor: "Investor",
-};
-
 const MANDATORY_ARCHETYPES: ExpertType[] = [
   "ex-founder",
   "operator",
@@ -76,7 +63,17 @@ const MANDATORY_ARCHETYPES: ExpertType[] = [
 ];
 
 export function expertTypeLabel(type: ExpertType): string {
-  return EXPERT_TYPE_LABELS[type] ?? type;
+  return EXPERT_TYPE_LABEL[type] ?? type;
+}
+
+export function matchesActionableReadiness(
+  kind: "expert" | "company",
+  level: string,
+): boolean {
+  if (kind === "expert") {
+    return level === "call-ready" || level === "verify-contact";
+  }
+  return level === "target-ready" || level === "verify-ownership" || level === "verify-scale";
 }
 
 export function sourceFreshness(sources: { title: string; url: string; publisher?: string }[], news?: { date: string }[]) {

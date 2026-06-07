@@ -5,11 +5,12 @@ import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import type { Expert } from "@/lib/types";
 import { DataTable } from "@/app/components/ui";
 import { EXPERT_TYPE_LABEL, EXPERT_TYPE_STYLE } from "@/lib/labels";
-import { formatExpertRoleLine, type ExpertRoleDisplay } from "@/lib/expert-copy";
+import { callPhase, formatExpertRoleLine, type ExpertRoleDisplay } from "@/lib/expert-copy";
 import type { ReadinessBadgeModel } from "@/lib/investment-readiness";
 import ReadinessBadge from "@/app/components/ReadinessBadge";
 import {
   ExpandChevron,
+  ExpandedRowPanel,
   rowExpandClass,
 } from "@/app/components/table/ExpandableTableRow";
 import {
@@ -429,11 +430,13 @@ export default function ExpertCallList({
                   </td>
                 </tr>
                 {expanded ? (
-                  <tr className="bg-[#f7f9fc]">
-                    <td colSpan={COL_SPAN} className="border-b border-line !p-0">
-                      <div className="ee-row-expand" onClick={stopRowExpand}>
+                  <ExpandedRowPanel colSpan={COL_SPAN}>
+                      <div onClick={stopRowExpand}>
                         <div className="flex flex-wrap items-center gap-2">
                           <ReadinessBadge badge={row.readiness} compact />
+                          <span className="ee-type-pill border-line bg-paper text-ink-soft">
+                            {callPhase(row.expert)}
+                          </span>
                           <span className="ee-score-pill" title="Relevance score">
                             Score {row.score}
                           </span>
@@ -481,8 +484,7 @@ export default function ExpertCallList({
                           </label>
                         </div>
                       </div>
-                    </td>
-                  </tr>
+                  </ExpandedRowPanel>
                 ) : null}
               </Fragment>
             );
