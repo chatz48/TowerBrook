@@ -810,12 +810,7 @@ export default function GraphExplorer({
           ) : null}
 
           {variant === "full" ? (
-            <GraphCommandBar
-              selectedNode={selectedNode}
-              selectedEdges={selectedEdges}
-              connectedPreview={connectedPreview}
-              onFocus={selectNodeAndReveal}
-            />
+            <DirectLinksBar connectedPreview={connectedPreview} onFocus={selectNodeAndReveal} />
           ) : null}
 
           <div className={variant === "embed" ? styles.embedGraphToolbar : styles.graphToolbar}>
@@ -854,14 +849,14 @@ export default function GraphExplorer({
                 className={!pathView ? styles.activeToolbarButton : undefined}
                 onClick={() => setPathView(false)}
               >
-                Direct network
+                All connections
               </button>
               <button
                 type="button"
                 className={pathView ? styles.activeToolbarButton : undefined}
                 onClick={() => setPathView(true)}
               >
-                Layered map
+                By role
               </button>
               <button type="button" onClick={stepBack} disabled={history.length === 0}>
                 Previous focus
@@ -874,15 +869,17 @@ export default function GraphExplorer({
               <span>
                 Showing {visibleEdges.filter((edge) => edge.from === selectedKey || edge.to === selectedKey).length} of{" "}
                 {selectedEdges.length} direct connections
-                {pathView ? " in layered map" : ""}.
+                {pathView ? " in by-role view" : ""}.
               </span>
               {pathView ? (
                 <button type="button" onClick={() => setPathView(false)}>
-                  Show direct network
+                  Show all connections
                 </button>
               ) : null}
             </div>
           ) : null}
+
+          <p className={styles.graphCanvasHint}>Click any node on the map to make it the focus.</p>
 
           <section className={styles.graphCard} aria-label="Interactive graph canvas">
             <div className={styles.graphScroller}>
@@ -890,16 +887,13 @@ export default function GraphExplorer({
                 nodes={visibleNodes}
                 edges={visibleEdges}
                 selectedKey={selectedNode?.key}
+                highlightedEdgeId={highlightedEdgeId}
                 nodeByKey={nodeByKey}
                 onSelect={selectNode}
               />
             </div>
             <PathStrip path={path} selectedNode={selectedNode} onSelect={selectNodeAndReveal} />
           </section>
-
-          {variant === "full" ? (
-            <GraphInsights metrics={metrics} onFocus={selectNodeAndReveal} />
-          ) : null}
         </main>
 
         {variant === "full" ? (
@@ -918,9 +912,40 @@ export default function GraphExplorer({
                   <h2>{selectedNode.name}</h2>
                   <p>{selectedNode.subtitle}</p>
                 </div>
-                <button type="button" aria-label="Reset selected graph node" onClick={resetExplorer}>
+                <button type="button" aria-label="Reset map" onClick={resetExplorer}>
                   ×
                 </button>
+              </div>
+
+              <div className={styles.inspectorQuickActions}>
+                <Link href={selectedNode.href} className={styles.primaryButton}>
+                  Open profile
+                </Link>
+                <Link
+                  href={askHref(
+                    `Use the relationship graph to prepare a concise action plan for ${selectedNode.name}. Include best intro paths, evidence strength, and next diligence steps.`,
+                  )}
+                  className={styles.secondaryButton}
+                >
+                  Ask Copilot
+                </Link>
+                {selectedNode.kind !== "deal" ? (
+                  <WorkspaceActionButton
+                    item={{
+                      id: selectedNode.id,
+                      kind: selectedNode.kind === "expert" ? "call" : "target",
+                      name: selectedNode.name,
+                      sub: selectedNode.subtitle,
+                      href: selectedNode.href,
+                      theme: selectedNode.themes[0],
+                      note: selectedNode.evidence,
+                      status: "graph shortlist",
+                    }}
+                    className={styles.secondaryButton}
+                  >
+                    Save to basket
+                  </WorkspaceActionButton>
+                ) : null}
               </div>
 
               <section className={styles.confidenceBox}>
@@ -931,28 +956,35 @@ export default function GraphExplorer({
 
               <section className={styles.inspectSection}>
                 <div className={styles.sectionLine}>
-                  <strong>Mapped relationships ({selectedEdges.length})</strong>
+                  <strong>Connections ({selectedEdges.length})</strong>
                   <button type="button" onClick={() => setPathView(false)}>
-                    Show all direct
+                    All connections
                   </button>
                 </div>
+                <p className={styles.filterHint}>Click a row to highlight it on the map.</p>
                 <ul className={styles.relationshipList}>
                   {selectedEdges.slice(0, 8).map((edge) => {
                     const neighbor = nodeByKey.get(otherNode(edge, selectedNode.key));
                     return (
-                      <li key={edge.id}>
+                      <li
+                        key={edge.id}
+                        className={highlightedEdgeId === edge.id ? styles.activeRelationship : undefined}
+                      >
                         <span
                           className={styles.edgeArrow}
                           style={{ "--edge-color": RELATIONSHIP_COLOR[edge.relationship] } as CSSProperties}
                         />
-                        <button
-                          type="button"
-                          onClick={() => neighbor && selectNodeAndReveal(neighbor.key)}
-                        >
+                        <button type="button" onClick={() => highlightRelationship(edge.id)}>
                           <strong>{edge.relationshipLabel}</strong>
                           <small>{neighbor?.name ?? "Unknown node"}</small>
                         </button>
-                        <em>{edge.sourceIds.length} related</em>
+                        <button
+                          type="button"
+                          className={styles.focusNeighbor}
+                          onClick={() => neighbor && selectNodeAndReveal(neighbor.key)}
+                        >
+                          Focus
+                        </button>
                       </li>
                     );
                   })}
@@ -995,36 +1027,6 @@ export default function GraphExplorer({
                 </ol>
               </section>
 
-              <div className={styles.inspectorActions}>
-                <Link href={selectedNode.href} className={styles.primaryButton}>
-                  Open {selectedNode.kind} profile
-                </Link>
-                {selectedNode.kind !== "deal" ? (
-                  <WorkspaceActionButton
-                    item={{
-                      id: selectedNode.id,
-                      kind: selectedNode.kind === "expert" ? "call" : "target",
-                      name: selectedNode.name,
-                      sub: selectedNode.subtitle,
-                      href: selectedNode.href,
-                      theme: selectedNode.themes[0],
-                      note: selectedNode.evidence,
-                      status: "graph shortlist",
-                    }}
-                    className={styles.secondaryButton}
-                  >
-                    Save to basket
-                  </WorkspaceActionButton>
-                ) : null}
-                <Link
-                  href={askHref(
-                    `Use the relationship graph to prepare next steps for ${selectedNode.name}. Summarise the mapped relationships, likely intro paths, evidence strength, and recommended outreach or diligence actions.`,
-                  )}
-                  className={styles.secondaryButton}
-                >
-                  Ask AI
-                </Link>
-              </div>
             </>
           ) : (
             <div className={styles.emptyInspector}>No mapped node matches this query.</div>
@@ -1097,119 +1099,27 @@ function GraphLegend({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function GraphCommandBar({
-  selectedNode,
-  selectedEdges,
+function DirectLinksBar({
   connectedPreview,
   onFocus,
 }: {
-  selectedNode?: ExplorerNode;
-  selectedEdges: ExplorerEdge[];
   connectedPreview: { edge: ExplorerEdge; node: ExplorerNode }[];
   onFocus: (key: string) => void;
 }) {
-  if (!selectedNode) return null;
+  if (!connectedPreview.length) return null;
 
   return (
-    <section className={styles.commandBar} aria-label="Graph command center">
-      <div className={styles.commandPrimary}>
-        <span className={styles.focusGlyph} data-kind={selectedNode.kind}>
-          {nodeBadgeText(selectedNode)}
-        </span>
-        <div>
-          <span>{nodeKindName(selectedNode)} focus</span>
-          <strong>{selectedNode.name}</strong>
-          <small>
-            {selectedEdges.length} direct path{selectedEdges.length === 1 ? "" : "s"} · {confidenceText(selectedNode.confidence)} confidence
-          </small>
-        </div>
+    <section className={styles.directLinksBar} aria-label="Direct links from current focus">
+      <span>Direct links</span>
+      <div className={styles.connectedRail}>
+        {connectedPreview.map(({ edge, node }) => (
+          <button key={edge.id} type="button" onClick={() => onFocus(node.key)}>
+            <i style={{ "--edge-color": RELATIONSHIP_COLOR[edge.relationship] } as CSSProperties} />
+            <b>{node.name}</b>
+            <em>{edge.relationshipLabel}</em>
+          </button>
+        ))}
       </div>
-
-      <div className={styles.commandActions}>
-        <Link href={selectedNode.href} className={styles.commandLink}>
-          Open profile
-        </Link>
-        <Link
-          href={askHref(
-            `Use the relationship graph to prepare a concise action plan for ${selectedNode.name}. Include best intro paths, evidence strength, and next diligence steps.`,
-          )}
-          className={styles.commandLink}
-        >
-          Ask AI
-        </Link>
-      </div>
-
-      {connectedPreview.length ? (
-        <div className={styles.connectedRail} aria-label="Connected now">
-          <span>Connected now</span>
-          {connectedPreview.map(({ edge, node }) => (
-            <button key={edge.id} type="button" onClick={() => onFocus(node.key)}>
-              <i style={{ "--edge-color": RELATIONSHIP_COLOR[edge.relationship] } as CSSProperties} />
-              <b>{node.name}</b>
-              <em>{edge.relationshipLabel}</em>
-            </button>
-          ))}
-        </div>
-      ) : null}
-    </section>
-  );
-}
-
-function GraphInsights({
-  metrics,
-  onFocus,
-}: {
-  metrics: {
-    bridgeExperts: { expert: ExplorerExpertNode; count: number }[];
-    denseTargets: { company: ExplorerCompanyNode; count: number }[];
-    repeatedAdvisors: { relationship: RelationshipType; label: string; count: number }[];
-    weakCoverage: string[];
-  };
-  onFocus: (key: string) => void;
-}) {
-  return (
-    <section className={styles.insights}>
-      <InsightCard
-        title="Bridge experts"
-        onFocus={onFocus}
-        items={metrics.bridgeExperts.map(({ expert, count }, index) => ({
-          id: expert.id,
-          rank: index + 1,
-          label: expert.name,
-          sub: `Connects ${count} mapped relationships`,
-          value: count,
-          focusKey: expert.key,
-        }))}
-      />
-      <InsightCard
-        title="Repeated relationship patterns"
-        items={metrics.repeatedAdvisors.map(({ relationship, label, count }) => ({
-          id: relationship,
-          label,
-          sub: `${count} mapped edge${count === 1 ? "" : "s"}`,
-          value: count,
-        }))}
-      />
-      <InsightCard
-        title="High-density targets"
-        onFocus={onFocus}
-        items={metrics.denseTargets.map(({ company, count }) => ({
-          id: company.id,
-          label: company.name,
-          sub: `${count} linked expert${count === 1 ? "" : "s"}`,
-          value: count,
-          focusKey: company.key,
-        }))}
-      />
-      <InsightCard
-        title="Weak coverage areas"
-        items={(metrics.weakCoverage.length ? metrics.weakCoverage : ["Unmapped buyer interviews", "Recent exits", "Advisor overlap"]).map((label, index) => ({
-          id: label,
-          label,
-          sub: index === 0 ? "Needs another verified relationship" : "Limited visible coverage",
-          value: index === 0 ? 1 : 0,
-        }))}
-      />
     </section>
   );
 }
