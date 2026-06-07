@@ -28,7 +28,10 @@ import CallNotesPanel from "@/app/components/CallNotesPanel";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import { expertReadiness } from "@/lib/investment-readiness";
 import ReadinessBadge from "@/app/components/ReadinessBadge";
-import { expertCallAngle } from "@/lib/expert-copy";
+import { callObjective, expertCallAngle } from "@/lib/expert-copy";
+import { outreachStorageKey } from "@/lib/outreach-plan";
+import { getPageScope } from "@/lib/page-scope";
+import ExpertOutreachPanel from "@/app/components/ExpertOutreachPanel";
 
 export function generateStaticParams() {
   return getExperts().map((e) => ({ id: e.id }));
@@ -40,9 +43,11 @@ export default async function ExpertPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const { themeFocus, includeTowerBrookEmployees } = await getPageScope();
   const base = getExpert(id);
   if (!base) notFound();
   const expert = resolveExpert(base);
+  const outreachKey = outreachStorageKey(themeFocus, includeTowerBrookEmployees);
   const companiesById = new Map(getCompanies().map((company) => [company.id, company]));
   const towerBrook = towerBrookExpertScore(base, companiesById);
   const warmPaths = warmPathsForExpert(expert.id);
@@ -359,6 +364,12 @@ export default async function ExpertPage({
                 </>
               )}
             </section>
+            <ExpertOutreachPanel
+              expertId={expert.id}
+              expertName={expert.name}
+              storageKey={outreachKey}
+              defaultObjective={callObjective(expert)}
+            />
             <CallNotesPanel expertId={expert.id} expertName={expert.name} />
             <div id="call-actions">
               <ExpertActions expertId={expert.id} expertName={expert.name} />
