@@ -289,8 +289,8 @@ function WorkspaceSection({
                     >
                       Ask Copilot
                     </Link>
-                    <Link href="/experts" className="text-[11px] font-semibold text-accent hover:underline">
-                      Use in campaign
+                    <Link href="/experts?readiness=actionable" className="text-[11px] font-semibold text-accent hover:underline">
+                      Open call list
                     </Link>
                   </div>
                 </div>

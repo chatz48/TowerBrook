@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import type { ThemeFocus } from "@/lib/theme-focus";
 
 export interface SearchItem {
   id: string;
@@ -12,26 +13,73 @@ export interface SearchItem {
   keywords: string;
 }
 
+interface ApiSearchResult {
+  id: string;
+  kind: "expert" | "company";
+  name: string;
+  subtitle: string;
+  href: string;
+}
+
 export default function SearchBox({
   index,
   scopeLabel = "All experts and companies",
   compact = false,
+  theme = "all",
 }: {
   index: SearchItem[];
   scopeLabel?: string;
   compact?: boolean;
+  theme?: ThemeFocus;
 }) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
+  const [apiResults, setApiResults] = useState<ApiSearchResult[]>([]);
   const router = useRouter();
 
-  const results = useMemo(() => {
+  const localResults = useMemo(() => {
     const query = q.trim().toLowerCase();
     if (!query) return [];
     return index
       .filter((it) => it.keywords.includes(query))
       .slice(0, 8);
   }, [q, index]);
+
+  useEffect(() => {
+    const query = q.trim();
+    if (query.length < 2) {
+      setApiResults([]);
+      return;
+    }
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const params = new URLSearchParams({ q: query, theme, limit: "8" });
+        const res = await fetch(`/api/search?${params}`);
+        const data = (await res.json()) as { results?: ApiSearchResult[] };
+        if (!cancelled) setApiResults(data.results ?? []);
+      } catch {
+        if (!cancelled) setApiResults([]);
+      }
+    }, 250);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [q, theme]);
+
+  const results = useMemo(() => {
+    if (apiResults.length > 0) {
+      return apiResults.map((item) => ({
+        id: item.id,
+        name: item.name,
+        sub: item.subtitle,
+        kind: item.kind,
+        href: item.href,
+      }));
+    }
+    return localResults;
+  }, [apiResults, localResults]);
 
   function go(href: string) {
     setOpen(false);
