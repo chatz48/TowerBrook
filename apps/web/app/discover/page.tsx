@@ -202,6 +202,18 @@ function DiscoverPageContent() {
 
   return (
     <PageShell innerClassName="mx-auto max-w-[1580px]">
+        <section className="ee-panel mb-4 rounded-lg border-l-4 border-l-accent px-4 py-3">
+          <p className="text-[13px] leading-relaxed text-ink-soft">
+            <strong className="text-ink">Coverage gaps</strong> surfaces experts, companies, and taxonomy holes
+            that are missing from the mapped directory. Pick a queue, select a lead, then run targeted research
+            or add findings to the{" "}
+            <Link href="/experts" className="font-semibold text-accent hover:underline">
+              call list
+            </Link>
+            .
+          </p>
+        </section>
+
         <DataPageHeader
           title="Coverage gaps"
           meta={`${visibleCounts[view]} in queue · ${THEME_LABEL[themeId]} · ${DISCOVERY.coverage.advisor_gaps_with_no_named_expert} advisor names missing`}
