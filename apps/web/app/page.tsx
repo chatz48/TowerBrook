@@ -70,7 +70,7 @@ export default async function Home() {
             includeTowerBrookEmployees={includeTowerBrookEmployees}
           />
         ) : (
-          <div className={`grid gap-0 divide-y divide-line lg:grid-cols-3 lg:divide-x lg:divide-y-0`}>
+          <div className="grid gap-0 divide-y divide-line lg:grid-cols-3 lg:grid-rows-[repeat(6,auto)] lg:divide-y-0">
             {visibleThemes.map((theme) => {
               const brief = buildBrief(theme.id, includeTowerBrookEmployees);
               const themeCompanies = companiesWithLinks(theme.id, includeTowerBrookEmployees);
@@ -84,48 +84,66 @@ export default async function Home() {
               const gap = themeGapSummary(theme.id, expertsForTheme(theme.id))[0];
 
               return (
-                <article key={theme.id} className="overflow-hidden">
+                <article
+                  key={theme.id}
+                  className="grid grid-rows-subgrid overflow-hidden max-lg:divide-y max-lg:divide-line lg:row-span-6 lg:border-r lg:border-line lg:last:border-r-0"
+                >
                   <div className="border-b border-line px-4 py-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <h3 className="text-[14px] font-semibold">{theme.name}</h3>
-                      <Badge className="border-line bg-paper text-ink-soft">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="min-h-[2.5rem] text-[14px] font-semibold leading-snug">{theme.name}</h3>
+                      <Badge className="shrink-0 border-line bg-paper text-ink-soft">
                         {brief.stats.experts} experts
                       </Badge>
                     </div>
+                  </div>
+                  <div className="border-b border-line px-4 pb-2">
                     <div
-                      className="mt-2 h-[3px] w-full rounded-full"
+                      className="h-[3px] w-full rounded-full"
                       style={{ backgroundColor: theme.accent }}
                       aria-hidden="true"
                     />
                   </div>
-                  <div className="divide-y divide-line">
-                    <DecisionRow
-                      label="First call"
-                      title={firstCall?.expert.name ?? "No expert mapped"}
-                      body={firstCall?.whyNow ?? "Build expert coverage for this theme."}
-                      href={firstCall ? `/experts/${firstCall.expert.id}` : `/experts?theme=${theme.id}`}
-                    />
-                    <DecisionRow
-                      label="Lead target"
-                      title={leadTarget?.name ?? "No target mapped"}
-                      body={
-                        leadTarget?.whyInteresting ??
-                        leadTarget?.description ??
-                        "Derive a company from expert evidence."
-                      }
-                      href={leadTarget ? `/companies/${leadTarget.id}` : `/companies?theme=${theme.id}`}
-                    />
-                    <DecisionRow
-                      label={gap ? "Coverage gap" : "Coverage check"}
-                      title={gap ?? "No taxonomy gap flagged"}
-                      body={
-                        gap
-                          ? "No mapped expert currently covers this specialty."
-                          : "Review source freshness and relationship depth."
-                      }
-                      href={`/discover?theme=${theme.id}${gap ? `&gap=${encodeURIComponent(gap)}` : ""}`}
-                    />
-                  </div>
+                  <DecisionRow
+                    label="First call"
+                    title={firstCall?.expert.name ?? "No expert mapped"}
+                    body={firstCall?.whyNow ?? "Build expert coverage for this theme."}
+                    href={firstCall ? `/experts/${firstCall.expert.id}` : `/experts?theme=${theme.id}`}
+                    copilotPrompt={
+                      firstCall
+                        ? `Should I call ${firstCall.expert.name} first for ${theme.name}? Summarise why, what to validate, and which companies they unlock.`
+                        : `Who should I call first for ${theme.name}? Rank experts and explain the call sequence.`
+                    }
+                  />
+                  <DecisionRow
+                    label="Lead target"
+                    title={leadTarget?.name ?? "No target mapped"}
+                    body={
+                      leadTarget?.whyInteresting ??
+                      leadTarget?.description ??
+                      "Derive a company from expert evidence."
+                    }
+                    href={leadTarget ? `/companies/${leadTarget.id}` : `/companies?theme=${theme.id}`}
+                    copilotPrompt={
+                      leadTarget
+                        ? `Assess ${leadTarget.name} as a diligence target in ${theme.name}. Ownership, scale, expert validation path, and risks.`
+                        : `Which companies should we prioritise as targets in ${theme.name}?`
+                    }
+                  />
+                  <DecisionRow
+                    label={gap ? "Coverage gap" : "Coverage check"}
+                    title={gap ?? "No taxonomy gap flagged"}
+                    body={
+                      gap
+                        ? "No mapped expert currently covers this specialty."
+                        : "Review source freshness and relationship depth."
+                    }
+                    href={`/discover?theme=${theme.id}${gap ? `&gap=${encodeURIComponent(gap)}` : ""}`}
+                    copilotPrompt={
+                      gap
+                        ? `Which experts should we find to cover "${gap}" in ${theme.name}? Suggest archetypes and search angles.`
+                        : `Review coverage health for ${theme.name} and flag the highest-priority gaps.`
+                    }
+                  />
                   <div className="flex items-center justify-between gap-3 border-t border-line bg-[#fbfcff] px-4 py-2">
                     <span className="text-[12px] text-ink-faint">
                       {brief.stats.targets} targets · {brief.stats.exits} exits
@@ -247,6 +265,11 @@ function SingleThemeDecisions({
         title={firstCall?.expert.name ?? "No expert mapped"}
         body={firstCall?.whyNow ?? "Build expert coverage for this theme."}
         href={firstCall ? `/experts/${firstCall.expert.id}` : `/experts?theme=${theme.id}`}
+        copilotPrompt={
+          firstCall
+            ? `Should I call ${firstCall.expert.name} first for ${theme.name}? Summarise why, what to validate, and which companies they unlock.`
+            : `Who should I call first for ${theme.name}? Rank experts and explain the call sequence.`
+        }
       />
       <DecisionRow
         label="Lead target"
@@ -257,6 +280,11 @@ function SingleThemeDecisions({
           "Derive a company from expert evidence."
         }
         href={leadTarget ? `/companies/${leadTarget.id}` : `/companies?theme=${theme.id}`}
+        copilotPrompt={
+          leadTarget
+            ? `Assess ${leadTarget.name} as a diligence target in ${theme.name}. Ownership, scale, expert validation path, and risks.`
+            : `Which companies should we prioritise as targets in ${theme.name}?`
+        }
       />
       <DecisionRow
         label={gap ? "Coverage gap" : "Coverage check"}
@@ -267,6 +295,11 @@ function SingleThemeDecisions({
             : "Review source freshness and relationship depth."
         }
         href={`/discover?theme=${theme.id}${gap ? `&gap=${encodeURIComponent(gap)}` : ""}`}
+        copilotPrompt={
+          gap
+            ? `Which experts should we find to cover "${gap}" in ${theme.name}? Suggest archetypes and search angles.`
+            : `Review coverage health for ${theme.name} and flag the highest-priority gaps.`
+        }
       />
     </div>
   );
@@ -314,20 +347,32 @@ function DecisionRow({
   title,
   body,
   href,
+  copilotPrompt,
 }: {
   label: string;
   title: string;
   body: string;
   href: string;
+  copilotPrompt?: string;
 }) {
   return (
-    <Link href={href} className="block px-4 py-3 hover:bg-[#fbfcff]">
-      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-        <span className="ee-label text-ink-faint">{label}</span>
-        <span className="text-[14px] font-semibold text-ink">{title}</span>
-      </div>
-      <p className="mt-0.5 line-clamp-2 text-[13px] leading-snug text-ink-soft">{body}</p>
-    </Link>
+    <div className="border-b border-line px-4 py-3 hover:bg-[#fbfcff]">
+      <Link href={href} className="block">
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <span className="ee-label text-ink-faint">{label}</span>
+          <span className="text-[14px] font-semibold text-ink">{title}</span>
+        </div>
+        <p className="mt-0.5 line-clamp-2 min-h-[2.5rem] text-[13px] leading-snug text-ink-soft">{body}</p>
+      </Link>
+      {copilotPrompt ? (
+        <Link
+          href={`/ask?prompt=${encodeURIComponent(copilotPrompt)}`}
+          className="mt-1.5 inline-flex text-[11px] font-semibold text-accent hover:underline"
+        >
+          Ask Copilot →
+        </Link>
+      ) : null}
+    </div>
   );
 }
 
