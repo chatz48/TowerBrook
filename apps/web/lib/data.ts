@@ -38,7 +38,7 @@ function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function dedupeCompanyLinks(expert: Expert): Expert["companies"] {
+export function dedupeCompanyLinks(expert: Expert): Expert["companies"] {
   const byCompany = new Map<string, Expert["companies"][number]>();
   for (const link of expert.companies) {
     const current = byCompany.get(link.companyId);
@@ -63,7 +63,7 @@ function dedupeCompanyLinks(expert: Expert): Expert["companies"] {
   return [...byCompany.values()];
 }
 
-function canonicalCompanyName(name: string) {
+export function canonicalCompanyName(name: string) {
   return name
     .toLowerCase()
     .replace(/\([^)]*\)/g, "")
