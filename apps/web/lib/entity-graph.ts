@@ -1,4 +1,4 @@
-import type { GraphCompany, GraphExpert, GraphLink } from "@/app/components/ThemeGraph";
+import type { GraphCompany, GraphExpert, GraphLink } from "@/lib/graph-inline-types";
 import type { GraphModel } from "@/lib/graph-model";
 import {
   computeVisibleGraph,
@@ -7,7 +7,8 @@ import {
 import { resolveGraphFocusKey } from "@/lib/graph-normalize";
 import { THEME_BY_ID } from "@/lib/themes";
 import type { ThemeFocus } from "@/lib/theme-focus";
-import type { CompanyWithLinks, ThemeId } from "@/lib/types";
+import type { ThemeId } from "@/lib/types";
+import { uniqueById } from "@/lib/arrays";
 
 export interface EntityGraphModel {
   experts: GraphExpert[];
@@ -16,26 +17,6 @@ export interface EntityGraphModel {
   accent: string;
   focusKey: string;
   fullGraphHref: string;
-}
-
-function uniqueById<T extends { id: string }>(items: T[]) {
-  const seen = new Set<string>();
-  return items.filter((item) => {
-    if (seen.has(item.id)) return false;
-    seen.add(item.id);
-    return true;
-  });
-}
-
-export function uniqueCompanyLinks(
-  links: { companyId: string; name: string; expertCount: number }[],
-) {
-  const seen = new Set<string>();
-  return links.filter((link) => {
-    if (seen.has(link.companyId)) return false;
-    seen.add(link.companyId);
-    return true;
-  });
 }
 
 function expertCompanyLink(edge: {
@@ -102,42 +83,4 @@ export function toEntityGraphModel(
           : selectedKey,
     fullGraphHref: `/graph?focus=${encodeURIComponent(selectedKey)}`,
   };
-}
-
-export function graphFromCompany(company: CompanyWithLinks, theme: ThemeFocus): EntityGraphModel {
-  const experts: GraphExpert[] = uniqueById(
-    company.linkedExperts.map((link) => ({
-      id: link.expert.id,
-      name: link.expert.name,
-      type: link.expert.type,
-    })),
-  );
-  const companies: GraphCompany[] = [
-    { id: company.id, name: company.name, expertCount: company.expertCount },
-  ];
-  const linksByExpert = new Map<string, GraphLink>();
-  for (const link of company.linkedExperts) {
-    if (!linksByExpert.has(link.expert.id)) {
-      linksByExpert.set(link.expert.id, {
-        expertId: link.expert.id,
-        companyId: company.id,
-        relationship: link.relationship,
-      });
-    }
-  }
-  const links = [...linksByExpert.values()];
-  const themeId = company.themes[0] ?? (theme !== "all" ? theme : "grid-infrastructure");
-
-  return {
-    experts,
-    companies,
-    links,
-    accent: THEME_BY_ID[themeId]?.accent ?? "#0757d3",
-    focusKey: `c:${company.id}`,
-    fullGraphHref: `/graph?focus=${encodeURIComponent(`company:${company.id}`)}`,
-  };
-}
-
-export function themeAccent(themeId?: ThemeId) {
-  return themeId ? (THEME_BY_ID[themeId]?.accent ?? "#0757d3") : "#0757d3";
 }

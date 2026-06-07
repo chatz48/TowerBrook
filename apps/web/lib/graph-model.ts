@@ -5,7 +5,7 @@ import type {
   ExplorerExpertNode,
   ExplorerSource,
   ExplorerTheme,
-} from "@/app/components/graph/GraphExplorer";
+} from "@/lib/graph-types";
 import { getCompanies, getExperts } from "@/lib/data";
 import { DEAL_ADVISOR_LABEL, DEAL_TYPE_LABEL } from "@/lib/deals";
 import { listDeals } from "@/lib/deal-repository";

@@ -3,7 +3,7 @@ import type {
   ExplorerDealNode,
   ExplorerEdge,
   ExplorerExpertNode,
-} from "@/app/components/graph/GraphExplorer";
+} from "@/lib/graph-types";
 import { matchesThemeFocus, type ThemeFocus } from "@/lib/theme-focus";
 import type { ExpertType, RelationshipType } from "@/lib/types";
 

@@ -1,19 +1,6 @@
 import type { Company, Expert, RelationshipType } from "@/lib/types";
 import { canonicalCompanyName, dedupeCompanyLinks } from "@/lib/data";
-
-const RELATIONSHIP_PRIORITY: Record<RelationshipType, number> = {
-  founded: 100,
-  "co-founded": 95,
-  led: 90,
-  partner: 80,
-  board: 75,
-  advised: 70,
-  "invested-in": 65,
-  acquired: 60,
-  banked: 55,
-  "legal-counsel": 50,
-  served: 20,
-};
+import { relationshipPriority } from "@/lib/relationship-priority";
 
 function companyScore(company: Company) {
   return company.confidence * 1000 + company.sources.length;
@@ -42,10 +29,6 @@ export function buildCompanyCanonicalMap(companies: Company[]) {
 
 export function canonicalCompanyId(id: string, idMap: Map<string, string>) {
   return idMap.get(id) ?? id;
-}
-
-export function canonicalCompanyNodeKey(id: string, idMap: Map<string, string>) {
-  return `company:${canonicalCompanyId(id, idMap)}`;
 }
 
 export function resolveGraphFocusKey(focus: string, idMap: Map<string, string>) {
@@ -99,8 +82,8 @@ export function normalizeExpertCompanyLinks(
         byPair.set(pairKey, next);
         continue;
       }
-      const currentPriority = RELATIONSHIP_PRIORITY[current.relationship] ?? 0;
-      const nextPriority = RELATIONSHIP_PRIORITY[next.relationship] ?? 0;
+      const currentPriority = relationshipPriority(current.relationship);
+      const nextPriority = relationshipPriority(next.relationship);
       if (nextPriority > currentPriority) {
         byPair.set(pairKey, { ...next, note: next.note ?? current.note });
       } else if (!current.note && next.note) {
@@ -136,8 +119,8 @@ export function collapseEndpointEdges<T extends CollapsibleEdge>(edges: T[]): T[
       byEndpoints.set(key, edge);
       continue;
     }
-    const currentPriority = RELATIONSHIP_PRIORITY[current.relationship] ?? 0;
-    const nextPriority = RELATIONSHIP_PRIORITY[edge.relationship] ?? 0;
+    const currentPriority = relationshipPriority(current.relationship);
+    const nextPriority = relationshipPriority(edge.relationship);
     const winner = nextPriority > currentPriority ? edge : current;
     const loser = winner === edge ? current : edge;
     byEndpoints.set(key, {

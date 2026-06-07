@@ -4,116 +4,37 @@ import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
-import type {
-  CompanyCategory,
-  ExpertType,
-  RelationshipType,
-  ThemeId,
-} from "@/lib/types";
+import type { ExpertType, RelationshipType } from "@/lib/types";
 import {
   ALL_RELATIONSHIPS,
   computeVisibleGraph,
   DEFAULT_CONFIDENCE_FLOOR,
   filterGraphEdges,
 } from "@/lib/graph-visible";
+import { RELATIONSHIP_COLOR } from "@/lib/graph-colors";
+import { askHref } from "@/lib/links";
+import type {
+  ExplorerCompanyNode,
+  ExplorerDealNode,
+  ExplorerEdge,
+  ExplorerExpertNode,
+  ExplorerNode,
+  ExplorerSource,
+  ExplorerTheme,
+} from "@/lib/graph-types";
 import { matchesThemeFocus, publishThemeFocus, type ThemeFocus } from "@/lib/theme-focus";
 import styles from "./GraphExplorer.module.css";
 
-export interface ExplorerTheme {
-  id: ThemeFocus;
-  name: string;
-  shortName: string;
-}
-
-export interface ExplorerSource {
-  id: string;
-  title: string;
-  url: string;
-  publisher?: string;
-  label: string;
-}
-
-export interface ExplorerExpertNode {
-  key: string;
-  id: string;
-  kind: "expert";
-  name: string;
-  subtitle: string;
-  type: ExpertType;
-  typeLabel: string;
-  org?: string;
-  location?: string;
-  themes: ThemeId[];
-  tags: string[];
-  confidence: number;
-  href: string;
-  sourceIds: string[];
-  evidence: string;
-}
-
-export interface ExplorerCompanyNode {
-  key: string;
-  id: string;
-  kind: "company";
-  name: string;
-  subtitle: string;
-  category: CompanyCategory;
-  categoryLabel: string;
-  themes: ThemeId[];
-  tags: string[];
-  confidence: number;
-  href: string;
-  sourceIds: string[];
-  evidence: string;
-}
-
-export interface ExplorerDealNode {
-  key: string;
-  id: string;
-  kind: "deal";
-  name: string;
-  subtitle: string;
-  typeLabel: string;
-  themes: ThemeId[];
-  tags: string[];
-  confidence: number;
-  href: string;
-  sourceIds: string[];
-  evidence: string;
-}
-
-export interface ExplorerEdge {
-  id: string;
-  from: string;
-  to: string;
-  relationship: RelationshipType;
-  relationshipLabel: string;
-  note: string;
-  themes: ThemeId[];
-  confidence: number;
-  sourceIds: string[];
-}
-
-type ExplorerNode = ExplorerExpertNode | ExplorerCompanyNode | ExplorerDealNode;
-function askHref(prompt: string) {
-  return `/ask?prompt=${encodeURIComponent(prompt)}`;
-}
+export type {
+  ExplorerCompanyNode,
+  ExplorerDealNode,
+  ExplorerEdge,
+  ExplorerExpertNode,
+  ExplorerSource,
+  ExplorerTheme,
+} from "@/lib/graph-types";
 
 const RELATIONSHIP_ORDER = ALL_RELATIONSHIPS;
-
-const RELATIONSHIP_COLOR: Record<RelationshipType, string> = {
-  founded: "#11843b",
-  "co-founded": "#11843b",
-  led: "#1667d9",
-  partner: "#7248b9",
-  board: "#7248b9",
-  advised: "#075fe4",
-  "invested-in": "#0a8b9b",
-  acquired: "#f26a21",
-  banked: "#1f64cc",
-  "legal-counsel": "#7747bd",
-  served: "#64748b",
-};
 
 const NODE_KIND_LABEL = {
   expert: "People",

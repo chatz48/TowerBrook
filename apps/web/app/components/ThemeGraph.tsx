@@ -2,22 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { uniqueById } from "@/lib/arrays";
+import type { GraphCompany, GraphExpert, GraphLink } from "@/lib/graph-inline-types";
 
-export interface GraphExpert {
-  id: string;
-  name: string;
-  type: string;
-}
-export interface GraphCompany {
-  id: string;
-  name: string;
-  expertCount: number;
-}
-export interface GraphLink {
-  expertId: string;
-  companyId: string;
-  relationship?: string;
-}
+export type { GraphCompany, GraphExpert, GraphLink } from "@/lib/graph-inline-types";
 
 /**
  * Interactive graph explorer: start from the full derivation map, then click
@@ -44,8 +32,8 @@ export default function ThemeGraph({
   const [focusKey, setFocusKey] = useState<string | null>(null);
   const [trail, setTrail] = useState<string[]>([]);
 
-  const graphExperts = useMemo(() => uniqueNodes(experts), [experts]);
-  const graphCompanies = useMemo(() => uniqueNodes(companies), [companies]);
+  const graphExperts = useMemo(() => uniqueById(experts), [experts]);
+  const graphCompanies = useMemo(() => uniqueById(companies), [companies]);
 
   const expertById = useMemo(() => new Map(graphExperts.map((e) => [e.id, e])), [graphExperts]);
   const companyById = useMemo(
@@ -534,13 +522,4 @@ export default function ThemeGraph({
       </div>
     </div>
   );
-}
-
-function uniqueNodes<T extends { id: string }>(items: T[]) {
-  const seen = new Set<string>();
-  return items.filter((item) => {
-    if (seen.has(item.id)) return false;
-    seen.add(item.id);
-    return true;
-  });
 }

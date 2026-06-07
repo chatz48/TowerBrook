@@ -1,24 +1,21 @@
 import { buildGraphModel } from "@/lib/graph-model";
 import { resolveGraphFocusKey } from "@/lib/graph-normalize";
 import { matchesThemeFocus } from "@/lib/theme-focus";
-import { getThemeFocus } from "@/lib/theme-focus-server";
-import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
+import { getPageScope } from "@/lib/page-scope";
 import { singleParam } from "@/lib/url-params";
-import GraphExplorer, {
-  type ExplorerCompanyNode,
-  type ExplorerDealNode,
-  type ExplorerExpertNode,
-} from "@/app/components/graph/GraphExplorer";
+import GraphExplorer from "@/app/components/graph/GraphExplorer";
+import type {
+  ExplorerCompanyNode,
+  ExplorerDealNode,
+  ExplorerExpertNode,
+} from "@/lib/graph-types";
 
 export default async function GraphPage({
   searchParams,
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const [themeFocus, includeTowerBrookEmployees] = await Promise.all([
-    getThemeFocus(),
-    getIncludeTowerBrookEmployees(),
-  ]);
+  const { themeFocus, includeTowerBrookEmployees } = await getPageScope();
   const params = (await searchParams) ?? {};
   const focusParam = singleParam(params.focus);
   const model = await buildGraphModel(includeTowerBrookEmployees);

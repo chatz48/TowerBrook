@@ -2,7 +2,7 @@ import type {
   ExplorerCompanyNode,
   ExplorerDealNode,
   ExplorerExpertNode,
-} from "@/app/components/graph/GraphExplorer";
+} from "@/lib/graph-types";
 import { buildGraphModel } from "@/lib/graph-model";
 import {
   computeVisibleGraph,
@@ -10,8 +10,7 @@ import {
   filterGraphEdges,
 } from "@/lib/graph-visible";
 import { resolveGraphFocusKey } from "@/lib/graph-normalize";
-import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
-import { getThemeFocus } from "@/lib/theme-focus-server";
+import { getPageScope } from "@/lib/page-scope";
 
 export async function GET(request: Request) {
   const focus = new URL(request.url).searchParams.get("focus");
@@ -19,10 +18,7 @@ export async function GET(request: Request) {
     return Response.json({ error: "focus is required" }, { status: 400 });
   }
 
-  const [themeFocus, includeTowerBrookEmployees] = await Promise.all([
-    getThemeFocus(),
-    getIncludeTowerBrookEmployees(),
-  ]);
+  const { themeFocus, includeTowerBrookEmployees } = await getPageScope();
   const model = await buildGraphModel(includeTowerBrookEmployees);
   const selectedKey = resolveGraphFocusKey(focus, model.canonicalMap);
   const knownKeys = new Set(
