@@ -140,10 +140,10 @@ export default function InvestorWorkspaceTray() {
           <div className="flex items-start justify-between gap-3 border-b border-line bg-[#fbfcfe] p-3">
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                Current basket
+                Outreach plan
               </div>
               <div className="mt-1 text-xs text-ink-faint">
-                Experts, companies, and AI notes selected for this theme workflow.
+                Experts and targets selected for this week&apos;s calls and validation.
               </div>
             </div>
             <button
@@ -163,8 +163,8 @@ export default function InvestorWorkspaceTray() {
           </div>
 
           <div className="grid gap-2 border-b border-line p-3 sm:grid-cols-2">
-            <Link href="/campaign" className="ee-button ee-button-secondary min-h-8 px-2 text-[11px]">
-              Origination
+            <Link href="/experts" className="ee-button ee-button-secondary min-h-8 px-2 text-[11px]">
+              Open plan
             </Link>
             <Link href={`/ask?prompt=${basketPrompt}`} className="ee-button ee-button-primary min-h-8 px-2 text-[11px]">
               Generate call plan
@@ -203,7 +203,7 @@ export default function InvestorWorkspaceTray() {
           onClick={() => setOpen(true)}
           className="flex items-center gap-2 rounded-full border border-line-strong bg-white px-4 py-2.5 text-sm font-semibold text-ink shadow-lg transition hover:border-accent hover:text-accent"
         >
-          Basket
+          Plan
           <span
             id="towerbrook-basket-counter"
             className="rounded-full bg-accent px-2 py-0.5 text-[11px] text-white transition-transform"
@@ -289,7 +289,7 @@ function WorkspaceSection({
                     >
                       Ask Copilot
                     </Link>
-                    <Link href="/campaign" className="text-[11px] font-semibold text-accent hover:underline">
+                    <Link href="/experts" className="text-[11px] font-semibold text-accent hover:underline">
                       Use in campaign
                     </Link>
                   </div>

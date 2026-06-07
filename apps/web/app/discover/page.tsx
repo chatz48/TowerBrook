@@ -18,17 +18,16 @@ import {
   EXPERT_TYPE_LABEL,
   EXPERT_TYPE_STYLE,
 } from "@/lib/labels";
-import { THEMES, THEME_BY_ID } from "@/lib/themes";
+import { THEME_BY_ID } from "@/lib/themes";
 import type { CompanyCategory, ExpertType, ThemeId } from "@/lib/types";
-import { publishThemeFocus, type ThemeFocus } from "@/lib/theme-focus";
+import type { ThemeFocus } from "@/lib/theme-focus";
 import { matchesThemeFocus } from "@/lib/theme-focus";
 import { useThemeFocusClient } from "@/lib/theme-focus-client";
 import {
   INCLUDE_TOWERBROOK_EMPLOYEES_EVENT,
   readIncludeTowerBrookEmployeesCookie,
 } from "@/lib/employee-scope";
-import { Badge, PageShell, ThemeTag } from "@/app/components/ui";
-import OperatorWorkflowRail from "@/app/components/OperatorWorkflowRail";
+import { Badge, DataPageHeader, DataTable, PageShell, ThemeTag } from "@/app/components/ui";
 
 interface LiveSearchPreview {
   configured: boolean;
@@ -65,7 +64,6 @@ const EXPERT_TYPE_FILTERS: ExpertType[] = [
   "banker",
   "lawyer",
   "technical-dd",
-  "lender-credit",
 ];
 
 const COMPANY_CATEGORY_FILTERS: CompanyCategory[] = [
@@ -213,10 +211,6 @@ function DiscoverPageContent() {
     gaps: filteredGaps.length,
   };
 
-  function changeTheme(focus: ThemeFocus) {
-    publishThemeFocus(focus);
-  }
-
   async function createDiscoveryJob(lead?: ExpertDiscoveryCandidate | DerivedCompanyCandidate | AdvisorExpertGap) {
     const request = buildJobRequest(lead, themeId);
     setLoadingJob(true);
@@ -243,116 +237,28 @@ function DiscoverPageContent() {
 
   return (
     <PageShell innerClassName="mx-auto max-w-[1580px]">
-        <header className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h1 className="text-[26px] font-semibold tracking-tight">Research Queue</h1>
-            <p className="mt-2 max-w-4xl text-[13px] leading-relaxed text-ink-soft">
-              Review people to verify, companies to validate, and advisor names to find before
-              they become call-ready experts or memo-ready targets.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Link href="/experts" className="ee-button ee-button-secondary">
-              Call list
-            </Link>
-            <Link href="/companies" className="ee-button ee-button-secondary">
-              Company map
-            </Link>
-            <button
-              onClick={() => createDiscoveryJob(selectedLead)}
-              disabled={loadingJob || !selectedLead}
-              className="ee-button ee-button-primary disabled:opacity-50"
-            >
-              {loadingJob ? "Checking..." : "Refresh research queue"}
-            </button>
-          </div>
-        </header>
-
-        <section className="ee-insight-strip mb-5">
-          <InsightMetric
-            label="Discovered experts"
-            value={DISCOVERY.coverage.expert_candidates}
-            detail={`${DISCOVERY.coverage.towerbrook_connected_experts} with public TowerBrook/deal evidence`}
-          />
-          <InsightMetric
-            label="Derived companies"
-            value={DISCOVERY.coverage.derived_companies}
-            detail="Targets, advisors and ecosystem firms"
-          />
-          <InsightMetric
-            label="Missing advisor names"
-            value={DISCOVERY.coverage.advisor_gaps_with_no_named_expert}
-            detail="Needs verification before call-ready"
-          />
-          <InsightMetric
-            label="Visible now"
-            value={visibleCounts[view]}
-            detail={`${THEME_LABEL[themeId]} · ${QUEUES.find((queue) => queue.id === view)?.label}`}
-          />
-        </section>
-
-        <OperatorWorkflowRail
-          title="Convert uncertain leads into call-ready coverage"
-          subtitle="Treat this as the quality gate before a person, company or advisor name enters the partner workflow."
-          steps={[
-            {
-              label: "Verify",
-              detail: "Confirm identity, role, source recency and relationship to the theme.",
-            },
-            {
-              label: "Promote",
-              detail: "Move credible people to the call list and credible companies to validation.",
-            },
-            {
-              label: "Document",
-              detail: "Keep unresolved gaps visible until a named expert or source closes them.",
-            },
-          ]}
-          actions={[
-            { label: "Call list", href: "/experts?readiness=actionable", primary: true },
-            { label: "Company map", href: "/companies?readiness=actionable" },
-            { label: "Meeting memo", href: "/reports" },
-          ]}
+        <DataPageHeader
+          title="Coverage gaps"
+          meta={`${visibleCounts[view]} in queue · ${THEME_LABEL[themeId]} · ${DISCOVERY.coverage.advisor_gaps_with_no_named_expert} advisor names missing`}
+          actions={
+            <>
+              <Link href="/experts?readiness=actionable" className="ee-button ee-button-secondary">
+                Call list
+              </Link>
+              <button
+                onClick={() => createDiscoveryJob(selectedLead)}
+                disabled={loadingJob || !selectedLead}
+                className="ee-button ee-button-primary disabled:opacity-50"
+              >
+                {loadingJob ? "Checking..." : "Refresh"}
+              </button>
+            </>
+          }
         />
 
-        <div className="grid gap-5 xl:grid-cols-[340px_minmax(0,1fr)]">
-          <aside className="space-y-5">
-            <section className="ee-panel rounded-lg p-5">
-              <div className="ee-label text-ink">Theme scope</div>
-              <select
-                value={themeId}
-                onChange={(event) => changeTheme(event.target.value as ThemeFocus)}
-                className="mt-3 w-full rounded-md border border-line-strong bg-white px-3 py-2 text-[13px] outline-none focus:border-accent"
-              >
-                <option value="all">All three themes</option>
-                {THEMES.map((theme) => (
-                  <option key={theme.id} value={theme.id}>
-                    {theme.name}
-                  </option>
-                ))}
-              </select>
-              <div className="mt-4 space-y-3">
-                {THEMES.map((theme) => (
-                  <button
-                    key={theme.id}
-                    type="button"
-                    onClick={() => changeTheme(theme.id)}
-                    className={`w-full rounded-md border p-3 text-left transition ${
-                      themeId === theme.id
-                        ? "border-line-dark bg-[#f7fbff]"
-                        : "border-line bg-white hover:border-line-strong"
-                    }`}
-                  >
-                    <ThemeTag id={theme.id} small />
-                    <p className="mt-1 text-[11px] leading-relaxed text-ink-soft">
-                      {theme.description}
-                    </p>
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <section className="ee-panel rounded-lg p-5">
+        <div className="grid gap-3 xl:grid-cols-[340px_minmax(0,1fr)]">
+          <aside className="space-y-3">
+            <section className="ee-panel rounded-lg p-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="ee-label text-ink">Find a lead</div>
@@ -416,7 +322,7 @@ function DiscoverPageContent() {
               ) : null}
             </section>
 
-            <section className="ee-panel rounded-lg p-5">
+            <section className="ee-panel rounded-lg p-3">
               <div className="ee-label text-ink">Research refresh</div>
               <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">
                 Refresh uses public sources to find new experts and companies. When live discovery
@@ -541,8 +447,7 @@ function ExpertQueue({
 }) {
   if (!experts.length) return <EmptyQueue />;
   return (
-    <div className="overflow-x-auto">
-      <table className="ee-table min-w-[1060px]">
+    <DataTable minWidth={1000}>
         <thead>
           <tr>
             <th>Priority</th>
@@ -604,8 +509,7 @@ function ExpertQueue({
             </tr>
           ))}
         </tbody>
-      </table>
-    </div>
+    </DataTable>
   );
 }
 
@@ -620,8 +524,7 @@ function CompanyQueue({
 }) {
   if (!companies.length) return <EmptyQueue />;
   return (
-    <div className="overflow-x-auto">
-      <table className="ee-table min-w-[1060px]">
+    <DataTable minWidth={1000}>
         <thead>
           <tr>
             <th>Priority</th>
@@ -683,8 +586,7 @@ function CompanyQueue({
             </tr>
           ))}
         </tbody>
-      </table>
-    </div>
+    </DataTable>
   );
 }
 
@@ -699,8 +601,7 @@ function GapQueue({
 }) {
   if (!gaps.length) return <EmptyQueue />;
   return (
-    <div className="overflow-x-auto">
-      <table className="ee-table min-w-[980px]">
+    <DataTable minWidth={960}>
         <thead>
           <tr>
             <th>Priority</th>
@@ -755,8 +656,7 @@ function GapQueue({
             </tr>
           ))}
         </tbody>
-      </table>
-    </div>
+    </DataTable>
   );
 }
 
@@ -985,24 +885,6 @@ function EvidenceRail({
         </DetailPanel>
       ) : null}
     </aside>
-  );
-}
-
-function InsightMetric({
-  label,
-  value,
-  detail,
-}: {
-  label: string;
-  value: number;
-  detail: string;
-}) {
-  return (
-    <div className="ee-insight-metric">
-      <div className="ee-label">{label}</div>
-      <div className="mt-2 text-[26px] font-semibold tabular-nums">{value}</div>
-      <p className="mt-1 text-[12px] text-ink-soft">{detail}</p>
-    </div>
   );
 }
 

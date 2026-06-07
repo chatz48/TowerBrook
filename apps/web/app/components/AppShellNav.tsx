@@ -2,19 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Command Centre", match: "/" },
-  { href: "/campaign", label: "Origination", match: "/campaign" },
-  { href: "/experts", label: "Explore", match: "/experts" },
-  { href: "/ask", label: "Copilot", match: "/ask" },
+  { href: "/", label: "Home", match: "/" },
+  { href: "/experts", label: "Call list", match: "/experts" },
+  { href: "/companies", label: "Targets", match: "/companies" },
+  { href: "/reports", label: "Memo", match: "/reports" },
 ];
 
-const MORE_ITEMS = [
-  { href: "/companies", label: "Companies", match: "/companies" },
-  { href: "/discover", label: "Discover", match: "/discover" },
-  { href: "/reports", label: "Meeting packs", match: "/reports" },
+const TOOLS_ITEMS = [
   { href: "/graph", label: "Relationship graph", match: "/graph" },
+  { href: "/discover", label: "Coverage gaps", match: "/discover" },
+  { href: "/ask", label: "Copilot", match: "/ask" },
   { href: "/deals", label: "Deal evidence", match: "/deals" },
   { href: "/sources", label: "Sources", match: "/sources" },
   { href: "/ingest", label: "Add source text", match: "/ingest" },
@@ -35,7 +35,7 @@ export default function AppShellNav({ mobile = false }: { mobile?: boolean }) {
       {NAV_ITEMS.map((item) => (
         <NavLink key={item.href} item={item} pathname={pathname} mobile={mobile} />
       ))}
-      <MoreDropdown pathname={pathname} mobile={mobile} />
+      <ToolsDropdown pathname={pathname} mobile={mobile} />
     </nav>
   );
 }
@@ -67,19 +67,32 @@ function NavLink({
   );
 }
 
-function MoreDropdown({ pathname, mobile }: { pathname: string; mobile: boolean }) {
-  const active = MORE_ITEMS.some(
+function ToolsDropdown({ pathname, mobile }: { pathname: string; mobile: boolean }) {
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const active = TOOLS_ITEMS.some(
     (item) => pathname === item.href || pathname.startsWith(item.match),
   );
 
+  useEffect(() => {
+    const handlePointerDown = (event: PointerEvent) => {
+      const details = detailsRef.current;
+      if (details?.open && !details.contains(event.target as Node)) {
+        details.open = false;
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, []);
+
   return (
-    <details className="group relative flex h-full shrink-0 items-center">
+    <details ref={detailsRef} className="group relative flex h-full shrink-0 items-center">
       <summary
         className={`relative flex h-full cursor-pointer list-none items-center ${mobile ? "px-3 text-[12px]" : "px-4 text-[13px]"} font-medium transition-colors marker:hidden ${
           active ? "text-accent" : "text-ink hover:text-accent"
         }`}
       >
-        More
+        Tools
         <span className="ml-1 text-[10px] text-ink-faint"> v</span>
         {active ? (
           <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-accent" />
@@ -90,7 +103,7 @@ function MoreDropdown({ pathname, mobile }: { pathname: string; mobile: boolean 
           mobile ? "left-2" : "right-0"
         }`}
       >
-        {MORE_ITEMS.map((item) => {
+        {TOOLS_ITEMS.map((item) => {
           const itemActive = pathname === item.href || pathname.startsWith(item.match);
           return (
             <Link

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 import {
@@ -20,12 +21,21 @@ const OPTIONS = [
   ...THEMES,
 ];
 
+export interface ScopeStats {
+  experts: number;
+  companies: number;
+  targets: number;
+  gaps: number;
+}
+
 export default function ThemeSwitcher({
   initialFocus,
   initialIncludeTowerBrookEmployees,
+  scopeStats,
 }: {
   initialFocus: ThemeFocus;
   initialIncludeTowerBrookEmployees: boolean;
+  scopeStats: ScopeStats;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -77,46 +87,98 @@ export default function ThemeSwitcher({
     startTransition(() => router.refresh());
   }
 
+  const gapsHref =
+    scopeStats.gaps > 0
+      ? `/discover?severity=high`
+      : "/discover";
+
   return (
-    <nav
-      aria-label="Switch investment theme"
-      className="flex min-w-0 items-center gap-1.5 overflow-x-auto px-4 py-1.5"
+    <div
+      className="border-t border-line bg-[#fbfcff]"
+      role="status"
+      aria-live="polite"
     >
-      <span className="mr-1 shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
-        Theme focus
-      </span>
-      {OPTIONS.map((theme) => {
-        const active = activeFocus === theme.id;
-        return (
-          <button
-            key={theme.id}
-            type="button"
-            onClick={() => changeFocus(theme.id)}
-            aria-pressed={active}
-            className={`flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
-              active
-                ? "border-accent bg-[#edf5ff] text-accent"
-                : "border-line bg-white text-ink-soft hover:border-line-strong hover:text-ink"
-            }`}
-          >
-            <span
-              className="h-1.5 w-1.5 rounded-full"
-              style={{ backgroundColor: theme.accent }}
-              aria-hidden="true"
-            />
-            {theme.shortName}
-          </button>
-        );
-      })}
-      <label className="ml-auto flex shrink-0 cursor-pointer items-center gap-2 border-l border-line pl-3 text-[11px] font-medium text-ink-soft">
-        <input
-          type="checkbox"
-          checked={includeTowerBrookEmployees}
-          onChange={(event) => changeEmployeeScope(event.target.checked)}
-          className="h-3.5 w-3.5 accent-accent"
-        />
-        Include TowerBrook employees
-      </label>
-    </nav>
+      <nav
+        aria-label="Switch investment theme"
+        className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 px-4 py-1.5"
+      >
+        <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
+          Theme
+        </span>
+        <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+          {OPTIONS.map((theme) => {
+            const active = activeFocus === theme.id;
+            return (
+              <button
+                key={theme.id}
+                type="button"
+                onClick={() => changeFocus(theme.id)}
+                aria-pressed={active}
+                className={`flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1 text-[12px] font-semibold transition-colors ${
+                  active
+                    ? "border-accent bg-[#edf5ff] text-accent"
+                    : "border-line bg-white text-ink-soft hover:border-line-strong hover:text-ink"
+                }`}
+              >
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: theme.accent }}
+                  aria-hidden="true"
+                />
+                {theme.shortName}
+              </button>
+            );
+          })}
+        </div>
+
+        <span className="hidden h-4 w-px bg-line sm:inline" aria-hidden="true" />
+
+        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 text-[12px] text-ink-soft">
+          <ScopeStat value={scopeStats.experts} label="experts" href="/experts" />
+          <ScopeStat value={scopeStats.companies} label="companies" href="/companies" />
+          <ScopeStat value={scopeStats.targets} label="targets" href="/companies?category=target" />
+          <ScopeStat
+            value={scopeStats.gaps}
+            label="gaps"
+            href={gapsHref}
+            highlight={scopeStats.gaps > 0}
+          />
+          <Link href="/graph" className="font-semibold text-accent hover:underline">
+            Graph
+          </Link>
+        </div>
+
+        <label className="ml-auto flex shrink-0 cursor-pointer items-center gap-2 text-[12px] font-medium text-ink-soft">
+          <input
+            type="checkbox"
+            checked={includeTowerBrookEmployees}
+            onChange={(event) => changeEmployeeScope(event.target.checked)}
+            className="h-3.5 w-3.5 accent-accent"
+          />
+          Include TB employees
+        </label>
+      </nav>
+    </div>
+  );
+}
+
+function ScopeStat({
+  value,
+  label,
+  href,
+  highlight = false,
+}: {
+  value: number;
+  label: string;
+  href: string;
+  highlight?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`tabular-nums hover:text-accent ${highlight ? "font-semibold text-amber-700" : ""}`}
+    >
+      <strong className="font-semibold text-ink">{value}</strong> {label}
+    </Link>
   );
 }

@@ -40,13 +40,13 @@ export default function SearchBox({
   }
 
   return (
-    <div className="relative">
+    <div className="relative min-w-0">
       <div
-        className={`flex items-center gap-2 border border-line-strong bg-card shadow-sm transition-colors focus-within:border-accent ${
-          compact ? "rounded-lg px-3 py-1.5" : "rounded-xl px-4 py-3"
+        className={`flex min-w-0 items-center gap-1.5 overflow-hidden border border-line-strong bg-card shadow-sm transition-colors focus-within:border-accent ${
+          compact ? "rounded-lg px-2.5 py-1.5" : "rounded-xl px-4 py-3"
         }`}
       >
-        <span className="text-ink-faint" aria-hidden="true">🔎</span>
+        <span className="shrink-0 text-ink-faint" aria-hidden="true">🔎</span>
         <input
           value={q}
           onChange={(e) => {
@@ -55,17 +55,26 @@ export default function SearchBox({
           }}
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
-          placeholder="Search any person or company - e.g. solar, leak detection, Piclo"
-          className={`flex-1 bg-transparent outline-none placeholder:text-ink-faint ${
-            compact ? "min-w-[220px] text-[12px]" : "text-[15px]"
+          placeholder={
+            compact
+              ? "Search people or companies"
+              : "Search any person or company - e.g. solar, leak detection, Piclo"
+          }
+          className={`min-w-0 flex-1 bg-transparent outline-none placeholder:text-ink-faint ${
+            compact ? "text-[12px]" : "text-[15px]"
           }`}
         />
         {q ? (
-          <kbd className="text-[10px] text-ink-faint border border-line rounded px-1.5 py-0.5">
+          <kbd className="shrink-0 whitespace-nowrap text-[10px] text-ink-faint border border-line rounded px-1.5 py-0.5">
             {results.length} match{results.length === 1 ? "" : "es"}
           </kbd>
         ) : compact ? (
-          <span className="shrink-0 text-[10px] text-ink-faint">{index.length} records</span>
+          <span
+            className="shrink-0 whitespace-nowrap text-[10px] tabular-nums text-ink-faint"
+            title={`${index.length} searchable records`}
+          >
+            {index.length}
+          </span>
         ) : null}
       </div>
       {!compact ? (
