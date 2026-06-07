@@ -29,9 +29,28 @@ export async function callBackendApi<T>(
       ...(init?.headers ?? {}),
     },
   });
-  const data = await response.json();
+  const raw = await response.text();
+  let data: Record<string, unknown> = {};
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      data = typeof parsed === "object" && parsed !== null ? (parsed as Record<string, unknown>) : {};
+    } catch {
+      if (!response.ok) {
+        throw new Error(raw.slice(0, 160) || `Backend API failed: ${response.status}`);
+      }
+      throw new Error("Backend returned a non-JSON response.");
+    }
+  }
   if (!response.ok) {
-    throw new Error(data.error ?? data.detail ?? `Backend API failed: ${response.status}`);
+    const detail = data.error ?? data.detail;
+    const message =
+      typeof detail === "string"
+        ? detail
+        : typeof detail === "object" && detail !== null && "message" in detail
+          ? String((detail as { message?: unknown }).message ?? response.status)
+          : `Backend API failed: ${response.status}`;
+    throw new Error(message);
   }
   return data as T;
 }

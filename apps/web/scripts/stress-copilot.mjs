@@ -118,6 +118,13 @@ async function askStream(question) {
   };
 }
 
+async function stressConcurrent(question, concurrency = 3) {
+  const started = Date.now();
+  const runs = await Promise.all(Array.from({ length: concurrency }, () => askStream(question)));
+  const ok = runs.filter((r) => r.ok).length;
+  return { concurrency, ok, ms: Date.now() - started, runs };
+}
+
 async function main() {
   console.log(`Stress testing copilot at ${baseUrl}\n`);
   const results = [];
@@ -125,10 +132,14 @@ async function main() {
   for (const question of QUESTIONS) {
     const streamResult = await askStream(question);
     results.push({ question, ...streamResult });
+    const sseHealthy = streamResult.baselineMs != null && streamResult.phases >= 1;
     console.log(
-      `[stream] ${streamResult.ok ? "OK" : "FAIL"} ${streamResult.ms}ms baseline=${streamResult.baselineMs ?? "-"} phases=${streamResult.phases ?? 0} experts=${streamResult.experts ?? 0} intent=${streamResult.intent ?? "-"} enriched=${streamResult.backendEnriched ?? false} tools=${streamResult.tools ?? 0} keiro=${streamResult.keiroLive ?? false} model=${streamResult.model ?? "-"}`,
+      `[stream] ${streamResult.ok && sseHealthy ? "OK" : "WARN"} ${streamResult.ms}ms baseline=${streamResult.baselineMs ?? "-"} phases=${streamResult.phases ?? 0} experts=${streamResult.experts ?? 0} intent=${streamResult.intent ?? "-"} enriched=${streamResult.backendEnriched ?? false} tools=${streamResult.tools ?? 0} keiro=${streamResult.keiroLive ?? false} model=${streamResult.model ?? "-"}`,
     );
     if (streamResult.error) console.log(`  error: ${streamResult.error}`);
+    if (!sseHealthy) {
+      console.log("  warn: response was not SSE (deploy streaming build or check backend wiring)");
+    }
   }
 
   const jsonResult = await askJson(QUESTIONS[0]);
@@ -136,9 +147,16 @@ async function main() {
     `\n[json] ${jsonResult.ok ? "OK" : "FAIL"} ${jsonResult.ms}ms experts=${jsonResult.experts} intent=${jsonResult.intent ?? "-"} enriched=${jsonResult.backendEnriched} tools=${jsonResult.tools} keiro=${jsonResult.keiroLive} model=${jsonResult.model ?? "-"}`,
   );
 
+  const burst = await stressConcurrent(QUESTIONS[0], 3);
+  console.log(
+    `\n[burst] ${burst.ok}/${burst.concurrency} concurrent streams in ${burst.ms}ms`,
+  );
+
   const failed = results.filter((r) => !r.ok).length;
+  const weakSse = results.filter((r) => r.baselineMs == null || (r.phases ?? 0) < 1).length;
   console.log(`\n${results.length - failed}/${results.length} stream requests succeeded`);
-  process.exit(failed > 0 ? 1 : 0);
+  if (weakSse) console.log(`${weakSse} stream response(s) missing SSE baseline/phases`);
+  process.exit(failed > 0 || burst.ok < burst.concurrency ? 1 : 0);
 }
 
 main().catch((error) => {
