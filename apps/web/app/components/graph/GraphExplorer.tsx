@@ -10,6 +10,12 @@ import type {
   RelationshipType,
   ThemeId,
 } from "@/lib/types";
+import {
+  ALL_RELATIONSHIPS,
+  computeVisibleGraph,
+  DEFAULT_CONFIDENCE_FLOOR,
+  filterGraphEdges,
+} from "@/lib/graph-visible";
 import { matchesThemeFocus, publishThemeFocus, type ThemeFocus } from "@/lib/theme-focus";
 import styles from "./GraphExplorer.module.css";
 
@@ -89,25 +95,11 @@ export interface ExplorerEdge {
 }
 
 type ExplorerNode = ExplorerExpertNode | ExplorerCompanyNode | ExplorerDealNode;
-type MockupMode = "network" | "paths" | "matrix";
-
 function askHref(prompt: string) {
   return `/ask?prompt=${encodeURIComponent(prompt)}`;
 }
 
-const RELATIONSHIP_ORDER: RelationshipType[] = [
-  "founded",
-  "co-founded",
-  "led",
-  "advised",
-  "board",
-  "invested-in",
-  "acquired",
-  "banked",
-  "legal-counsel",
-  "partner",
-  "served",
-];
+const RELATIONSHIP_ORDER = ALL_RELATIONSHIPS;
 
 const RELATIONSHIP_COLOR: Record<RelationshipType, string> = {
   founded: "#11843b",
@@ -238,6 +230,7 @@ export default function GraphExplorer({
   defaultTheme,
   defaultSelected,
   returnContext,
+  variant = "full",
 }: {
   themes: ExplorerTheme[];
   experts: ExplorerExpertNode[];
@@ -252,6 +245,7 @@ export default function GraphExplorer({
     href: string;
     detail: string;
   };
+  variant?: "full" | "embed";
 }) {
   const [theme, setTheme] = useState<ThemeFocus>(defaultTheme);
   const [query, setQuery] = useState("");
@@ -266,10 +260,9 @@ export default function GraphExplorer({
         RELATIONSHIP_ORDER.map((relationship) => [relationship, true]),
       ) as Record<RelationshipType, boolean>,
   );
-  const [confidenceFloor, setConfidenceFloor] = useState(0.72);
+  const [confidenceFloor, setConfidenceFloor] = useState(DEFAULT_CONFIDENCE_FLOOR);
   const [pathView, setPathView] = useState(true);
-  const [mockupMode, setMockupMode] = useState<MockupMode>("network");
-  const [expertDomain, setExpertDomain] = useState<string>("all");
+  const [expertDomain, setExpertDomain] = useState<ExpertType | "all">("all");
   const [selectedKey, setSelectedKey] = useState(defaultSelected ?? experts[0]?.key ?? companies[0]?.key);
   const [history, setHistory] = useState<string[]>([]);
   const canvasColumnRef = useRef<HTMLElement>(null);
@@ -289,23 +282,22 @@ export default function GraphExplorer({
     return labels;
   }, [edges]);
 
+  const graphViewOptions = useMemo(
+    () => ({
+      theme,
+      selectedKey,
+      confidenceFloor,
+      pathView,
+      nodeKinds,
+      relationships,
+      expertDomain,
+    }),
+    [confidenceFloor, expertDomain, nodeKinds, pathView, relationships, selectedKey, theme],
+  );
+
   const filteredEdges = useMemo(
-    () =>
-      edges.filter((edge) => {
-        const from = nodeByKey.get(edge.from);
-        const to = nodeByKey.get(edge.to);
-        if (!from || !to) return false;
-        if (!matchesThemeFocus(edge.themes, theme)) return false;
-        if (!relationships[edge.relationship]) return false;
-        if (edge.confidence < confidenceFloor) return false;
-        if (!nodeKinds[from.kind] || !nodeKinds[to.kind]) return false;
-        if (expertDomain !== "all") {
-          const expertNode = from.kind === "expert" ? from : to.kind === "expert" ? to : null;
-          if (expertNode && expertNode.type !== expertDomain) return false;
-        }
-        return true;
-      }),
-    [confidenceFloor, edges, nodeByKey, nodeKinds, relationships, theme, expertDomain],
+    () => filterGraphEdges(edges, nodeByKey, graphViewOptions),
+    [edges, graphViewOptions, nodeByKey],
   );
 
   const filteredNodeKeys = useMemo(() => {
@@ -317,18 +309,17 @@ export default function GraphExplorer({
     return keys;
   }, [filteredEdges]);
 
-  const selectedNode =
-    nodeByKey.get(selectedKey) ??
-    [...filteredNodeKeys].map((key) => nodeByKey.get(key)).find(Boolean) ??
-    allNodes[0];
-
-  const selectedEdges = useMemo(
+  const visibleGraph = useMemo(
     () =>
-      filteredEdges
-        .filter((edge) => edge.from === selectedNode?.key || edge.to === selectedNode?.key)
-        .sort((a, b) => b.confidence - a.confidence || b.sourceIds.length - a.sourceIds.length),
-    [filteredEdges, selectedNode?.key],
+      computeVisibleGraph(
+        { experts, companies, deals, edges },
+        graphViewOptions,
+      ),
+    [companies, deals, edges, experts, graphViewOptions],
   );
+
+  const selectedNode = visibleGraph.selectedNode;
+  const selectedEdges = visibleGraph.selectedEdges;
 
   const focusMatches = useMemo(() => {
     const searchText = query.trim().toLowerCase();
@@ -370,37 +361,8 @@ export default function GraphExplorer({
     [nodeByKey, selectedEdges, selectedNode],
   );
 
-  const visibleEdges = useMemo(() => {
-    if (!selectedNode) return filteredEdges.slice(0, 10);
-    const selected = selectedNode.key;
-    const firstHop = selectedEdges.slice(0, pathView ? 7 : 12);
-    if (!pathView) return firstHop;
-
-    const firstHopKeys = new Set(firstHop.flatMap((edge) => [edge.from, edge.to]));
-    const secondHop = filteredEdges
-      .filter(
-        (edge) =>
-          !firstHop.some((first) => first.id === edge.id) &&
-          (firstHopKeys.has(edge.from) || firstHopKeys.has(edge.to)),
-      )
-      .filter((edge) => edge.from !== selected && edge.to !== selected)
-      .sort((a, b) => b.confidence - a.confidence)
-      .slice(0, 5);
-
-    return [...firstHop, ...secondHop];
-  }, [filteredEdges, pathView, selectedEdges, selectedNode]);
-
-  const visibleNodes = useMemo(() => {
-    const keys = new Set<string>();
-    for (const edge of visibleEdges) {
-      keys.add(edge.from);
-      keys.add(edge.to);
-    }
-    if (selectedNode) keys.add(selectedNode.key);
-    return [...keys]
-      .map((key) => nodeByKey.get(key))
-      .filter((node): node is ExplorerNode => Boolean(node));
-  }, [nodeByKey, selectedNode, visibleEdges]);
+  const visibleEdges = visibleGraph.visibleEdges;
+  const visibleNodes = visibleGraph.visibleNodes;
 
   const metrics = useMemo(() => {
     const bridgeExperts = experts
@@ -461,13 +423,6 @@ export default function GraphExplorer({
     });
   }
 
-  function changeMode(nextMode: MockupMode) {
-    setMockupMode(nextMode);
-    window.requestAnimationFrame(() => {
-      canvasColumnRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }
-
   function stepBack() {
     const previous = history.at(-1);
     if (!previous) return;
@@ -484,7 +439,7 @@ export default function GraphExplorer({
         RELATIONSHIP_ORDER.map((relationship) => [relationship, true]),
       ) as Record<RelationshipType, boolean>,
     );
-    setConfidenceFloor(0.72);
+    setConfidenceFloor(DEFAULT_CONFIDENCE_FLOOR);
     setPathView(true);
     setExpertDomain("all");
     setSelectedKey(defaultSelected ?? experts[0]?.key ?? companies[0]?.key ?? deals[0]?.key);
@@ -543,8 +498,9 @@ export default function GraphExplorer({
   };
 
   return (
-    <div className={styles.shell}>
-      <div className={styles.workspace}>
+    <div className={variant === "embed" ? styles.embedShell : styles.shell}>
+      <div className={variant === "embed" ? styles.embedWorkspace : styles.workspace}>
+        {variant === "full" ? (
         <aside className={styles.queryPanel}>
           <PanelHeader title="Relationship Graph" caption="Start with a company or person, then follow the relationship layers that matter." />
 
@@ -797,83 +753,62 @@ export default function GraphExplorer({
             </button>
           </div>
         </aside>
+        ) : null}
 
-        <main ref={canvasColumnRef} className={styles.canvasColumn}>
-          {returnContext ? (
+        <main
+          ref={canvasColumnRef}
+          className={variant === "embed" ? styles.embedCanvasColumn : styles.canvasColumn}
+        >
+          {variant === "full" && returnContext ? (
             <div className={styles.returnContext}>
               <Link href={returnContext.href}>← Back to {returnContext.label}</Link>
               <span>{returnContext.detail}</span>
             </div>
           ) : null}
 
-          <GraphCommandBar
-            selectedNode={selectedNode}
-            selectedEdges={selectedEdges}
-            connectedPreview={connectedPreview}
-            mockupMode={mockupMode}
-            onModeChange={changeMode}
-            onFocus={selectNodeAndReveal}
-          />
+          {variant === "full" ? (
+            <GraphCommandBar
+              selectedNode={selectedNode}
+              selectedEdges={selectedEdges}
+              connectedPreview={connectedPreview}
+              onFocus={selectNodeAndReveal}
+            />
+          ) : null}
 
-          <div className={styles.mockupTabs} aria-label="Relationship graph views">
-            <button
-              type="button"
-              className={mockupMode === "network" ? styles.activeMockupTab : undefined}
-              onClick={() => changeMode("network")}
-            >
-              <strong>Network Canvas</strong>
-              <span>Best for exploration</span>
-            </button>
-            <button
-              type="button"
-              className={mockupMode === "paths" ? styles.activeMockupTab : undefined}
-              onClick={() => changeMode("paths")}
-            >
-              <strong>Path Finder</strong>
-              <span>Best for warm intros</span>
-            </button>
-            <button
-              type="button"
-              className={mockupMode === "matrix" ? styles.activeMockupTab : undefined}
-              onClick={() => changeMode("matrix")}
-            >
-              <strong>Evidence Matrix</strong>
-              <span>Best for IC review</span>
-            </button>
-          </div>
-
-          <div className={styles.graphToolbar}>
+          <div className={variant === "embed" ? styles.embedGraphToolbar : styles.graphToolbar}>
             <div className={styles.toolbarFocus}>
               <span>Focused on</span>
               <strong>{selectedNode?.name ?? "No matching node"}</strong>
             </div>
             <div className={styles.toolbarButtons}>
-              <select
-                className={styles.select}
-                value={expertDomain}
-                onChange={(event) => {
-                  const nextDomain = event.target.value;
-                  setExpertDomain(nextDomain);
-                  if (nextDomain !== "all") {
-                    const topExpert = experts
-                      .filter((e) => e.type === nextDomain && matchesThemeFocus(e.themes, theme))
-                      .sort((a, b) => {
-                        const aEdges = filteredEdges.filter((edge) => edge.from === a.key || edge.to === a.key).length;
-                        const bEdges = filteredEdges.filter((edge) => edge.from === b.key || edge.to === b.key).length;
-                        return bEdges - aEdges;
-                      })[0];
-                    if (topExpert) selectNode(topExpert.key);
-                  }
-                }}
-                style={{ minWidth: 160, height: 32, fontSize: 12 }}
-              >
-                <option value="all">All expert domains</option>
-                {expertDomainOptions(experts).map(({ value, label }) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
+              {variant === "full" ? (
+                <select
+                  className={styles.select}
+                  value={expertDomain}
+                  onChange={(event) => {
+                    const nextDomain = event.target.value as ExpertType | "all";
+                    setExpertDomain(nextDomain);
+                    if (nextDomain !== "all") {
+                      const topExpert = experts
+                        .filter((e) => e.type === nextDomain && matchesThemeFocus(e.themes, theme))
+                        .sort((a, b) => {
+                          const aEdges = filteredEdges.filter((edge) => edge.from === a.key || edge.to === a.key).length;
+                          const bEdges = filteredEdges.filter((edge) => edge.from === b.key || edge.to === b.key).length;
+                          return bEdges - aEdges;
+                        })[0];
+                      if (topExpert) selectNode(topExpert.key);
+                    }
+                  }}
+                  style={{ minWidth: 160, height: 32, fontSize: 12 }}
+                >
+                  <option value="all">All expert domains</option>
+                  {expertDomainOptions(experts).map(({ value, label }) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              ) : null}
               <button
                 type="button"
                 className={!pathView ? styles.activeToolbarButton : undefined}
@@ -894,52 +829,26 @@ export default function GraphExplorer({
             </div>
           </div>
 
-          {mockupMode === "network" ? (
-            <>
-              <section className={styles.graphCard} aria-label="Interactive graph canvas">
-                <GraphLegend />
-                <div className={styles.graphScroller}>
-                  <GraphCanvas
-                    nodes={visibleNodes}
-                    edges={visibleEdges}
-                    selectedKey={selectedNode?.key}
-                    nodeByKey={nodeByKey}
-                    onSelect={selectNode}
-                  />
-                </div>
-                <PathStrip path={path} selectedNode={selectedNode} onSelect={selectNodeAndReveal} />
-              </section>
-
-              <GraphInsights
-                metrics={metrics}
-                onFocus={selectNodeAndReveal}
+          <section className={styles.graphCard} aria-label="Interactive graph canvas">
+            <GraphLegend />
+            <div className={styles.graphScroller}>
+              <GraphCanvas
+                nodes={visibleNodes}
+                edges={visibleEdges}
+                selectedKey={selectedNode?.key}
+                nodeByKey={nodeByKey}
+                onSelect={selectNode}
               />
-            </>
-          ) : null}
+            </div>
+            <PathStrip path={path} selectedNode={selectedNode} onSelect={selectNodeAndReveal} />
+          </section>
 
-          {mockupMode === "paths" ? (
-            <PathWorkspaceMockup
-              selectedNode={selectedNode}
-              selectedEdges={selectedEdges}
-              visibleEdges={visibleEdges}
-              nodeByKey={nodeByKey}
-              path={path}
-              onSelect={selectNodeAndReveal}
-            />
-          ) : null}
-
-          {mockupMode === "matrix" ? (
-            <EvidenceMatrixMockup
-              selectedNode={selectedNode}
-              selectedEdges={selectedEdges}
-              filteredEdges={filteredEdges}
-              nodeByKey={nodeByKey}
-              sources={sources}
-              onSelect={selectNodeAndReveal}
-            />
+          {variant === "full" ? (
+            <GraphInsights metrics={metrics} onFocus={selectNodeAndReveal} />
           ) : null}
         </main>
 
+        {variant === "full" ? (
         <aside className={styles.inspector}>
           {selectedNode ? (
             <>
@@ -1067,6 +976,7 @@ export default function GraphExplorer({
             <div className={styles.emptyInspector}>No mapped node matches this query.</div>
           )}
         </aside>
+        ) : null}
       </div>
     </div>
   );
@@ -1115,15 +1025,11 @@ function GraphCommandBar({
   selectedNode,
   selectedEdges,
   connectedPreview,
-  mockupMode,
-  onModeChange,
   onFocus,
 }: {
   selectedNode?: ExplorerNode;
   selectedEdges: ExplorerEdge[];
   connectedPreview: { edge: ExplorerEdge; node: ExplorerNode }[];
-  mockupMode: MockupMode;
-  onModeChange: (mode: MockupMode) => void;
   onFocus: (key: string) => void;
 }) {
   if (!selectedNode) return null;
@@ -1144,27 +1050,6 @@ function GraphCommandBar({
       </div>
 
       <div className={styles.commandActions}>
-        <button
-          type="button"
-          className={mockupMode === "paths" ? styles.activeCommandButton : undefined}
-          onClick={() => onModeChange("paths")}
-        >
-          Focus path
-        </button>
-        <button
-          type="button"
-          className={mockupMode === "network" ? styles.activeCommandButton : undefined}
-          onClick={() => onModeChange("network")}
-        >
-          Network
-        </button>
-        <button
-          type="button"
-          className={mockupMode === "matrix" ? styles.activeCommandButton : undefined}
-          onClick={() => onModeChange("matrix")}
-        >
-          Evidence
-        </button>
         <Link href={selectedNode.href} className={styles.commandLink}>
           Open profile
         </Link>
@@ -1255,177 +1140,6 @@ function GraphInsights({
 
 function SourceMarker({ id }: { id: string }) {
   return <a className={styles.sourceMarker} href={`#source-${id}`}>[{id}]</a>;
-}
-
-function PathWorkspaceMockup({
-  selectedNode,
-  selectedEdges,
-  visibleEdges,
-  nodeByKey,
-  path,
-  onSelect,
-}: {
-  selectedNode?: ExplorerNode;
-  selectedEdges: ExplorerEdge[];
-  visibleEdges: ExplorerEdge[];
-  nodeByKey: Map<string, ExplorerNode>;
-  path: ExplorerNode[];
-  onSelect: (key: string) => void;
-}) {
-  const introRows = selectedEdges.slice(0, 6).map((edge) => {
-    const neighbor = selectedNode ? nodeByKey.get(otherNode(edge, selectedNode.key)) : undefined;
-    const onward = neighbor
-      ? visibleEdges.find(
-          (candidate) =>
-            candidate.id !== edge.id &&
-            (candidate.from === neighbor.key || candidate.to === neighbor.key),
-        )
-      : undefined;
-    const third = onward && neighbor ? nodeByKey.get(otherNode(onward, neighbor.key)) : undefined;
-    return { edge, neighbor, third };
-  });
-
-  return (
-    <section className={styles.pathWorkspace}>
-      <div className={styles.pathHero}>
-        <div>
-          <span>Path finder</span>
-          <h2>Relationship Path Finder</h2>
-          <p>Use this view to identify the shortest credible path from TowerBrook context to a person, company, advisor, or transaction.</p>
-        </div>
-        <div className={styles.pathSummary}>
-          <Metric label="Direct paths" value={selectedEdges.length} />
-          <Metric label="Visible hops" value={path.length} />
-          <Metric label="Avg confidence" value={Math.round((selectedEdges[0]?.confidence ?? selectedNode?.confidence ?? 0.75) * 100)} />
-        </div>
-      </div>
-
-      <div className={styles.routeBoard}>
-        <article className={styles.routePrimary}>
-          <strong>Recommended path</strong>
-          <ol>
-            {path.map((node, index) => (
-              <li key={node.key}>
-                <span className={styles.pathNode} data-kind={node.kind}>{nodeBadgeText(node)}</span>
-                <div>
-                  <button type="button" onClick={() => onSelect(node.key)}>{node.name}</button>
-                  <small>{nodeKindName(node)} · {nodeTypeName(node)}</small>
-                </div>
-                {index < path.length - 1 ? <em>then</em> : <em>ask</em>}
-              </li>
-            ))}
-          </ol>
-          {selectedNode ? (
-            <div className={styles.routeActions}>
-              <Link
-                href={askHref(
-                  `Prepare a warm-intro plan for ${selectedNode.name} using the recommended relationship path and known evidence.`,
-                )}
-                className={styles.primaryButton}
-              >
-                Prepare intro plan
-              </Link>
-              <Link href={selectedNode.href} className={styles.secondaryButton}>
-                Open profile
-              </Link>
-            </div>
-          ) : null}
-        </article>
-
-        <article className={styles.routeList}>
-          <strong>Alternate warm-intro routes</strong>
-          <div>
-            {introRows.map(({ edge, neighbor, third }) => (
-              <button key={edge.id} type="button" onClick={() => neighbor && onSelect(neighbor.key)}>
-                <span style={{ "--edge-color": RELATIONSHIP_COLOR[edge.relationship] } as CSSProperties} />
-                <div>
-                  <b>{neighbor?.name ?? "Unknown node"}</b>
-                  <small>{edge.relationshipLabel}{third ? ` to ${third.name}` : ""}</small>
-                </div>
-                <em>{confidenceText(edge.confidence)}</em>
-              </button>
-            ))}
-          </div>
-        </article>
-      </div>
-    </section>
-  );
-}
-
-function EvidenceMatrixMockup({
-  selectedNode,
-  selectedEdges,
-  filteredEdges,
-  nodeByKey,
-  sources,
-  onSelect,
-}: {
-  selectedNode?: ExplorerNode;
-  selectedEdges: ExplorerEdge[];
-  filteredEdges: ExplorerEdge[];
-  nodeByKey: Map<string, ExplorerNode>;
-  sources: ExplorerSource[];
-  onSelect: (key: string) => void;
-}) {
-  const sourceById = new Map(sources.map((source) => [source.id, source]));
-  const rows = selectedEdges.slice(0, 9).map((edge) => ({
-    edge,
-    node: selectedNode ? nodeByKey.get(otherNode(edge, selectedNode.key)) : undefined,
-    citations: edge.sourceIds.map((id) => sourceById.get(id)).filter((source): source is ExplorerSource => Boolean(source)),
-  }));
-  const relationshipCounts = RELATIONSHIP_ORDER.map((relationship) => ({
-    relationship,
-    count: filteredEdges.filter((edge) => edge.relationship === relationship).length,
-  })).filter((item) => item.count > 0).slice(0, 7);
-
-  return (
-    <section className={styles.matrixWorkspace}>
-      <div className={styles.matrixHeader}>
-        <div>
-          <span>Evidence review</span>
-          <h2>Evidence-First Relationship Matrix</h2>
-          <p>Review provenance, relationship confidence, and citation coverage before using the graph in diligence or outreach.</p>
-        </div>
-        <div className={styles.relationshipBars}>
-          {relationshipCounts.map(({ relationship, count }) => (
-            <div key={relationship}>
-              <span>{relationship}</span>
-              <i><b style={{ width: `${Math.min(100, count * 18)}%`, background: RELATIONSHIP_COLOR[relationship] }} /></i>
-              <em>{count}</em>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className={styles.matrixTableWrap}>
-        <table className={styles.matrixTable}>
-          <thead>
-            <tr>
-              <th>Related entity</th>
-              <th>Relationship</th>
-              <th>Confidence</th>
-              <th>Evidence</th>
-              <th>Citations</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map(({ edge, node, citations }) => (
-              <tr key={edge.id}>
-                <td>
-                  {node ? <button type="button" onClick={() => onSelect(node.key)}>{node.name}</button> : "Unknown node"}
-                  <small>{node ? `${nodeKindName(node)} · ${nodeTypeName(node)}` : "Unresolved"}</small>
-                </td>
-                <td><span style={{ "--edge-color": RELATIONSHIP_COLOR[edge.relationship] } as CSSProperties}>{edge.relationshipLabel}</span></td>
-                <td>{confidenceText(edge.confidence)}</td>
-                <td>{edge.note}</td>
-                <td>{citations.slice(0, 2).map((source) => <a key={source.id} href={source.url} target="_blank" rel="noreferrer">[{source.id}]</a>)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </section>
-  );
 }
 
 function nodeColor(node: ExplorerNode) {

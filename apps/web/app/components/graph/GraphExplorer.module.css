@@ -1633,6 +1633,32 @@
   }
 }
 
+.embedShell {
+  background: #fbfcff;
+  color: #111827;
+  font-size: 13px;
+}
+
+.embedWorkspace {
+  display: block;
+}
+
+.embedCanvasColumn {
+  display: block;
+  min-width: 0;
+}
+
+.embedGraphToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #dfe5ee;
+  background: #fff;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .selectedHalo {
     animation: none;

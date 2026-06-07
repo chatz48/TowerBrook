@@ -44,10 +44,13 @@ export default function ThemeGraph({
   const [focusKey, setFocusKey] = useState<string | null>(null);
   const [trail, setTrail] = useState<string[]>([]);
 
-  const expertById = useMemo(() => new Map(experts.map((e) => [e.id, e])), [experts]);
+  const graphExperts = useMemo(() => uniqueNodes(experts), [experts]);
+  const graphCompanies = useMemo(() => uniqueNodes(companies), [companies]);
+
+  const expertById = useMemo(() => new Map(graphExperts.map((e) => [e.id, e])), [graphExperts]);
   const companyById = useMemo(
-    () => new Map(companies.map((c) => [c.id, c])),
-    [companies],
+    () => new Map(graphCompanies.map((c) => [c.id, c])),
+    [graphCompanies],
   );
 
   const selected = focusKey ? getNode(focusKey) : null;
@@ -105,13 +108,15 @@ export default function ThemeGraph({
   }
 
   function neighborsFor(key: string) {
+    const seen = new Set<string>();
     return linkedEdges(key)
       .map((edge) => {
         const neighborKey = isExpertKey(key)
           ? companyKey(edge.companyId)
           : expertKey(edge.expertId);
         const node = getNode(neighborKey);
-        if (!node) return null;
+        if (!node || seen.has(neighborKey)) return null;
+        seen.add(neighborKey);
         return {
           node,
           edge,
@@ -157,18 +162,18 @@ export default function ThemeGraph({
 
   const rowH = 34;
   const pad = 24;
-  const overviewHeight = Math.max(experts.length, companies.length, 1) * rowH + pad * 2;
+  const overviewHeight = Math.max(graphExperts.length, graphCompanies.length, 1) * rowH + pad * 2;
   const width = 720;
   const xL = 190;
   const xR = width - 190;
 
   const eY = (i: number) =>
-    pad + (overviewHeight - pad * 2) * ((i + 0.5) / Math.max(experts.length, 1));
+    pad + (overviewHeight - pad * 2) * ((i + 0.5) / Math.max(graphExperts.length, 1));
   const cY = (i: number) =>
-    pad + (overviewHeight - pad * 2) * ((i + 0.5) / Math.max(companies.length, 1));
+    pad + (overviewHeight - pad * 2) * ((i + 0.5) / Math.max(graphCompanies.length, 1));
 
-  const eIndex = new Map(experts.map((e, i) => [e.id, i]));
-  const cIndex = new Map(companies.map((c, i) => [c.id, i]));
+  const eIndex = new Map(graphExperts.map((e, i) => [e.id, i]));
+  const cIndex = new Map(graphCompanies.map((c, i) => [c.id, i]));
 
   function linkActive(l: GraphLink) {
     if (!hoverKey) return true;
@@ -413,12 +418,12 @@ export default function ThemeGraph({
               })}
 
               {/* expert nodes */}
-              {experts.map((e, i) => {
+              {graphExperts.map((e, i) => {
                 const y = eY(i);
                 const key = expertKey(e.id);
                 const active = nodeActive(key);
                 return (
-                  <NodeButton key={e.id} nodeKey={key} opacity={active ? 1 : 0.35}>
+                  <NodeButton key={key} nodeKey={key} opacity={active ? 1 : 0.35}>
                     <g transform={`translate(${xL}, ${y})`}>
                       <circle cx={0} cy={0} r={4} fill={accent} />
                       <text x={-10} y={4} textAnchor="end" fontSize="12" className="fill-ink">
@@ -430,13 +435,13 @@ export default function ThemeGraph({
               })}
 
               {/* company nodes (size = expert density) */}
-              {companies.map((c, i) => {
+              {graphCompanies.map((c, i) => {
                 const y = cY(i);
                 const key = companyKey(c.id);
                 const active = nodeActive(key);
                 const r = 4 + Math.min(c.expertCount, 4) * 1.6;
                 return (
-                  <NodeButton key={c.id} nodeKey={key} opacity={active ? 1 : 0.35}>
+                  <NodeButton key={key} nodeKey={key} opacity={active ? 1 : 0.35}>
                     <g transform={`translate(${xR}, ${y})`}>
                       <circle cx={0} cy={0} r={r} fill="none" stroke={accent} strokeWidth={1.5} />
                       <circle cx={0} cy={0} r={2} fill={accent} />
@@ -514,8 +519,8 @@ export default function ThemeGraph({
               <button
                 type="button"
                 onClick={() => {
-                  const firstCompany = companies[0];
-                  const firstExpert = experts[0];
+                  const firstCompany = graphCompanies[0];
+                  const firstExpert = graphExperts[0];
                   if (firstCompany) focusNode(companyKey(firstCompany.id));
                   else if (firstExpert) focusNode(expertKey(firstExpert.id));
                 }}
@@ -529,4 +534,13 @@ export default function ThemeGraph({
       </div>
     </div>
   );
+}
+
+function uniqueNodes<T extends { id: string }>(items: T[]) {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  });
 }
