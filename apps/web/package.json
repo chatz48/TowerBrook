@@ -19,7 +19,7 @@
     "db:seed": "node scripts/seed-supabase.mjs",
     "db:seed:graph": "node scripts/seed-people-graph.mjs",
     "product:score": "node scripts/score-product-readiness.mjs",
-    "test:unit": "node --experimental-strip-types --test tests/*.test.mjs",
+    "test:unit": "node --experimental-strip-types --test tests/*.test.mjs tests/*.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
@@ -28,7 +28,6 @@
     "test:e2e:report": "playwright show-report playwright-report"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.100.1",
     "@supabase/supabase-js": "^2.107.0",
     "next": "16.2.6",
     "pdf-parse": "^2.4.5",
