@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReportModel, ReportSection, ReportSource } from "@/lib/report";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import ReportExportControls from "./ReportExportControls";
-import { PageShell } from "@/app/components/ui";
+import { DataPageHeader, PageShell } from "@/app/components/ui";
 
 interface FocusContext {
   kind: "expert" | "company";
@@ -20,29 +20,11 @@ export default function ReportWorkspace({
 }) {
   return (
     <PageShell>
-        <header className="ee-panel rounded-lg p-5">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-            <div>
-              <div className="ee-label text-accent">Partner-ready work product</div>
-              <h1 className="mt-2 text-[28px] font-semibold tracking-tight">
-                {report.reportName}
-              </h1>
-              <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
-                A reviewable memo assembled from the current expert, company,
-                deal, and source graph. Use it to decide who to call, which
-                companies to prioritize, and which claims need source confirmation
-                before circulation.
-              </p>
-              <div className="mt-4 flex flex-wrap gap-4 text-[11px] text-ink-faint">
-                <span>Drafted {report.generatedAt}</span>
-                <span>{report.stats.sources} source records</span>
-                <span>{report.stats.experts} experts mapped</span>
-                <span>{report.stats.companies} companies mapped</span>
-              </div>
-            </div>
-            <ReportExportControls markdown={report.markdown} fileName={report.reportName} />
-          </div>
-        </header>
+        <DataPageHeader
+          title={report.reportName}
+          meta={`Drafted ${report.generatedAt} · ${report.stats.sources} sources · ${report.stats.experts} experts · ${report.stats.companies} companies`}
+          actions={<ReportExportControls markdown={report.markdown} fileName={report.reportName} />}
+        />
 
         {focusContext ? (
           <section className="mt-5 rounded-lg border border-blue-200 bg-blue-50 p-4">
@@ -75,8 +57,8 @@ export default function ReportWorkspace({
           </section>
         ) : null}
 
-        <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-          <main className="space-y-5">
+        <section className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1fr)_340px]">
+          <main className="space-y-3">
             {report.sections.map((section) => (
               <ReportSectionCard
                 key={section.id}
@@ -86,10 +68,10 @@ export default function ReportWorkspace({
             ))}
           </main>
 
-          <aside className="space-y-5 xl:sticky xl:top-20 xl:self-start">
-            <section className="ee-panel rounded-lg p-5">
+          <aside className="space-y-3 xl:sticky xl:top-20 xl:self-start">
+            <section className="ee-panel rounded-lg p-3">
               <div className="ee-label text-ink">Review before circulation</div>
-              <ul className="mt-4 space-y-3 text-[12px] leading-relaxed text-ink-soft">
+              <ul className="mt-2 space-y-1.5 text-[11px] leading-snug text-ink-soft">
                 <li>Confirm every material claim has a source that supports that exact claim.</li>
                 <li>Validate ownership, scale, and recent activity directly with named experts.</li>
                 <li>Separate graph coverage from a complete market census.</li>
@@ -97,9 +79,9 @@ export default function ReportWorkspace({
               </ul>
             </section>
 
-            <section className="ee-panel rounded-lg p-5">
+            <section className="ee-panel rounded-lg p-3">
               <div className="ee-label text-ink">Use this memo</div>
-              <div className="mt-4 space-y-2">
+              <div className="mt-2 space-y-2">
                 <Link href={report.themeHref} className="ee-button ee-button-secondary w-full">
                   Open Command Centre
                 </Link>
@@ -115,9 +97,9 @@ export default function ReportWorkspace({
               </div>
             </section>
 
-            <section className="ee-panel rounded-lg p-5">
+            <section className="ee-panel rounded-lg p-3">
               <div className="ee-label text-ink">Evidence coverage</div>
-              <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="mt-2 grid grid-cols-2 gap-2">
                 <EvidenceMetric label="Sources" value={report.stats.sources} />
                 <EvidenceMetric label="High confidence" value={report.stats.highConfidenceSources} />
                 <EvidenceMetric label="Experts" value={report.stats.experts} />
