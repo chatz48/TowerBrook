@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReportModel, ReportSection, ReportSource } from "@/lib/report";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import ReportExportControls from "./ReportExportControls";
+import LiveReportEnhance from "./LiveReportEnhance";
 import { DataPageHeader, PageShell } from "@/app/components/ui";
 
 interface FocusContext {
@@ -14,16 +15,23 @@ interface FocusContext {
 export default function ReportWorkspace({
   report,
   focusContext,
+  themeId = "all",
 }: {
   report: ReportModel;
   focusContext?: FocusContext;
+  themeId?: string;
 }) {
   return (
     <PageShell>
         <DataPageHeader
           title={report.reportName}
           meta={`Drafted ${report.generatedAt} · ${report.stats.sources} sources · ${report.stats.experts} experts · ${report.stats.companies} companies`}
-          actions={<ReportExportControls markdown={report.markdown} fileName={report.reportName} />}
+          actions={
+            <div className="flex flex-col items-end gap-2">
+              <ReportExportControls markdown={report.markdown} fileName={report.reportName} />
+              <LiveReportEnhance themeId={themeId} fileName={report.reportName} />
+            </div>
+          }
         />
 
         {focusContext ? (
