@@ -59,7 +59,7 @@ export default function SearchBox({
         ) : null}
       </div>
       <div className="mt-2 flex items-center justify-between gap-3 text-[11px] text-ink-faint">
-        <span>Search scope: {scopeLabel}</span>
+        {scopeLabel ? <span>Search scope: {scopeLabel}</span> : <span />}
         <span>{index.length} records</span>
       </div>
 

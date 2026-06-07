@@ -19,7 +19,7 @@
     "db:seed": "node scripts/seed-supabase.mjs",
     "db:seed:graph": "node scripts/seed-people-graph.mjs",
     "product:score": "node scripts/score-product-readiness.mjs",
-    "test:unit": "node --experimental-strip-types --test tests/deals.test.mjs"
+    "test:unit": "node --experimental-strip-types --test tests/*.test.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.100.1",

@@ -20,7 +20,7 @@ import { buildReport, type ReportModel } from "@/lib/report";
 import type { Expert, ExpertType, ThemeId } from "@/lib/types";
 import SearchBox, { type SearchItem } from "./components/SearchBox";
 import ReportExportControls from "./components/reports/ReportExportControls";
-import { Badge } from "./components/ui";
+import { Badge, PageShell } from "./components/ui";
 
 const CORE_ARCHETYPES: ExpertType[] = [
   "ex-founder",
@@ -132,12 +132,11 @@ export default async function Home() {
   ];
 
   return (
-    <div className="ee-shell px-3 py-5 sm:px-5">
-      <div className="mx-auto max-w-[1540px]">
+    <PageShell>
         <section className="ee-panel rounded-lg p-5 sm:p-6">
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_520px] xl:items-end">
             <div>
-              <div className="ee-label text-accent">Command centre</div>
+              <div className="ee-label text-accent">Command Centre</div>
               <h1 className="mt-2 max-w-3xl text-[30px] font-semibold tracking-tight">
                 Start with the next investment decision
               </h1>
@@ -147,7 +146,7 @@ export default async function Home() {
                 next diligence step.
               </p>
             </div>
-            <SearchBox index={index} scopeLabel="Full expert and company graph" />
+            <SearchBox index={index} scopeLabel="" />
           </div>
 
         </section>
@@ -169,16 +168,20 @@ export default async function Home() {
 
         <details className="mt-5 ee-panel rounded-lg">
           <summary className="cursor-pointer list-none px-5 py-4 marker:hidden">
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-ink-faint">
-              <span className="ee-label text-ink">Coverage snapshot</span>
-              <CoverageFact value={experts.length} label="expert profiles" />
-              <CoverageFact value={companies.length} label="companies" />
-              <CoverageFact value={sourceCount} label="source records" />
-              <CoverageFact
-                value={directExperts.length + directCompanies.length}
-                label="public TowerBrook paths"
-              />
-              <span className="ml-auto text-[12px] font-semibold text-accent">Expand</span>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <div className="ee-label text-ink">Coverage snapshot</div>
+                <div className="mt-1 flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-ink-faint">
+                  <CoverageFact value={experts.length} label="expert profiles" />
+                  <CoverageFact value={companies.length} label="companies" />
+                  <CoverageFact value={sourceCount} label="source records" />
+                  <CoverageFact
+                    value={directExperts.length + directCompanies.length}
+                    label="public TowerBrook paths"
+                  />
+                </div>
+              </div>
+              <span className="shrink-0 text-[12px] font-semibold text-accent">Expand</span>
             </div>
           </summary>
           <div className="border-t border-line px-5 pb-5 pt-2 text-[12px] text-ink-soft">
@@ -268,7 +271,7 @@ export default async function Home() {
 
                   <div className="flex items-center justify-between gap-3 border-t border-line bg-[#fbfcff] px-5 py-4">
                     <span className="text-[11px] text-ink-faint">
-                      {brief.stats.targets} independent targets · {brief.stats.exits} acquired comps
+                      {brief.stats.targets} independent targets · {brief.stats.exits} acquired comparables
                     </span>
                     <Link
                       href="/campaign"
@@ -309,8 +312,7 @@ export default async function Home() {
             actionLabel="Review all experts"
           />
         </section>
-      </div>
-    </div>
+    </PageShell>
   );
 }
 
@@ -383,7 +385,7 @@ function BlankSpacesCard({
   themeFocus: ThemeId | "all";
   visibleThemes: typeof THEMES;
 }) {
-  const highGaps = matrixRows.filter((row) => row.gap === "high");
+  const openGaps = matrixRows.filter((row) => row.gap !== "low");
   const themeLabel =
     themeFocus === "all" ? "across all themes" : visibleThemes[0]?.name ?? "this theme";
 
@@ -392,12 +394,12 @@ function BlankSpacesCard({
       <div className="ee-label text-ink">Where we&apos;re thin</div>
       <h2 className="mt-2 text-[18px] font-semibold tracking-tight">Coverage gaps to close</h2>
       <ul className="mt-4 space-y-2 text-[12px] leading-relaxed text-ink-soft">
-        {highGaps.length ? (
-          highGaps.slice(0, 4).map((row) => (
+        {openGaps.length ? (
+          openGaps.slice(0, 4).map((row) => (
             <li key={row.type} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-line bg-white px-3 py-2">
               <span>
-                No verified <strong className="text-ink">{EXPERT_TYPE_LABEL[row.type]}</strong> experts
-                {" "}{themeLabel}
+                <strong className="text-ink">{EXPERT_TYPE_LABEL[row.type]}</strong> coverage is {row.gap}:
+                {" "}{row.verified} verified / {row.contactable} contactable {themeLabel}
               </span>
               <Link
                 href={`/discover?gap=${encodeURIComponent(EXPERT_TYPE_LABEL[row.type])}`}
@@ -409,7 +411,7 @@ function BlankSpacesCard({
           ))
         ) : (
           <li className="rounded-md border border-line bg-white px-3 py-2">
-            Core archetypes are covered {themeLabel}. Review source freshness in the research queue.
+            Core archetypes are covered {themeLabel}. Review source freshness before IC circulation.
           </li>
         )}
       </ul>
@@ -470,14 +472,18 @@ function GuidedWorkflow({
           <WorkflowCard
             step="03"
             title="Fill coverage gaps"
-            body={`${gapCount} expert archetype gap${gapCount === 1 ? "" : "s"} need more research before the map is complete.`}
+            body={
+              gapCount === 1
+                ? "1 expert archetype gap needs more research before the map is complete."
+                : `${gapCount} expert archetype gaps need more research before the map is complete.`
+            }
             href={`/discover${themeQuery}${themeQuery ? "&" : "?"}severity=high`}
             action="Open queue"
           />
           <WorkflowCard
             step="04"
             title="Prepare meeting pack"
-            body="Convert sources, calls, targets, gaps and next steps into the theme memo."
+            body="Assemble sources, calls, targets, gaps and next steps into the theme memo."
             href="/reports"
             action="Review memo"
           />

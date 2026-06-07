@@ -1,3 +1,7 @@
+import logging
+import time
+from uuid import uuid4
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -8,6 +12,9 @@ from app.repositories.supabase_repo import repo
 from app.services.embeddings_bge import embeddings
 
 app = FastAPI(title="TowerBrook Backend API", version="0.1.0")
+logger = logging.getLogger("towerbrook.api")
+_request_count = 0
+_error_count = 0
 
 _settings = get_settings()
 _allowed_origins = [
@@ -20,7 +27,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=_allowed_origins or ["*"],
     allow_credentials=False,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -35,9 +42,16 @@ app.include_router(search.router)
 
 @app.middleware("http")
 async def require_api_token(request: Request, call_next):
+    global _request_count, _error_count
+    request_id = request.headers.get("x-request-id") or str(uuid4())
+    started = time.perf_counter()
+    _request_count += 1
     settings = get_settings()
+    is_cron_job = request.url.path == "/jobs/process-next" and request.method == "GET"
     is_public = request.url.path == "/health" or (
-        request.url.path == "/jobs/process-next" and request.method == "GET"
+        is_cron_job
+        and settings.cron_secret
+        and request.headers.get("authorization") == f"Bearer {settings.cron_secret}"
     )
     if (
         settings.backend_api_token
@@ -46,12 +60,51 @@ async def require_api_token(request: Request, call_next):
         and request.headers.get("authorization")
         != f"Bearer {settings.backend_api_token}"
     ):
-        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
-    return await call_next(request)
+        _error_count += 1
+        response = JSONResponse(
+            status_code=401,
+            content={
+                "error": {
+                    "code": "unauthorized",
+                    "message": "Unauthorized",
+                    "request_id": request_id,
+                }
+            },
+        )
+    else:
+        try:
+            response = await call_next(request)
+            if response.status_code >= 500:
+                _error_count += 1
+        except Exception:
+            _error_count += 1
+            logger.exception(
+                "Unhandled API request error",
+                extra={
+                    "request_id": request_id,
+                    "method": request.method,
+                    "path": request.url.path,
+                },
+            )
+            raise
+
+    elapsed_ms = int((time.perf_counter() - started) * 1000)
+    response.headers["x-request-id"] = request_id
+    response.headers["x-response-time-ms"] = str(elapsed_ms)
+    logger.info(
+        "API request complete",
+        extra={
+            "request_id": request_id,
+            "method": request.method,
+            "path": request.url.path,
+            "status_code": response.status_code,
+            "duration_ms": elapsed_ms,
+        },
+    )
+    return response
 
 
-@app.get("/health")
-async def health():
+def health_payload():
     settings = get_settings()
     return {
         "ok": True,
@@ -62,4 +115,16 @@ async def health():
         "live_search_configured": bool(settings.keirolabs_api_key or settings.tavily_api_key or settings.serper_api_key or settings.brave_search_api_key),
         "embedding_model": embeddings.model_name,
         "embedding_dimensions": embeddings.dimensions,
+        "requests_observed": _request_count,
+        "errors_observed": _error_count,
     }
+
+
+@app.get("/health")
+async def health():
+    return health_payload()
+
+
+@app.get("/api/v1/health")
+async def versioned_health():
+    return health_payload()

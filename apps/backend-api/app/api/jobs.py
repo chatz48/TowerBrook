@@ -221,8 +221,8 @@ async def _process_claimed_job(job):
             },
         )
         return {"processed": True, "job_id": job.id, "keirolabs_requests_used": requests_used, **totals}
-    except Exception as exc:
-        error = str(exc) or repr(exc)
+    except Exception:
+        error = "Research job failed during processing. Check server logs with the request id for details."
         repo.update_job(job.id, {"status": "failed", "error": error})
         return {"processed": True, "job_id": job.id, "error": error}
 

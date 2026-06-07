@@ -19,6 +19,7 @@ export default function PageAwareChat() {
   const [loading, setLoading] = useState(false);
   const [progressStep, setProgressStep] = useState(0);
   const [error, setError] = useState("");
+  const [lastQuestion, setLastQuestion] = useState("");
   const [slowResponse, setSlowResponse] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -35,6 +36,7 @@ export default function PageAwareChat() {
       ...current,
       { id: makePageChatId("user"), role: "user", content: cleanQuestion },
     ]);
+    setLastQuestion(cleanQuestion);
     setLoading(true);
     setProgressStep(0);
     setError("");
@@ -186,7 +188,17 @@ export default function PageAwareChat() {
           <div className="max-h-[56vh] overflow-y-auto p-3">
             {error ? (
               <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-                {error}
+                <p>{error}</p>
+                {lastQuestion ? (
+                  <button
+                    type="button"
+                    onClick={() => void submit(lastQuestion)}
+                    disabled={loading}
+                    className="mt-2 rounded border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-700 disabled:opacity-50"
+                  >
+                    Retry
+                  </button>
+                ) : null}
               </div>
             ) : null}
 

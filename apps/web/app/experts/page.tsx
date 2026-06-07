@@ -11,6 +11,10 @@ import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 import ExpertFilters from "./ExpertFilters";
 import { expertReadiness } from "@/lib/investment-readiness";
 import ExpertCallList from "./ExpertCallList";
+import OperatorWorkflowRail from "@/app/components/OperatorWorkflowRail";
+import { singleParam } from "@/lib/url-params";
+import { PageShell } from "@/app/components/ui";
+import { expertCallAngle } from "@/lib/expert-copy";
 
 export default async function ExpertsPage({
   searchParams,
@@ -76,14 +80,12 @@ export default async function ExpertsPage({
   ).length;
 
   return (
-    <div className="ee-shell px-3 py-5 sm:px-5">
-      <div className="mx-auto max-w-[1540px]">
+    <PageShell>
         <header className="mb-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
           <div>
             <h1 className="text-[26px] font-semibold tracking-tight">Expert Call List</h1>
             <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
-              A ranked slate of people to call, filtered by theme, specialty and expert type.
-              Each row shows why the person matters, what companies they can unlock, and how to reach them.
+              {ranked.length} matches in scope · {candidateCount} research candidates · {advisorGaps.length} advisor gaps.
             </p>
           </div>
           <div className="ee-panel rounded-lg p-4">
@@ -92,7 +94,7 @@ export default async function ExpertsPage({
               {firstCall?.name ?? "No matching expert"}
             </div>
             <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-ink-soft">
-              {firstCall?.signals?.[0] ?? firstCall?.whyRelevant ?? "Broaden the filters or open the research queue to fill the coverage gap."}
+              {firstCall?.signals?.[0] ?? (firstCall ? expertCallAngle(firstCall) : "Broaden the filters or open the research queue to fill the coverage gap.")}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               {firstCall ? (
@@ -120,6 +122,29 @@ export default async function ExpertsPage({
           initialReadiness={selectedReadiness}
           initialQuery={singleParam(params.q) ?? ""}
         />
+        <OperatorWorkflowRail
+          title="Build a call slate, then move it into execution"
+          subtitle="Use this page to choose the best first calls, verify evidence quality, and hand the selected people into the origination plan."
+          steps={[
+            {
+              label: "Select",
+              detail: "Pick founder, operator and advisor coverage that explains the market.",
+            },
+            {
+              label: "Sequence",
+              detail: "Send selected experts into campaign phases with the theme already scoped.",
+            },
+            {
+              label: "Close gaps",
+              detail: "Open the research queue when a needed archetype is missing or thin.",
+            },
+          ]}
+          actions={[
+            { label: "Open campaign", href: "/campaign", primary: true },
+            { label: "Fill gaps", href: "/discover" },
+            { label: "Meeting memo", href: "/reports" },
+          ]}
+        />
         <div className="ee-panel mb-5 rounded-lg px-4 py-3">
           <div className="flex flex-wrap gap-x-5 gap-y-2 text-[11px] text-ink-faint">
             <span><strong className="text-ink">{ranked.length}</strong> call-ready matches</span>
@@ -134,7 +159,7 @@ export default async function ExpertsPage({
             <div>
               <h2 className="ee-label text-ink">Call-ready experts</h2>
               <p className="mt-1 text-[11px] text-ink-faint">
-                Prioritized for outreach, company discovery and source-backed diligence.
+                Pick the calls that can change the next investment decision.
               </p>
             </div>
             <Link href="/discover" className="ee-link text-[12px]">
@@ -159,11 +184,6 @@ export default async function ExpertsPage({
             })}
           />
         </section>
-      </div>
-    </div>
+    </PageShell>
   );
-}
-
-function singleParam(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
 }

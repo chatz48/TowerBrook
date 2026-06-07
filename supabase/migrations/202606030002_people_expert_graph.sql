@@ -1,6 +1,7 @@
 create extension if not exists pgcrypto;
 create extension if not exists vector;
 
+drop function if exists public.match_source_chunks(vector(384), integer, jsonb);
 drop function if exists public.match_source_chunks(vector(1536), integer, jsonb);
 drop function if exists public.match_source_chunks(vector(384), integer, jsonb);
 drop index if exists public.idx_source_chunks_embedding;

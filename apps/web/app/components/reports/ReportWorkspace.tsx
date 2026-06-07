@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReportModel, ReportSection, ReportSource } from "@/lib/report";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import ReportExportControls from "./ReportExportControls";
+import { PageShell } from "@/app/components/ui";
 
 interface FocusContext {
   kind: "expert" | "company";
@@ -18,8 +19,7 @@ export default function ReportWorkspace({
   focusContext?: FocusContext;
 }) {
   return (
-    <div className="ee-shell px-3 py-5 sm:px-5">
-      <div className="mx-auto max-w-[1540px]">
+    <PageShell>
         <header className="ee-panel rounded-lg p-5">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
             <div>
@@ -128,8 +128,7 @@ export default function ReportWorkspace({
         </section>
 
         <SourceRegister sources={report.sources} />
-      </div>
-    </div>
+    </PageShell>
   );
 }
 

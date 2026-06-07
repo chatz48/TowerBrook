@@ -2,7 +2,7 @@ import sourceRegister from "@/data/source-register.json";
 import warmPathData from "@/data/towerbrook-warm-paths.json";
 import candidates from "@/data/candidates.json";
 import deals from "@/data/deals.json";
-import { ConfidenceBars } from "@/app/components/ui";
+import { ConfidenceBars, PageShell } from "@/app/components/ui";
 import { getExperts } from "@/lib/data";
 import { getThemeFocus } from "@/lib/theme-focus-server";
 
@@ -69,8 +69,7 @@ export default async function SourcesPage() {
   }
 
   return (
-    <div className="ee-shell px-3 py-5 sm:px-5">
-      <div className="mx-auto max-w-[1540px]">
+    <PageShell>
         <header className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-[26px] font-semibold tracking-tight">Source Register</h1>
@@ -164,7 +163,6 @@ export default async function SourcesPage() {
             </table>
           </div>
         </section>
-      </div>
-    </div>
+    </PageShell>
   );
 }

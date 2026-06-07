@@ -263,12 +263,61 @@
   text-align: right;
 }
 
+.directoryHint {
+  margin: -3px 0 9px;
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
 .directoryList {
   display: grid;
   gap: 6px;
   max-height: 292px;
   overflow: auto;
   padding-right: 4px;
+}
+
+.directoryGroup {
+  border: 1px solid #e0e6ef;
+  border-radius: 7px;
+  background: #fbfcff;
+  overflow: hidden;
+}
+
+.directoryGroup summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 9px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.directoryGroup summary::-webkit-details-marker {
+  display: none;
+}
+
+.directoryGroup summary span {
+  color: #334155;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.directoryGroup summary small {
+  color: #64748b;
+  font-size: 10px;
+}
+
+.directoryGroup > div {
+  display: grid;
+  gap: 5px;
+  border-top: 1px solid #e0e6ef;
+  padding: 6px;
+  background: #fff;
 }
 
 .directoryList button {
@@ -439,6 +488,186 @@
   scroll-margin-top: 104px;
 }
 
+.returnContext {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #dfe5ee;
+  border-radius: 7px;
+  background: #fff;
+  margin-bottom: 10px;
+  padding: 9px 12px;
+}
+
+.returnContext a {
+  color: #075fe4;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.returnContext a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.returnContext span {
+  min-width: 0;
+  overflow: hidden;
+  color: #64748b;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.commandBar {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(360px, 1.1fr);
+  gap: 12px;
+  border: 1px solid #d6e3f4;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  margin-bottom: 10px;
+  padding: 12px;
+}
+
+.commandPrimary {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.commandPrimary span,
+.commandPrimary strong,
+.commandPrimary small {
+  display: block;
+}
+
+.commandPrimary div > span {
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.commandPrimary strong {
+  margin-top: 2px;
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.commandPrimary small {
+  margin-top: 3px;
+  color: #526176;
+  font-size: 11px;
+}
+
+.commandActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.commandActions button,
+.commandLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  border: 1px solid #d8e1ec;
+  border-radius: 6px;
+  background: #fff;
+  color: #263244;
+  padding: 0 10px;
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.commandActions button:hover,
+.commandLink:hover {
+  border-color: #9bbcf0;
+  color: #075fe4;
+}
+
+.commandActions .activeCommandButton {
+  border-color: #075fe4;
+  background: #075fe4;
+  color: #fff;
+}
+
+.connectedRail {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  overflow: auto;
+  padding-top: 9px;
+  border-top: 1px solid #e6edf6;
+}
+
+.connectedRail > span {
+  flex: 0 0 auto;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.connectedRail button {
+  display: inline-grid;
+  grid-template-columns: 24px minmax(80px, auto) auto;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  max-width: 270px;
+  border: 1px solid #dce3ec;
+  border-radius: 999px;
+  background: #fff;
+  color: #263244;
+  padding: 6px 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.connectedRail button:hover {
+  border-color: #9bbcf0;
+  background: #f7faff;
+}
+
+.connectedRail i {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--edge-color);
+}
+
+.connectedRail b {
+  overflow: hidden;
+  color: #172033;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.connectedRail em {
+  color: #64748b;
+  font-size: 11px;
+  font-style: normal;
+}
+
 .mockupTabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -597,9 +826,42 @@
   outline: none;
 }
 
+.nodeCard {
+  transition:
+    filter 160ms ease,
+    stroke-width 160ms ease,
+    transform 160ms ease;
+}
+
 .svgNode:hover .nodeCard,
 .svgNode:focus .nodeCard {
   filter: drop-shadow(0 6px 12px rgba(15, 23, 42, 0.12));
+}
+
+.selectedSvgNode .nodeCard {
+  filter: drop-shadow(0 10px 18px rgba(7, 95, 228, 0.18));
+}
+
+.selectedHalo {
+  fill: none;
+  stroke: #075fe4;
+  stroke-opacity: 0.16;
+  stroke-width: 20;
+  animation: graphPulse 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes graphPulse {
+  0%,
+  100% {
+    stroke-opacity: 0.08;
+    r: 52;
+  }
+
+  50% {
+    stroke-opacity: 0.22;
+    r: 66;
+  }
 }
 
 .nodeBadge {
@@ -682,7 +944,23 @@
   min-width: 0;
 }
 
-.pathStrip li > span:last-of-type {
+.pathStrip button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+
+.pathStrip button:hover span:last-child {
+  color: #075fe4;
+}
+
+.pathStrip li button > span:last-of-type {
   max-width: 145px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1098,6 +1376,16 @@
   border-radius: 7px;
   background: #fbfcff;
   padding: 12px;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    transform 140ms ease;
+}
+
+.routePrimary li:hover {
+  border-color: #9bbcf0;
+  background: #f7faff;
+  transform: translateY(-1px);
 }
 
 .routePrimary button,
@@ -1163,6 +1451,13 @@
 .routeList small {
   margin-top: 3px;
   color: #64748b;
+}
+
+.routeActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
 }
 
 .relationshipBars {
@@ -1279,10 +1574,15 @@
   }
 
   .mockupTabs,
+  .commandBar,
   .pathHero,
   .matrixHeader,
   .routeBoard {
     grid-template-columns: 1fr;
+  }
+
+  .commandActions {
+    justify-content: flex-start;
   }
 
   .routePrimary {
@@ -1326,5 +1626,15 @@
 
   .pathSummary {
     grid-template-columns: 1fr;
+  }
+
+  .routeActions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .selectedHalo {
+    animation: none;
   }
 }

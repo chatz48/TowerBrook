@@ -4,6 +4,8 @@ import { runDealEnrichment } from "@/lib/deal-enrichment";
 import { callBackendApi, hasBackendApi } from "@/lib/backend-api";
 import { hasModel } from "@/lib/llm";
 
+const MAX_INGEST_TEXT_CHARS = 50_000;
+
 export async function POST(request: Request) {
   try {
     if (hasBackendApi()) {
@@ -17,6 +19,15 @@ export async function POST(request: Request) {
       return Response.json(
         { error: "Paste deal text or extracted source content before ingestion." },
         { status: 400 },
+      );
+    }
+    if (body.text.length > MAX_INGEST_TEXT_CHARS) {
+      return Response.json(
+        {
+          error:
+            "Submitted source text is too long. Keep uploads under 50,000 characters and split larger source packs into separate submissions.",
+        },
+        { status: 413 },
       );
     }
 
@@ -53,9 +64,10 @@ export async function POST(request: Request) {
         : "Persisted. Run enrichment to fetch missing facts from follow-up sources.",
     });
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Ingestion failed";
     return Response.json(
-      { error: error instanceof Error ? error.message : "Ingestion failed" },
-      { status: 500 },
+      { error: message },
+      { status: message.includes("too long") ? 413 : 500 },
     );
   }
 }
@@ -70,12 +82,18 @@ async function forwardToIntelligenceApi(request: Request) {
     });
   }
   const body = await request.json();
+  const text = String(body.text ?? "");
+  if (text.length > MAX_INGEST_TEXT_CHARS) {
+    throw new Error(
+      "Submitted source text is too long. Keep uploads under 50,000 characters and split larger source packs into separate submissions.",
+    );
+  }
   return callBackendApi("/ingest/json", {
     method: "POST",
     body: JSON.stringify({
       url: body.url,
       title: body.title,
-      text: body.text,
+      text,
       source_type: "user_upload",
       theme_id: body.themeId,
       metadata: { enrich: body.enrich },
@@ -109,12 +127,24 @@ async function readIngestRequest(request: Request): Promise<{
 
   if (file instanceof File) {
     const fileText = await readUploadedFile(file);
+    const text = [rawText, fileText].filter(Boolean).join("\n\n");
+    if (text.length > MAX_INGEST_TEXT_CHARS) {
+      throw new Error(
+        "Submitted source text is too long. Keep uploads under 50,000 characters and split larger source packs into separate submissions.",
+      );
+    }
     return {
-      text: [rawText, fileText].filter(Boolean).join("\n\n"),
+      text,
       title: title || file.name,
       url: url || undefined,
       enrich,
     };
+  }
+
+  if (rawText.length > MAX_INGEST_TEXT_CHARS) {
+    throw new Error(
+      "Submitted source text is too long. Keep uploads under 50,000 characters and split larger source packs into separate submissions.",
+    );
   }
 
   return {

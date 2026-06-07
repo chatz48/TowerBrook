@@ -9,7 +9,7 @@ import {
   resolveDealExperts,
 } from "@/lib/deals";
 import { listDeals, loadDeal } from "@/lib/deal-repository";
-import { Badge, BackLink, Confidence, ConfidenceBars, SourceLinks, ThemeTag } from "@/app/components/ui";
+import { Badge, BackLink, Confidence, ConfidenceBars, PageShell, SourceLinks, ThemeTag } from "@/app/components/ui";
 import DealEnrichmentButton from "@/app/components/DealEnrichmentButton";
 
 export async function generateStaticParams() {
@@ -33,8 +33,7 @@ export default async function DealPage({
   const conflicts = deal.contradictoryFacts ?? [];
 
   return (
-    <div className="ee-shell px-3 py-5 sm:px-5">
-      <div className="mx-auto max-w-[1540px]">
+    <PageShell>
         <BackLink href="/deals">Back to deals</BackLink>
 
         <header className="ee-panel mt-5 rounded-lg p-5">
@@ -255,8 +254,7 @@ export default async function DealPage({
             </section>
           </aside>
         </div>
-      </div>
-    </div>
+    </PageShell>
   );
 }
 

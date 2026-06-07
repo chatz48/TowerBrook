@@ -13,6 +13,17 @@ def test_health():
     body = response.json()
     assert body["ok"] is True
     assert body["embedding_dimensions"] == 384
+    assert "requests_observed" in body
+    assert "errors_observed" in body
+    assert response.headers["x-request-id"]
+    assert response.headers["x-response-time-ms"].isdigit()
+
+
+def test_versioned_health():
+    response = client.get("/api/v1/health")
+    assert response.status_code == 200
+    assert response.json()["ok"] is True
+    assert response.headers["x-request-id"]
 
 
 def test_create_and_get_job():
@@ -73,6 +84,10 @@ def test_api_token_protects_non_public_routes():
     try:
         response = client.post("/discovery/jobs", json={"theme_id": "grid-infrastructure"})
         assert response.status_code == 401
+        body = response.json()
+        assert body["error"]["code"] == "unauthorized"
+        assert body["error"]["request_id"]
+        assert response.headers["x-request-id"] == body["error"]["request_id"]
 
         response = client.post(
             "/discovery/jobs",
@@ -104,3 +119,18 @@ def test_search_endpoint_uses_local_fallback_without_provider_keys():
     assert body["providers"]["keirolabs"] is False
     assert isinstance(body["results"], list)
     assert len(body["results"]) <= 3
+
+
+def test_ingest_json_rejects_oversized_source_text():
+    response = client.post(
+        "/ingest/json",
+        json={
+            "title": "Oversized source",
+            "text": "x" * 50_001,
+            "source_type": "user_upload",
+            "theme_id": "grid-infrastructure",
+        },
+    )
+
+    assert response.status_code == 413
+    assert "too long" in response.json()["detail"]

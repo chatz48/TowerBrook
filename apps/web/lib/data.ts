@@ -9,6 +9,68 @@ import type {
 } from "./types";
 import { filterTowerBrookEmployees } from "./employee-scope";
 
+const RELATIONSHIP_PRIORITY = {
+  founded: 100,
+  "co-founded": 95,
+  led: 90,
+  partner: 80,
+  board: 75,
+  advised: 70,
+  "invested-in": 65,
+  acquired: 60,
+  banked: 55,
+  "legal-counsel": 50,
+  served: 20,
+} satisfies Record<Expert["companies"][number]["relationship"], number>;
+
+function isGeneratedRelationshipNote(note: string | undefined, expertName?: string) {
+  if (!note) return true;
+  const normalized = note.trim().replace(/\s+/g, " ");
+  if (!normalized) return true;
+  if (!expertName) return /^.+ is related to .+\.$/i.test(normalized);
+  return normalized.toLowerCase() === `${expertName} is related to`.toLowerCase()
+    || new RegExp(`^${escapeRegExp(expertName)} is related to .+\\.$`, "i").test(normalized);
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function dedupeCompanyLinks(expert: Expert): Expert["companies"] {
+  const byCompany = new Map<string, Expert["companies"][number]>();
+  for (const link of expert.companies) {
+    const current = byCompany.get(link.companyId);
+    const next = isGeneratedRelationshipNote(link.note, expert.name)
+      ? { ...link, note: undefined }
+      : link;
+    if (!current) {
+      byCompany.set(link.companyId, next);
+      continue;
+    }
+    const currentPriority = RELATIONSHIP_PRIORITY[current.relationship] ?? 0;
+    const nextPriority = RELATIONSHIP_PRIORITY[next.relationship] ?? 0;
+    if (nextPriority > currentPriority) {
+      byCompany.set(link.companyId, {
+        ...next,
+        note: next.note ?? current.note,
+      });
+    } else if (!current.note && next.note) {
+      byCompany.set(link.companyId, { ...current, note: next.note });
+    }
+  }
+  return [...byCompany.values()];
+}
+
+function canonicalCompanyName(name: string) {
+  return name
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, "")
+    .replace(/\blimited\b|\bltd\b|\bplc\b|\binc\b|\bcorp\b/g, "")
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
 // JSON is the single source of truth; it's produced by the discovery pipeline
 // (scripts/) and hand-verified. We cast once here and build all derived views
 // in memory — there's no DB, which keeps the demo trivially runnable.
@@ -46,17 +108,43 @@ export function companiesForTheme(theme: ThemeId): Company[] {
 
 /** Resolve an expert's edges into full company records (for detail views). */
 export function resolveExpert(expert: Expert): ExpertWithCompanies {
+  const resolvedCompanies = dedupeCompanyLinks(expert)
+    .map((link) => {
+      const company = COMPANY_BY_ID.get(link.companyId);
+      return company
+        ? { company, relationship: link.relationship, note: link.note }
+        : null;
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null);
+
   return {
     ...expert,
-    resolvedCompanies: expert.companies
-      .map((link) => {
-        const company = COMPANY_BY_ID.get(link.companyId);
-        return company
-          ? { company, relationship: link.relationship, note: link.note }
-          : null;
-      })
-      .filter((x): x is NonNullable<typeof x> => x !== null),
+    companies: dedupeCompanyLinks(expert),
+    resolvedCompanies: dedupeResolvedCompanies(resolvedCompanies),
   };
+}
+
+function dedupeResolvedCompanies(
+  items: ExpertWithCompanies["resolvedCompanies"],
+): ExpertWithCompanies["resolvedCompanies"] {
+  const byName = new Map<string, ExpertWithCompanies["resolvedCompanies"][number]>();
+  for (const item of items) {
+    const key = canonicalCompanyName(item.company.name);
+    const current = byName.get(key);
+    if (!current) {
+      byName.set(key, item);
+      continue;
+    }
+    const currentPriority = RELATIONSHIP_PRIORITY[current.relationship] ?? 0;
+    const nextPriority = RELATIONSHIP_PRIORITY[item.relationship] ?? 0;
+    const keepNext =
+      item.company.confidence > current.company.confidence ||
+      (item.company.confidence === current.company.confidence && nextPriority > currentPriority);
+    byName.set(key, keepNext
+      ? { ...item, note: item.note ?? current.note }
+      : { ...current, note: current.note ?? item.note });
+  }
+  return [...byName.values()];
 }
 
 /**
@@ -73,15 +161,42 @@ export function companiesWithLinks(
   const visibleExperts = filterTowerBrookEmployees(EXPERTS, includeTowerBrookEmployees);
   const result = pool.map((company) => {
     const linkedExperts = visibleExperts.flatMap((expert) =>
-      expert.companies
+      dedupeCompanyLinks(expert)
         .filter((l) => l.companyId === company.id)
         .filter(() => !theme || expert.themes.includes(theme))
         .map((l) => ({ expert, relationship: l.relationship, note: l.note })),
     );
     return { ...company, linkedExperts, expertCount: linkedExperts.length };
   });
+  const deduped = new Map<string, CompanyWithLinks>();
+  for (const company of result) {
+    const key = canonicalCompanyName(company.name);
+    const existing = deduped.get(key);
+    if (!existing) {
+      deduped.set(key, company);
+      continue;
+    }
+    const mergedExperts = [...existing.linkedExperts, ...company.linkedExperts].filter(
+      (link, index, links) =>
+        links.findIndex(
+          (other) =>
+            other.expert.id === link.expert.id &&
+            other.relationship === link.relationship,
+        ) === index,
+    );
+    const winner =
+      company.expertCount > existing.expertCount ||
+      (company.expertCount === existing.expertCount && company.confidence > existing.confidence)
+        ? company
+        : existing;
+    deduped.set(key, {
+      ...winner,
+      linkedExperts: mergedExperts,
+      expertCount: mergedExperts.length,
+    });
+  }
   // Rank: expert density first, then confidence as a tie-breaker.
-  return result.sort(
+  return [...deduped.values()].sort(
     (a, b) => b.expertCount - a.expertCount || b.confidence - a.confidence,
   );
 }
@@ -93,7 +208,7 @@ export function companyWithLinks(
   const company = COMPANY_BY_ID.get(id);
   if (!company) return undefined;
   const linkedExperts = filterTowerBrookEmployees(EXPERTS, includeTowerBrookEmployees).flatMap((expert) =>
-    expert.companies
+    dedupeCompanyLinks(expert)
       .filter((l) => l.companyId === id)
       .map((l) => ({ expert, relationship: l.relationship, note: l.note })),
   );

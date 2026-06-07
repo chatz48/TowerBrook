@@ -4,6 +4,7 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import type { ExpertType, ThemeId } from "@/lib/types";
 import type { ThemeFocus } from "@/lib/investment-readiness";
+import { PageShell } from "@/app/components/ui";
 
 type CampaignStatus = "not-started" | "owner-assigned" | "outreach-sent" | "scheduled" | "completed" | "promoted" | "rejected";
 
@@ -115,8 +116,7 @@ export default function CampaignWorkspace({
   }, [callRows, state, targetRows]);
 
   return (
-    <div className="ee-shell px-3 py-5 sm:px-5">
-      <div className="mx-auto max-w-[1540px]">
+    <PageShell>
         <header className="ee-panel rounded-lg p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
@@ -202,8 +202,7 @@ export default function CampaignWorkspace({
             </section>
           </aside>
         </div>
-      </div>
-    </div>
+    </PageShell>
   );
 }
 

@@ -7,7 +7,7 @@ export function Badge({
   children,
   className = "",
 }: {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
 }) {
   return (
@@ -23,10 +23,26 @@ export function Panel({
   children,
   className = "",
 }: {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
 }) {
   return <section className={`ee-panel rounded-lg ${className}`}>{children}</section>;
+}
+
+export function PageShell({
+  children,
+  className = "",
+  innerClassName = "mx-auto max-w-[1540px]",
+}: {
+  children?: React.ReactNode;
+  className?: string;
+  innerClassName?: string;
+}) {
+  return (
+    <div className={`ee-shell px-3 py-5 sm:px-5 ${className}`}>
+      <div className={innerClassName}>{children}</div>
+    </div>
+  );
 }
 
 export function PanelHeader({

@@ -9,6 +9,7 @@ import { getTheme, THEMES } from "@/lib/themes";
 import { callBackendApi, hasBackendApi } from "@/lib/backend-api";
 import type { Company, Deal, Expert, ExpertType, Source, ThemeId } from "@/lib/types";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
+import { warmPathsForExpert, warmPathStatusLabel } from "@/lib/warm-paths";
 
 type SourceRecord = {
   source_id: string;
@@ -352,10 +353,7 @@ async function buildStructuredAnswer(
       firm: expert.org ?? firmFromHeadline(expert.headline),
       archetype: EXPERT_TYPE_LABEL[expert.type],
       relevance: clamp(Math.round(score), 1, 99),
-      access:
-        expert.access === "proprietary"
-          ? "No introduction path verified"
-          : "Known market participant",
+      access: expertAccessLabel(expert),
       momentum: momentumLabel(expert),
       why: expert.whyRelevant,
       citations,
@@ -566,6 +564,16 @@ async function buildStructuredAnswer(
   };
 }
 
+function expertAccessLabel(expert: Expert) {
+  const warmPath = warmPathsForExpert(expert.id)[0];
+  if (warmPath) return `${warmPathStatusLabel(warmPath.status)} via ${warmPath.intro_route}`;
+  if (expert.email) return "Direct email on file";
+  if (expert.linkedin) return "LinkedIn path on file";
+  return expert.access === "proprietary"
+    ? "Sourced outreach needed; rank driven by evidence and graph relevance"
+    : "Known market participant";
+}
+
 function normalizeChatHistory(history: ChatTurn[] | undefined): ChatTurn[] {
   if (!Array.isArray(history)) return [];
   return history
@@ -678,15 +686,16 @@ function buildSourceIndex(experts: Expert[], companies: Company[], deals: Deal[]
       return;
     }
     const source_id = `S${sources.size + 1}`;
+    const sourceType = classifySource(source);
     sources.set(source_id, {
       source_id,
       title: source.title,
       publisher: source.publisher ?? "Source on file",
       url: source.url,
-      source_type: classifySource(source),
+      source_type: sourceType,
       snippet: owner.description,
       entities: owner.entities.slice(0, 8),
-      confidence: owner.confidence,
+      confidence: sourceType === "Contact reference" ? Math.min(owner.confidence, 0.62) : owner.confidence,
     });
   };
 
@@ -873,6 +882,7 @@ function momentumLabel(expert: Expert): string {
 
 function classifySource(source: Source): string {
   const hay = `${source.title} ${source.publisher ?? ""}`.toLowerCase();
+  if (hay.includes("linkedin") || hay.includes("contactout") || hay.includes("email finder")) return "Contact reference";
   if (hay.includes("deal") || hay.includes("acquisition") || hay.includes("portfolio")) return "Deal / portfolio";
   if (hay.includes("profile") || hay.includes("team") || hay.includes("people")) return "Expert profile";
   if (hay.includes("regulator") || hay.includes("ofwat") || hay.includes("ferc")) return "Regulatory";

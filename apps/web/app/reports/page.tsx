@@ -3,6 +3,7 @@ import { getCompany, getExpert } from "@/lib/data";
 import { buildReport } from "@/lib/report";
 import { getThemeFocus } from "@/lib/theme-focus-server";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
+import { singleParam } from "@/lib/url-params";
 
 export default async function ReportsPage({
   searchParams,
@@ -43,8 +44,4 @@ export default async function ReportsPage({
       }
     />
   );
-}
-
-function singleParam(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
 }

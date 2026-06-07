@@ -1,21 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useSyncExternalStore } from "react";
-
-export type WorkspaceKind = "call" | "target" | "memo";
-
-interface WorkspaceItem {
-  id: string;
-  kind: WorkspaceKind;
-  name: string;
-  sub?: string;
-  href: string;
-  theme?: string;
-  note?: string;
-  status: string;
-  addedAt: string;
-}
+import { useMemo, useState } from "react";
+import {
+  upsertWorkspaceItem,
+  updateWorkspaceItem,
+  useWorkspaceItems,
+  WORKSPACE_KIND_LABEL,
+  WORKSPACE_STATUS_OPTIONS,
+  writeWorkspace,
+  type WorkspaceItem,
+  type WorkspaceKind,
+} from "@/lib/workspace";
 
 interface WorkspaceActionButtonProps {
   item: Omit<WorkspaceItem, "addedAt" | "status"> & { status?: string };
@@ -23,73 +19,65 @@ interface WorkspaceActionButtonProps {
   className?: string;
 }
 
-const STORAGE_KEY = "towerbrook-investor-workspace-v1";
-const WORKSPACE_EVENT = "towerbrook-investor-workspace-updated";
-
-const DEFAULT_STATUS: Record<WorkspaceKind, string> = {
-  call: "shortlisted",
-  target: "watchlist",
-  memo: "copilot note",
-};
-
-const KIND_LABEL: Record<WorkspaceKind, string> = {
-  call: "Experts to call",
-  target: "Companies to validate",
-  memo: "Memo notes",
-};
-
 export function WorkspaceActionButton({
   item,
   children,
   className = "ee-button ee-button-secondary min-h-8 px-3",
 }: WorkspaceActionButtonProps) {
-  const workspaceSnapshot = useSyncExternalStore(
-    subscribeWorkspace,
-    readWorkspaceSnapshot,
-    () => "[]",
-  );
+  const workspaceItems = useWorkspaceItems();
   const saved = useMemo(
-    () =>
-      parseWorkspace(workspaceSnapshot).some(
-        (existing) => existing.id === item.id && existing.kind === item.kind,
-      ),
-    [item.id, item.kind, workspaceSnapshot],
+    () => workspaceItems.some((existing) => existing.id === item.id && existing.kind === item.kind),
+    [item.id, item.kind, workspaceItems],
   );
 
   function save() {
-    const current = readWorkspace();
-    const nextItem: WorkspaceItem = {
-      ...item,
-      status: item.status ?? DEFAULT_STATUS[item.kind],
-      addedAt: new Date().toISOString(),
-    };
-    const next = [
-      nextItem,
-      ...current.filter((existing) => !(existing.id === item.id && existing.kind === item.kind)),
-    ].slice(0, 30);
-    writeWorkspace(next);
+    upsertWorkspaceItem(item);
     pulseBasketCounter();
   }
 
   return (
-    <button type="button" onClick={save} className={className} aria-pressed={saved}>
+    <button
+      type="button"
+      onClick={save}
+      className={`${className} ${
+        saved ? "border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" : ""
+      }`}
+      aria-pressed={saved}
+    >
       {saved ? "✓ Saved" : children}
     </button>
   );
 }
 
-export function isWorkspaceSaved(id: string, kind: WorkspaceKind): boolean {
-  return readWorkspace().some((item) => item.id === id && item.kind === kind);
+export function WorkspaceSavedBadge({
+  id,
+  kind,
+  className = "",
+}: {
+  id: string;
+  kind: WorkspaceKind;
+  className?: string;
+}) {
+  const workspaceItems = useWorkspaceItems();
+  const saved = useMemo(
+    () => workspaceItems.some((existing) => existing.id === id && existing.kind === kind),
+    [id, kind, workspaceItems],
+  );
+
+  if (!saved) return null;
+
+  return (
+    <span
+      className={`inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-700 ${className}`}
+    >
+      Saved
+    </span>
+  );
 }
 
 export default function InvestorWorkspaceTray() {
   const [open, setOpen] = useState(false);
-  const workspaceSnapshot = useSyncExternalStore(
-    subscribeWorkspace,
-    readWorkspaceSnapshot,
-    () => "[]",
-  );
-  const items = useMemo(() => parseWorkspace(workspaceSnapshot), [workspaceSnapshot]);
+  const items = useWorkspaceItems();
 
   const counts = useMemo(
     () => ({
@@ -100,7 +88,7 @@ export default function InvestorWorkspaceTray() {
     [items],
   );
   const basketPrompt = useMemo(() => {
-    const names = items.slice(0, 12).map((item) => `${KIND_LABEL[item.kind]}: ${item.name}`);
+    const names = items.slice(0, 12).map((item) => `${WORKSPACE_KIND_LABEL[item.kind]}: ${item.name}`);
     return encodeURIComponent(
       names.length
         ? `Prepare a call plan from the saved basket: call order, objective for each call, questions to ask, and what would raise or reduce conviction. Items: ${names.join("; ")}`
@@ -112,7 +100,7 @@ export default function InvestorWorkspaceTray() {
     const header = "Type,Name,Status,Theme,Note,Link";
     const rows = items.map((item) =>
       [
-        KIND_LABEL[item.kind],
+        WORKSPACE_KIND_LABEL[item.kind],
         item.name,
         item.status,
         item.theme ?? "",
@@ -198,6 +186,7 @@ export default function InvestorWorkspaceTray() {
                   items={items.filter((item) => item.kind === kind)}
                   onClear={clearKind}
                   onRemove={removeItem}
+                  onStatusChange={(item, status) => updateWorkspaceItem(item, { status })}
                 />
               ))
             ) : (
@@ -241,16 +230,18 @@ function WorkspaceSection({
   items,
   onClear,
   onRemove,
+  onStatusChange,
 }: {
   kind: WorkspaceKind;
   items: WorkspaceItem[];
   onClear: (kind: WorkspaceKind) => void;
   onRemove: (item: WorkspaceItem) => void;
+  onStatusChange: (item: WorkspaceItem, status: string) => void;
 }) {
   return (
     <section className="mb-4 last:mb-0">
       <div className="mb-2 flex items-center justify-between gap-3">
-        <h2 className="ee-label text-ink">{KIND_LABEL[kind]}</h2>
+        <h2 className="ee-label text-ink">{WORKSPACE_KIND_LABEL[kind]}</h2>
         {items.length ? (
           <button type="button" onClick={() => onClear(kind)} className="text-[12px] font-semibold text-accent">
             Clear
@@ -272,8 +263,35 @@ function WorkspaceSection({
                     </p>
                   ) : null}
                   <div className="mt-2 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.12em] text-ink-faint">
-                    <span>{item.status}</span>
+                    <label className="sr-only" htmlFor={`workspace-status-${item.kind}-${item.id}`}>
+                      Status for {item.name}
+                    </label>
+                    <select
+                      id={`workspace-status-${item.kind}-${item.id}`}
+                      value={item.status}
+                      onChange={(event) => onStatusChange(item, event.target.value)}
+                      className="rounded border border-line bg-white px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-soft"
+                    >
+                      {WORKSPACE_STATUS_OPTIONS[item.kind].map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
                     {item.theme ? <span>{item.theme}</span> : null}
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Link
+                      href={`/ask?prompt=${encodeURIComponent(
+                        `Review this saved ${item.kind === "call" ? "expert" : item.kind === "target" ? "company" : "note"} for the current investment workflow: ${item.name}. Context: ${item.note ?? item.sub ?? item.status}`,
+                      )}`}
+                      className="text-[11px] font-semibold text-accent hover:underline"
+                    >
+                      Ask Copilot
+                    </Link>
+                    <Link href="/campaign" className="text-[11px] font-semibold text-accent hover:underline">
+                      Use in campaign
+                    </Link>
                   </div>
                 </div>
                 <button
@@ -289,7 +307,7 @@ function WorkspaceSection({
           ))
         ) : (
           <div className="rounded-md border border-dashed border-line bg-paper p-3 text-[12px] text-ink-faint">
-            No {KIND_LABEL[kind].toLowerCase()} saved yet.
+            No {WORKSPACE_KIND_LABEL[kind].toLowerCase()} saved yet.
           </div>
         )}
       </div>
@@ -297,54 +315,9 @@ function WorkspaceSection({
   );
 }
 
-function readWorkspace(): WorkspaceItem[] {
-  return parseWorkspace(readWorkspaceSnapshot());
-}
-
-function readWorkspaceSnapshot(): string {
-  if (typeof window === "undefined") return "[]";
-  return window.localStorage.getItem(STORAGE_KEY) ?? "[]";
-}
-
-function parseWorkspace(value: string): WorkspaceItem[] {
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed.filter(isWorkspaceItem) : [];
-  } catch {
-    return [];
-  }
-}
-
-function subscribeWorkspace(onStoreChange: () => void) {
-  window.addEventListener(WORKSPACE_EVENT, onStoreChange);
-  window.addEventListener("storage", onStoreChange);
-  return () => {
-    window.removeEventListener(WORKSPACE_EVENT, onStoreChange);
-    window.removeEventListener("storage", onStoreChange);
-  };
-}
-
-function writeWorkspace(items: WorkspaceItem[]) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  window.dispatchEvent(new Event(WORKSPACE_EVENT));
-}
-
 function pulseBasketCounter() {
   const counter = document.getElementById("towerbrook-basket-counter");
   if (!counter) return;
   counter.classList.add("scale-125");
   window.setTimeout(() => counter.classList.remove("scale-125"), 250);
-}
-
-function isWorkspaceItem(item: unknown): item is WorkspaceItem {
-  if (!item || typeof item !== "object") return false;
-  const candidate = item as Partial<WorkspaceItem>;
-  return Boolean(
-    candidate.id &&
-      candidate.name &&
-      candidate.href &&
-      candidate.status &&
-      candidate.addedAt &&
-      (candidate.kind === "call" || candidate.kind === "target" || candidate.kind === "memo"),
-  );
 }

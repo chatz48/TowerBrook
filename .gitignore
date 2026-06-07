@@ -46,7 +46,8 @@ yarn-error.log*
 next-env.d.ts
 
 # docs
-/docs/*
+/docs/
 !docs/SEARCH_DISCOVERY_STRATEGY.md
+!docs/systematic-review-2026-06-06-v3.md
 /research-screenshots/
 VIDEO_SCRIPT.md

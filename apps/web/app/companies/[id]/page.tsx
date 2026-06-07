@@ -19,11 +19,15 @@ import {
   Chip,
   Confidence,
   NewsFeed,
+  PageShell,
   SourceLinks,
   ThemeTag,
 } from "@/app/components/ui";
 import { CallPrepChecklist } from "@/app/components/InvestorWorkflow";
-import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
+import {
+  WorkspaceActionButton,
+  WorkspaceSavedBadge,
+} from "@/app/components/InvestorWorkspaceTray";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
 import { companyReadiness, targetScorecard } from "@/lib/investment-readiness";
 import ReadinessBadge from "@/app/components/ReadinessBadge";
@@ -51,8 +55,7 @@ export default async function CompanyPage({
     .filter((c): c is NonNullable<typeof c> => Boolean(c));
 
   return (
-    <div className="ee-shell px-3 py-5 sm:px-5">
-      <div className="mx-auto max-w-[1300px]">
+    <PageShell innerClassName="mx-auto max-w-[1300px]">
         <BackLink href="/companies">Back to companies</BackLink>
 
         <header className="ee-panel mt-5 rounded-lg p-5">
@@ -60,6 +63,7 @@ export default async function CompanyPage({
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-[28px] font-semibold tracking-tight">{company.name}</h1>
+                <WorkspaceSavedBadge id={company.id} kind="target" />
                 <Badge className={COMPANY_CATEGORY_STYLE[company.category]}>
                   {COMPANY_CATEGORY_LABEL[company.category]}
                 </Badge>
@@ -368,7 +372,7 @@ export default async function CompanyPage({
             <section className="ee-panel rounded-lg p-5">
               <div className="ee-label text-ink">Relationship path</div>
               <div className="mt-3 text-[14px] font-semibold">
-                {towerBrook.isDirect ? towerBrook.label : "No public TowerBrook path mapped"}
+                {towerBrook.isDirect ? towerBrook.label : "Path not mapped"}
               </div>
               <ul className="mt-3 space-y-2 text-[12px] leading-relaxed text-ink-soft">
                 {(towerBrook.isDirect && towerBrook.reasons.length
@@ -413,8 +417,7 @@ export default async function CompanyPage({
             </section>
           </aside>
         </div>
-      </div>
-    </div>
+    </PageShell>
   );
 }
 

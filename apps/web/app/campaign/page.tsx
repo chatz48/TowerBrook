@@ -8,6 +8,7 @@ import { rankExperts } from "@/lib/score";
 import { THEME_BY_ID } from "@/lib/themes";
 import { towerBrookCompanyScore } from "@/lib/towerbrook";
 import type { CompanyWithLinks, Expert, ExpertType, ThemeId } from "@/lib/types";
+import { singleParam } from "@/lib/url-params";
 import CallCampaignWorkspace, {
   type CampaignCompany,
   type CampaignExpert,
@@ -39,11 +40,38 @@ function expertConfidence(expert: Expert) {
 }
 
 function callObjective(expert: Expert) {
-  const edges = expert.companies.length;
+  const edges = new Set(expert.companies.map((link) => link.companyId)).size;
+  const primaryCompany = expert.companies[0]?.companyId.replaceAll("-", " ");
+  const specialty = expert.specialties?.[0]?.toLowerCase();
   if (!edges) {
     return "Map their strongest companies, buyer pain and founder/operator referral paths.";
   }
-  return `Validate their ${edges} mapped company edge${edges === 1 ? "" : "s"} and ask for 2 founder/operator referrals.`;
+  if (expert.type === "ex-founder") {
+    return `Pressure-test founder economics, buyer urgency and two operator referrals around ${primaryCompany ?? "their strongest company edge"}.`;
+  }
+  if (expert.type === "operator") {
+    return `Validate implementation bottlenecks, procurement timing and customer references across ${edges} mapped company edge${edges === 1 ? "" : "s"}.`;
+  }
+  if (expert.type === "banker") {
+    return `Ask which assets are actionable now, who owns the buyer dialogue and which advisers control warm introductions.`;
+  }
+  if (expert.type === "investor" || expert.type === "lender-credit") {
+    return `Test sponsor appetite, leverage constraints and valuation signals for ${specialty ?? "the theme"} targets.`;
+  }
+  if (expert.type === "lawyer") {
+    return `Verify deal parties, counsel history, completion risk and diligence issues behind the mapped transaction edges.`;
+  }
+  return `Use their ${edges} mapped edge${edges === 1 ? "" : "s"} to identify named decision-makers, live diligence gaps and referral paths.`;
+}
+
+function callPhase(expert: Expert): CampaignExpert["phase"] {
+  if (expert.type === "ex-founder" || expert.type === "operator") {
+    return "Market orientation";
+  }
+  if (expert.type === "banker" || expert.type === "investor" || expert.type === "lender-credit") {
+    return "Buyer validation";
+  }
+  return "Deal intelligence";
 }
 
 function mapExpert(expert: Expert): CampaignExpert {
@@ -55,8 +83,9 @@ function mapExpert(expert: Expert): CampaignExpert {
     readiness: expertReadiness(expert),
     confidence: expertConfidence(expert),
     objective: callObjective(expert),
+    phase: callPhase(expert),
     sourceCount: expert.sources.length,
-    companyEdges: expert.companies.length,
+    companyEdges: new Set(expert.companies.map((link) => link.companyId)).size,
   };
 }
 
@@ -106,11 +135,21 @@ function coverageGaps(experts: Expert[]): CampaignGap[] {
   });
 }
 
-export default async function CampaignPage() {
+export default async function CampaignPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const [themeFocus, includeTowerBrookEmployees] = await Promise.all([
     getThemeFocus(),
     getIncludeTowerBrookEmployees(),
   ]);
+  const params: Record<string, string | string[] | undefined> = (await searchParams) ?? {};
+  const selectedExpertIds = (singleParam(params.experts) ?? "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+  const selectedExpertSet = new Set(selectedExpertIds);
   const theme = themeFocus === "all" ? undefined : (themeFocus as ThemeId);
   const themeLabel = theme ? THEME_BY_ID[theme].name : "All three themes";
   const sourceCompanyCount = getCompanies().length;
@@ -119,7 +158,12 @@ export default async function CampaignPage() {
     includeTowerBrookEmployees,
   );
   const expertRows = rankExperts(experts)
-    .slice(0, 8)
+    .sort((a, b) => {
+      const aSelected = selectedExpertSet.has(a.expert.id) ? 1 : 0;
+      const bSelected = selectedExpertSet.has(b.expert.id) ? 1 : 0;
+      return bSelected - aSelected || b.score.total - a.score.total;
+    })
+    .slice(0, Math.max(8, selectedExpertSet.size))
     .map(({ expert }) => mapExpert(expert));
 
   const companyRows = companiesWithLinks(theme, includeTowerBrookEmployees)
@@ -155,6 +199,7 @@ export default async function CampaignPage() {
       companies={companyRows}
       gaps={gaps}
       sourceCompanyCount={sourceCompanyCount}
+      selectedExpertIds={selectedExpertIds}
     />
   );
 }

@@ -12,12 +12,12 @@ const NAV_ITEMS = [
 
 const MORE_ITEMS = [
   { href: "/companies", label: "Companies", match: "/companies" },
-  { href: "/discover", label: "Research Queue", match: "/discover" },
+  { href: "/discover", label: "Discover", match: "/discover" },
   { href: "/reports", label: "Meeting packs", match: "/reports" },
   { href: "/graph", label: "Relationship graph", match: "/graph" },
   { href: "/deals", label: "Deal evidence", match: "/deals" },
   { href: "/sources", label: "Sources", match: "/sources" },
-  { href: "/ingest", label: "Ingest", match: "/ingest" },
+  { href: "/ingest", label: "Add source text", match: "/ingest" },
 ];
 
 export default function AppShellNav({ mobile = false }: { mobile?: boolean }) {

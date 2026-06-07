@@ -94,12 +94,13 @@ export function expertReadiness(expert: Expert): ReadinessBadgeModel {
   const reasons: string[] = [];
   const hasDirectContact = Boolean(expert.email || expert.linkedin || expert.contactFacts?.some((fact) => fact.value));
   const freshness = sourceFreshness(expert.sources, expert.news);
-  const hasEdges = expert.companies.length > 0;
+  const companyEdgeCount = new Set(expert.companies.map((link) => link.companyId)).size;
+  const hasEdges = companyEdgeCount > 0;
   const highConfidence = expert.confidence >= 0.78;
 
   if (highConfidence) reasons.push("Verified profile confidence");
   else reasons.push("Identity or role should be confirmed");
-  if (hasEdges) reasons.push(`${expert.companies.length} mapped company/deal edge${expert.companies.length === 1 ? "" : "s"}`);
+  if (hasEdges) reasons.push(`${companyEdgeCount} mapped company/deal edge${companyEdgeCount === 1 ? "" : "s"}`);
   else reasons.push("No resolved company edge yet");
   if (hasDirectContact) reasons.push("Contact or intro path on file");
   else reasons.push("Contact path still needed");

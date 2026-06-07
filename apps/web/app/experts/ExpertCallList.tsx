@@ -7,6 +7,8 @@ import ReadinessBadge from "@/app/components/ReadinessBadge";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import type { ReadinessBadgeModel } from "@/lib/investment-readiness";
 import type { ScoreBreakdown } from "@/lib/score";
+import { expertCallAngle } from "@/lib/expert-copy";
+import { useWorkspaceItems } from "@/lib/workspace";
 
 export interface RankedExpertRow {
   expert: Expert;
@@ -37,8 +39,13 @@ function strengthBars(total: number) {
 
 export default function ExpertCallList({ rows }: { rows: RankedExpertRow[] }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const workspaceItems = useWorkspaceItems();
 
   const allSelected = rows.length > 0 && selected.size === rows.length;
+  const savedExpertIds = useMemo(
+    () => new Set(workspaceItems.filter((item) => item.kind === "call").map((item) => item.id)),
+    [workspaceItems],
+  );
 
   function toggle(id: string) {
     setSelected((current) => {
@@ -63,6 +70,9 @@ export default function ExpertCallList({ rows }: { rows: RankedExpertRow[] }) {
       ? `Build outreach and call prep for these experts: ${selectedRows.map((row) => row.expert.name).join(", ")}`
       : "",
   );
+  const campaignHref = selectedRows.length
+    ? `/campaign?experts=${encodeURIComponent(selectedRows.map((row) => row.expert.id).join(","))}`
+    : "/campaign";
 
   if (!rows.length) {
     return (
@@ -87,7 +97,7 @@ export default function ExpertCallList({ rows }: { rows: RankedExpertRow[] }) {
           <Link href={`/ask?prompt=${batchPrompt}`} className="ee-button ee-button-primary min-h-8 px-3 text-[11px]">
             Generate outreach for selected
           </Link>
-          <Link href="/campaign" className="ee-button ee-button-secondary min-h-8 px-3 text-[11px]">
+          <Link href={campaignHref} className="ee-button ee-button-secondary min-h-8 px-3 text-[11px]">
             Add to call plan
           </Link>
         </div>
@@ -109,8 +119,10 @@ export default function ExpertCallList({ rows }: { rows: RankedExpertRow[] }) {
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, index) => (
-              <tr key={row.expert.id}>
+            {rows.map((row, index) => {
+              const saved = savedExpertIds.has(row.expert.id);
+              return (
+              <tr key={row.expert.id} className={saved ? "bg-emerald-50/45" : undefined}>
                 <td>
                   <input
                     type="checkbox"
@@ -128,6 +140,11 @@ export default function ExpertCallList({ rows }: { rows: RankedExpertRow[] }) {
                   <Link href={`/experts/${row.expert.id}`} className="ee-link font-semibold">
                     {row.expert.name}
                   </Link>
+                  {saved ? (
+                    <span className="ml-2 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-700">
+                      Saved
+                    </span>
+                  ) : null}
                   <div className="mt-0.5 text-[11px] text-ink-soft">{row.expert.headline}</div>
                   <div className="mt-1 flex items-center gap-2 text-[11px] text-ink-faint">
                     <span className="font-semibold tabular-nums text-ink">{row.score.total}</span>
@@ -139,7 +156,7 @@ export default function ExpertCallList({ rows }: { rows: RankedExpertRow[] }) {
                 </td>
                 <td className="max-w-[360px] text-[11px] leading-relaxed text-ink-soft">
                   <span className="line-clamp-2">
-                    {row.expert.news?.[0]?.headline ?? row.expert.signals?.[0] ?? row.expert.whyRelevant}
+                    {row.expert.news?.[0]?.headline ?? row.expert.signals?.[0] ?? expertCallAngle(row.expert)}
                   </span>
                 </td>
                 <td className="max-w-[240px] text-[11px] text-ink-soft">
@@ -172,17 +189,32 @@ export default function ExpertCallList({ rows }: { rows: RankedExpertRow[] }) {
                   </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
 
       <div className="space-y-3 p-4 lg:hidden">
-        {rows.map((row, index) => (
-          <article key={row.expert.id} className="rounded-lg border border-line bg-white p-4">
+        {rows.map((row, index) => {
+          const saved = savedExpertIds.has(row.expert.id);
+          return (
+          <article
+            key={row.expert.id}
+            className={`rounded-lg border bg-white p-4 ${
+              saved ? "border-emerald-300 ring-1 ring-emerald-100" : "border-line"
+            }`}
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-[11px] font-semibold text-accent">#{index + 1}</div>
+                <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-accent">
+                  <span>#{index + 1}</span>
+                  {saved ? (
+                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-emerald-700">
+                      Saved
+                    </span>
+                  ) : null}
+                </div>
                 <Link href={`/experts/${row.expert.id}`} className="ee-link text-[15px] font-semibold">
                   {row.expert.name}
                 </Link>
@@ -201,7 +233,7 @@ export default function ExpertCallList({ rows }: { rows: RankedExpertRow[] }) {
               {strengthBars(row.score.total)}
             </div>
             <p className="mt-2 line-clamp-3 text-[12px] leading-relaxed text-ink-soft">
-              {row.expert.whyRelevant}
+              {expertCallAngle(row.expert)}
             </p>
             <p className="mt-2 text-[11px] text-ink-faint">{row.companyPreview}</p>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -222,7 +254,8 @@ export default function ExpertCallList({ rows }: { rows: RankedExpertRow[] }) {
               </WorkspaceActionButton>
             </div>
           </article>
-        ))}
+          );
+        })}
       </div>
     </>
   );

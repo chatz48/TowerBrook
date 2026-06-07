@@ -12,6 +12,7 @@ import { getThemeFocus } from "@/lib/theme-focus-server";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 import type { Company, Deal, Expert, RelationshipType, Source } from "@/lib/types";
+import { singleParam } from "@/lib/url-params";
 import GraphExplorer, {
   type ExplorerCompanyNode,
   type ExplorerDealNode,
@@ -220,6 +221,9 @@ export default async function GraphPage({
     focusParam && isValidFocusKey(focusParam, expertNodes, companyNodes, dealNodes)
       ? focusParam
       : undefined;
+  const selectedContextNode = requestedSelected
+    ? [...expertNodes, ...companyNodes, ...dealNodes].find((node) => node.key === requestedSelected)
+    : undefined;
 
   const defaultSelected =
     requestedSelected ??
@@ -258,12 +262,17 @@ export default async function GraphPage({
       sources={sources}
       defaultTheme={themeFocus}
       defaultSelected={defaultSelected}
+      returnContext={
+        selectedContextNode
+          ? {
+              label: selectedContextNode.name,
+              href: selectedContextNode.href,
+              detail: selectedContextNode.subtitle,
+            }
+          : undefined
+      }
     />
   );
-}
-
-function singleParam(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
 }
 
 function isValidFocusKey(

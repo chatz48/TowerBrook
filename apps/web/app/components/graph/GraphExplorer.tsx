@@ -217,6 +217,17 @@ function directoryCountText(nodes: ExplorerNode[]) {
   return `${counts.expert} experts · ${counts.company} companies · ${counts.deal} deals`;
 }
 
+function directoryGroups(nodes: { node: ExplorerNode; connections: number }[]) {
+  return (["expert", "company", "deal"] as const)
+    .map((kind) => ({
+      kind,
+      label: NODE_KIND_LABEL[kind],
+      items: nodes.filter((item) => item.node.kind === kind).slice(0, 8),
+      total: nodes.filter((item) => item.node.kind === kind).length,
+    }))
+    .filter((group) => group.total > 0);
+}
+
 export default function GraphExplorer({
   themes,
   experts,
@@ -226,6 +237,7 @@ export default function GraphExplorer({
   sources,
   defaultTheme,
   defaultSelected,
+  returnContext,
 }: {
   themes: ExplorerTheme[];
   experts: ExplorerExpertNode[];
@@ -235,6 +247,11 @@ export default function GraphExplorer({
   sources: ExplorerSource[];
   defaultTheme: ThemeFocus;
   defaultSelected?: string;
+  returnContext?: {
+    label: string;
+    href: string;
+    detail: string;
+  };
 }) {
   const [theme, setTheme] = useState<ThemeFocus>(defaultTheme);
   const [query, setQuery] = useState("");
@@ -340,6 +357,18 @@ export default function GraphExplorer({
         .sort((a, b) => sortDirectoryNodes(a.node, b.node) || b.connections - a.connections),
     [allNodes, expertDomain, filteredEdges, nodeKinds, theme],
   );
+  const groupedDirectoryNodes = useMemo(() => directoryGroups(directoryNodes), [directoryNodes]);
+  const connectedPreview = useMemo(
+    () =>
+      selectedEdges
+        .slice(0, 6)
+        .map((edge) => ({
+          edge,
+          node: selectedNode ? nodeByKey.get(otherNode(edge, selectedNode.key)) : undefined,
+        }))
+        .filter((item): item is { edge: ExplorerEdge; node: ExplorerNode } => Boolean(item.node)),
+    [nodeByKey, selectedEdges, selectedNode],
+  );
 
   const visibleEdges = useMemo(() => {
     if (!selectedNode) return filteredEdges.slice(0, 10);
@@ -427,6 +456,13 @@ export default function GraphExplorer({
 
   function selectNodeAndReveal(key: string) {
     selectNode(key);
+    window.requestAnimationFrame(() => {
+      canvasColumnRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  function changeMode(nextMode: MockupMode) {
+    setMockupMode(nextMode);
     window.requestAnimationFrame(() => {
       canvasColumnRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
@@ -617,25 +653,38 @@ export default function GraphExplorer({
 
           <section className={styles.panelSection}>
             <div className={styles.sectionLine}>
-              <strong>Complete directory</strong>
+              <strong>Nearest nodes</strong>
               <span className={styles.directoryMeta}>{directoryCountText(directoryNodes.map(({ node }) => node))}</span>
             </div>
-            <div className={styles.directoryList} aria-label="Complete graph node directory">
-              {directoryNodes.map(({ node, connections }) => (
-                <button
-                  key={node.key}
-                  type="button"
-                  onClick={() => selectNode(node.key)}
-                  className={selectedNode?.key === node.key ? styles.activeDirectoryItem : undefined}
-                >
-                  <span className={styles.focusGlyph} data-kind={node.kind}>
-                    {nodeBadgeText(node)}
-                  </span>
-                  <span>
-                    <strong>{node.name}</strong>
-                    <small>{nodeKindName(node)} · {connections} relationship{connections === 1 ? "" : "s"}</small>
-                  </span>
-                </button>
+            <p className={styles.directoryHint}>
+              Search for the full graph. This panel caps each type so the default view stays path-led.
+            </p>
+            <div className={styles.directoryList} aria-label="Grouped graph node shortlist">
+              {groupedDirectoryNodes.map((group) => (
+                <details key={group.kind} open={group.kind !== "deal"} className={styles.directoryGroup}>
+                  <summary>
+                    <span>{group.label}</span>
+                    <small>{group.items.length} shown / {group.total}</small>
+                  </summary>
+                  <div>
+                    {group.items.map(({ node, connections }) => (
+                      <button
+                        key={node.key}
+                        type="button"
+                        onClick={() => selectNode(node.key)}
+                        className={selectedNode?.key === node.key ? styles.activeDirectoryItem : undefined}
+                      >
+                        <span className={styles.focusGlyph} data-kind={node.kind}>
+                          {nodeBadgeText(node)}
+                        </span>
+                        <span>
+                          <strong>{node.name}</strong>
+                          <small>{nodeKindName(node)} · {connections} relationship{connections === 1 ? "" : "s"}</small>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </details>
               ))}
             </div>
           </section>
@@ -750,11 +799,27 @@ export default function GraphExplorer({
         </aside>
 
         <main ref={canvasColumnRef} className={styles.canvasColumn}>
+          {returnContext ? (
+            <div className={styles.returnContext}>
+              <Link href={returnContext.href}>← Back to {returnContext.label}</Link>
+              <span>{returnContext.detail}</span>
+            </div>
+          ) : null}
+
+          <GraphCommandBar
+            selectedNode={selectedNode}
+            selectedEdges={selectedEdges}
+            connectedPreview={connectedPreview}
+            mockupMode={mockupMode}
+            onModeChange={changeMode}
+            onFocus={selectNodeAndReveal}
+          />
+
           <div className={styles.mockupTabs} aria-label="Relationship graph views">
             <button
               type="button"
               className={mockupMode === "network" ? styles.activeMockupTab : undefined}
-              onClick={() => setMockupMode("network")}
+              onClick={() => changeMode("network")}
             >
               <strong>Network Canvas</strong>
               <span>Best for exploration</span>
@@ -762,7 +827,7 @@ export default function GraphExplorer({
             <button
               type="button"
               className={mockupMode === "paths" ? styles.activeMockupTab : undefined}
-              onClick={() => setMockupMode("paths")}
+              onClick={() => changeMode("paths")}
             >
               <strong>Path Finder</strong>
               <span>Best for warm intros</span>
@@ -770,7 +835,7 @@ export default function GraphExplorer({
             <button
               type="button"
               className={mockupMode === "matrix" ? styles.activeMockupTab : undefined}
-              onClick={() => setMockupMode("matrix")}
+              onClick={() => changeMode("matrix")}
             >
               <strong>Evidence Matrix</strong>
               <span>Best for IC review</span>
@@ -842,7 +907,7 @@ export default function GraphExplorer({
                     onSelect={selectNode}
                   />
                 </div>
-                <PathStrip path={path} selectedNode={selectedNode} />
+                <PathStrip path={path} selectedNode={selectedNode} onSelect={selectNodeAndReveal} />
               </section>
 
               <GraphInsights
@@ -1046,6 +1111,89 @@ function GraphLegend() {
   );
 }
 
+function GraphCommandBar({
+  selectedNode,
+  selectedEdges,
+  connectedPreview,
+  mockupMode,
+  onModeChange,
+  onFocus,
+}: {
+  selectedNode?: ExplorerNode;
+  selectedEdges: ExplorerEdge[];
+  connectedPreview: { edge: ExplorerEdge; node: ExplorerNode }[];
+  mockupMode: MockupMode;
+  onModeChange: (mode: MockupMode) => void;
+  onFocus: (key: string) => void;
+}) {
+  if (!selectedNode) return null;
+
+  return (
+    <section className={styles.commandBar} aria-label="Graph command center">
+      <div className={styles.commandPrimary}>
+        <span className={styles.focusGlyph} data-kind={selectedNode.kind}>
+          {nodeBadgeText(selectedNode)}
+        </span>
+        <div>
+          <span>{nodeKindName(selectedNode)} focus</span>
+          <strong>{selectedNode.name}</strong>
+          <small>
+            {selectedEdges.length} direct path{selectedEdges.length === 1 ? "" : "s"} · {confidenceText(selectedNode.confidence)} confidence
+          </small>
+        </div>
+      </div>
+
+      <div className={styles.commandActions}>
+        <button
+          type="button"
+          className={mockupMode === "paths" ? styles.activeCommandButton : undefined}
+          onClick={() => onModeChange("paths")}
+        >
+          Focus path
+        </button>
+        <button
+          type="button"
+          className={mockupMode === "network" ? styles.activeCommandButton : undefined}
+          onClick={() => onModeChange("network")}
+        >
+          Network
+        </button>
+        <button
+          type="button"
+          className={mockupMode === "matrix" ? styles.activeCommandButton : undefined}
+          onClick={() => onModeChange("matrix")}
+        >
+          Evidence
+        </button>
+        <Link href={selectedNode.href} className={styles.commandLink}>
+          Open profile
+        </Link>
+        <Link
+          href={askHref(
+            `Use the relationship graph to prepare a concise action plan for ${selectedNode.name}. Include best intro paths, evidence strength, and next diligence steps.`,
+          )}
+          className={styles.commandLink}
+        >
+          Ask AI
+        </Link>
+      </div>
+
+      {connectedPreview.length ? (
+        <div className={styles.connectedRail} aria-label="Connected now">
+          <span>Connected now</span>
+          {connectedPreview.map(({ edge, node }) => (
+            <button key={edge.id} type="button" onClick={() => onFocus(node.key)}>
+              <i style={{ "--edge-color": RELATIONSHIP_COLOR[edge.relationship] } as CSSProperties} />
+              <b>{node.name}</b>
+              <em>{edge.relationshipLabel}</em>
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 function GraphInsights({
   metrics,
   onFocus,
@@ -1167,6 +1315,21 @@ function PathWorkspaceMockup({
               </li>
             ))}
           </ol>
+          {selectedNode ? (
+            <div className={styles.routeActions}>
+              <Link
+                href={askHref(
+                  `Prepare a warm-intro plan for ${selectedNode.name} using the recommended relationship path and known evidence.`,
+                )}
+                className={styles.primaryButton}
+              >
+                Prepare intro plan
+              </Link>
+              <Link href={selectedNode.href} className={styles.secondaryButton}>
+                Open profile
+              </Link>
+            </div>
+          ) : null}
         </article>
 
         <article className={styles.routeList}>
@@ -1455,23 +1618,31 @@ function GraphCanvas({
           </g>
         );
       })}
+      {selected ? (
+        <circle
+          className={styles.selectedHalo}
+          cx={positions.get(selected.key)?.x}
+          cy={positions.get(selected.key)?.y}
+          r="58"
+        />
+      ) : null}
       {nodes.map((node) => {
         const point = positions.get(node.key);
         if (!point) return null;
-        const selected = node.key === selectedKey;
+        const isSelected = node.key === selectedKey;
         const color = nodeColor(node);
-        const cardWidth = selected ? 214 : 180;
-        const cardHeight = selected ? 80 : 68;
+        const cardWidth = isSelected ? 214 : 180;
+        const cardHeight = isSelected ? 80 : 68;
         const kindName = nodeKindName(node);
         const typeName = nodeTypeName(node);
         const displayName =
-          node.name.length > (selected ? 27 : 22)
-            ? `${node.name.slice(0, selected ? 25 : 20)}…`
+          node.name.length > (isSelected ? 27 : 22)
+            ? `${node.name.slice(0, isSelected ? 25 : 20)}…`
             : node.name;
         return (
           <g
             key={node.key}
-            className={styles.svgNode}
+            className={`${styles.svgNode} ${isSelected ? styles.selectedSvgNode : ""}`}
             transform={`translate(${point.x} ${point.y})`}
             role="button"
             tabIndex={0}
@@ -1492,10 +1663,10 @@ function GraphCanvas({
               width={cardWidth}
               height={cardHeight}
               rx={node.kind === "expert" ? cardHeight / 2 : node.kind === "deal" ? 4 : 9}
-              fill={selected ? "#f4f8ff" : "#ffffff"}
+              fill={isSelected ? "#f4f8ff" : "#ffffff"}
               stroke={color}
-              strokeWidth={selected ? 2.4 : 1.4}
-              filter={selected ? "url(#graph-node-shadow)" : undefined}
+              strokeWidth={isSelected ? 2.4 : 1.4}
+              filter={isSelected ? "url(#graph-node-shadow)" : undefined}
             />
             <rect
               x={-cardWidth / 2 + 11}
@@ -1549,9 +1720,11 @@ function buildPath(
 function PathStrip({
   path,
   selectedNode,
+  onSelect,
 }: {
   path: ExplorerNode[];
   selectedNode?: ExplorerNode;
+  onSelect: (key: string) => void;
 }) {
   return (
     <div className={styles.pathStrip}>
@@ -1562,10 +1735,12 @@ function PathStrip({
       <ol>
         {path.map((node, index) => (
           <li key={node.key}>
-            <span className={styles.pathNode} data-kind={node.kind}>
-              {nodeBadgeText(node)}
-            </span>
-            <span>{node.name}</span>
+            <button type="button" onClick={() => onSelect(node.key)}>
+              <span className={styles.pathNode} data-kind={node.kind}>
+                {nodeBadgeText(node)}
+              </span>
+              <span>{node.name}</span>
+            </button>
             {index < path.length - 1 ? <em>→</em> : null}
           </li>
         ))}

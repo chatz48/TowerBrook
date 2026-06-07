@@ -1,6 +1,7 @@
 import ResearchWorkspace from "@/app/components/copilot/ResearchWorkspace";
 import { getThemeFocus } from "@/lib/theme-focus-server";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
+import { singleParam } from "@/lib/url-params";
 
 export default async function AskPage({
   searchParams,
@@ -26,10 +27,7 @@ export default async function AskPage({
       initialTheme={themeFocus}
       includeTowerBrookEmployees={includeTowerBrookEmployees}
       initialPrompt={initialPrompt}
+      autoRunInitial={Boolean(initialPrompt)}
     />
   );
-}
-
-function singleParam(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
 }

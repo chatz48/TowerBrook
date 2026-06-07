@@ -1,36 +1,78 @@
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, field_validator
 
 
 ThemeId = Literal["clean-energy-advisory", "grid-infrastructure", "smart-water"]
+ToolName = Literal[
+    "rag_search_sources",
+    "rag_search_entities",
+    "web_search",
+    "fetch_source",
+    "graph_query",
+    "generate_report",
+    "run_deep_discovery",
+    "linkedin_link_search",
+    "draft_email",
+]
+
+ALLOWED_TOOLS = {
+    "rag_search_sources",
+    "rag_search_entities",
+    "web_search",
+    "fetch_source",
+    "graph_query",
+    "generate_report",
+    "run_deep_discovery",
+    "linkedin_link_search",
+    "draft_email",
+}
+
+
+def blank_url_to_none(value):
+    return None if value == "" else value
 
 
 class Citation(BaseModel):
     source_id: str | None = None
     title: str
-    url: str | None = None
+    url: HttpUrl | None = None
     evidence: str
+
+    @field_validator("url", mode="before")
+    @classmethod
+    def normalize_url(cls, value):
+        return blank_url_to_none(value)
 
 
 class SourceInput(BaseModel):
-    url: str | None = None
+    url: HttpUrl | None = None
     title: str | None = None
     text: str | None = None
     source_type: str = "user_upload"
     theme_id: ThemeId | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+    @field_validator("url", mode="before")
+    @classmethod
+    def normalize_url(cls, value):
+        return blank_url_to_none(value)
+
 
 class SourceRecord(BaseModel):
     id: str
     title: str
-    url: str | None = None
+    url: HttpUrl | None = None
     publisher: str | None = None
     source_type: str = "submitted"
     raw_text: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("url", mode="before")
+    @classmethod
+    def normalize_url(cls, value):
+        return blank_url_to_none(value)
 
 
 class ExtractedPerson(BaseModel):
@@ -112,12 +154,20 @@ class ResearchJob(BaseModel):
 
 
 class ChatRequest(BaseModel):
-    message: str
+    message: str = Field(min_length=1, max_length=12000)
     session_id: str | None = None
     theme_id: ThemeId | None = None
     context_type: str | None = None
     context_id: str | None = None
     tools: list[str] = Field(default_factory=list)
+
+    @field_validator("tools")
+    @classmethod
+    def validate_tools(cls, tools: list[str]) -> list[str]:
+        unknown = sorted(set(tools) - ALLOWED_TOOLS)
+        if unknown:
+            raise ValueError(f"Unknown tool(s): {', '.join(unknown)}")
+        return tools
 
 
 class ToolTrace(BaseModel):

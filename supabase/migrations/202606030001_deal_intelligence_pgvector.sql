@@ -18,7 +18,7 @@ create table if not exists public.source_chunks (
   source_id uuid not null references public.sources(id) on delete cascade,
   content text not null,
   token_count integer not null default 0,
-  embedding vector(1536),
+  embedding vector(384),
   metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
@@ -43,8 +43,8 @@ create table if not exists public.deals (
   geography text not null default 'Not captured',
   status text not null check (status in ('announced', 'completed', 'rumored', 'pending', 'failed')),
   deal_type text not null check (deal_type in ('acquisition', 'minority-investment', 'growth-equity', 'merger', 'carve-out', 'refinancing', 'jv')),
-  announcement_date text,
-  completion_date text,
+  announcement_date date,
+  completion_date date,
   target_entity_id uuid references public.graph_entities(id),
   buyer_entity_id uuid references public.graph_entities(id),
   investor_entity_id uuid references public.graph_entities(id),
@@ -127,7 +127,7 @@ create table if not exists public.graph_edges (
   from_entity_id uuid not null references public.graph_entities(id) on delete cascade,
   to_entity_id uuid not null references public.graph_entities(id) on delete cascade,
   deal_id uuid references public.deals(id) on delete cascade,
-  relationship_type text not null,
+  relationship_type text not null check (relationship_type in ('founded', 'co-founded', 'led', 'partner', 'board', 'advised', 'invested-in', 'acquired', 'banked', 'legal-counsel', 'served', 'financial-advisor-buyer', 'financial-advisor-seller', 'legal-counsel-buyer', 'legal-counsel-seller', 'commercial-diligence', 'technical-diligence', 'tax-accounting', 'other-advisor', 'target', 'buyer', 'investor', 'seller', 'existing-shareholder', 'co-investor', 'management')),
   source_id uuid references public.sources(id),
   evidence_text text,
   confidence numeric not null default 0.7 check (confidence >= 0 and confidence <= 1),
@@ -139,8 +139,10 @@ create index if not exists idx_sources_url on public.sources (url);
 create index if not exists idx_source_chunks_source_id on public.source_chunks (source_id);
 create index if not exists idx_source_chunks_metadata on public.source_chunks using gin (metadata);
 create index if not exists idx_graph_entities_name on public.graph_entities using gin (to_tsvector('simple', name));
+create index if not exists idx_graph_entities_entity_type on public.graph_entities (entity_type);
 create index if not exists idx_graph_entities_theme_ids on public.graph_entities using gin (theme_ids);
 create index if not exists idx_deals_theme on public.deals (theme);
+create index if not exists idx_deals_status on public.deals (status);
 create index if not exists idx_deals_external_id on public.deals (external_id);
 create index if not exists idx_deal_facts_deal_id on public.deal_facts (deal_id);
 create index if not exists idx_deal_facts_review_status on public.deal_facts (review_status);
@@ -156,7 +158,7 @@ create index if not exists idx_source_chunks_embedding
   where embedding is not null;
 
 create or replace function public.match_source_chunks(
-  query_embedding vector(1536),
+  query_embedding vector(384),
   match_count integer default 8,
   filter jsonb default '{}'::jsonb
 )

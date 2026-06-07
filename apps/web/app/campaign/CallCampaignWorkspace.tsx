@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
+import OperatorWorkflowRail from "@/app/components/OperatorWorkflowRail";
+import { PageShell } from "@/app/components/ui";
 
 export interface CampaignMetric {
   label: string;
@@ -18,6 +20,7 @@ export interface CampaignExpert {
   readiness: string;
   confidence: string;
   objective: string;
+  phase: "Market orientation" | "Buyer validation" | "Deal intelligence";
   sourceCount: number;
   companyEdges: number;
 }
@@ -56,6 +59,7 @@ interface CallCampaignWorkspaceProps {
   companies: CampaignCompany[];
   gaps: CampaignGap[];
   sourceCompanyCount: number;
+  selectedExpertIds: string[];
 }
 
 const OWNERS = ["Unassigned", "Arun", "Danielle", "Deal team", "Operating partner"];
@@ -70,12 +74,45 @@ const STATUSES = [
 ];
 const ACTIVE_STATUSES = new Set(["Outreach sent", "Scheduled", "Completed"]);
 const CLOSED_STATUSES = new Set(["Completed", "Promoted", "Rejected"]);
+const PHASES: CampaignExpert["phase"][] = [
+  "Market orientation",
+  "Buyer validation",
+  "Deal intelligence",
+];
 
 const DEFAULT_STATE: CampaignState = {
   owner: "Unassigned",
   status: "Not started",
   note: "",
 };
+
+function seedCampaignState(experts: CampaignExpert[], companies: CampaignCompany[]) {
+  const seeded: Record<string, CampaignState> = {};
+  const owners = ["Arun", "Danielle", "Deal team", "Operating partner"];
+  const statuses = ["Scheduled", "Outreach sent", "Owner assigned", "Completed"];
+
+  experts.slice(0, 4).forEach((expert, index) => {
+    seeded[`expert:${expert.id}`] = {
+      owner: owners[index % owners.length],
+      status: statuses[index % statuses.length],
+      note:
+        index === 0
+          ? "Use as first orientation call; ask for two named referrals."
+          : index === 1
+            ? "Confirm availability and strongest company edge."
+            : "",
+    };
+  });
+  companies.slice(0, 3).forEach((company, index) => {
+    seeded[`company:${company.id}`] = {
+      owner: owners[(index + 1) % owners.length],
+      status: index === 0 ? "Owner assigned" : "Not started",
+      note: index === 0 ? "Validate ownership and sponsor angle before memo." : "",
+    };
+  });
+
+  return seeded;
+}
 
 function csvEscape(value: string | number) {
   return `"${String(value).replaceAll('"', '""')}"`;
@@ -103,6 +140,7 @@ export default function CallCampaignWorkspace({
   companies,
   gaps,
   sourceCompanyCount,
+  selectedExpertIds,
 }: CallCampaignWorkspaceProps) {
   const [state, setState] = useState<Record<string, CampaignState>>({});
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
@@ -111,13 +149,13 @@ export default function CallCampaignWorkspace({
     let nextState: Record<string, CampaignState> = {};
     try {
       const stored = window.localStorage.getItem(storageKey);
-      nextState = stored ? JSON.parse(stored) : {};
+      nextState = stored ? JSON.parse(stored) : seedCampaignState(experts, companies);
     } catch {
-      nextState = {};
+      nextState = seedCampaignState(experts, companies);
     }
     const timeout = window.setTimeout(() => setState(nextState), 0);
     return () => window.clearTimeout(timeout);
-  }, [storageKey]);
+  }, [companies, experts, storageKey]);
 
   function update(id: string, patch: Partial<CampaignState>) {
     setState((current) => {
@@ -134,7 +172,8 @@ export default function CallCampaignWorkspace({
   }
 
   function reset() {
-    setState({});
+    const seeded = seedCampaignState(experts, companies);
+    setState(seeded);
     window.localStorage.removeItem(storageKey);
   }
 
@@ -234,10 +273,10 @@ export default function CallCampaignWorkspace({
     `Open gaps: ${gaps.filter((gap) => gap.severity !== "low").slice(0, 5).map((gap) => `${gap.archetype} ${gap.severity}`).join("; ") || "No high-priority gaps"}`,
     `Progress: ${assignedCount} assigned or started, ${activeCount} active, ${closedCount} closed.`,
   ].join("\n");
+  const selectedExpertSet = useMemo(() => new Set(selectedExpertIds), [selectedExpertIds]);
 
   return (
-    <div className="ee-shell px-3 py-5 sm:px-5">
-      <div className="mx-auto max-w-[1540px]">
+    <PageShell>
         <section className="ee-panel rounded-lg p-5 sm:p-6">
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
             <div>
@@ -253,6 +292,11 @@ export default function CallCampaignWorkspace({
               <div className="mt-4 text-[12px] font-semibold text-ink-soft">
                 Scope: {themeLabel}
               </div>
+              {selectedExpertIds.length ? (
+                <div className="mt-3 inline-flex rounded-md border border-accent/25 bg-[#f4f8ff] px-3 py-2 text-[12px] font-semibold text-accent">
+                  {selectedExpertIds.length} selected expert{selectedExpertIds.length === 1 ? "" : "s"} pinned from the call list
+                </div>
+              ) : null}
             </div>
             <div className="flex flex-wrap gap-2 lg:justify-end">
               <Link href={askHref(planReviewPrompt)} className="ee-button ee-button-primary">
@@ -301,110 +345,113 @@ export default function CallCampaignWorkspace({
           </div>
         </section>
 
+        <OperatorWorkflowRail
+          title="Run the week, then feed the evidence back"
+          subtitle="The campaign is the execution layer: assign each call or target, record the result, and turn completed work into memo evidence or new research gaps."
+          steps={[
+            {
+              label: "Assign",
+              detail: "Put an owner and status on every call or company before outreach.",
+            },
+            {
+              label: "Capture",
+              detail: "Use notes to record referrals, target claims and objections.",
+            },
+            {
+              label: "Decide",
+              detail: "Promote, reject or return items to research before the meeting pack.",
+            },
+          ]}
+          actions={[
+            { label: "Review with AI", href: askHref(planReviewPrompt), primary: true },
+            { label: "Open memo", href: "/reports" },
+            { label: "Research gaps", href: "/discover?severity=high" },
+          ]}
+        />
+
         <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
           <main className="space-y-5">
             <section className="ee-panel overflow-hidden rounded-lg">
               <div className="border-b border-line px-4 py-3">
                 <h2 className="ee-label text-ink">1. Expert calls to run this week</h2>
                 <p className="mt-1 text-[11px] text-ink-faint">
-                  Prioritized by readiness, source confidence and company edges. Capture owner,
-                  status and the ask for each call.
+                  Sequenced into practical call phases. Capture owner, status and the ask for
+                  each call; selected experts from the call list stay pinned at the top.
                 </p>
               </div>
-              <div className="overflow-x-auto">
-                <table className="ee-table min-w-[1240px]">
-                  <thead>
-                    <tr>
-                      <th>Expert</th>
-                      <th>Readiness</th>
-                      <th>Call objective</th>
-                      <th>Owner</th>
-                      <th>Status</th>
-                      <th>Notes / referral asks</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {experts.map((expert) => {
-                      const id = `expert:${expert.id}`;
-                      const current = rowState(state, id);
-                      return (
-                        <tr key={expert.id}>
-                          <td className="min-w-[260px]">
-                            <Link href={expert.href} className="ee-link">
-                              {expert.name}
-                            </Link>
-                            <div className="mt-0.5 text-[11px] text-ink-soft">
-                              {expert.headline}
-                            </div>
-                          </td>
-                          <td className="min-w-[170px]">
-                            <div className="text-[12px] font-semibold text-ink">
-                              {expert.readiness}
-                            </div>
-                            <div className="mt-1 text-[11px] text-ink-faint">
-                              {expert.confidence}
-                            </div>
-                          </td>
-                          <td className="max-w-[330px] text-[11px] leading-relaxed text-ink-soft">
-                            {expert.objective}
-                          </td>
-                          <td>
-                            <SelectControl
-                              value={current.owner}
-                              options={OWNERS}
-                              label={`Owner for ${expert.name}`}
-                              onChange={(owner) => update(id, { owner })}
-                            />
-                          </td>
-                          <td>
-                            <SelectControl
-                              value={current.status}
-                              options={STATUSES}
-                              label={`Status for ${expert.name}`}
-                              onChange={(status) => update(id, { status })}
-                            />
-                          </td>
-                          <td className="min-w-[260px]">
-                            <input
-                              value={current.note}
-                              onChange={(event) => update(id, { note: event.target.value })}
-                              placeholder="Add ask, blocker, referral or call note"
-                              className="h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[12px] text-ink outline-none focus:border-accent"
-                            />
-                          </td>
-                          <td className="min-w-[150px]">
-                            <div className="flex flex-wrap gap-2">
-                              <WorkspaceActionButton
-                                item={{
-                                  id: expert.id,
-                                  kind: "call",
-                                  name: expert.name,
-                                  sub: expert.headline,
-                                  href: expert.href,
-                                  theme: themeLabel,
-                                  note: `${expert.objective}${current.note ? ` Note: ${current.note}` : ""}`,
-                                  status: current.status === "Not started" ? "origination plan" : current.status.toLowerCase(),
-                                }}
-                                className="ee-button ee-button-secondary min-h-8 px-3"
-                              >
-                                Save
-                              </WorkspaceActionButton>
-                              <Link
-                                href={askHref(
-                                  `Prepare an expert call brief for ${expert.name} in ${themeLabel}. Objective: ${expert.objective}. Current owner: ${current.owner}. Current status: ${current.status}. Note: ${current.note || "None"}. Include outreach angle, questions, likely referrals, and companies to validate.`,
-                                )}
-                                className="ee-button ee-button-secondary min-h-8 px-3"
-                              >
-                                Ask AI
-                              </Link>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+              <div className="divide-y divide-line">
+                {PHASES.map((phase, phaseIndex) => {
+                  const phaseExperts = experts.filter((expert) => expert.phase === phase);
+                  return (
+                    <div key={phase} className="p-4">
+                      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <div className="text-[12px] font-semibold text-ink">
+                            Phase {phaseIndex + 1}: {phase}
+                          </div>
+                          <p className="mt-1 text-[11px] text-ink-faint">
+                            {phase === "Market orientation"
+                              ? "Start with operators and founders to define pain, budgets and referral routes."
+                              : phase === "Buyer validation"
+                                ? "Use bankers, investors and lenders to test buyer appetite and ownership facts."
+                                : "Finish with advisors, lawyers and diligence providers to verify transaction evidence."}
+                          </p>
+                        </div>
+                        <span className="rounded-full border border-line bg-paper px-2.5 py-1 text-[11px] font-semibold text-ink-soft">
+                          {phaseExperts.length} call{phaseExperts.length === 1 ? "" : "s"}
+                        </span>
+                      </div>
+                      {phaseExperts.length ? (
+                        <>
+                          <div className="hidden overflow-x-auto lg:block">
+                            <table className="ee-table min-w-[1180px]">
+                              <thead>
+                                <tr>
+                                  <th>Expert</th>
+                                  <th>Readiness</th>
+                                  <th>Call objective</th>
+                                  <th>Owner</th>
+                                  <th>Status</th>
+                                  <th>Notes / referral asks</th>
+                                  <th>Action</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {phaseExperts.map((expert) => (
+                                  <ExpertPlanRow
+                                    key={expert.id}
+                                    expert={expert}
+                                    current={rowState(state, `expert:${expert.id}`)}
+                                    themeLabel={themeLabel}
+                                    pinned={selectedExpertSet.has(expert.id)}
+                                    onUpdate={(patch) => update(`expert:${expert.id}`, patch)}
+                                  />
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                          <div className="space-y-3 lg:hidden">
+                            {phaseExperts.map((expert) => (
+                              <ExpertPlanCard
+                                key={expert.id}
+                                expert={expert}
+                                current={rowState(state, `expert:${expert.id}`)}
+                                themeLabel={themeLabel}
+                                pinned={selectedExpertSet.has(expert.id)}
+                                onUpdate={(patch) => update(`expert:${expert.id}`, patch)}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="rounded-md border border-dashed border-line-strong bg-[#fbfcff] px-3 py-4 text-[12px] text-ink-soft">
+                          No experts in this phase yet. Add advisors, lawyers, diligence providers or other service
+                          providers from the expert list to close this part of the call sequence.
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </section>
 
@@ -416,7 +463,7 @@ export default function CallCampaignWorkspace({
                   promoting a company to memo-ready.
                 </p>
               </div>
-              <div className="overflow-x-auto">
+              <div className="hidden overflow-x-auto lg:block">
                 <table className="ee-table min-w-[1220px]">
                   <thead>
                     <tr>
@@ -511,6 +558,20 @@ export default function CallCampaignWorkspace({
                   </tbody>
                 </table>
               </div>
+              <div className="space-y-3 p-4 lg:hidden">
+                {companies.map((company) => {
+                  const id = `company:${company.id}`;
+                  return (
+                    <CompanyPlanCard
+                      key={company.id}
+                      company={company}
+                      current={rowState(state, id)}
+                      themeLabel={themeLabel}
+                      onUpdate={(patch) => update(id, patch)}
+                    />
+                  );
+                })}
+              </div>
             </section>
           </main>
 
@@ -564,8 +625,7 @@ export default function CallCampaignWorkspace({
             </section>
           </aside>
         </div>
-      </div>
-    </div>
+    </PageShell>
   );
 }
 
@@ -578,6 +638,199 @@ function MetricCard({ metric }: { metric: CampaignMetric }) {
       </div>
       <div className="mt-2 text-[11px] text-ink-faint">{metric.detail}</div>
     </div>
+  );
+}
+
+function ExpertPlanRow({
+  expert,
+  current,
+  themeLabel,
+  pinned,
+  onUpdate,
+}: {
+  expert: CampaignExpert;
+  current: CampaignState;
+  themeLabel: string;
+  pinned: boolean;
+  onUpdate: (patch: Partial<CampaignState>) => void;
+}) {
+  return (
+    <tr className={pinned ? "bg-[#f8fbff]" : undefined}>
+      <td className="min-w-[260px]">
+        <Link href={expert.href} className="ee-link">
+          {expert.name}
+        </Link>
+        {pinned ? (
+          <span className="ml-2 rounded-full border border-accent/25 bg-[#eef5ff] px-2 py-0.5 text-[10px] font-semibold text-accent">
+            Pinned
+          </span>
+        ) : null}
+        <div className="mt-0.5 text-[11px] text-ink-soft">{expert.headline}</div>
+      </td>
+      <td className="min-w-[170px]">
+        <div className="text-[12px] font-semibold text-ink">{expert.readiness}</div>
+        <div className="mt-1 text-[11px] text-ink-faint">{expert.confidence}</div>
+      </td>
+      <td className="max-w-[330px] text-[11px] leading-relaxed text-ink-soft">{expert.objective}</td>
+      <td>
+        <SelectControl value={current.owner} options={OWNERS} label={`Owner for ${expert.name}`} onChange={(owner) => onUpdate({ owner })} />
+      </td>
+      <td>
+        <SelectControl value={current.status} options={STATUSES} label={`Status for ${expert.name}`} onChange={(status) => onUpdate({ status })} />
+      </td>
+      <td className="min-w-[260px]">
+        <NoteInput value={current.note} placeholder="Add ask, blocker, referral or call note" onChange={(note) => onUpdate({ note })} />
+      </td>
+      <td className="min-w-[150px]">
+        <ExpertActions expert={expert} current={current} themeLabel={themeLabel} />
+      </td>
+    </tr>
+  );
+}
+
+function ExpertPlanCard({
+  expert,
+  current,
+  themeLabel,
+  pinned,
+  onUpdate,
+}: {
+  expert: CampaignExpert;
+  current: CampaignState;
+  themeLabel: string;
+  pinned: boolean;
+  onUpdate: (patch: Partial<CampaignState>) => void;
+}) {
+  return (
+    <article className={`rounded-lg border bg-white p-4 ${pinned ? "border-accent/35" : "border-line"}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <Link href={expert.href} className="ee-link text-[14px] font-semibold">{expert.name}</Link>
+          <p className="mt-1 text-[12px] text-ink-soft">{expert.headline}</p>
+        </div>
+        {pinned ? <span className="rounded-full border border-accent/25 bg-[#eef5ff] px-2 py-1 text-[10px] font-semibold text-accent">Pinned</span> : null}
+      </div>
+      <div className="mt-3 grid gap-2 text-[12px] sm:grid-cols-2">
+        <div>
+          <div className="ee-label text-ink-faint">Readiness</div>
+          <div className="mt-1 font-semibold">{expert.readiness}</div>
+          <div className="text-[11px] text-ink-faint">{expert.confidence}</div>
+        </div>
+        <div>
+          <div className="ee-label text-ink-faint">Edges</div>
+          <div className="mt-1 font-semibold">{expert.companyEdges} companies · {expert.sourceCount} sources</div>
+        </div>
+      </div>
+      <p className="mt-3 text-[12px] leading-relaxed text-ink-soft">{expert.objective}</p>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        <SelectControl value={current.owner} options={OWNERS} label={`Owner for ${expert.name}`} onChange={(owner) => onUpdate({ owner })} />
+        <SelectControl value={current.status} options={STATUSES} label={`Status for ${expert.name}`} onChange={(status) => onUpdate({ status })} />
+      </div>
+      <div className="mt-2">
+        <NoteInput value={current.note} placeholder="Add ask, blocker, referral or call note" onChange={(note) => onUpdate({ note })} />
+      </div>
+      <div className="mt-3">
+        <ExpertActions expert={expert} current={current} themeLabel={themeLabel} />
+      </div>
+    </article>
+  );
+}
+
+function ExpertActions({
+  expert,
+  current,
+  themeLabel,
+}: {
+  expert: CampaignExpert;
+  current: CampaignState;
+  themeLabel: string;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      <WorkspaceActionButton
+        item={{
+          id: expert.id,
+          kind: "call",
+          name: expert.name,
+          sub: expert.headline,
+          href: expert.href,
+          theme: themeLabel,
+          note: `${expert.objective}${current.note ? ` Note: ${current.note}` : ""}`,
+          status: current.status === "Not started" ? "origination plan" : current.status.toLowerCase(),
+        }}
+        className="ee-button ee-button-secondary min-h-8 px-3"
+      >
+        Save
+      </WorkspaceActionButton>
+      <Link
+        href={askHref(
+          `Prepare an expert call brief for ${expert.name} in ${themeLabel}. Objective: ${expert.objective}. Current owner: ${current.owner}. Current status: ${current.status}. Note: ${current.note || "None"}. Include outreach angle, questions, likely referrals, and companies to validate.`,
+        )}
+        className="ee-button ee-button-secondary min-h-8 px-3"
+      >
+        Ask AI
+      </Link>
+    </div>
+  );
+}
+
+function CompanyPlanCard({
+  company,
+  current,
+  themeLabel,
+  onUpdate,
+}: {
+  company: CampaignCompany;
+  current: CampaignState;
+  themeLabel: string;
+  onUpdate: (patch: Partial<CampaignState>) => void;
+}) {
+  return (
+    <article className="rounded-lg border border-line bg-white p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <Link href={company.href} className="ee-link text-[14px] font-semibold">{company.name}</Link>
+          <p className="mt-1 text-[12px] text-ink-soft">{company.stage} / {company.ownership}</p>
+        </div>
+        <div className="text-right">
+          <div className="text-[20px] font-semibold tabular-nums">{company.score}</div>
+          <div className="text-[10px] text-ink-faint">{company.label}</div>
+        </div>
+      </div>
+      <p className="mt-3 text-[12px] leading-relaxed text-ink-soft">{company.nextAction}</p>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        <SelectControl value={current.owner} options={OWNERS} label={`Owner for ${company.name}`} onChange={(owner) => onUpdate({ owner })} />
+        <SelectControl value={current.status} options={STATUSES} label={`Status for ${company.name}`} onChange={(status) => onUpdate({ status })} />
+      </div>
+      <div className="mt-2">
+        <NoteInput value={current.note} placeholder="Add diligence blocker or next step" onChange={(note) => onUpdate({ note })} />
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <WorkspaceActionButton
+          item={{
+            id: company.id,
+            kind: "target",
+            name: company.name,
+            sub: `${company.score}/100 ${company.label}`,
+            href: company.href,
+            theme: themeLabel,
+            note: `${company.nextAction}${current.note ? ` Note: ${current.note}` : ""}`,
+            status: current.status === "Not started" ? "origination plan" : current.status.toLowerCase(),
+          }}
+          className="ee-button ee-button-secondary min-h-8 px-3"
+        >
+          Save
+        </WorkspaceActionButton>
+        <Link
+          href={askHref(
+            `Prepare a company validation brief for ${company.name} in ${themeLabel}. PE score: ${company.score}/100 ${company.label}. Next diligence action: ${company.nextAction}. Current owner: ${current.owner}. Current status: ${current.status}. Note: ${current.note || "None"}. Include people to call, evidence gaps, and memo implications.`,
+          )}
+          className="ee-button ee-button-secondary min-h-8 px-3"
+        >
+          Ask AI
+        </Link>
+      </div>
+    </article>
   );
 }
 
@@ -597,7 +850,7 @@ function SelectControl({
       value={value}
       onChange={(event) => onChange(event.target.value)}
       aria-label={label}
-      className="h-10 min-w-[150px] rounded-md border border-line-strong bg-white px-3 text-[12px] text-ink outline-none focus:border-accent"
+      className="h-10 min-w-[150px] w-full rounded-md border border-line-strong bg-white px-3 text-[12px] text-ink outline-none focus:border-accent"
     >
       {options.map((option) => (
         <option key={option} value={option}>
@@ -605,6 +858,25 @@ function SelectControl({
         </option>
       ))}
     </select>
+  );
+}
+
+function NoteInput({
+  value,
+  placeholder,
+  onChange,
+}: {
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <input
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      placeholder={placeholder}
+      className="h-10 w-full rounded-md border border-line-strong bg-white px-3 text-[12px] text-ink outline-none focus:border-accent"
+    />
   );
 }
 

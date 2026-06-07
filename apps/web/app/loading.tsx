@@ -1,7 +1,8 @@
+import { PageShell } from "@/app/components/ui";
+
 export default function Loading() {
   return (
-    <div className="ee-shell px-3 py-5 sm:px-5">
-      <div className="mx-auto max-w-[1540px] animate-pulse space-y-5">
+    <PageShell innerClassName="mx-auto max-w-[1540px] animate-pulse space-y-5">
         <div className="ee-panel rounded-lg p-6">
           <div className="h-4 w-32 rounded bg-line" />
           <div className="mt-4 h-8 w-2/3 max-w-lg rounded bg-line" />
@@ -13,7 +14,6 @@ export default function Loading() {
           ))}
         </div>
         <div className="ee-panel h-72 rounded-lg" />
-      </div>
-    </div>
+    </PageShell>
   );
 }

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getCompany } from "@/lib/data";
 import { DEAL_TYPE_LABEL, dealDate, primaryDealParty } from "@/lib/deals";
 import { listDeals } from "@/lib/deal-repository";
-import { ConfidenceBars, ThemeTag } from "@/app/components/ui";
+import { ConfidenceBars, PageShell, ThemeTag } from "@/app/components/ui";
 import { getThemeFocus } from "@/lib/theme-focus-server";
 import DealEnrichmentButton from "@/app/components/DealEnrichmentButton";
 
@@ -13,8 +13,7 @@ export default async function DealsPage() {
   );
 
   return (
-    <div className="ee-shell px-3 py-5 sm:px-5">
-      <div className="mx-auto max-w-[1540px]">
+    <PageShell>
         <header className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-[26px] font-semibold tracking-tight">Deal Intelligence</h1>
@@ -130,8 +129,7 @@ export default async function DealsPage() {
             </table>
           </div>
         </section>
-      </div>
-    </div>
+    </PageShell>
   );
 }
 

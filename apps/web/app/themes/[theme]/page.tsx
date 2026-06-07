@@ -14,7 +14,7 @@ import type { ThemeId } from "@/lib/types";
 import ExpertList from "@/app/components/ExpertList";
 import ThemeGraph from "@/app/components/ThemeGraph";
 import { buildBrief } from "@/lib/brief";
-import { Badge, BackLink, ConfidenceBars } from "@/app/components/ui";
+import { Badge, BackLink, ConfidenceBars, PageShell } from "@/app/components/ui";
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 
@@ -95,8 +95,7 @@ export default async function ThemePage({
   );
 
   return (
-    <div className="ee-shell px-3 py-5 sm:px-5">
-      <div className="mx-auto max-w-[1540px]">
+    <PageShell>
         <BackLink href="/">Back to Themes</BackLink>
 
         <header className="mt-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -446,8 +445,7 @@ export default async function ThemePage({
             />
           </div>
         </section>
-      </div>
-    </div>
+    </PageShell>
   );
 }
 

@@ -19,6 +19,7 @@ import {
   BackLink,
   Chip,
   NewsFeed,
+  PageShell,
   SourceLinks,
   ThemeTag,
 } from "@/app/components/ui";
@@ -27,6 +28,7 @@ import CallNotesPanel from "@/app/components/CallNotesPanel";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import { expertReadiness } from "@/lib/investment-readiness";
 import ReadinessBadge from "@/app/components/ReadinessBadge";
+import { expertCallAngle } from "@/lib/expert-copy";
 
 export function generateStaticParams() {
   return getExperts().map((e) => ({ id: e.id }));
@@ -48,8 +50,7 @@ export default async function ExpertPage({
   const readiness = expertReadiness(expert);
   const relatedDeals = await listDealsForExpert(expert.id);
   return (
-    <div className="ee-shell px-3 py-5 sm:px-5">
-      <div className="mx-auto max-w-[1540px]">
+    <PageShell>
         <BackLink href="/experts">Back to call tray</BackLink>
 
         <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
@@ -135,7 +136,7 @@ export default async function ExpertPage({
                 <ul className="space-y-2 text-[13px] leading-relaxed text-ink">
                   <li className="flex gap-3">
                     <span className="mt-2 h-1.5 w-1.5 rounded-full bg-ink" />
-                    <span>{expert.whyRelevant}</span>
+                    <span>{expertCallAngle(expert)}</span>
                   </li>
                   {expert.bio ? (
                     <li className="flex gap-3">
@@ -150,6 +151,31 @@ export default async function ExpertPage({
                     </li>
                   ))}
                 </ul>
+              </div>
+            </section>
+
+            <section className="ee-panel overflow-hidden rounded-lg">
+              <div className="border-b border-line px-4 py-3">
+                <h2 className="ee-label text-ink">What to listen for</h2>
+              </div>
+              <div className="grid gap-3 p-4 lg:grid-cols-3">
+                {callListeningPrompts(expert).map((item) => (
+                  <article key={item.claim} className="rounded-md border border-line bg-white p-3">
+                    <div className="text-[12px] font-semibold leading-snug text-ink">
+                      {item.claim}
+                    </div>
+                    <div className="mt-3 space-y-2 text-[11px] leading-relaxed text-ink-soft">
+                      <p>
+                        <span className="font-semibold text-emerald-700">Raises conviction:</span>{" "}
+                        {item.raises}
+                      </p>
+                      <p>
+                        <span className="font-semibold text-amber-700">Reduces conviction:</span>{" "}
+                        {item.reduces}
+                      </p>
+                    </div>
+                  </article>
+                ))}
               </div>
             </section>
 
@@ -343,7 +369,65 @@ export default async function ExpertPage({
             </section>
           </aside>
         </div>
-      </div>
-    </div>
+    </PageShell>
   );
+}
+
+function callListeningPrompts(expert: ReturnType<typeof resolveExpert>) {
+  const firstCompany = expert.resolvedCompanies[0]?.company.name ?? "their strongest mapped company";
+  const specialty = expert.specialties?.[0]?.toLowerCase() ?? "the market";
+
+  const base = [
+    {
+      claim: `${expert.name.split(" ")[0]} can validate whether ${specialty} demand is investable now.`,
+      raises:
+        "They name specific buyers, budgets, procurement blockers, or recent projects from first-hand work.",
+      reduces:
+        "They stay at market-level commentary and cannot name companies, customers, advisers, or implementation constraints.",
+    },
+    {
+      claim: `${firstCompany} is useful because it is tied to sourced expert evidence.`,
+      raises:
+        "The call confirms current ownership, growth, customer traction, and a reachable decision-maker or adviser path.",
+      reduces:
+        "The company edge is stale, the ownership has changed, or the relationship is too distant for access.",
+    },
+  ];
+
+  if (expert.type === "banker" || expert.type === "lawyer" || expert.type === "advisor") {
+    return [
+      ...base,
+      {
+        claim: "The adviser network can reveal live transaction angles.",
+        raises:
+          "They identify active processes, likely buyers, counsel, valuation pressure, or conflicts that shape access.",
+        reduces:
+          "They only discuss historical transactions and cannot say who controls current conversations.",
+      },
+    ];
+  }
+
+  if (expert.type === "ex-founder" || expert.type === "operator") {
+    return [
+      ...base,
+      {
+        claim: "The operating evidence can separate product pull from sector hype.",
+        raises:
+          "They quantify adoption friction, sales cycles, unit economics, and the conditions that changed customer behavior.",
+        reduces:
+          "They describe a compelling product but cannot show repeatable buyer urgency or implementation economics.",
+      },
+    ];
+  }
+
+  return [
+    ...base,
+    {
+      claim: "The call should convert coverage into named next steps.",
+      raises:
+        "They provide two named referrals, a company to validate, and a specific source or deal record to check.",
+      reduces:
+        "The discussion ends with broad themes and no named follow-up path.",
+    },
+  ];
 }

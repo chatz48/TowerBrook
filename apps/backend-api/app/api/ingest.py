@@ -1,4 +1,4 @@
-from fastapi import APIRouter, File, Form, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from app.repositories.supabase_repo import repo
 from app.schemas.domain import SourceInput
@@ -10,6 +10,20 @@ from app.services.keiro_search import keiro
 from app.services.parser import parse_upload
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])
+MAX_INGEST_TEXT_CHARS = 50_000
+
+
+def _validate_source_text(source_text: str | None) -> str:
+    text = source_text or ""
+    if len(text) > MAX_INGEST_TEXT_CHARS:
+        raise HTTPException(
+            status_code=413,
+            detail=(
+                "Submitted source text is too long. Keep uploads under 50,000 "
+                "characters and split larger source packs into separate submissions."
+            ),
+        )
+    return text
 
 
 @router.post("/source")
@@ -27,6 +41,7 @@ async def ingest_source(
         fetched = await keiro.fetch_content(url)
         source_text = fetched.get("content", "")
         title = title or fetched.get("title")
+    source_text = _validate_source_text(source_text)
 
     source = repo.upsert_source(
         {
@@ -51,17 +66,18 @@ async def ingest_source(
 
 @router.post("/json")
 async def ingest_json(body: SourceInput):
+    source_text = _validate_source_text(body.text)
     source = repo.upsert_source(
         {
             "url": body.url,
             "title": body.title or body.url or "Submitted source",
             "source_type": body.source_type,
-            "raw_text": body.text,
+            "raw_text": source_text,
             "metadata": {"theme_id": body.theme_id, **body.metadata},
         }
     )
-    chunks = chunk_text(body.text or "")
+    chunks = chunk_text(source_text)
     vectors = embeddings.embed_many(chunks)
-    extraction = await extractor.extract(body.text or "", source.title, source.url, body.theme_id)
+    extraction = await extractor.extract(source_text, source.title, source.url, body.theme_id)
     persisted = await persist_extraction(extraction, source, chunks, vectors, body.theme_id)
     return {"source": source.model_dump(), "extraction": extraction.model_dump(), "persisted": persisted}

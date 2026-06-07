@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
@@ -12,20 +12,26 @@ import {
 } from "@/lib/theme-focus";
 import discoveryCandidatesRaw from "@/data/expert-first-pe-discovery-candidates.json";
 import type { ExpertDiscoveryCandidate } from "@/lib/expert-discovery";
+import {
+  readWorkspace,
+  useWorkspaceItems,
+  workspaceKindLabel,
+  type WorkspaceItem,
+} from "@/lib/workspace";
 
 interface DiscoveryData {
   expert_candidates: ExpertDiscoveryCandidate[];
 }
 const DISCOVERY_CANDIDATES = (discoveryCandidatesRaw as DiscoveryData).expert_candidates ?? [];
 
-type CopilotTab = "ask" | "queue" | "notes";
+type CopilotTab = "ask" | "notes";
 type ConversationMessage = { id: string; role: "user" | "assistant"; content: string; answer?: AskResponse };
 
 const OBJECTIVES = [
-  { label: "Find experts", value: "Find experts" },
-  { label: "Map companies", value: "Map companies" },
-  { label: "Red-team thesis", value: "Red-team thesis" },
-  { label: "Prepare calls", value: "Prepare calls" },
+  { label: "Find experts", value: "Find experts", prompt: "Who should I call first, and why now?" },
+  { label: "Map companies", value: "Map companies", prompt: "Which companies are most actionable and which experts validate them?" },
+  { label: "Red-team thesis", value: "Red-team thesis", prompt: "What would disconfirm the current investment thesis?" },
+  { label: "Prepare calls", value: "Prepare calls", prompt: "Build a three-call plan with questions and conviction signals." },
 ];
 
 const THEMES = [
@@ -82,10 +88,12 @@ export default function ResearchWorkspace({
   initialTheme,
   includeTowerBrookEmployees,
   initialPrompt,
+  autoRunInitial = false,
 }: {
   initialTheme: ThemeFocus;
   includeTowerBrookEmployees: boolean;
   initialPrompt?: string;
+  autoRunInitial?: boolean;
 }) {
   const startingFilters = useMemo(
     () => makeInitialFilters(initialTheme, includeTowerBrookEmployees),
@@ -97,15 +105,18 @@ export default function ResearchWorkspace({
   const [answer, setAnswer] = useState<AskResponse | null>(null);
   const [conversation, setConversation] = useState<ConversationMessage[]>([]);
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [loadingQuestion, setLoadingQuestion] = useState(startingQuestion);
   const [progressStep, setProgressStep] = useState(0);
   const [error, setError] = useState("");
+  const activeRequest = useRef<AbortController | null>(null);
   const workspaceItems = useWorkspaceItems();
 
   async function submit(nextQuestion = question, nextFilters = filters) {
     const cleanQuestion = nextQuestion.trim();
     if (!cleanQuestion || loading) return;
+    const controller = new AbortController();
+    activeRequest.current = controller;
     const chatHistory = toChatHistory(conversation);
     const userMessage: ConversationMessage = {
       id: makeMessageId("user"),
@@ -118,10 +129,12 @@ export default function ResearchWorkspace({
     setLoading(true);
     setProgressStep(0);
     setError("");
+    const timeout = window.setTimeout(() => controller.abort("timeout"), 30000);
     try {
       const res = await fetch("/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
           question: cleanQuestion,
           filters: nextFilters,
@@ -129,8 +142,9 @@ export default function ResearchWorkspace({
           pageContext: buildWorkspacePageContext(workspaceItems, nextFilters),
         }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Request failed");
+      const data = (await safeJson(res)) as AskResponse;
+      if (!res.ok) throw new Error(responseError(data, "Request failed"));
+      if (activeRequest.current !== controller) return;
       setAnswer(data);
       setConversation((current) => [
         ...current,
@@ -143,14 +157,48 @@ export default function ResearchWorkspace({
       ]);
       setSelectedSourceId(data.sources_used?.[0]?.source_id ?? null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong");
+      if (activeRequest.current !== controller) return;
+      const isAbort = e instanceof DOMException && e.name === "AbortError";
+      setError(
+        isAbort
+          ? "The Copilot request was stopped. Adjust filters or ask again."
+          : e instanceof Error
+            ? e.message
+            : "Something went wrong",
+      );
     } finally {
-      setLoading(false);
+      window.clearTimeout(timeout);
+      if (activeRequest.current === controller) {
+        activeRequest.current = null;
+        setLoading(false);
+      }
     }
   }
 
+  function runWithFilters(nextFilters: CopilotFilters) {
+    if (answer || conversation.length > 0) {
+      submit(question || answer?.input_context.question || loadingQuestion, nextFilters);
+      return;
+    }
+    const nextDefault = defaultQuestion(isThemeFocus(nextFilters.theme) ? nextFilters.theme : "all");
+    setQuestion(nextDefault);
+    setLoadingQuestion(nextDefault);
+  }
+
+  function cancelRequest() {
+    activeRequest.current?.abort("cancelled");
+    activeRequest.current = null;
+    setLoading(false);
+    setError("The Copilot request was stopped. Adjust filters or ask again.");
+  }
+
   useEffect(() => {
+    if (!autoRunInitial) {
+      return;
+    }
     let cancelled = false;
+    const controller = new AbortController();
+    activeRequest.current = controller;
 
     async function loadInitialAnswer() {
       setQuestion(startingQuestion);
@@ -158,19 +206,21 @@ export default function ResearchWorkspace({
       setLoading(true);
       setProgressStep(0);
       setError("");
+      const timeout = window.setTimeout(() => controller.abort("timeout"), 30000);
       try {
         const res = await fetch("/api/ask", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          signal: controller.signal,
           body: JSON.stringify({
             question: startingQuestion,
             filters: startingFilters,
             chatHistory: [],
-            pageContext: buildWorkspacePageContext(readWorkspaceItemsSnapshot(), startingFilters),
+            pageContext: buildWorkspacePageContext(readWorkspace(), startingFilters),
           }),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error ?? "Request failed");
+        const data = (await safeJson(res)) as AskResponse;
+        if (!res.ok) throw new Error(responseError(data, "Request failed"));
         if (!cancelled) {
           setAnswer(data);
           setConversation([
@@ -190,9 +240,11 @@ export default function ResearchWorkspace({
         }
       } catch (e) {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : "Something went wrong");
+          const isAbort = e instanceof DOMException && e.name === "AbortError";
+          setError(isAbort ? "The Copilot request was stopped. Adjust filters or ask again." : e instanceof Error ? e.message : "Something went wrong");
         }
       } finally {
+        window.clearTimeout(timeout);
         if (!cancelled) setLoading(false);
       }
     }
@@ -200,8 +252,10 @@ export default function ResearchWorkspace({
     void loadInitialAnswer();
     return () => {
       cancelled = true;
+      controller.abort("unmounted");
+      if (activeRequest.current === controller) activeRequest.current = null;
     };
-  }, [startingFilters, startingQuestion]);
+  }, [autoRunInitial, startingFilters, startingQuestion]);
 
   useEffect(() => {
     if (!loading) return;
@@ -237,7 +291,8 @@ export default function ResearchWorkspace({
           filters={filters}
           resetFilters={startingFilters}
           onFiltersChange={setFilters}
-          onRun={(nextFilters) => submit(question || answer?.input_context.question || loadingQuestion, nextFilters)}
+          onQuestionChange={setQuestion}
+          onRun={runWithFilters}
         />
 
         <main className="min-w-0 border-x border-[#dfe3eb] bg-white">
@@ -251,10 +306,10 @@ export default function ResearchWorkspace({
               </div>
             </div>
 
-            <div className="mt-3 flex gap-1 border-b border-[#e6eaf0] pb-0">
+            <div className="mt-3 flex flex-wrap items-end justify-between gap-3 border-b border-[#e6eaf0] pb-0">
+              <div className="flex gap-1">
               {([
                 ["ask", "Ask"],
-                ["queue", "Research Queue"],
                 ["notes", "Notes"],
               ] as const).map(([key, label]) => (
                 <button
@@ -268,11 +323,6 @@ export default function ResearchWorkspace({
                   }`}
                 >
                   {label}
-                  {key === "queue" && (
-                    <span className="ml-1.5 rounded-full bg-[#eef5ff] px-1.5 py-0.5 text-[10px] text-[#0b5bd3]">
-                      {queueCandidates.length}
-                    </span>
-                  )}
                   {key === "notes" && workspaceItems.length > 0 && (
                     <span className="ml-1.5 rounded-full bg-[#eef5ff] px-1.5 py-0.5 text-[10px] text-[#0b5bd3]">
                       {workspaceItems.length}
@@ -280,6 +330,10 @@ export default function ResearchWorkspace({
                   )}
                 </button>
               ))}
+              </div>
+              <Link href="/discover" className="pb-2 text-xs font-semibold text-[#0b5bd3] hover:underline">
+                Open Discover ({queueCandidates.length})
+              </Link>
             </div>
 
             {tab === "ask" ? (
@@ -304,6 +358,15 @@ export default function ResearchWorkspace({
                   >
                     {loading ? "Running" : "Ask"}
                   </button>
+                  {loading ? (
+                    <button
+                      type="button"
+                      onClick={cancelRequest}
+                      className="rounded border border-[#cfd6e2] bg-white px-3 py-2.5 text-sm font-semibold text-[#344054] transition hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
+                    >
+                      Cancel
+                    </button>
+                  ) : null}
                 </form>
               </>
             ) : null}
@@ -339,7 +402,13 @@ export default function ResearchWorkspace({
                   ))}
                 </div>
               ) : (
-                <MessageFrame question={answer?.input_context.question ?? question} />
+                <IdlePrompt
+                  question={answer?.input_context.question ?? question}
+                  onPrompt={(prompt) => {
+                    setQuestion(prompt);
+                    submit(prompt);
+                  }}
+                />
               )}
               {loading ? (
                 <div className="space-y-2">
@@ -358,15 +427,6 @@ export default function ResearchWorkspace({
                 </div>
               ) : null}
             </div>
-          ) : tab === "queue" ? (
-            <ResearchQueueTab
-              candidates={queueCandidates}
-              theme={initialTheme}
-              onPrompt={(prompt) => {
-                setTab("ask");
-                submit(prompt);
-              }}
-            />
           ) : (
             <NotesTab items={workspaceItems} />
           )}
@@ -390,6 +450,22 @@ function toChatHistory(messages: ConversationMessage[]): ChatTurn[] {
     .slice(-8);
 }
 
+async function safeJson(res: Response): Promise<unknown> {
+  try {
+    return await res.json();
+  } catch {
+    return { error: "The server returned a non-JSON response." };
+  }
+}
+
+function responseError(data: unknown, fallback: string) {
+  return isRecord(data) && typeof data.error === "string" ? data.error : fallback;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 function makeMessageId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
@@ -398,11 +474,13 @@ function SessionRail({
   filters,
   resetFilters,
   onFiltersChange,
+  onQuestionChange,
   onRun,
 }: {
   filters: CopilotFilters;
   resetFilters: CopilotFilters;
   onFiltersChange: (filters: CopilotFilters) => void;
+  onQuestionChange: (question: string) => void;
   onRun: (filters: CopilotFilters) => void;
 }) {
   function patch(patchFilters: Partial<CopilotFilters>) {
@@ -426,8 +504,8 @@ function SessionRail({
             <button
               key={objective.value}
               onClick={() => {
-                const next = patch({ objective: objective.value });
-                onRun(next);
+                patch({ objective: objective.value });
+                onQuestionChange(objective.prompt);
               }}
               className={`flex w-full items-center justify-between rounded border px-3 py-2 text-left text-xs transition ${
                 filters.objective === objective.value
@@ -533,7 +611,7 @@ function SessionRail({
 
       <section className="rounded border border-[#dfe3eb] bg-white p-3">
         <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#344054]">
-          Memo and queue
+          Memo and follow-up
         </div>
         <div className="mt-3 grid gap-2">
           <button
@@ -550,13 +628,12 @@ function SessionRail({
           >
             Draft partner memo risks and gaps
           </button>
-          <button
-            type="button"
-            onClick={() => onRun(patch({ sourceScope: "Include indicative records" }))}
+          <Link
+            href="/discover"
             className="rounded border border-[#d8dee8] bg-[#fbfcfe] px-3 py-2 text-left text-xs font-medium text-[#344054] hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
           >
-            Review research queue candidates
-          </button>
+            Review Discover candidates
+          </Link>
         </div>
       </section>
     </aside>
@@ -819,6 +896,8 @@ function EvidenceInspector({
   selectedSourceId: string | null;
   onSourceSelect: (sourceId: string) => void;
 }) {
+  if (!sources.length) return null;
+
   return (
     <aside className="bg-[#fbfcfe] p-4 md:col-span-2 2xl:col-span-1 2xl:min-h-[calc(100vh-6.5rem)]">
       <div className="mb-4 flex items-center justify-between">
@@ -905,18 +984,36 @@ function EvidenceInspector({
   );
 }
 
-function MessageFrame({ question }: { question: string }) {
+function IdlePrompt({
+  question,
+  onPrompt,
+}: {
+  question: string;
+  onPrompt: (prompt: string) => void;
+}) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-4 rounded border border-[#dfe3eb] bg-[#fbfcfe] p-4">
       <div className="flex gap-3">
         <Avatar label="AB" />
         <div>
           <div className="text-xs">
-            <span className="font-semibold">You</span>
-            <span className="ml-2 text-[#667085]">Current question</span>
+            <span className="font-semibold">Ready to ask</span>
+            <span className="ml-2 text-[#667085]">Set filters first or start here</span>
           </div>
           <p className="mt-1 text-sm text-[#344054]">{question}</p>
         </div>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {[question, ...PROMPTS].filter(Boolean).slice(0, 5).map((prompt) => (
+          <button
+            key={prompt}
+            type="button"
+            onClick={() => onPrompt(prompt)}
+            className="rounded border border-[#d8dee8] bg-white px-3 py-2 text-xs font-medium text-[#344054] transition hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
+          >
+            Try: {prompt}
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -971,6 +1068,8 @@ function BasketContextPanel({
       ),
     },
   ];
+
+  if (!items.length) return null;
 
   return (
     <section className="rounded border border-[#cfd6e2] bg-[#f8fbff] p-3">
@@ -1229,210 +1328,7 @@ function themeLabel(value: string): string {
   return THEMES.find((theme) => theme.value === value)?.label ?? value;
 }
 
-function workspaceKindLabel(kind: string): string {
-  if (kind === "call") return "Expert";
-  if (kind === "target") return "Company";
-  return "Note";
-}
-
-// ---- Research Queue Tab ----
-
-function ResearchQueueTab({
-  candidates,
-  theme,
-  onPrompt,
-}: {
-  candidates: ExpertDiscoveryCandidate[];
-  theme: ThemeFocus;
-  onPrompt: (prompt: string) => void;
-}) {
-  const unmatched = candidates.filter(
-    (candidate) => candidate.canonical_match.status !== "exact_name_match",
-  );
-  const matched = candidates.filter(
-    (candidate) => candidate.canonical_match.status === "exact_name_match",
-  );
-
-  return (
-    <div className="space-y-4 px-5 py-4">
-      <div>
-        <h2 className="text-sm font-semibold">Research Queue</h2>
-        <p className="mt-1 text-xs text-[#667085]">
-          Discovery candidates for {themeLabel(theme)} sourced from PE deal evidence, peer fund activity, and market mapping.
-          Review and action each candidate to build expert coverage.
-        </p>
-      </div>
-
-      <div className="grid gap-3 lg:grid-cols-2">
-        <div className="rounded border border-[#dfe3eb] bg-white">
-          <div className="border-b border-[#e6eaf0] px-3 py-2.5">
-            <span className="text-xs font-semibold">Unmatched candidates</span>
-            <span className="ml-2 text-[11px] text-[#667085]">
-              {unmatched.length} need verification
-            </span>
-          </div>
-          <div className="max-h-[420px] overflow-y-auto">
-            {unmatched.slice(0, 15).map((candidate) => (
-              <div
-                key={candidate.candidate_id}
-                className="border-b border-[#edf0f5] px-3 py-2.5 last:border-0"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="text-xs font-semibold">{candidate.name}</div>
-                    <div className="mt-0.5 text-[11px] text-[#667085]">
-                      {candidate.headline} · {candidate.archetypes.join(", ")}
-                    </div>
-                    <div className="mt-1 text-[11px] text-[#344054] line-clamp-2">
-                      {candidate.why_relevant}
-                    </div>
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {candidate.organizations.slice(0, 2).map((org) => (
-                        <span
-                          key={org}
-                          className="rounded border border-[#d8dee8] bg-[#f8fafc] px-1.5 py-0.5 text-[10px] text-[#667085]"
-                        >
-                          {org}
-                        </span>
-                      ))}
-                      <span className="rounded border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[10px] text-amber-700">
-                        {candidate.access_path.replaceAll("-", " ")}
-                      </span>
-                    </div>
-                  </div>
-                  <span className="shrink-0 rounded bg-[#eef5ff] px-2 py-1 text-[10px] font-semibold text-[#0b5bd3]">
-                    {Math.round(candidate.scores.research_priority)}%
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    onPrompt(
-                      `Research ${candidate.name}: ${candidate.why_relevant}. Find their LinkedIn, email, and confirm their current role and organisation.`,
-                    )
-                  }
-                  className="mt-2 text-[11px] font-medium text-[#0b5bd3] hover:underline"
-                >
-                  Ask Copilot to research →
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded border border-[#dfe3eb] bg-white">
-          <div className="border-b border-[#e6eaf0] px-3 py-2.5">
-            <span className="text-xs font-semibold">Matched candidates</span>
-            <span className="ml-2 text-[11px] text-[#667085]">
-              {matched.length} in expert directory
-            </span>
-          </div>
-          <div className="max-h-[420px] overflow-y-auto">
-            {matched.length === 0 ? (
-              <div className="px-3 py-6 text-center text-xs text-[#667085]">
-                No matched candidates yet. Run discovery jobs to populate.
-              </div>
-            ) : (
-              matched.slice(0, 10).map((candidate) => (
-                <div
-                  key={candidate.candidate_id}
-                  className="border-b border-[#edf0f5] px-3 py-2.5 last:border-0"
-                >
-                  <div className="text-xs font-semibold">{candidate.name}</div>
-                  <div className="mt-0.5 text-[11px] text-[#667085]">{candidate.headline}</div>
-                  {candidate.canonical_match.expert_id && (
-                    <Link
-                      href={`/experts/${candidate.canonical_match.expert_id}`}
-                      className="mt-1 inline-block text-[11px] font-medium text-[#07883f] hover:underline"
-                    >
-                      View expert profile →
-                    </Link>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() =>
-            onPrompt(
-              "Review the research queue and prioritise which candidates to verify first based on deal relevance and access path.",
-            )
-          }
-          className="rounded border border-[#0b5bd3] bg-[#0b5bd3] px-4 py-2 text-xs font-semibold text-white hover:bg-[#084aa9]"
-        >
-          Prioritise queue with Copilot
-        </button>
-        <Link
-          href="/experts"
-          className="rounded border border-[#d8dee8] bg-white px-4 py-2 text-xs font-medium text-[#344054] hover:border-[#0b5bd3]"
-        >
-          Open call tray
-        </Link>
-      </div>
-    </div>
-  );
-}
-
 // ---- Notes Tab ----
-
-interface WorkspaceItem {
-  id: string;
-  kind: string;
-  name: string;
-  sub?: string;
-  href: string;
-  theme?: string;
-  note?: string;
-  status: string;
-  addedAt: string;
-}
-
-const WORKSPACE_STORAGE_KEY = "towerbrook-investor-workspace-v1";
-const WORKSPACE_EVENT = "towerbrook-investor-workspace-updated";
-
-function useWorkspaceItems(): WorkspaceItem[] {
-  const snapshot = useSyncExternalStore(
-    (callback) => {
-      const handler = () => callback();
-      window.addEventListener(WORKSPACE_EVENT, handler);
-      return () => window.removeEventListener(WORKSPACE_EVENT, handler);
-    },
-    () => {
-      try {
-        return localStorage.getItem(WORKSPACE_STORAGE_KEY) ?? "[]";
-      } catch {
-        return "[]";
-      }
-    },
-    () => "[]",
-  );
-
-  return useMemo(() => {
-    return parseWorkspaceItems(snapshot);
-  }, [snapshot]);
-}
-
-function readWorkspaceItemsSnapshot(): WorkspaceItem[] {
-  try {
-    return parseWorkspaceItems(localStorage.getItem(WORKSPACE_STORAGE_KEY) ?? "[]");
-  } catch {
-    return [];
-  }
-}
-
-function parseWorkspaceItems(value: string): WorkspaceItem[] {
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
 
 function NotesTab({ items }: { items: WorkspaceItem[] }) {
   const calls = items.filter((item) => item.kind === "call");

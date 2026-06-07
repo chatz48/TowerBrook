@@ -27,7 +27,8 @@ import {
   INCLUDE_TOWERBROOK_EMPLOYEES_EVENT,
   readIncludeTowerBrookEmployeesCookie,
 } from "@/lib/employee-scope";
-import { Badge, ThemeTag } from "@/app/components/ui";
+import { Badge, PageShell, ThemeTag } from "@/app/components/ui";
+import OperatorWorkflowRail from "@/app/components/OperatorWorkflowRail";
 
 interface LiveSearchPreview {
   configured: boolean;
@@ -95,7 +96,7 @@ const QUEUES: { id: QueueView; label: string; description: string }[] = [
 
 export default function DiscoverPage() {
   return (
-    <Suspense fallback={<div className="ee-shell px-3 py-5 sm:px-5" />}>
+    <Suspense fallback={<PageShell />}>
       <DiscoverPageContent />
     </Suspense>
   );
@@ -241,8 +242,7 @@ function DiscoverPageContent() {
   }
 
   return (
-    <div className="ee-shell px-3 py-5 sm:px-5">
-      <div className="mx-auto max-w-[1580px]">
+    <PageShell innerClassName="mx-auto max-w-[1580px]">
         <header className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h1 className="text-[26px] font-semibold tracking-tight">Research Queue</h1>
@@ -290,6 +290,30 @@ function DiscoverPageContent() {
             detail={`${THEME_LABEL[themeId]} · ${QUEUES.find((queue) => queue.id === view)?.label}`}
           />
         </section>
+
+        <OperatorWorkflowRail
+          title="Convert uncertain leads into call-ready coverage"
+          subtitle="Treat this as the quality gate before a person, company or advisor name enters the partner workflow."
+          steps={[
+            {
+              label: "Verify",
+              detail: "Confirm identity, role, source recency and relationship to the theme.",
+            },
+            {
+              label: "Promote",
+              detail: "Move credible people to the call list and credible companies to validation.",
+            },
+            {
+              label: "Document",
+              detail: "Keep unresolved gaps visible until a named expert or source closes them.",
+            },
+          ]}
+          actions={[
+            { label: "Call list", href: "/experts?readiness=actionable", primary: true },
+            { label: "Company map", href: "/companies?readiness=actionable" },
+            { label: "Meeting memo", href: "/reports" },
+          ]}
+        />
 
         <div className="grid gap-5 xl:grid-cols-[340px_minmax(0,1fr)]">
           <aside className="space-y-5">
@@ -393,7 +417,7 @@ function DiscoverPageContent() {
             </section>
 
             <section className="ee-panel rounded-lg p-5">
-              <div className="ee-label text-ink">Job status</div>
+              <div className="ee-label text-ink">Research refresh</div>
               <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">
                 Refresh uses public sources to find new experts and companies. When live discovery
                 is unavailable, you can still review the research queue below.
@@ -407,15 +431,20 @@ function DiscoverPageContent() {
               {job ? (
                 <div className="mt-4 rounded-md border border-line bg-white p-3">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="font-semibold text-[13px]">{job.status}</span>
-                    <span className="text-[11px] text-ink-faint">{job.job_type}</span>
+                    <span className="font-semibold text-[13px]">{researchStatusLabel(job.status)}</span>
+                    <span className="text-[11px] text-ink-faint">{researchTypeLabel(job.job_type)}</span>
                   </div>
                   <div className="mt-2 grid grid-cols-3 gap-2 text-[11px] text-ink-soft">
-                    <span>{job.sources_found} sources</span>
-                    <span>{job.entities_created} entities</span>
-                    <span>{job.relationships_created} edges</span>
+                    <span>{job.sources_found} sources checked</span>
+                    <span>{job.entities_created} new leads</span>
+                    <span>{job.relationships_created} relationship paths</span>
                   </div>
-                  <p className="mt-2 break-all text-[11px] text-ink-faint">{job.id}</p>
+                  <details className="mt-2">
+                    <summary className="cursor-pointer text-[11px] font-semibold text-accent">
+                      Technical details
+                    </summary>
+                    <p className="mt-1 break-all text-[11px] text-ink-faint">{job.id}</p>
+                  </details>
                 </div>
               ) : null}
             </section>
@@ -497,8 +526,7 @@ function DiscoverPageContent() {
             </section>
           </main>
         </div>
-      </div>
-    </div>
+    </PageShell>
   );
 }
 
@@ -986,6 +1014,19 @@ function MiniMetric({ label, value, detail }: { label: string; value: string | n
       <p className="mt-1 text-[11px] text-ink-faint">{detail}</p>
     </div>
   );
+}
+
+function researchStatusLabel(status: string) {
+  return status
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function researchTypeLabel(jobType: string) {
+  if (jobType.includes("advisor")) return "Advisor name search";
+  if (jobType.includes("company")) return "Company validation";
+  if (jobType.includes("expert")) return "Expert verification";
+  return "Research refresh";
 }
 
 function DetailPanel({

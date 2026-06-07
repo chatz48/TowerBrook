@@ -157,8 +157,8 @@ export default function IngestPage() {
           Create missing-fact searches after saving to the database
         </label>
         <p className="mt-1 text-[11px] leading-relaxed text-ink-faint">
-          In local demo mode, the app extracts a reviewable draft and shows the searches to run
-          before anything is committed to the graph.
+          Extract a reviewable draft and inspect the follow-up searches before committing new
+          facts to the graph.
         </p>
 
         <button
