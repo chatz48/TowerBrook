@@ -11,6 +11,7 @@ import {
   computeVisibleGraph,
   DEFAULT_CONFIDENCE_FLOOR,
   filterGraphEdges,
+  type GraphViewOptions,
 } from "@/lib/graph-visible";
 import { RELATIONSHIP_COLOR } from "@/lib/graph-colors";
 import { askHref } from "@/lib/links";
@@ -23,7 +24,7 @@ import type {
   ExplorerSource,
   ExplorerTheme,
 } from "@/lib/graph-types";
-import { matchesThemeFocus, publishThemeFocus, type ThemeFocus } from "@/lib/theme-focus";
+import { matchesThemeFocus, type ThemeFocus } from "@/lib/theme-focus";
 import styles from "./GraphExplorer.module.css";
 
 export type {
@@ -100,16 +101,37 @@ function quickJumpNodes(
     .slice(0, 4);
 }
 
-function expertDomainOptions(experts: ExplorerExpertNode[]): { value: string; label: string }[] {
-  const seen = new Set<string>();
-  const options: { value: string; label: string }[] = [];
-  for (const expert of experts) {
-    if (!seen.has(expert.type)) {
-      seen.add(expert.type);
-      options.push({ value: expert.type, label: expert.typeLabel });
+function expertTypesForFocus(
+  selectedKey: string,
+  selectedNode: ExplorerNode | undefined,
+  edges: ExplorerEdge[],
+  nodeByKey: Map<string, ExplorerNode>,
+  options: Omit<GraphViewOptions, "expertDomain" | "selectedKey">,
+): { value: ExpertType; label: string }[] {
+  if (!selectedNode) return [];
+
+  const connectedEdges = filterGraphEdges(edges, nodeByKey, {
+    ...options,
+    selectedKey,
+    expertDomain: "all",
+  }).filter((edge) => edge.from === selectedKey || edge.to === selectedKey);
+
+  const types = new Map<ExpertType, string>();
+  const addExpert = (node?: ExplorerNode) => {
+    if (node?.kind === "expert") {
+      types.set(node.type, node.typeLabel);
     }
+  };
+
+  addExpert(selectedNode);
+
+  for (const edge of connectedEdges) {
+    addExpert(nodeByKey.get(otherNode(edge, selectedKey)));
   }
-  return options.sort((a, b) => a.label.localeCompare(b.label));
+
+  return [...types.entries()]
+    .map(([value, label]) => ({ value, label }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 }
 
 function sortDirectoryNodes(a: ExplorerNode, b: ExplorerNode) {
@@ -277,6 +299,35 @@ export default function GraphExplorer({
   const selectedNode = visibleGraph.selectedNode;
   const selectedEdges = visibleGraph.selectedEdges;
 
+  const focusExpertDomainOptions = useMemo(
+    () =>
+      expertTypesForFocus(selectedKey, selectedNode, edges, nodeByKey, {
+        theme,
+        confidenceFloor,
+        pathView,
+        nodeKinds,
+        relationships,
+      }),
+    [
+      confidenceFloor,
+      edges,
+      nodeByKey,
+      nodeKinds,
+      pathView,
+      relationships,
+      selectedKey,
+      selectedNode,
+      theme,
+    ],
+  );
+
+  useEffect(() => {
+    if (expertDomain === "all") return;
+    if (!focusExpertDomainOptions.some((option) => option.value === expertDomain)) {
+      setExpertDomain("all");
+    }
+  }, [expertDomain, focusExpertDomainOptions]);
+
   const focusMatches = useMemo(() => {
     const searchText = query.trim().toLowerCase();
     if (!searchText) return [];
@@ -325,18 +376,6 @@ export default function GraphExplorer({
     () => availableRelationships.filter((relationship) => relationships[relationship]).length,
     [availableRelationships, relationships],
   );
-  const connectedPreview = useMemo(
-    () =>
-      selectedEdges
-        .slice(0, 6)
-        .map((edge) => ({
-          edge,
-          node: selectedNode ? nodeByKey.get(otherNode(edge, selectedNode.key)) : undefined,
-        }))
-        .filter((item): item is { edge: ExplorerEdge; node: ExplorerNode } => Boolean(item.node)),
-    [nodeByKey, selectedEdges, selectedNode],
-  );
-
   const visibleEdges = visibleGraph.visibleEdges;
   const visibleNodes = visibleGraph.visibleNodes;
   const hiddenDirectEdges = useMemo(() => {
@@ -454,6 +493,8 @@ export default function GraphExplorer({
     if (!previous) return;
     setSelectedKey(previous);
     setHistory((items) => items.slice(0, -1));
+    setHighlightedEdgeId(null);
+    syncFocusToUrl(previous);
   }
 
   function resetExplorer() {
@@ -477,41 +518,12 @@ export default function GraphExplorer({
 
   function runQuery() {
     const next = focusMatches[0]?.node;
-    if (next) {
-      setHistory([]);
-      setSelectedKey(next.key);
-      setQuery("");
-    }
-  }
-
-  function changeTheme(nextTheme: ThemeFocus) {
-    setTheme(nextTheme);
-    publishThemeFocus(nextTheme);
-    setQuery("");
+    if (!next) return;
     setHistory([]);
-
-    const next = allNodes
-      .filter((node) => matchesThemeFocus(node.themes, nextTheme) && nodeKinds[node.kind])
-      .map((node) => ({
-        node,
-        connections: edges.filter((edge) => {
-          const from = nodeByKey.get(edge.from);
-          const to = nodeByKey.get(edge.to);
-          return Boolean(
-            from &&
-              to &&
-              matchesThemeFocus(edge.themes, nextTheme) &&
-              relationships[edge.relationship] &&
-              edge.confidence >= confidenceFloor &&
-              nodeKinds[from.kind] &&
-              nodeKinds[to.kind] &&
-              (edge.from === node.key || edge.to === node.key),
-          );
-        }).length,
-      }))
-      .sort((a, b) => b.connections - a.connections)[0]?.node;
-
-    if (next) setSelectedKey(next.key);
+    setSelectedKey(next.key);
+    setQuery("");
+    setHighlightedEdgeId(null);
+    syncFocusToUrl(next.key);
   }
 
   const selectedSources =
@@ -580,7 +592,7 @@ export default function GraphExplorer({
                         <span className={styles.focusGlyph} data-kind={node.kind}>
                           {nodeBadgeText(node)}
                         </span>
-                        <span>
+                        <span className={styles.quickJumpText}>
                           <strong>{node.name}</strong>
                           <small>
                             {nodeKindName(node)} · {count} relationship{count === 1 ? "" : "s"}
@@ -633,7 +645,7 @@ export default function GraphExplorer({
                       <span className={styles.focusGlyph} data-kind={node.kind}>
                         {nodeBadgeText(node)}
                       </span>
-                      <span>
+                      <span className={styles.quickJumpText}>
                         <strong>{node.name}</strong>
                         <small>
                           {reason}
@@ -809,35 +821,19 @@ export default function GraphExplorer({
             </div>
           ) : null}
 
-          {variant === "full" ? (
-            <DirectLinksBar connectedPreview={connectedPreview} onFocus={selectNodeAndReveal} />
-          ) : null}
-
           <div className={variant === "embed" ? styles.embedGraphToolbar : styles.graphToolbar}>
             <GraphLegend compact />
             <div className={styles.toolbarButtons}>
-              {variant === "full" ? (
+              {variant === "full" && focusExpertDomainOptions.length > 0 ? (
                 <select
-                  className={styles.select}
+                  className={`${styles.select} ${styles.toolbarSelect}`}
                   value={expertDomain}
-                  onChange={(event) => {
-                    const nextDomain = event.target.value as ExpertType | "all";
-                    setExpertDomain(nextDomain);
-                    if (nextDomain !== "all") {
-                      const topExpert = experts
-                        .filter((e) => e.type === nextDomain && matchesThemeFocus(e.themes, theme))
-                        .sort((a, b) => {
-                          const aEdges = filteredEdges.filter((edge) => edge.from === a.key || edge.to === a.key).length;
-                          const bEdges = filteredEdges.filter((edge) => edge.from === b.key || edge.to === b.key).length;
-                          return bEdges - aEdges;
-                        })[0];
-                      if (topExpert) selectNode(topExpert.key);
-                    }
-                  }}
-                  style={{ minWidth: 160, height: 32, fontSize: 12 }}
+                  onChange={(event) => setExpertDomain(event.target.value as ExpertType | "all")}
+                  aria-label="Filter experts shown on the map"
+                  title="Filters which expert types appear — does not change your current focus"
                 >
-                  <option value="all">All expert domains</option>
-                  {expertDomainOptions(experts).map(({ value, label }) => (
+                  <option value="all">All expert types</option>
+                  {focusExpertDomainOptions.map(({ value, label }) => (
                     <option key={value} value={value}>
                       {label}
                     </option>
@@ -1099,31 +1095,6 @@ function GraphLegend({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function DirectLinksBar({
-  connectedPreview,
-  onFocus,
-}: {
-  connectedPreview: { edge: ExplorerEdge; node: ExplorerNode }[];
-  onFocus: (key: string) => void;
-}) {
-  if (!connectedPreview.length) return null;
-
-  return (
-    <section className={styles.directLinksBar} aria-label="Direct links from current focus">
-      <span>Direct links</span>
-      <div className={styles.connectedRail}>
-        {connectedPreview.map(({ edge, node }) => (
-          <button key={edge.id} type="button" onClick={() => onFocus(node.key)}>
-            <i style={{ "--edge-color": RELATIONSHIP_COLOR[edge.relationship] } as CSSProperties} />
-            <b>{node.name}</b>
-            <em>{edge.relationshipLabel}</em>
-          </button>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 function SourceMarker({ id }: { id: string }) {
   return <a className={styles.sourceMarker} href={`#source-${id}`}>[{id}]</a>;
 }
@@ -1139,8 +1110,10 @@ function nodeColor(node: ExplorerNode) {
 
 const LAYOUT_CARD_WIDTH = 204;
 const LAYOUT_ROW_HEIGHT = 96;
-const LAYOUT_MAX_PER_ROW = 5;
-const LAYOUT_LAYER_GAP = 132;
+const LAYOUT_MAX_PER_ROW = 3;
+const TARGET_CANVAS_HEIGHT = 820;
+const CANVAS_TOP_MARGIN = 92;
+const CANVAS_BOTTOM_MARGIN = 150;
 
 function layerSequenceFor(selected?: ExplorerNode) {
   if (selected?.kind === "company") {
@@ -1167,6 +1140,7 @@ function layoutNodesInRows(
   startY: number,
   canvasWidth: number,
   positions: Map<string, { x: number; y: number }>,
+  rowSpacing = LAYOUT_ROW_HEIGHT,
 ) {
   if (!nodes.length) return 0;
   const rowCount = Math.ceil(nodes.length / LAYOUT_MAX_PER_ROW);
@@ -1174,7 +1148,7 @@ function layoutNodesInRows(
     const row = nodes.slice(rowIndex * LAYOUT_MAX_PER_ROW, (rowIndex + 1) * LAYOUT_MAX_PER_ROW);
     const rowWidth = row.length <= 1 ? LAYOUT_CARD_WIDTH : (row.length - 1) * LAYOUT_CARD_WIDTH + LAYOUT_CARD_WIDTH;
     const startX = canvasWidth / 2 - rowWidth / 2 + LAYOUT_CARD_WIDTH / 2;
-    const y = startY + rowIndex * LAYOUT_ROW_HEIGHT;
+    const y = startY + rowIndex * rowSpacing;
     row.forEach((node, index) => {
       positions.set(node.key, { x: startX + index * LAYOUT_CARD_WIDTH, y });
     });
@@ -1186,12 +1160,14 @@ function GraphCanvas({
   nodes,
   edges,
   selectedKey,
+  highlightedEdgeId,
   nodeByKey,
   onSelect,
 }: {
   nodes: ExplorerNode[];
   edges: ExplorerEdge[];
   selectedKey?: string;
+  highlightedEdgeId?: string | null;
   nodeByKey: Map<string, ExplorerNode>;
   onSelect: (key: string) => void;
 }) {
@@ -1262,8 +1238,8 @@ function GraphCanvas({
     1,
     ...layerOrder.map((layerName) => Math.min((layers.get(layerName) ?? []).length, LAYOUT_MAX_PER_ROW)),
   );
-  const width = Math.max(1120, maxNodesInRow * LAYOUT_CARD_WIDTH + 280);
-  const focusY = 96;
+  const width = Math.max(960, maxNodesInRow * LAYOUT_CARD_WIDTH + 280);
+  const focusY = CANVAS_TOP_MARGIN;
 
   if (selected) positions.set(selected.key, { x: width / 2, y: focusY });
 
@@ -1272,16 +1248,33 @@ function GraphCanvas({
     layerLabels.push({ label: focusLayerLabel(selected), y: focusY });
   }
 
-  let yCursor = 220;
-  for (const layerName of layerOrder) {
-    const layerNodes = [...(layers.get(layerName) ?? [])].sort((a, b) => a.name.localeCompare(b.name));
-    if (!layerNodes.length) continue;
-    const rowCount = layoutNodesInRows(layerNodes, yCursor, width, positions);
-    layerLabels.push({ label: layerName, y: yCursor });
-    yCursor += LAYOUT_LAYER_GAP + Math.max(0, rowCount - 1) * LAYOUT_ROW_HEIGHT;
+  const activeLayers = layerOrder
+    .map((name) => {
+      const nodes = layers.get(name) ?? [];
+      if (!nodes.length) return null;
+      return {
+        name,
+        nodes: [...nodes].sort((a, b) => a.name.localeCompare(b.name)),
+        rowCount: Math.ceil(nodes.length / LAYOUT_MAX_PER_ROW),
+      };
+    })
+    .filter((layer): layer is NonNullable<typeof layer> => Boolean(layer));
+
+  const totalRowsBelowFocus = activeLayers.reduce((sum, layer) => sum + layer.rowCount, 0);
+  const spaceBelowFocus = TARGET_CANVAS_HEIGHT - CANVAS_BOTTOM_MARGIN - focusY - 72;
+  const rowSpacing =
+    totalRowsBelowFocus > 0
+      ? Math.min(210, Math.max(112, spaceBelowFocus / totalRowsBelowFocus))
+      : LAYOUT_ROW_HEIGHT;
+
+  let yCursor = focusY + rowSpacing * 0.75;
+  for (const layer of activeLayers) {
+    layoutNodesInRows(layer.nodes, yCursor, width, positions, rowSpacing);
+    layerLabels.push({ label: layer.name, y: yCursor });
+    yCursor += layer.rowCount * rowSpacing;
   }
 
-  const height = Math.max(680, yCursor + 110);
+  const height = TARGET_CANVAS_HEIGHT;
 
   return (
     <svg className={styles.graphSvg} viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Mapped relationship graph">
@@ -1323,16 +1316,19 @@ function GraphCanvas({
         const midX = (from.x + to.x) / 2;
         const midY = (from.y + to.y) / 2;
         const color = RELATIONSHIP_COLOR[edge.relationship];
-        const bend = Math.abs(from.x - to.x) > 120 ? 42 : 20;
+        const verticalSpan = Math.abs(from.y - to.y);
+        const bend = Math.max(24, Math.min(verticalSpan * 0.28, 90));
+        const isHighlighted = highlightedEdgeId === edge.id;
+        const dimOthers = Boolean(highlightedEdgeId && !isHighlighted);
         return (
           <g key={edge.id}>
             <path
               d={`M ${from.x} ${from.y + 34} C ${from.x} ${midY - bend}, ${to.x} ${midY + bend}, ${to.x} ${to.y - 34}`}
               fill="none"
               stroke={color}
-              strokeWidth="1.55"
+              strokeWidth={isHighlighted ? 2.8 : 1.55}
               markerEnd={`url(#arrow-${edge.relationship})`}
-              opacity={edge.confidence >= 0.8 ? 0.92 : 0.58}
+              opacity={dimOthers ? 0.16 : edge.confidence >= 0.8 ? 0.92 : 0.58}
             />
             <g transform={`translate(${midX - 36} ${midY - 15})`}>
               <rect width="72" height="21" rx="10.5" fill="#ffffff" stroke="#e4e9f1" />
@@ -1474,49 +1470,3 @@ function PathStrip({
   );
 }
 
-function InsightCard({
-  title,
-  items,
-  onFocus,
-}: {
-  title: string;
-  items: { id: string; rank?: number; label: string; sub: string; value: number; focusKey?: string }[];
-  onFocus?: (key: string) => void;
-}) {
-  return (
-    <article className={styles.insightCard}>
-      <div className={styles.sectionLine}>
-        <strong>{title}</strong>
-      </div>
-      <ul>
-        {items.slice(0, 3).map((item) => {
-          const content = (
-            <>
-              <span>{item.rank ?? "!"}</span>
-              <div>
-                <strong>{item.label}</strong>
-                <small>{item.sub}</small>
-              </div>
-              <em>{item.value || ""}</em>
-            </>
-          );
-          return (
-            <li key={item.id}>
-              {item.focusKey && onFocus ? (
-                <button
-                  type="button"
-                  aria-label={`Focus on ${item.label}`}
-                  onClick={() => onFocus(item.focusKey!)}
-                >
-                  {content}
-                </button>
-              ) : (
-                <div>{content}</div>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    </article>
-  );
-}

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { buildGraphModel } from "@/lib/graph-model";
 import { resolveGraphFocusKey } from "@/lib/graph-normalize";
 import { matchesThemeFocus } from "@/lib/theme-focus";
@@ -47,26 +48,28 @@ export default async function GraphPage({
     experts[0]?.key;
 
   return (
-    <GraphExplorer
-      key={`${themeFocus}:${defaultSelected}`}
-      themes={themes}
-      experts={experts}
-      companies={companies}
-      deals={deals}
-      edges={edges}
-      sources={sources}
-      defaultTheme={themeFocus}
-      defaultSelected={defaultSelected}
-      returnContext={
-        selectedContextNode
-          ? {
-              label: selectedContextNode.name,
-              href: selectedContextNode.href,
-              detail: selectedContextNode.subtitle,
-            }
-          : undefined
-      }
-    />
+    <Suspense fallback={<div className="p-6 text-sm text-ink-soft">Loading relationship graph…</div>}>
+      <GraphExplorer
+        key={`${themeFocus}:${defaultSelected}`}
+        themes={themes}
+        experts={experts}
+        companies={companies}
+        deals={deals}
+        edges={edges}
+        sources={sources}
+        defaultTheme={themeFocus}
+        defaultSelected={defaultSelected}
+        returnContext={
+          selectedContextNode
+            ? {
+                label: selectedContextNode.name,
+                href: selectedContextNode.href,
+                detail: selectedContextNode.subtitle,
+              }
+            : undefined
+        }
+      />
+    </Suspense>
   );
 }
 

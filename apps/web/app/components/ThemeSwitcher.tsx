@@ -150,7 +150,7 @@ export default function ThemeSwitcher({
             highlight={scopeStats.gaps > 0}
           />
           <Link href="/graph" className="font-semibold text-accent hover:underline">
-            Graph
+            Relationships
           </Link>
         </div>
 
