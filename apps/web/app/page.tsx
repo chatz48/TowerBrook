@@ -15,59 +15,16 @@ import {
   isTowerBrookWorkedWithCompany,
   isTowerBrookWorkedWithExpert,
 } from "@/lib/towerbrook";
-import { EXPERT_TYPE_LABEL } from "@/lib/labels";
 import { buildReport, type ReportModel } from "@/lib/report";
-import type { Expert, ExpertType, ThemeId } from "@/lib/types";
+import {
+  expertReadiness,
+  coverageMatrix,
+  themeGapSummary,
+} from "@/lib/investment-readiness";
+import type { Expert, ThemeId } from "@/lib/types";
 import SearchBox, { type SearchItem } from "./components/SearchBox";
 import ReportExportControls from "./components/reports/ReportExportControls";
 import { Badge, PageShell } from "./components/ui";
-
-const CORE_ARCHETYPES: ExpertType[] = [
-  "ex-founder",
-  "operator",
-  "advisor",
-  "banker",
-  "lawyer",
-  "investor",
-];
-
-function coverageGaps(themeId: ThemeId, includeTowerBrookEmployees: boolean): string[] {
-  const covered = new Set(
-    filterTowerBrookEmployees(expertsForTheme(themeId), includeTowerBrookEmployees).flatMap(
-      (expert) => expert.specialties ?? [],
-    ),
-  );
-  return THEME_SPECIALTIES[themeId].filter((specialty) => !covered.has(specialty));
-}
-
-function isVerifiedExpert(expert: Expert) {
-  return expert.confidence >= 0.75 && expert.sources.length > 0;
-}
-
-function isContactableExpert(expert: Expert) {
-  return Boolean(expert.linkedin || expert.email);
-}
-
-function coverageMatrix(experts: Expert[]) {
-  return CORE_ARCHETYPES.map((type) => {
-    const archetypeExperts = experts.filter((expert) => expert.type === type);
-    const verified = archetypeExperts.filter(isVerifiedExpert).length;
-    const contactable = archetypeExperts.filter(isContactableExpert).length;
-    const gap =
-      archetypeExperts.length === 0 || verified === 0
-        ? "high"
-        : contactable < 2
-          ? "medium"
-          : "low";
-    return {
-      type,
-      total: archetypeExperts.length,
-      verified,
-      contactable,
-      gap,
-    };
-  });
-}
 
 export default async function Home() {
   const [themeFocus, includeTowerBrookEmployees] = await Promise.all([
@@ -95,10 +52,13 @@ export default async function Home() {
     ...experts.flatMap((expert) => expert.sources.map((source) => source.url)),
     ...companies.flatMap((company) => company.sources.map((source) => source.url)),
   ]).size;
-  const matrixRows = coverageMatrix(experts);
-  const gapCount = matrixRows.filter((row) => row.gap !== "low").length;
+  const matrixRows = coverageMatrix(themeFocus, includeTowerBrookEmployees);
+  const gapCount = matrixRows.filter((row) => row.gapSeverity !== "low").length;
   const callReadyCount = experts.filter(
-    (expert) => isVerifiedExpert(expert) && (isContactableExpert(expert) || expert.confidence >= 0.85),
+    (expert) => {
+      const readiness = expertReadiness(expert);
+      return readiness.level === "call-ready" || readiness.level === "verify-contact";
+    },
   ).length;
   const targetCount = linkedCompanies.filter(
     (company) =>
@@ -133,14 +93,14 @@ export default async function Home() {
 
   return (
     <PageShell>
-        <section className="ee-panel rounded-lg p-5 sm:p-6">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_520px] xl:items-end">
+        <section className="ee-panel rounded-lg p-4 sm:p-5">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_520px] xl:items-end">
             <div>
               <div className="ee-label text-accent">Command Centre</div>
-              <h1 className="mt-2 max-w-3xl text-[30px] font-semibold tracking-tight">
+              <h1 className="mt-1.5 max-w-3xl text-[22px] font-semibold tracking-tight">
                 Start with the next investment decision
               </h1>
-              <p className="mt-3 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
+              <p className="mt-2 max-w-3xl text-[12px] leading-relaxed text-ink-soft">
                 Identify the people worth calling, the companies they can
                 unlock, and the evidence or coverage gap that should shape the
                 next diligence step.
@@ -166,12 +126,12 @@ export default async function Home() {
           visibleThemes={visibleThemes}
         />
 
-        <details className="mt-5 ee-panel rounded-lg">
-          <summary className="cursor-pointer list-none px-5 py-4 marker:hidden">
+        <details className="mt-4 ee-panel rounded-lg">
+          <summary className="cursor-pointer list-none px-4 py-3 marker:hidden">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <div className="ee-label text-ink">Coverage snapshot</div>
-                <div className="mt-1 flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-ink-faint">
+                <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-ink-faint">
                   <CoverageFact value={experts.length} label="expert profiles" />
                   <CoverageFact value={companies.length} label="companies" />
                   <CoverageFact value={sourceCount} label="source records" />
@@ -184,7 +144,7 @@ export default async function Home() {
               <span className="shrink-0 text-[12px] font-semibold text-accent">Expand</span>
             </div>
           </summary>
-          <div className="border-t border-line px-5 pb-5 pt-2 text-[12px] text-ink-soft">
+          <div className="border-t border-line px-4 pb-4 pt-1.5 text-[11px] text-ink-soft">
             Use the guided workflow above for your next move. Expand this panel when you need
             coverage counts before an IC or partner meeting.
           </div>
@@ -195,8 +155,8 @@ export default async function Home() {
         <section className="mt-5">
           <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-[18px] font-semibold tracking-tight">Your week across themes</h2>
-              <p className="mt-1 text-[12px] text-ink-soft">
+              <h2 className="text-[16px] font-semibold tracking-tight">Your week across themes</h2>
+              <p className="mt-1 text-[11px] text-ink-soft">
                 Top call, lead target, and coverage gap per theme — one panel instead of three cards.
               </p>
             </div>
@@ -205,7 +165,7 @@ export default async function Home() {
             </Link>
           </div>
 
-          <div className={`grid gap-5 ${visibleThemes.length > 1 ? "xl:grid-cols-3" : ""}`}>
+          <div className={`grid gap-4 ${visibleThemes.length > 1 ? "xl:grid-cols-3" : ""}`}>
             {visibleThemes.map((theme) => {
               const brief = buildBrief(theme.id, includeTowerBrookEmployees);
               const themeCompanies = companiesWithLinks(theme.id, includeTowerBrookEmployees);
@@ -216,7 +176,7 @@ export default async function Home() {
                     company.category === "target" &&
                     company.ownershipStatus === "independent",
                 ) ?? themeCompanies[0];
-              const gap = coverageGaps(theme.id, includeTowerBrookEmployees)[0];
+              const gap = themeGapSummary(theme.id, expertsForTheme(theme.id))[0];
 
               return (
                 <article
@@ -224,13 +184,13 @@ export default async function Home() {
                   className="ee-panel overflow-hidden rounded-lg border-t-2"
                   style={{ borderTopColor: theme.accent }}
                 >
-                  <div className="border-b border-line p-5">
+                  <div className="border-b border-line p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <h3 className="text-[17px] font-semibold tracking-tight">
+                        <h3 className="text-[15px] font-semibold tracking-tight">
                           {theme.name}
                         </h3>
-                        <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">
+                        <p className="mt-1.5 text-[11px] leading-relaxed text-ink-soft">
                           {theme.description}
                         </p>
                       </div>
@@ -269,7 +229,7 @@ export default async function Home() {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between gap-3 border-t border-line bg-[#fbfcff] px-5 py-4">
+                  <div className="flex items-center justify-between gap-3 border-t border-line bg-[#fbfcff] px-4 py-3">
                     <span className="text-[11px] text-ink-faint">
                       {brief.stats.targets} independent targets · {brief.stats.exits} acquired comparables
                     </span>
@@ -347,14 +307,14 @@ function MemoSummaryCard({
         : "border-red-200 bg-red-50 text-red-700";
 
   return (
-    <section id="theme-memo" className="mt-5 ee-panel rounded-lg p-5 scroll-mt-28">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <section id="theme-memo" className="mt-4 ee-panel rounded-lg p-4 scroll-mt-28">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="ee-label text-accent">Theme memo</div>
-          <h2 className="mt-2 text-[20px] font-semibold tracking-tight">
+          <h2 className="mt-1.5 text-[17px] font-semibold tracking-tight">
             Your IC pack is ready
           </h2>
-          <p className="mt-2 max-w-2xl text-[13px] leading-relaxed text-ink-soft">
+          <p className="mt-1.5 max-w-2xl text-[12px] leading-relaxed text-ink-soft">
             {report.sections.length} sections · {report.stats.highConfidenceSources} high-confidence
             sources · {report.stats.experts} experts mapped · {gapCount + needsEvidence} open gaps
           </p>
@@ -385,24 +345,24 @@ function BlankSpacesCard({
   themeFocus: ThemeId | "all";
   visibleThemes: typeof THEMES;
 }) {
-  const openGaps = matrixRows.filter((row) => row.gap !== "low");
+  const openGaps = matrixRows.filter((row) => row.gapSeverity !== "low");
   const themeLabel =
     themeFocus === "all" ? "across all themes" : visibleThemes[0]?.name ?? "this theme";
 
   return (
-    <section className="mt-5 ee-panel rounded-lg p-5">
+    <section className="mt-4 ee-panel rounded-lg p-4">
       <div className="ee-label text-ink">Where we&apos;re thin</div>
-      <h2 className="mt-2 text-[18px] font-semibold tracking-tight">Coverage gaps to close</h2>
-      <ul className="mt-4 space-y-2 text-[12px] leading-relaxed text-ink-soft">
+      <h2 className="mt-1.5 text-[16px] font-semibold tracking-tight">Coverage gaps to close</h2>
+      <ul className="mt-3 space-y-1.5 text-[11px] leading-relaxed text-ink-soft">
         {openGaps.length ? (
           openGaps.slice(0, 4).map((row) => (
             <li key={row.type} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-line bg-white px-3 py-2">
               <span>
-                <strong className="text-ink">{EXPERT_TYPE_LABEL[row.type]}</strong> coverage is {row.gap}:
+                <strong className="text-ink">{row.label}</strong> coverage is {row.gapSeverity}:
                 {" "}{row.verified} verified / {row.contactable} contactable {themeLabel}
               </span>
               <Link
-                href={`/discover?gap=${encodeURIComponent(EXPERT_TYPE_LABEL[row.type])}`}
+                href={`/discover?gap=${encodeURIComponent(row.label)}`}
                 className="ee-link text-[12px] font-semibold"
               >
                 Find experts
@@ -436,24 +396,24 @@ function GuidedWorkflow({
 }) {
   const themeQuery = themeFocus === "all" ? "" : `?theme=${themeFocus}`;
   return (
-    <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.08fr)_minmax(420px,0.92fr)]">
-      <div className="ee-panel rounded-lg border-2 border-accent/20 p-5 sm:p-6 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <section className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(400px,0.92fr)]">
+      <div className="ee-panel rounded-lg border-2 border-accent/20 p-4 sm:p-5 shadow-sm">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="ee-label text-ink">Guided investment workflow</div>
-            <h2 className="mt-2 max-w-2xl text-[22px] font-semibold tracking-tight">
+            <h2 className="mt-1.5 max-w-2xl text-[18px] font-semibold tracking-tight">
               What do you need by the next IC / Monday meeting?
             </h2>
-            <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-ink-soft">
-              Pick the job. The app carries the theme scope, saved work, evidence state,
-              call targets and company validation steps through the workflow.
+            <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-ink-soft">
+              Pick the job. Your theme scope, saved work, and call targets stay with you
+              across every step.
             </p>
           </div>
-          <span className="shrink-0 rounded-full border border-line bg-paper px-3 py-2 text-[11px] font-semibold text-ink-soft">
+          <span className="shrink-0 rounded-full border border-line bg-paper px-2.5 py-1.5 text-[10px] font-semibold text-ink-soft">
             Scoped to {themeLabel}
           </span>
         </div>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 2xl:grid-cols-4">
+        <div className="mt-4 grid gap-2.5 sm:grid-cols-2 2xl:grid-cols-4">
           <WorkflowCard
             step="01"
             title="Build my call list"
@@ -491,7 +451,7 @@ function GuidedWorkflow({
       </div>
 
       <details className="ee-panel overflow-hidden rounded-lg">
-        <summary className="flex cursor-pointer list-none items-start justify-between gap-4 border-b border-line px-5 py-4 marker:hidden">
+        <summary className="flex cursor-pointer list-none items-start justify-between gap-4 border-b border-line px-4 py-3 marker:hidden">
           <div>
             <h2 className="ee-label text-ink">Coverage matrix</h2>
             <p className="mt-1 text-[11px] text-ink-faint">
@@ -514,21 +474,21 @@ function GuidedWorkflow({
             <tbody>
               {matrixRows.map((row) => (
                 <tr key={row.type}>
-                  <td className="font-semibold">{EXPERT_TYPE_LABEL[row.type]}</td>
+                  <td className="font-semibold">{row.label}</td>
                   <td className="tabular-nums">{row.total}</td>
                   <td className="tabular-nums">{row.verified}</td>
                   <td className="tabular-nums">{row.contactable}</td>
                   <td>
                     <span
                       className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
-                        row.gap === "high"
+                        row.gapSeverity === "high"
                           ? "border-red-200 bg-red-50 text-red-700"
-                          : row.gap === "medium"
+                          : row.gapSeverity === "medium"
                             ? "border-amber-200 bg-amber-50 text-amber-700"
                             : "border-emerald-200 bg-emerald-50 text-emerald-700"
                       }`}
                     >
-                      {row.gap}
+                      {row.gapSeverity}
                     </span>
                   </td>
                 </tr>
@@ -559,14 +519,14 @@ function WorkflowCard({
   return (
     <Link
       href={href}
-      className={`group block min-h-[190px] rounded-lg border bg-white p-4 transition-colors hover:border-line-strong hover:bg-[#fbfcff] ${
+      className={`group block min-h-[160px] rounded-lg border bg-white p-3.5 transition-colors hover:border-line-strong hover:bg-[#fbfcff] ${
         primary ? "border-accent/40 shadow-sm" : "border-line"
       }`}
     >
-      <div className="text-[11px] font-semibold tracking-[0.12em] text-accent">
+      <div className="text-[10px] font-semibold tracking-[0.12em] text-accent">
         {step}
       </div>
-      <h3 className="mt-4 text-[15px] font-semibold tracking-tight text-ink">
+      <h3 className="mt-3 text-[14px] font-semibold tracking-tight text-ink">
         {title}
       </h3>
       <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">{body}</p>

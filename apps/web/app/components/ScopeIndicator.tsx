@@ -31,7 +31,7 @@ export default async function ScopeIndicator() {
 
   return (
     <div
-      className="border-b border-line bg-[#f7fbff] px-4 py-2 text-[12px] text-ink-soft"
+      className="border-b border-line bg-[#f7fbff] px-4 py-1.5 text-[11px] text-ink-soft"
       role="status"
       aria-live="polite"
     >

@@ -39,7 +39,7 @@ export function PageShell({
   innerClassName?: string;
 }) {
   return (
-    <div className={`ee-shell px-3 py-5 sm:px-5 ${className}`}>
+    <div className={`ee-shell px-3 py-3 sm:px-4 ${className}`}>
       <div className={innerClassName}>{children}</div>
     </div>
   );

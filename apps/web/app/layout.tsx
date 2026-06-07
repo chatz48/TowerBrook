@@ -25,7 +25,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full bg-paper text-ink">
         <header className="sticky top-0 z-40 border-b border-line bg-white">
-          <div className="flex h-14 items-center gap-5 px-4">
+          <div className="flex h-12 items-center gap-4 px-4">
             <Link href="/" className="flex min-w-[220px] items-center gap-3 group">
               <span className="flex h-9 w-8 flex-col justify-center gap-1" aria-hidden="true">
                 <span className="h-1 w-7 rounded-full bg-accent" />

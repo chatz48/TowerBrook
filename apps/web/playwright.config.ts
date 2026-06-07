@@ -13,7 +13,7 @@ import { defineConfig, devices } from "@playwright/test";
  *   BASE_URL=http://localhost:3000 npx playwright test
  */
 
-const BASE_URL = process.env.BASE_URL ?? "https://towerbrook-arun.vercel.app";
+const BASE_URL = process.env.BASE_URL ?? "http://localhost:3000";
 
 export default defineConfig({
   testDir: "./tests/playwright",

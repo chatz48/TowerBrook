@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import asyncio
 import json
+import logging
 import re
 from typing import Any
 
@@ -15,6 +17,41 @@ from app.schemas.domain import (
     ExtractedRelationship,
     ExtractionResult,
 )
+
+logger = logging.getLogger("towerbrook.extractor")
+
+# Retry configuration for external API calls
+MAX_RETRIES = 3
+RETRYABLE_STATUSES = {429, 500, 502, 503, 504}
+
+
+async def _retry_with_backoff(fn, *args, max_retries=MAX_RETRIES, **kwargs):
+    """Call an async function with exponential backoff on transient failures."""
+    last_exc = None
+    for attempt in range(max_retries):
+        try:
+            return await fn(*args, **kwargs)
+        except httpx.TimeoutException as exc:
+            last_exc = exc
+            if attempt < max_retries - 1:
+                delay = 2 ** attempt
+                logger.warning("API timeout (attempt %d/%d), retrying in %ds", attempt + 1, max_retries, delay)
+                await asyncio.sleep(delay)
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code in RETRYABLE_STATUSES and attempt < max_retries - 1:
+                delay = 2 ** attempt
+                logger.warning("API %d (attempt %d/%d), retrying in %ds", exc.response.status_code, attempt + 1, max_retries, delay)
+                await asyncio.sleep(delay)
+                last_exc = exc
+            else:
+                raise
+        except (httpx.ConnectError, httpx.RemoteProtocolError) as exc:
+            last_exc = exc
+            if attempt < max_retries - 1:
+                delay = 2 ** attempt
+                logger.warning("API connection error (attempt %d/%d), retrying in %ds", attempt + 1, max_retries, delay)
+                await asyncio.sleep(delay)
+    raise last_exc  # type: ignore[misc]
 
 
 SYSTEM_PROMPT = """You extract private-equity people intelligence.
@@ -68,53 +105,62 @@ class DeepSeekExtractor:
             "target_context": target_context or {},
             "text": text[:18000],
         }
-        async with httpx.AsyncClient(timeout=60) as client:
-            response = await client.post(
-                "https://api.deepseek.com/chat/completions",
-                headers={"Authorization": f"Bearer {self.settings.deepseek_api_key}"},
-                json={
-                    "model": self.settings.deepseek_model,
-                    "messages": [
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": json.dumps(prompt)},
-                    ],
-                    "response_format": {"type": "json_object"},
-                },
-            )
-            response.raise_for_status()
-            raw = response.json()["choices"][0]["message"]["content"]
+        async def _call():
+            async with httpx.AsyncClient(timeout=60) as client:
+                response = await client.post(
+                    "https://api.deepseek.com/chat/completions",
+                    headers={"Authorization": f"Bearer {self.settings.deepseek_api_key}"},
+                    json={
+                        "model": self.settings.deepseek_model,
+                        "messages": [
+                            {"role": "system", "content": SYSTEM_PROMPT},
+                            {"role": "user", "content": json.dumps(prompt)},
+                        ],
+                        "response_format": {"type": "json_object"},
+                    },
+                )
+                response.raise_for_status()
+                return response.json()["choices"][0]["message"]["content"]
+
+        raw = await _retry_with_backoff(_call)
         if not raw or not raw.strip():
             return self._heuristic_extract(text, title, url, theme_id)
         try:
             result = ExtractionResult.model_validate_json(raw)
             return self._apply_target_fact_context(result, target_context)
-        except Exception:
+        except (ValueError, TypeError) as exc:
+            logger.warning("Primary extraction parse failed: %s", exc, extra={"raw_preview": raw[:200]})
             try:
                 parsed = json.loads(raw)
                 result = ExtractionResult.model_validate(
                     self._normalize_extraction_payload(parsed, title, url, theme_id)
                 )
                 return self._apply_target_fact_context(result, target_context)
-            except Exception:
+            except (ValueError, TypeError, json.JSONDecodeError) as exc2:
+                logger.warning("Fallback extraction parse also failed: %s", exc2)
                 return self._heuristic_extract(text, title, url, theme_id)
 
     async def synthesize(self, instruction: str, context: dict[str, Any]) -> str:
         if not self.settings.deepseek_api_key:
             return self._fallback_synthesis(instruction, context)
-        async with httpx.AsyncClient(timeout=60) as client:
-            response = await client.post(
-                "https://api.deepseek.com/chat/completions",
-                headers={"Authorization": f"Bearer {self.settings.deepseek_api_key}"},
-                json={
-                    "model": self.settings.deepseek_model,
-                    "messages": [
-                        {"role": "system", "content": "Write concise, source-grounded investment research output. Do not invent facts."},
-                        {"role": "user", "content": json.dumps({"instruction": instruction, "context": context})},
-                    ],
-                },
-            )
-            response.raise_for_status()
-            return response.json()["choices"][0]["message"]["content"]
+
+        async def _call():
+            async with httpx.AsyncClient(timeout=60) as client:
+                response = await client.post(
+                    "https://api.deepseek.com/chat/completions",
+                    headers={"Authorization": f"Bearer {self.settings.deepseek_api_key}"},
+                    json={
+                        "model": self.settings.deepseek_model,
+                        "messages": [
+                            {"role": "system", "content": "Write concise, source-grounded investment research output. Do not invent facts."},
+                            {"role": "user", "content": json.dumps({"instruction": instruction, "context": context})},
+                        ],
+                    },
+                )
+                response.raise_for_status()
+                return response.json()["choices"][0]["message"]["content"]
+
+        return await _retry_with_backoff(_call)
 
     def _heuristic_extract(self, text: str, title: str | None, url: str | None, theme_id: str | None) -> ExtractionResult:
         people = []

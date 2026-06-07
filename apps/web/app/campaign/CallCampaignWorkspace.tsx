@@ -277,19 +277,19 @@ export default function CallCampaignWorkspace({
 
   return (
     <PageShell>
-        <section className="ee-panel rounded-lg p-5 sm:p-6">
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+        <section className="ee-panel rounded-lg p-4 sm:p-5">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
             <div>
               <div className="ee-label text-accent">Origination desk</div>
-              <h1 className="mt-3 max-w-4xl text-[30px] font-semibold tracking-tight">
+              <h1 className="mt-2 max-w-4xl text-[22px] font-semibold tracking-tight">
                 Turn the map into an assigned origination plan
               </h1>
-              <p className="mt-3 max-w-4xl text-[13px] leading-relaxed text-ink-soft">
+              <p className="mt-2 max-w-4xl text-[12px] leading-relaxed text-ink-soft">
                 Assign owners, track outreach status, capture notes, and export a
                 Monday-ready origination pack. This closes the loop from expert discovery
                 to calls, referrals, company validation, and memo prep.
               </p>
-              <div className="mt-4 text-[12px] font-semibold text-ink-soft">
+              <div className="mt-3 text-[11px] font-semibold text-ink-soft">
                 Scope: {themeLabel}
               </div>
               {selectedExpertIds.length ? (
@@ -317,7 +317,7 @@ export default function CallCampaignWorkspace({
               </button>
             </div>
           </div>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-4 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
             {metrics.map((metric) => (
               <MetricCard key={metric.label} metric={metric} />
             ))}
@@ -369,12 +369,12 @@ export default function CallCampaignWorkspace({
           ]}
         />
 
-        <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
           <main className="space-y-5">
             <section className="ee-panel overflow-hidden rounded-lg">
-              <div className="border-b border-line px-4 py-3">
+              <div className="border-b border-line px-3 py-2.5">
                 <h2 className="ee-label text-ink">1. Expert calls to run this week</h2>
-                <p className="mt-1 text-[11px] text-ink-faint">
+                <p className="mt-0.5 text-[10px] text-ink-faint">
                   Sequenced into practical call phases. Capture owner, status and the ask for
                   each call; selected experts from the call list stay pinned at the top.
                 </p>
@@ -383,13 +383,13 @@ export default function CallCampaignWorkspace({
                 {PHASES.map((phase, phaseIndex) => {
                   const phaseExperts = experts.filter((expert) => expert.phase === phase);
                   return (
-                    <div key={phase} className="p-4">
-                      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                    <div key={phase} className="p-3">
+                      <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
                         <div>
-                          <div className="text-[12px] font-semibold text-ink">
+                          <div className="text-[11px] font-semibold text-ink">
                             Phase {phaseIndex + 1}: {phase}
                           </div>
-                          <p className="mt-1 text-[11px] text-ink-faint">
+                          <p className="mt-0.5 text-[10px] text-ink-faint">
                             {phase === "Market orientation"
                               ? "Start with operators and founders to define pain, budgets and referral routes."
                               : phase === "Buyer validation"
@@ -456,9 +456,9 @@ export default function CallCampaignWorkspace({
             </section>
 
             <section id="targets" className="ee-panel overflow-hidden rounded-lg scroll-mt-28">
-              <div className="border-b border-line px-4 py-3">
+              <div className="border-b border-line px-3 py-2.5">
                 <h2 className="ee-label text-ink">2. Target companies to validate</h2>
-                <p className="mt-1 text-[11px] text-ink-faint">
+                <p className="mt-0.5 text-[10px] text-ink-faint">
                   Track ownership, scale and commercial-diligence verification before
                   promoting a company to memo-ready.
                 </p>
@@ -490,11 +490,11 @@ export default function CallCampaignWorkspace({
                               {company.stage} / {company.ownership}
                             </div>
                           </td>
-                          <td className="min-w-[155px]">
-                            <div className="text-[20px] font-semibold tabular-nums">
+                          <td className="min-w-[140px]">
+                            <div className="text-[17px] font-semibold tabular-nums">
                               {company.score}
                             </div>
-                            <div className="mt-1 text-[11px] text-ink-faint">
+                            <div className="mt-0.5 text-[10px] text-ink-faint">
                               {company.label}
                             </div>
                           </td>

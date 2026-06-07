@@ -15,22 +15,22 @@ export default function GuidedWorkflow({
   const themeName = theme === "all" ? "all three themes" : THEME_BY_ID[theme]?.name ?? theme;
 
   return (
-    <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]">
-      <div className="ee-panel rounded-lg p-5">
-        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+    <section className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(340px,0.9fr)]">
+      <div className="ee-panel rounded-lg p-4">
+        <div className="flex flex-col gap-2.5 md:flex-row md:items-start md:justify-between">
           <div>
             <div className="ee-label text-accent">Guided investment workflow</div>
-            <h2 className="mt-2 text-[20px] font-semibold tracking-tight">What do you need by the next IC / Monday meeting?</h2>
-            <p className="mt-2 max-w-3xl text-[12px] leading-relaxed text-ink-soft">
-              A simplified path for non-technical investors: pick a job, then the app carries the theme scope,
-              saved work, evidence state and call targets through the workflow.
+            <h2 className="mt-1.5 text-[18px] font-semibold tracking-tight">What do you need by the next IC / Monday meeting?</h2>
+            <p className="mt-1.5 max-w-3xl text-[12px] leading-relaxed text-ink-soft">
+              Pick a job and your theme scope, saved work, and call targets stay with you
+              across every step.
             </p>
           </div>
-          <span className="rounded-full border border-line bg-paper px-3 py-1 text-[11px] font-semibold text-ink-soft">
+          <span className="rounded-full border border-line bg-paper px-2.5 py-1 text-[10px] font-semibold text-ink-soft">
             Scoped to {themeName}
           </span>
         </div>
-        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-4 grid gap-2.5 md:grid-cols-2 xl:grid-cols-4">
           <WorkflowCard
             number="01"
             title="Build my call list"
@@ -110,11 +110,11 @@ export default function GuidedWorkflow({
 
 function WorkflowCard({ number, title, body, href, cta }: { number: string; title: string; body: string; href: string; cta: string }) {
   return (
-    <Link href={href} className="group rounded-lg border border-line bg-white p-4 transition hover:border-line-strong hover:shadow-sm">
+    <Link href={href} className="group rounded-lg border border-line bg-white p-3.5 transition hover:border-line-strong hover:shadow-sm">
       <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-accent">{number}</div>
-      <h3 className="mt-2 text-[14px] font-semibold text-ink">{title}</h3>
-      <p className="mt-2 min-h-14 text-[11px] leading-relaxed text-ink-soft">{body}</p>
-      <div className="mt-4 text-[12px] font-semibold text-accent group-hover:underline">{cta} →</div>
+      <h3 className="mt-1.5 text-[13px] font-semibold text-ink">{title}</h3>
+      <p className="mt-1.5 min-h-12 text-[11px] leading-relaxed text-ink-soft">{body}</p>
+      <div className="mt-3 text-[11px] font-semibold text-accent group-hover:underline">{cta} →</div>
     </Link>
   );
 }
