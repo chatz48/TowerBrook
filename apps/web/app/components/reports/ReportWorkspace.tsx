@@ -3,6 +3,7 @@ import type { ReportModel, ReportSection, ReportSource } from "@/lib/report";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import ReportExportControls from "./ReportExportControls";
 import LiveReportEnhance from "./LiveReportEnhance";
+import MemoBasketPanel from "./MemoBasketPanel";
 import { DataPageHeader, PageShell } from "@/app/components/ui";
 
 interface FocusContext {
@@ -77,6 +78,8 @@ export default function ReportWorkspace({
           </main>
 
           <aside className="space-y-3 xl:sticky xl:top-20 xl:self-start">
+            <MemoBasketPanel themeLabel={report.reportName.replace(/^Theme memo — /, "")} />
+
             <section className="ee-panel rounded-lg p-3">
               <div className="ee-label text-ink">Review before circulation</div>
               <ul className="mt-2 space-y-1.5 text-[11px] leading-snug text-ink-soft">
