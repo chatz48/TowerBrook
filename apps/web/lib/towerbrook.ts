@@ -1,3 +1,4 @@
+import { companySummaryDetail } from "./company-copy";
 import type { Company, Expert, ThemeId } from "./types";
 import { bestWarmPathForExpert, warmPathStatusLabel } from "./warm-paths";
 
@@ -234,7 +235,6 @@ export function towerBrookExpertScore(
     if (themeOverlap > 0) reasons.push(`${themeOverlap} focus theme${themeOverlap > 1 ? "s" : ""}`);
 
     if (expert.type === "investor") score += 12;
-    if (expert.type === "lender-credit") score += 11;
     if (expert.type === "banker" || expert.type === "lawyer") score += 10;
     if (
       expert.type === "strategy-consultant" ||
@@ -289,7 +289,7 @@ export function buildTowerBrookLens(
         href: `/companies/${company.id}`,
         score: score.score,
         label: score.label,
-        description: company.whyInteresting ?? company.description,
+        description: companySummaryDetail(company),
         themes: company.themes,
         expertCount: company.expertCount ?? 0,
         isDirect: score.isDirect,
