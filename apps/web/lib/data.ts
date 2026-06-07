@@ -89,8 +89,8 @@ function validate<T>(schema: z.ZodType<T>, data: unknown, label: string): T {
   return (result.success ? result.data : data) as unknown as T;
 }
 
-const EXPERTS: Expert[] = validate(z.array(ExpertSchema), expertsRaw, "experts.json");
-const COMPANIES: Company[] = validate(z.array(CompanySchema), companiesRaw, "companies.json");
+const EXPERTS = validate(z.array(ExpertSchema), expertsRaw, "experts.json") as Expert[];
+const COMPANIES = validate(z.array(CompanySchema), companiesRaw, "companies.json") as Company[];
 
 const EXPERT_BY_ID = new Map(EXPERTS.map((e) => [e.id, e]));
 const COMPANY_BY_ID = new Map(COMPANIES.map((c) => [c.id, c]));

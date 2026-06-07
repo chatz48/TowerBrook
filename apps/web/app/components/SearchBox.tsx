@@ -15,9 +15,11 @@ export interface SearchItem {
 export default function SearchBox({
   index,
   scopeLabel = "All experts and companies",
+  compact = false,
 }: {
   index: SearchItem[];
   scopeLabel?: string;
+  compact?: boolean;
 }) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -39,8 +41,12 @@ export default function SearchBox({
 
   return (
     <div className="relative">
-      <div className="flex items-center gap-2 rounded-xl border border-line-strong bg-card px-4 py-3 shadow-sm focus-within:border-accent transition-colors">
-        <span className="text-ink-faint">🔎</span>
+      <div
+        className={`flex items-center gap-2 border border-line-strong bg-card shadow-sm transition-colors focus-within:border-accent ${
+          compact ? "rounded-lg px-3 py-1.5" : "rounded-xl px-4 py-3"
+        }`}
+      >
+        <span className="text-ink-faint" aria-hidden="true">🔎</span>
         <input
           value={q}
           onChange={(e) => {
@@ -50,18 +56,24 @@ export default function SearchBox({
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           placeholder="Search any person or company - e.g. solar, leak detection, Piclo"
-          className="flex-1 bg-transparent outline-none text-[15px] placeholder:text-ink-faint"
+          className={`flex-1 bg-transparent outline-none placeholder:text-ink-faint ${
+            compact ? "min-w-[220px] text-[12px]" : "text-[15px]"
+          }`}
         />
         {q ? (
           <kbd className="text-[10px] text-ink-faint border border-line rounded px-1.5 py-0.5">
             {results.length} match{results.length === 1 ? "" : "es"}
           </kbd>
+        ) : compact ? (
+          <span className="shrink-0 text-[10px] text-ink-faint">{index.length} records</span>
         ) : null}
       </div>
-      <div className="mt-2 flex items-center justify-between gap-3 text-[11px] text-ink-faint">
-        {scopeLabel ? <span>Search scope: {scopeLabel}</span> : <span />}
-        <span>{index.length} records</span>
-      </div>
+      {!compact ? (
+        <div className="mt-2 flex items-center justify-between gap-3 text-[11px] text-ink-faint">
+          {scopeLabel ? <span>Search scope: {scopeLabel}</span> : <span />}
+          <span>{index.length} records</span>
+        </div>
+      ) : null}
 
       {open && results.length > 0 ? (
         <div className="absolute z-20 mt-2 w-full rounded-xl border border-line bg-card shadow-lg overflow-hidden">

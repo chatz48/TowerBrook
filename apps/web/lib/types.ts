@@ -241,6 +241,10 @@ export type CompanyCategory =
 export interface Company {
   id: string;
   name: string;
+  /** Alternate names, former legal names, or common variations.
+   *  The canonical `id` is the single source of truth. Never reference
+   *  a company by alias — use the id. */
+  aliases?: string[];
   themes: ThemeId[];
   category: CompanyCategory;
   description: string;

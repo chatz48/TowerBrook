@@ -13,7 +13,8 @@ const SourceSchema = z.object({
   title: z.string(),
   url: z.string(),
   publisher: z.string().optional(),
-});
+  sourceType: z.enum(["evidence", "contact"]).optional(),
+}).passthrough();
 
 const CompanyLinkSchema = z.object({
   companyId: z.string(),
@@ -31,6 +32,7 @@ const SignalSchema = z.object({
 export const ExpertSchema = z.object({
   id: z.string(),
   name: z.string(),
+  aliases: z.array(z.string()).optional(),
   type: z.string(),
   headline: z.string(),
   org: z.string().optional(),
@@ -57,6 +59,7 @@ export const ExpertSchema = z.object({
 export const CompanySchema = z.object({
   id: z.string(),
   name: z.string(),
+  aliases: z.array(z.string()).optional(),
   themes: z.array(z.string()),
   category: z.string(),
   description: z.string(),

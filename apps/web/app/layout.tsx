@@ -14,6 +14,9 @@ export const metadata: Metadata = {
   title: "Expert Engine — People & Companies by Theme",
   description:
     "Discover the experts and companies behind an investment theme — and act on them.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

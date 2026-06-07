@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { THEME_SPECIALTIES, THEMES } from "@/lib/themes";
+import { THEMES } from "@/lib/themes";
 import {
   companiesWithLinks,
   getCompanies,
@@ -21,7 +21,7 @@ import {
   coverageMatrix,
   themeGapSummary,
 } from "@/lib/investment-readiness";
-import type { Expert, ThemeId } from "@/lib/types";
+import type { ThemeId } from "@/lib/types";
 import SearchBox, { type SearchItem } from "./components/SearchBox";
 import ReportExportControls from "./components/reports/ReportExportControls";
 import { Badge, PageShell } from "./components/ui";
@@ -93,22 +93,21 @@ export default async function Home() {
 
   return (
     <PageShell>
-        <section className="ee-panel rounded-lg p-4 sm:p-5">
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_520px] xl:items-end">
-            <div>
+        <section className="ee-panel rounded-lg px-3 py-2 sm:px-4">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
               <div className="ee-label text-accent">Command Centre</div>
-              <h1 className="mt-1 max-w-3xl text-[20px] font-semibold tracking-tight">
-                Start with the next investment decision
+              <h1 className="truncate text-[13px] font-semibold tracking-tight text-ink">
+                Next investment decision
               </h1>
-              <p className="mt-1.5 max-w-3xl text-[11px] leading-relaxed text-ink-soft">
-                Identify the people worth calling, the companies they can
-                unlock, and the evidence or coverage gap that should shape the
-                next diligence step.
+              <p className="truncate text-[11px] text-ink-soft">
+                Find people, companies, and diligence gaps.
               </p>
             </div>
-            <SearchBox index={index} scopeLabel="" />
+            <div className="w-full md:w-[360px] lg:w-[430px]">
+              <SearchBox index={index} scopeLabel="" compact />
+            </div>
           </div>
-
         </section>
 
         <GuidedWorkflow
