@@ -72,12 +72,57 @@ export function readOutreachState(storageKey: string): OutreachPlanState {
   }
 }
 
+export const OUTREACH_EVENT = "towerbrook-outreach-updated";
+
 export function writeOutreachState(storageKey: string, state: OutreachPlanState) {
   window.localStorage.setItem(storageKey, JSON.stringify(state));
+  window.dispatchEvent(new CustomEvent(OUTREACH_EVENT, { detail: { storageKey } }));
+}
+
+export function subscribeOutreach(storageKey: string, onChange: () => void) {
+  if (typeof window === "undefined") return () => {};
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === storageKey) onChange();
+  };
+  const onCustom = (event: Event) => {
+    const detail = (event as CustomEvent<{ storageKey?: string }>).detail;
+    if (!detail?.storageKey || detail.storageKey === storageKey) onChange();
+  };
+  window.addEventListener("storage", onStorage);
+  window.addEventListener(OUTREACH_EVENT, onCustom);
+  return () => {
+    window.removeEventListener("storage", onStorage);
+    window.removeEventListener(OUTREACH_EVENT, onCustom);
+  };
 }
 
 export function outreachRowState(state: OutreachPlanState, expertId: string) {
   return state[outreachItemKey(expertId)] ?? DEFAULT_OUTREACH_STATE;
+}
+
+export function buildOutreachContextText(state: OutreachPlanState, limit = 24): string {
+  const rows = Object.entries(state).filter(
+    ([, item]) =>
+      item.owner !== "Unassigned" ||
+      item.status !== "Not started" ||
+      item.note.trim().length > 0 ||
+      item.objective.trim().length > 0,
+  );
+  if (!rows.length) return "";
+  return rows
+    .slice(0, limit)
+    .map(([key, item]) => {
+      const expertId = key.replace(/^expert:/, "");
+      const parts = [
+        `expert:${expertId}`,
+        `owner:${item.owner}`,
+        `status:${item.status}`,
+      ];
+      if (item.objective.trim()) parts.push(`objective:${item.objective.trim()}`);
+      if (item.note.trim()) parts.push(`note:${item.note.trim()}`);
+      return `- ${parts.join(" | ")}`;
+    })
+    .join("\n");
 }
 
 export function outreachStats(state: OutreachPlanState, expertIds: string[]) {

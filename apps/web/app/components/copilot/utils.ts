@@ -1,4 +1,5 @@
 import type { ThemeFocus } from "@/lib/theme-focus";
+import { buildOutreachContextText, type OutreachPlanState } from "@/lib/outreach-plan";
 import { workspaceKindLabel, type WorkspaceItem } from "@/lib/workspace";
 import { THEMES } from "./constants";
 import type { AskResponse, ChatTurn, CopilotFilters, PageContext } from "./types";
@@ -112,6 +113,7 @@ export function formatTime(value: string) {
 export function buildWorkspacePageContext(
   items: WorkspaceItem[],
   filters: CopilotFilters,
+  outreachState?: OutreachPlanState,
 ): PageContext {
   const saved = items.slice(0, 16).map((item) => {
     const detail = [workspaceKindLabel(item.kind), item.name, item.sub, item.note, item.status]
@@ -119,6 +121,13 @@ export function buildWorkspacePageContext(
       .join(" | ");
     return `- ${detail}`;
   });
+  const outreach = outreachState ? buildOutreachContextText(outreachState) : "";
+  const sections = [
+    saved.length
+      ? `Current basket for this investment workflow:\n${saved.join("\n")}`
+      : "Current basket is empty.",
+    outreach ? `Call list outreach state (owner, status, notes):\n${outreach}` : "",
+  ].filter(Boolean);
   return {
     title: "AI Copilot",
     pathname: "/ask",
@@ -126,10 +135,9 @@ export function buildWorkspacePageContext(
       `Theme: ${themeLabel(filters.theme)}`,
       `Objective: ${filters.objective}`,
       `Saved basket items: ${items.length}`,
-    ],
-    visibleText: saved.length
-      ? `Current basket for this investment workflow:\n${saved.join("\n")}`
-      : "Current basket is empty.",
+      outreach ? "Call list outreach notes attached" : "",
+    ].filter(Boolean),
+    visibleText: sections.join("\n\n"),
   };
 }
 

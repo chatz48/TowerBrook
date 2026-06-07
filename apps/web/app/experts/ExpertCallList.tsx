@@ -32,6 +32,7 @@ import {
   outreachRowState,
   outreachStats,
   readOutreachState,
+  subscribeOutreach,
   type OutreachPlanState,
   writeOutreachState,
 } from "@/lib/outreach-plan";
@@ -89,10 +90,9 @@ export default function ExpertCallList({
   const workspaceItems = useWorkspaceItems();
 
   useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      setPlanState(readOutreachState(storageKey));
-    }, 0);
-    return () => window.clearTimeout(timeout);
+    const load = () => setPlanState(readOutreachState(storageKey));
+    load();
+    return subscribeOutreach(storageKey, load);
   }, [storageKey]);
 
   const visibleRows = useMemo(() => rows.slice(0, visibleCount), [rows, visibleCount]);
@@ -153,6 +153,10 @@ export default function ExpertCallList({
   }
 
   function resetPlan() {
+    const assigned = stats.assigned + stats.active;
+    if (assigned > 0 && !window.confirm("Clear all owners, statuses, and notes on this call list?")) {
+      return;
+    }
     setPlanState({});
     window.localStorage.removeItem(storageKey);
   }
@@ -358,7 +362,7 @@ export default function ExpertCallList({
                           className="mt-0.5 inline-block text-[10px] font-medium text-accent hover:underline"
                           onClick={stopRowExpand}
                         >
-                          Graph
+                          Relationships
                         </Link>
                       </div>
                     </div>
