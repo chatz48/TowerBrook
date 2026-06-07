@@ -31,7 +31,6 @@ export type ExpertType =
   | "commercial-dd" // commercial diligence provider
   | "technical-dd" // operational, technical, environmental or ESG diligence
   | "engineering-consultant" // engineering design / delivery / asset advisory
-  | "lender-credit" // credit fund, lender or debt-financing professional
   | "regulatory-policy" // regulatory, policy or government-affairs expert
   | "banker" // M&A / capital-markets coverage of the space
   | "lawyer" // legal counsel on deals in the space

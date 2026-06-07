@@ -59,7 +59,6 @@ const EXPERT_TYPE_LABELS: Record<ExpertType, string> = {
   "commercial-dd": "Commercial diligence",
   "technical-dd": "Technical diligence",
   "engineering-consultant": "Engineering consultant",
-  "lender-credit": "Lender / credit",
   "regulatory-policy": "Regulatory / policy",
   banker: "Banker",
   lawyer: "Lawyer",
@@ -74,8 +73,6 @@ const MANDATORY_ARCHETYPES: ExpertType[] = [
   "banker",
   "lawyer",
   "investor",
-  "technical-dd",
-  "lender-credit",
 ];
 
 export function expertTypeLabel(type: ExpertType): string {

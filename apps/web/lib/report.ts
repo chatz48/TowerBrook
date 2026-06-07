@@ -525,7 +525,6 @@ function advisorRows(experts: Expert[], sources: ReportSource[]): ReportSection[
         "commercial-dd",
         "technical-dd",
         "engineering-consultant",
-        "lender-credit",
         "regulatory-policy",
         "banker",
         "lawyer",

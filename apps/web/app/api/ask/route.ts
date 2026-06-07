@@ -145,7 +145,6 @@ const EXPERT_TYPES = new Set<ExpertType>([
   "commercial-dd",
   "technical-dd",
   "engineering-consultant",
-  "lender-credit",
   "regulatory-policy",
   "banker",
   "lawyer",

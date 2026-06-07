@@ -100,7 +100,39 @@ export interface ExpertDiscoveryCensus {
   derived_company_candidates: DerivedCompanyCandidate[];
 }
 
-const DISCOVERY = discoveryRaw as ExpertDiscoveryCensus;
+const LEGACY_EXPERT_TYPES: Record<string, ExpertType> = {
+  "lender-credit": "investor",
+};
+
+function normalizeExpertType(value: string): ExpertType {
+  return LEGACY_EXPERT_TYPES[value] ?? (value as ExpertType);
+}
+
+function normalizeDiscovery(raw: ExpertDiscoveryCensus): ExpertDiscoveryCensus {
+  return {
+    ...raw,
+    expert_candidates: raw.expert_candidates.map((candidate) => ({
+      ...candidate,
+      expert_type: normalizeExpertType(candidate.expert_type),
+      archetypes: candidate.archetypes.map((archetype) =>
+        LEGACY_EXPERT_TYPES[archetype] ?? archetype,
+      ),
+    })),
+    advisor_expert_gaps: raw.advisor_expert_gaps.map((gap) => ({
+      ...gap,
+      expert_type_sought: normalizeExpertType(gap.expert_type_sought),
+    })),
+    derived_company_candidates: raw.derived_company_candidates.map((company) => ({
+      ...company,
+      expert_connections: company.expert_connections.map((connection) => ({
+        ...connection,
+        expert_type: normalizeExpertType(connection.expert_type),
+      })),
+    })),
+  };
+}
+
+const DISCOVERY = normalizeDiscovery(discoveryRaw as ExpertDiscoveryCensus);
 
 export function getExpertDiscovery(): ExpertDiscoveryCensus {
   return DISCOVERY;
