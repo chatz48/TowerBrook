@@ -14,16 +14,13 @@ import {
 } from "@/app/components/table/ExpandableTableRow";
 import type { EntityGraphModel } from "@/lib/entity-graph";
 import { companyReadiness, targetScorecard } from "@/lib/investment-readiness";
+import { askHref } from "@/lib/links";
 
 const COL_SPAN = 7;
 
 export interface TargetCompanyRow {
   company: CompanyWithLinks;
   graph: EntityGraphModel;
-}
-
-function askHref(prompt: string) {
-  return `/ask?prompt=${encodeURIComponent(prompt)}`;
 }
 
 export default function CompanyTargetTable({
