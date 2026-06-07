@@ -99,3 +99,10 @@ export const THEME_BY_ID: Record<ThemeId, Theme> = Object.fromEntries(
 export function getTheme(id: string): Theme | undefined {
   return THEME_BY_ID[id as ThemeId];
 }
+
+export function specialtiesForTheme(theme: ThemeId | "all"): string[] {
+  if (theme === "all") {
+    return Array.from(new Set(THEMES.flatMap((item) => THEME_SPECIALTIES[item.id]))).sort();
+  }
+  return THEME_SPECIALTIES[theme];
+}

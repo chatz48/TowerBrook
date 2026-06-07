@@ -12,6 +12,7 @@ import { buildTowerBrookLens, towerBrookExpertScore } from "@/lib/towerbrook";
 import { COMPANY_CATEGORY_LABEL, COMPANY_CATEGORY_STYLE } from "@/lib/labels";
 import type { ThemeId } from "@/lib/types";
 import ExpertList from "@/app/components/ExpertList";
+import ThemeBriefNarrative from "@/app/components/ThemeBriefNarrative";
 import ThemeGraph from "@/app/components/ThemeGraph";
 import { buildBrief } from "@/lib/brief";
 import { Badge, BackLink, ConfidenceBars, PageShell } from "@/app/components/ui";
@@ -106,6 +107,7 @@ export default async function ThemePage({
             <p className="mt-3 max-w-3xl text-[13px] leading-relaxed text-ink-soft">
               {theme.description}
             </p>
+            <ThemeBriefNarrative themeId={id} initialNarrative={brief.narrative} />
             <div className="mt-4 flex flex-wrap gap-4 text-[12px] text-ink-faint">
               <span>Global</span>
               <span>Infrastructure</span>
