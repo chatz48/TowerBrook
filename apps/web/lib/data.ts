@@ -10,20 +10,7 @@ import type {
 import { filterTowerBrookEmployees } from "./employee-scope";
 import { ExpertSchema, CompanySchema } from "./validation";
 import { z } from "zod";
-
-const RELATIONSHIP_PRIORITY = {
-  founded: 100,
-  "co-founded": 95,
-  led: 90,
-  partner: 80,
-  board: 75,
-  advised: 70,
-  "invested-in": 65,
-  acquired: 60,
-  banked: 55,
-  "legal-counsel": 50,
-  served: 20,
-} satisfies Record<Expert["companies"][number]["relationship"], number>;
+import { relationshipPriority } from "./relationship-priority";
 
 function isGeneratedRelationshipNote(note: string | undefined, expertName?: string) {
   if (!note) return true;
@@ -49,8 +36,8 @@ export function dedupeCompanyLinks(expert: Expert): Expert["companies"] {
       byCompany.set(link.companyId, next);
       continue;
     }
-    const currentPriority = RELATIONSHIP_PRIORITY[current.relationship] ?? 0;
-    const nextPriority = RELATIONSHIP_PRIORITY[next.relationship] ?? 0;
+    const currentPriority = relationshipPriority(current.relationship);
+    const nextPriority = relationshipPriority(next.relationship);
     if (nextPriority > currentPriority) {
       byCompany.set(link.companyId, {
         ...next,
@@ -150,8 +137,8 @@ function dedupeResolvedCompanies(
       byName.set(key, item);
       continue;
     }
-    const currentPriority = RELATIONSHIP_PRIORITY[current.relationship] ?? 0;
-    const nextPriority = RELATIONSHIP_PRIORITY[item.relationship] ?? 0;
+    const currentPriority = relationshipPriority(current.relationship);
+    const nextPriority = relationshipPriority(item.relationship);
     const keepNext =
       item.company.confidence > current.company.confidence ||
       (item.company.confidence === current.company.confidence && nextPriority > currentPriority);
