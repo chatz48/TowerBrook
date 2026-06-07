@@ -242,7 +242,7 @@ async function prepareAskContext(body: AskRequest): Promise<
 async function fetchBackendStream(message: string, themeId?: string): Promise<Response> {
   const baseUrl =
     process.env.BACKEND_API_URL?.replace(/\/$/, "") ??
-    (process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : null);
+    (process.env.NODE_ENV === "development" ? "http://127.0.0.1:8001" : null);
   if (!baseUrl) throw new Error("BACKEND_API_URL is not configured");
 
   return fetch(`${baseUrl}/chat/stream`, {

@@ -156,7 +156,7 @@ async function main() {
   const weakSse = results.filter((r) => r.baselineMs == null || (r.phases ?? 0) < 1).length;
   console.log(`\n${results.length - failed}/${results.length} stream requests succeeded`);
   if (weakSse) console.log(`${weakSse} stream response(s) missing SSE baseline/phases`);
-  process.exit(failed > 0 || burst.ok < burst.concurrency ? 1 : 0);
+  process.exit(failed > 0 || weakSse > 0 || burst.ok < burst.concurrency ? 1 : 0);
 }
 
 main().catch((error) => {
