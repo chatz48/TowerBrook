@@ -116,6 +116,29 @@ export function isWorkspaceSaved(id: string, kind: WorkspaceKind): boolean {
   return readWorkspace().some((item) => item.id === id && item.kind === kind);
 }
 
+export function removeWorkspaceItem(id: string, kind: WorkspaceKind) {
+  writeWorkspace(readWorkspace().filter((item) => !(item.id === id && item.kind === kind)));
+}
+
+export function toggleWorkspaceItem(
+  item: Omit<WorkspaceItem, "addedAt" | "status"> & { status?: string },
+) {
+  if (isWorkspaceSaved(item.id, item.kind)) {
+    removeWorkspaceItem(item.id, item.kind);
+    return false;
+  }
+  upsertWorkspaceItem(item);
+  return true;
+}
+
+export function pulseWorkspaceBasket() {
+  if (typeof document === "undefined") return;
+  const counter = document.getElementById("towerbrook-basket-counter");
+  if (!counter) return;
+  counter.classList.add("scale-110");
+  window.setTimeout(() => counter.classList.remove("scale-110"), 180);
+}
+
 export function workspaceKindLabel(kind: string): string {
   if (kind === "call") return "Expert";
   if (kind === "target") return "Company";
