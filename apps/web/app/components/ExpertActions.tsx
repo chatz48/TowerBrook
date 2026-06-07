@@ -37,20 +37,50 @@ export default function ExpertActions({
     setError("");
     setOutput("");
     setCopied(false);
+    const payload = {
+      expertId,
+      stream: true,
+      context: [
+        goals.length ? `Call objectives: ${goals.join("; ")}.` : "",
+        context,
+      ]
+        .filter(Boolean)
+        .join(" "),
+    };
     try {
       const res = await fetch(`/api/${which}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          expertId,
-          context: [
-            goals.length ? `Call objectives: ${goals.join("; ")}.` : "",
-            context,
-          ]
-            .filter(Boolean)
-            .join(" "),
-        }),
+        body: JSON.stringify(payload),
       });
+      const contentType = res.headers.get("content-type") ?? "";
+      if (contentType.includes("text/event-stream") && res.body) {
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
+          for (const line of lines) {
+            if (!line.startsWith("data:")) continue;
+            const data = line.slice(5).trim();
+            if (data === "[DONE]") break;
+            try {
+              const json = JSON.parse(data) as { text?: string; error?: string };
+              if (json.error) throw new Error(json.error);
+              if (json.text) setOutput((prev) => prev + json.text);
+            } catch (parseError) {
+              if (parseError instanceof Error && parseError.message !== "Unexpected end of JSON input") {
+                throw parseError;
+              }
+            }
+          }
+        }
+        return;
+      }
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Request failed");
       setOutput(data.text);

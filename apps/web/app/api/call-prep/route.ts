@@ -4,6 +4,7 @@ import {
   hasModel,
   loadExpertOrThrow,
 } from "@/lib/llm";
+import { sseTextStream, streamComplete } from "@/lib/llm-stream";
 import { RELATIONSHIP_LABEL } from "@/lib/labels";
 import type { ExpertWithCompanies } from "@/lib/types";
 
@@ -11,15 +12,22 @@ const SYSTEM = `You are a research analyst at a private equity firm preparing a 
 
 export async function POST(request: Request) {
   try {
-    const { expertId, context } = (await request.json()) as {
+    const { expertId, context, stream } = (await request.json()) as {
       expertId: string;
       context?: string;
+      stream?: boolean;
     };
     const expert = loadExpertOrThrow(expertId);
     const ctx = buildExpertContext(expert);
 
     if (!hasModel()) {
-      return Response.json({ text: fallbackBrief(expert, context), grounded: false });
+      const text = fallbackBrief(expert, context);
+      if (stream) {
+        return new Response(sseTextStream((async function* () { yield text; })()), {
+          headers: { "Content-Type": "text/event-stream" },
+        });
+      }
+      return Response.json({ text, grounded: false });
     }
 
     const user = `Prepare a call-prep brief for an investor speaking with this expert.
@@ -36,6 +44,12 @@ Produce, using markdown-free plain text with clear headers:
 5. WHAT WOULD REDUCE CONVICTION — 3 bullets on disconfirming signals to listen for.
 6. WATCH-OUTS — anything to be sensitive about (e.g. recent exits, current employer).
 Keep it under 320 words.`;
+
+    if (stream) {
+      return new Response(sseTextStream(streamComplete(SYSTEM, user)), {
+        headers: { "Content-Type": "text/event-stream" },
+      });
+    }
 
     const text = await complete(SYSTEM, user);
     return Response.json({ text, grounded: true });
