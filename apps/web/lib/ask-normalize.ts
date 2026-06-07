@@ -8,10 +8,11 @@ export function normalizeModelResponse(value: unknown, baseline: AskResponse): A
 
   const next: AskResponse = {
     ...baseline,
-    answer_summary: stringOr(value.answer_summary, baseline.answer_summary),
-    gaps: stringArray(value.gaps, baseline.gaps),
-    assumptions: stringArray(value.assumptions, baseline.assumptions),
-    grounded: true,
+    // Narrative fields stay baseline-locked — model may only refine cited blocks below.
+    answer_summary: baseline.answer_summary,
+    gaps: baseline.gaps,
+    assumptions: baseline.assumptions,
+    grounded: baseline.grounded,
     model_refined: true,
     model: baseline.model,
   };

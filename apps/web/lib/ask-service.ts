@@ -3,12 +3,12 @@ import { DEAL_ADVISOR_LABEL, DEAL_TYPE_LABEL, dealDate } from "@/lib/deals";
 import { hasDealDatabase, retrieveSourceChunks } from "@/lib/deal-db";
 import { listDeals } from "@/lib/deal-repository";
 import { COMPANY_CATEGORY_LABEL, EXPERT_TYPE_LABEL } from "@/lib/labels";
-import { normalizeModelResponse } from "@/lib/ask-normalize";
-import { complete, hasModel, MODEL } from "@/lib/llm";
-import { rankExperts } from "@/lib/score";
+import { buildExternalChatPayload, geographyToSession, objectiveToSession } from "@/lib/copilot-safety";
+import { rankExpertsForSession, type SessionCalibration } from "@/lib/score";
+import { parseSseChunk } from "@/lib/sse";
 import { getTheme, THEMES } from "@/lib/themes";
 import { callBackendApi, hasBackendApi } from "@/lib/backend-api";
-import type { AskResponse, ChatTurn, PageContext, SourceRecord } from "@/lib/ask-types";
+import type { AskResponse, ChatTurn, PageContext, SourceRecord, ToolTrace } from "@/lib/ask-types";
 import type { Company, Deal, Expert, ExpertType, Source, ThemeId } from "@/lib/types";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 import { warmPathsForExpert, warmPathStatusLabel } from "@/lib/warm-paths";
@@ -30,11 +30,6 @@ type AskRequest = {
   pageContext?: PageContext;
 };
 
-const SYSTEM = `You are a research copilot for a private equity deal team.
-You receive a deterministic JSON answer built only from the local expert/company graph.
-You may refine wording, risks, gaps, call sequencing, and listening prompts, but you must not invent people, companies, sources, IDs, facts, dates, or URLs.
-Return only strict JSON matching the provided shape.`;
-
 const EXPERT_TYPES = new Set<ExpertType>([
   "ex-founder",
   "operator",
@@ -50,45 +45,61 @@ const EXPERT_TYPES = new Set<ExpertType>([
   "investor",
 ]);
 
+type BackendChatResult = {
+  answer: string;
+  tool_calls: ToolTrace[];
+  confidence?: number;
+  intent?: string;
+  model_used?: string;
+  structured?: AskResponse["structured"];
+  citations?: { title: string; evidence: string; url?: string }[];
+};
+
+function wantsStream(request: Request): boolean {
+  if (request.headers.get("accept")?.includes("text/event-stream")) return true;
+  try {
+    return new URL(request.url).searchParams.get("stream") === "1";
+  } catch {
+    return false;
+  }
+}
+
 export async function handleAskRequest(request: Request) {
+  if (wantsStream(request)) return handleAskStream(request);
+
+  const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID();
   try {
     const body = (await request.json()) as AskRequest;
-    const question = body.question?.trim();
-    if (!question) {
-      return Response.json({ error: "Ask a question first." }, { status: 400 });
+    const prepared = await prepareAskContext(body);
+    if ("error" in prepared) {
+      return Response.json({ error: prepared.error }, { status: 400 });
     }
 
-    const chatHistory = normalizeChatHistory(body.chatHistory);
-    const pageContext = normalizePageContext(body.pageContext);
-    const contextualQuestion = questionWithChatHistory(question, chatHistory);
-    const baseline = await buildStructuredAnswer(contextualQuestion, body.filters ?? {}, pageContext, question);
-    const agentic = await maybeAskIntelligenceApi(question, body.filters ?? {}, pageContext, chatHistory);
-    const enrichedBaseline: AskResponse = agentic.result
-      ? {
-          ...baseline,
-          agentic_answer: agentic.result.answer,
-          tool_calls: agentic.result.tool_calls,
-          backend_enriched: true,
-          model: `${baseline.model} + backend-api`,
-        }
-      : { ...baseline, backend_error: agentic.error };
+    const agentic = await maybeAskIntelligenceApi(
+      prepared.question,
+      prepared.filters,
+      prepared.pageContext,
+      prepared.chatHistory,
+      prepared.baseline,
+    );
 
-    if (!hasModel()) {
+    if (agentic.result?.structured || agentic.result?.answer) {
+      const merged = mergeBackendIntoBaseline(prepared.baseline, agentic.result);
       return Response.json({
-        ...enrichedBaseline,
-        grounded: false,
-        model: agentic.result ? "deterministic-fallback + backend-api" : "deterministic-fallback",
+        ...merged,
+        backend_enriched: true,
+        request_id: requestId,
+        backend_error: agentic.error,
       });
     }
 
-    const refined = await refineWithModel(enrichedBaseline);
     return Response.json({
-      ...refined,
-      agentic_answer: agentic.result?.answer,
-      tool_calls: agentic.result?.tool_calls,
-      backend_enriched: Boolean(agentic.result),
+      ...prepared.baseline,
       backend_error: agentic.error,
-      model_refined: true,
+      enrichment_warnings: agentic.error
+        ? ["LangGraph copilot unavailable; directory baseline only."]
+        : prepared.baseline.enrichment_warnings,
+      request_id: requestId,
     });
   } catch (e) {
     return Response.json(
@@ -98,70 +109,256 @@ export async function handleAskRequest(request: Request) {
   }
 }
 
+async function handleAskStream(request: Request): Promise<Response> {
+  const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID();
+  const encoder = new TextEncoder();
+  const body = (await request.json()) as AskRequest;
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      const send = (event: string, data: unknown) => {
+        controller.enqueue(
+          encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`),
+        );
+      };
+
+      try {
+        const prepared = await prepareAskContext(body);
+        if ("error" in prepared) {
+          send("error", { message: prepared.error });
+          controller.close();
+          return;
+        }
+
+        send("baseline", { ...prepared.baseline, request_id: requestId });
+
+        if (!hasBackendApi()) {
+          send("complete", { ...prepared.baseline, request_id: requestId });
+          controller.close();
+          return;
+        }
+
+        const external = buildExternalChatPayload(
+          prepared.question,
+          prepared.filters,
+          prepared.pageContext,
+          extractEntityIdsFromHistory(prepared.chatHistory),
+          {
+            answer_summary: prepared.baseline.answer_summary,
+            ranked_expert_names: prepared.baseline.ranked_experts.map((e) => e.name),
+            ranked_company_names: prepared.baseline.ranked_companies.map((c) => c.name),
+          },
+        );
+
+        const backendRes = await fetchBackendStream(external.message, external.theme_id);
+        if (!backendRes.ok || !backendRes.body) {
+          send("complete", {
+            ...prepared.baseline,
+            backend_error: `Backend stream failed (${backendRes.status})`,
+            request_id: requestId,
+          });
+          controller.close();
+          return;
+        }
+
+        const reader = backendRes.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const parsed = parseSseChunk(buffer);
+          buffer = parsed.remainder;
+
+          for (const sse of parsed.events) {
+            if (sse.event === "phase") {
+              send("phase", JSON.parse(sse.data));
+            }
+            if (sse.event === "complete") {
+              const backend = JSON.parse(sse.data) as BackendChatResult;
+              const merged = mergeBackendIntoBaseline(prepared.baseline, backend);
+              send("complete", { ...merged, request_id: requestId });
+            }
+            if (sse.event === "error") {
+              send("error", JSON.parse(sse.data));
+            }
+          }
+        }
+
+        controller.close();
+      } catch (e) {
+        send("error", { message: e instanceof Error ? e.message : "Stream failed" });
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    },
+  });
+}
+
+async function prepareAskContext(body: AskRequest): Promise<
+  | {
+      question: string;
+      filters: NonNullable<AskRequest["filters"]>;
+      pageContext?: PageContext;
+      chatHistory: ChatTurn[];
+      baseline: AskResponse;
+    }
+  | { error: string }
+> {
+  const question = body.question?.trim();
+  if (!question) return { error: "Ask a question first." };
+
+  const chatHistory = normalizeChatHistory(body.chatHistory);
+  const pageContext = normalizePageContext(body.pageContext);
+  const contextualQuestion = questionWithChatHistory(question, chatHistory);
+  const baseline = await buildStructuredAnswer(
+    contextualQuestion,
+    body.filters ?? {},
+    pageContext,
+    question,
+  );
+
+  return {
+    question,
+    filters: body.filters ?? {},
+    pageContext,
+    chatHistory,
+    baseline,
+  };
+}
+
+async function fetchBackendStream(message: string, themeId?: string): Promise<Response> {
+  const baseUrl = process.env.BACKEND_API_URL?.replace(/\/$/, "");
+  if (!baseUrl) throw new Error("BACKEND_API_URL is not configured");
+
+  return fetch(`${baseUrl}/chat/stream`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(process.env.BACKEND_API_TOKEN
+        ? { Authorization: `Bearer ${process.env.BACKEND_API_TOKEN}` }
+        : {}),
+    },
+    body: JSON.stringify({ message, theme_id: themeId }),
+  });
+}
+
 async function maybeAskIntelligenceApi(
   question: string,
   filters: NonNullable<AskRequest["filters"]>,
   pageContext?: PageContext,
   chatHistory: ChatTurn[] = [],
-): Promise<{ result: { answer: string; tool_calls: unknown[] } | null; error?: string }> {
+  baseline?: AskResponse,
+): Promise<{ result: BackendChatResult | null; error?: string }> {
   if (!hasBackendApi()) return { result: null };
   try {
-    const contextBlock = pageContext
-      ? `\n\nCurrent page context:\nTitle: ${pageContext.title ?? "Untitled"}\nPath: ${pageContext.pathname ?? ""}\nHeadings: ${(pageContext.headings ?? []).join(" | ")}\nSelected text: ${pageContext.selectedText ?? ""}\nVisible text excerpt: ${pageContext.visibleText ?? ""}`
-      : "";
-    const historyBlock = chatHistory.length
-      ? `\n\nConversation so far:\n${chatHistory.map((turn) => `${turn.role === "assistant" ? "Assistant" : "User"}: ${turn.content}`).join("\n")}`
-      : "";
-    const employeeScopeInstruction =
-      filters.includeTowerBrookEmployees === true
-        ? ""
-        : "\n\nDo not include current TowerBrook employees in the answer or recommendations.";
-    const result = await callBackendApi<{ answer: string; tool_calls: unknown[] }>("/chat", {
+    const entityIds = extractEntityIdsFromHistory(chatHistory);
+    const external = buildExternalChatPayload(
+      question,
+      filters,
+      pageContext,
+      entityIds,
+      baseline
+        ? {
+            answer_summary: baseline.answer_summary,
+            ranked_expert_names: baseline.ranked_experts.map((e) => e.name),
+            ranked_company_names: baseline.ranked_companies.map((c) => c.name),
+          }
+        : undefined,
+    );
+    const result = await callBackendApi<BackendChatResult>("/chat", {
       method: "POST",
       body: JSON.stringify({
-        message: `${question}${historyBlock}${contextBlock}${employeeScopeInstruction}`,
-        theme_id: filters.theme && filters.theme !== "all" ? filters.theme : undefined,
-        tools: toolsForQuestion(question),
+        message: external.message,
+        theme_id: external.theme_id,
       }),
     });
+    if (!result) return { result: null, error: "Backend returned empty response" };
     return { result };
   } catch (error) {
     return {
       result: null,
-      error: error instanceof Error ? error.message : "Backend research unavailable",
+      error: error instanceof Error ? error.message : "LangGraph copilot unavailable",
     };
   }
 }
 
-function toolsForQuestion(question: string): string[] {
-  const lower = question.toLowerCase();
-  const tools = new Set(["rag_search_sources", "rag_search_entities"]);
-  if (lower.includes("search") || lower.includes("find more") || lower.includes("latest")) {
-    tools.add("web_search");
+function mergeBackendIntoBaseline(baseline: AskResponse, backend: BackendChatResult): AskResponse {
+  const structured = backend.structured;
+  const mergedGaps = [...new Set([...(structured?.gaps ?? []), ...baseline.gaps])].slice(0, 8);
+  const mergedRisks = structured?.risks?.length
+    ? structured.risks.map((risk) => ({
+        risk,
+        why_it_matters: "Identified by LangGraph research workflow.",
+        disconfirming_question: "What evidence would disprove this risk?",
+        citations: baseline.sources_used.slice(0, 2).map((s) => s.source_id),
+      }))
+    : baseline.risks;
+
+  const synthesisSummary = structured?.answer_summary || backend.answer;
+  const enrichmentWarnings: string[] = [];
+  if (structured?.uncertainty_notes) {
+    enrichmentWarnings.push(structured.uncertainty_notes);
   }
-  if (lower.includes("dig deeper") || lower.includes("deep discovery")) {
-    tools.add("run_deep_discovery");
-  }
-  if (lower.includes("path") || lower.includes("connection") || lower.includes("graph")) {
-    tools.add("graph_query");
-  }
-  return [...tools];
+
+  return {
+    ...baseline,
+    answer_summary: synthesisSummary,
+    gaps: mergedGaps,
+    risks: mergedRisks,
+    structured,
+    agentic_answer: synthesisSummary,
+    tool_calls: backend.tool_calls,
+    intent: backend.intent,
+    model_used: backend.model_used,
+    model: `langgraph/${backend.model_used ?? "deepseek"} (${backend.intent ?? "copilot"})`,
+    grounded: false,
+    backend_enriched: true,
+    enrichment_warnings: enrichmentWarnings.length ? enrichmentWarnings : undefined,
+    confidence: backend.confidence
+      ? {
+          score: backend.confidence,
+          label: backend.confidence >= 0.8 ? "High" : backend.confidence >= 0.65 ? "Medium" : "Indicative",
+          rationale: `LangGraph copilot confidence from ${backend.tool_calls?.length ?? 0} research steps.`,
+        }
+      : baseline.confidence,
+    follow_up_actions: structured?.follow_ups?.length
+      ? [
+          ...baseline.follow_up_actions,
+          ...structured.follow_ups.slice(0, 3).map((prompt, index) => ({
+            action: `langgraph_follow_up_${index}`,
+            label: "Follow-up",
+            prompt,
+          })),
+        ].slice(0, 8)
+      : baseline.follow_up_actions,
+  };
 }
 
-async function refineWithModel(baseline: AskResponse): Promise<AskResponse> {
-  const prompt = `BASELINE_JSON:
-${JSON.stringify(baseline, null, 2)}
-
-Return a JSON object with the same top-level keys. Keep ranked_experts, ranked_companies, sources_used IDs, URLs, names, and citations from BASELINE_JSON only.`;
-
-  try {
-    const raw = await complete(SYSTEM, prompt);
-    const parsed = parseJsonObject(raw);
-    if (!parsed) return { ...baseline, grounded: true, model: `${MODEL} (baseline used)` };
-    return normalizeModelResponse(parsed, baseline);
-  } catch {
-    return { ...baseline, grounded: true, model: `${MODEL} (baseline used)` };
+function extractEntityIdsFromHistory(
+  history: ChatTurn[],
+): { expert_ids: string[]; company_ids: string[] } | undefined {
+  const expertIds = new Set<string>();
+  const companyIds = new Set<string>();
+  for (const turn of history) {
+    const content = turn.content ?? "";
+    for (const match of content.matchAll(/\(([a-z0-9-]+)\)/gi)) {
+      const id = match[1];
+      if (id.includes("expert") || id.startsWith("exp-")) expertIds.add(id);
+      if (id.includes("company") || id.startsWith("co-")) companyIds.add(id);
+    }
   }
+  if (!expertIds.size && !companyIds.size) return undefined;
+  return { expert_ids: [...expertIds], company_ids: [...companyIds] };
 }
 
 async function buildStructuredAnswer(
@@ -178,7 +375,15 @@ async function buildStructuredAnswer(
   const includeTowerBrookEmployees = filters.includeTowerBrookEmployees === true;
   const theme = themeId ? getTheme(themeId) : undefined;
 
-  const rankedExpertInputs = rankExperts(
+  const sessionCalibration: SessionCalibration = {
+    objective: objectiveToSession(objective),
+    preferredTypes: archetypes.length > 0 ? archetypes : (["operator", "advisor", "banker", "ex-founder"] as ExpertType[]),
+    optimizeFor: objective.includes("Red") ? "non-obvious" : "balanced",
+    theme: themeId,
+    geography: geographyToSession(filters.geography),
+  };
+
+  const rankedExpertInputs = rankExpertsForSession(
     filterTowerBrookEmployees(
       getExperts().filter((expert) => {
         if (themeId && !expert.themes.includes(themeId)) return false;
@@ -187,14 +392,21 @@ async function buildStructuredAnswer(
       }),
       includeTowerBrookEmployees,
     ),
+    sessionCalibration,
   )
-    .map(({ expert, score }) => ({
-      expert,
-      score:
-        score.total +
-        keywordScore(words, expertText(expert)) * 8 +
-        (expert.access === "proprietary" ? 4 : 0),
-    }))
+    .map(({ expert, score }) => {
+      const keywordBoost = keywordScore(words, expertText(expert)) * 8 + (expert.access === "proprietary" ? 4 : 0);
+      return {
+        expert,
+        score: score.total + keywordBoost,
+        breakdown: {
+          base: score.baseTotal,
+          session_fit: score.sessionFit,
+          objective_fit: score.objectiveFit,
+          keyword_boost: keywordBoost,
+        },
+      };
+    })
     .sort((a, b) => b.score - a.score)
     .slice(0, 5);
 
@@ -228,6 +440,7 @@ async function buildStructuredAnswer(
   );
   const pageContextSourceId = addPageContextSource(sourceIndex, pageContext);
 
+  let vectorRetrievalFailed = false;
   if (hasDealDatabase()) {
     try {
       const chunks = await retrieveSourceChunks(question, 8, themeId ? { theme: themeId } : {});
@@ -245,13 +458,13 @@ async function buildStructuredAnswer(
         });
       }
     } catch {
-      // Keep the deterministic path available if embeddings are not configured.
+      vectorRetrievalFailed = true;
     }
   }
 
   const sourceIds = [...sourceIndex.keys()];
 
-  const ranked_experts = rankedExpertInputs.map(({ expert, score }, index) => {
+  const ranked_experts = rankedExpertInputs.map(({ expert, score, breakdown }, index) => {
     const citations = citationsFor(expert.sources, sourceIndex);
     return {
       expert_id: expert.id,
@@ -261,6 +474,7 @@ async function buildStructuredAnswer(
       firm: expert.org ?? firmFromHeadline(expert.headline),
       archetype: EXPERT_TYPE_LABEL[expert.type],
       relevance: clamp(Math.round(score), 1, 99),
+      score_breakdown: breakdown,
       access: expertAccessLabel(expert),
       momentum: momentumLabel(expert),
       why: expert.whyRelevant,
@@ -427,6 +641,10 @@ async function buildStructuredAnswer(
       "Higher-ranked experts are prioritized for session fit, confidence, source coverage, access, and graph relevance.",
       "Company rank is directional and driven by linked expert density plus record confidence.",
     ],
+    vector_retrieval_failed: vectorRetrievalFailed,
+    enrichment_warnings: vectorRetrievalFailed
+      ? ["Deal vector retrieval failed (embedding dimension or API misconfiguration). Directory sources only."]
+      : undefined,
     follow_up_actions: [
       {
         action: "add_to_shortlist",
@@ -467,7 +685,7 @@ async function buildStructuredAnswer(
           ]
         : []),
     ],
-    grounded: false,
+    grounded: true,
     model: "deterministic-fallback",
   };
 }
@@ -586,7 +804,7 @@ function addPageContextSource(index: Map<string, SourceRecord>, pageContext?: Pa
     title: pageContext.title || "Current page",
     publisher: "Current browser page",
     url: pageContext.url ?? pageContext.pathname ?? "",
-    source_type: "Page context",
+    source_type: "UI context (unverified)",
     snippet: snippet || `Route: ${pageContext.pathname ?? "current page"}`,
     entities: [
       pageContext.title,
@@ -795,21 +1013,6 @@ function average(values: number[]): number {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
-}
-
-function parseJsonObject(raw: string): unknown | null {
-  const trimmed = raw.trim();
-  try {
-    return JSON.parse(trimmed);
-  } catch {
-    const match = trimmed.match(/\{[\s\S]*\}/);
-    if (!match) return null;
-    try {
-      return JSON.parse(match[0]);
-    } catch {
-      return null;
-    }
-  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

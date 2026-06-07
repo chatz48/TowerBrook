@@ -3,6 +3,7 @@ export type {
   ChatTurn,
   PageContext,
   SourceRecord,
+  ToolTrace,
 } from "@/lib/ask-types";
 
 export type CopilotFilters = {

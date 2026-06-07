@@ -177,12 +177,24 @@ class ToolTrace(BaseModel):
     status: str = "completed"
 
 
+class CopilotStructuredAnswer(BaseModel):
+    answer_summary: str
+    key_findings: list[str] = Field(default_factory=list)
+    gaps: list[str] = Field(default_factory=list)
+    risks: list[str] = Field(default_factory=list)
+    follow_ups: list[str] = Field(default_factory=list)
+    uncertainty_notes: str = ""
+
+
 class ChatResponse(BaseModel):
     session_id: str
     answer: str
     citations: list[Citation] = Field(default_factory=list)
     tool_calls: list[ToolTrace] = Field(default_factory=list)
     confidence: float = 0.7
+    intent: str | None = None
+    model_used: str | None = None
+    structured: CopilotStructuredAnswer | dict[str, Any] | None = None
 
 
 class ReportRequest(BaseModel):

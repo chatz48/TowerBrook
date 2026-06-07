@@ -23,7 +23,7 @@ export async function GET(request: Request) {
       liveWebSearchConfigured: live.providers.length > 0,
       liveSearchProviders: live.providers,
       liveSearchError: live.error,
-      liveLlmConfigured: Boolean(process.env.GEMINI_API_KEY || process.env.DEEPSEEK_API_KEY),
+      liveLlmConfigured: Boolean(process.env.DEEPSEEK_API_KEY),
     },
   });
 }

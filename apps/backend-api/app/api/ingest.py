@@ -1,11 +1,11 @@
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from app.repositories.supabase_repo import repo
-from app.schemas.domain import SourceInput
+from app.schemas.domain import ResearchJobRequest, SourceInput
 from app.services.chunker import chunk_text
 from app.services.deepseek_extractor import extractor
 from app.services.embeddings_bge import embeddings
-from app.services.graph_builder import persist_extraction
+from app.services.graph_builder import persist_candidate_extraction
 from app.services.keiro_search import keiro
 from app.services.parser import parse_upload
 
@@ -55,12 +55,21 @@ async def ingest_source(
     chunks = chunk_text(source_text)
     vectors = embeddings.embed_many(chunks)
     extraction = await extractor.extract(source_text, source.title, source.url, theme_id)
-    persisted = await persist_extraction(extraction, source, chunks, vectors, theme_id)
+    job = repo.create_job(
+        ResearchJobRequest(
+            job_type="ingest_review",
+            theme_id=theme_id,
+            query=source.title,
+            metadata={"source_id": source.id, "review_gated": True},
+        )
+    )
+    persisted = await persist_candidate_extraction(extraction, source, chunks, vectors, theme_id, job)
     return {
         "source": source.model_dump(),
         "extraction": extraction.model_dump(),
         "persisted": persisted,
         "mutation": repo.enabled,
+        "review_gated": True,
     }
 
 
@@ -79,5 +88,18 @@ async def ingest_json(body: SourceInput):
     chunks = chunk_text(source_text)
     vectors = embeddings.embed_many(chunks)
     extraction = await extractor.extract(source_text, source.title, source.url, body.theme_id)
-    persisted = await persist_extraction(extraction, source, chunks, vectors, body.theme_id)
-    return {"source": source.model_dump(), "extraction": extraction.model_dump(), "persisted": persisted}
+    job = repo.create_job(
+        ResearchJobRequest(
+            job_type="ingest_review",
+            theme_id=body.theme_id,
+            query=source.title,
+            metadata={"source_id": source.id, "review_gated": True},
+        )
+    )
+    persisted = await persist_candidate_extraction(extraction, source, chunks, vectors, body.theme_id, job)
+    return {
+        "source": source.model_dump(),
+        "extraction": extraction.model_dump(),
+        "persisted": persisted,
+        "review_gated": True,
+    }

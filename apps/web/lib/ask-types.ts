@@ -23,6 +23,13 @@ export type ChatTurn = {
   content?: string;
 };
 
+export type ToolTrace = {
+  tool_name: string;
+  input: Record<string, unknown>;
+  output: Record<string, unknown>;
+  status?: string;
+};
+
 export type AskResponse = {
   intent: string;
   answer_summary: string;
@@ -48,6 +55,12 @@ export type AskResponse = {
     firm: string;
     archetype: string;
     relevance: number;
+    score_breakdown?: {
+      base: number;
+      session_fit: number;
+      objective_fit: number;
+      keyword_boost: number;
+    };
     access: string;
     momentum: string;
     why: string;
@@ -95,11 +108,28 @@ export type AskResponse = {
     label: string;
     prompt: string;
   }[];
+  /** True when the structured answer is fully directory-sourced (no unverified LLM prose). */
   grounded: boolean;
   model_refined?: boolean;
+  refine_failed?: boolean;
   backend_enriched?: boolean;
   backend_error?: string;
+  vector_retrieval_failed?: boolean;
+  enrichment_warnings?: string[];
+  request_id?: string;
   model: string;
+  intent?: string;
+  model_used?: string;
+  /** LangGraph structured synthesis from backend (gaps, risks, findings). */
+  structured?: {
+    answer_summary?: string;
+    key_findings?: string[];
+    gaps?: string[];
+    risks?: string[];
+    follow_ups?: string[];
+    uncertainty_notes?: string;
+  };
+  /** Legacy supplemental prose slot — mirrors structured.answer_summary when present. */
   agentic_answer?: string;
-  tool_calls?: unknown[];
+  tool_calls?: ToolTrace[];
 };

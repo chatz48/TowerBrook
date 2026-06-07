@@ -12,9 +12,8 @@ def test_health():
     assert response.status_code == 200
     body = response.json()
     assert body["ok"] is True
-    assert body["embedding_dimensions"] == 384
-    assert "requests_observed" in body
-    assert "errors_observed" in body
+    assert "supabase" in body
+    assert "embedding_dimensions" not in body
     assert response.headers["x-request-id"]
     assert response.headers["x-response-time-ms"].isdigit()
 

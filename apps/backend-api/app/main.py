@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api import chat, discovery, ingest, jobs, linkedin, reports, search
+from app.api import embeddings as embeddings_api
 from app.config import get_settings
 from app.repositories.supabase_repo import repo
 from app.services.embeddings_bge import embeddings
@@ -32,6 +33,7 @@ app.add_middleware(
 )
 
 app.include_router(chat.router)
+app.include_router(embeddings_api.router)
 app.include_router(discovery.router)
 app.include_router(ingest.router)
 app.include_router(jobs.router)
@@ -104,20 +106,28 @@ async def require_api_token(request: Request, call_next):
     return response
 
 
-def health_payload():
+def health_payload(detailed: bool = False):
     settings = get_settings()
-    return {
-        "ok": True,
-        "supabase": repo.health(),
-        "deepseek_configured": bool(settings.deepseek_api_key),
-        "gemini_configured": bool(settings.gemini_api_key),
-        "keirolabs_configured": bool(settings.keirolabs_api_key),
-        "live_search_configured": bool(settings.keirolabs_api_key or settings.tavily_api_key or settings.serper_api_key or settings.brave_search_api_key),
-        "embedding_model": embeddings.model_name,
-        "embedding_dimensions": embeddings.dimensions,
-        "requests_observed": _request_count,
-        "errors_observed": _error_count,
-    }
+    payload = {"ok": True, "supabase": repo.health()}
+    if detailed:
+        payload.update(
+            {
+                "deepseek_configured": bool(settings.deepseek_api_key),
+                "gemini_configured": bool(settings.gemini_api_key),
+                "keirolabs_configured": bool(settings.keirolabs_api_key),
+                "live_search_configured": bool(
+                    settings.keirolabs_api_key
+                    or settings.tavily_api_key
+                    or settings.serper_api_key
+                    or settings.brave_search_api_key
+                ),
+                "embedding_model": embeddings.model_name,
+                "embedding_dimensions": embeddings.dimensions,
+                "requests_observed": _request_count,
+                "errors_observed": _error_count,
+            }
+        )
+    return payload
 
 
 @app.get("/health")

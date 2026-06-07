@@ -39,7 +39,7 @@ test("normalizeModelResponse strips hallucinated expert ids", () => {
     },
     baseline,
   );
-  assert.equal(result.answer_summary, "Refined summary");
+  assert.equal(result.answer_summary, baseline.answer_summary);
   assert.equal(result.ranked_experts.length, 1);
   assert.equal(result.ranked_experts[0].expert_id, "alice");
   assert.deepEqual(result.sources_used, baseline.sources_used);

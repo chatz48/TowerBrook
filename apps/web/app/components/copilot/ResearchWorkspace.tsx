@@ -20,6 +20,7 @@ import {
   writeSkipBasketAutoRun,
 } from "@/lib/copilot-preferences";
 import { outreachStorageKey, readOutreachState } from "@/lib/outreach-plan";
+import { consumeAskStream, phaseToProgressStep } from "@/lib/ask-stream-client";
 import {
   buildBasketPrompt,
   buildWorkspacePageContext,
@@ -28,8 +29,6 @@ import {
   defaultQuestion,
   makeInitialFilters,
   makeMessageId,
-  responseError,
-  safeJson,
   toChatHistory,
   type ConversationMessage,
 } from "./utils";
@@ -99,22 +98,37 @@ export default function ResearchWorkspace({
     setLoading(true);
     setProgressStep(0);
     setError("");
-    const timeout = window.setTimeout(() => controller.abort("timeout"), 90000);
+    const timeout = window.setTimeout(() => controller.abort("timeout"), 180000);
     try {
-      const res = await fetch("/api/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal: controller.signal,
-        body: JSON.stringify({
+      let finalAnswer: AskResponse | null = null;
+      await consumeAskStream(
+        {
           question: cleanQuestion,
           filters: nextFilters,
           chatHistory,
           pageContext: pageContextFor(nextFilters),
-        }),
-      });
-      const data = (await safeJson(res)) as AskResponse;
-      if (!res.ok) throw new Error(responseError(data, "Request failed"));
-      if (activeRequest.current !== controller) return;
+        },
+        {
+          onBaseline: (data) => {
+            if (activeRequest.current !== controller) return;
+            setAnswer(data);
+            setProgressStep(0);
+          },
+          onPhase: (phase) => {
+            if (activeRequest.current !== controller) return;
+            setProgressStep(phaseToProgressStep(phase.phase));
+          },
+          onComplete: (data) => {
+            finalAnswer = data;
+          },
+          onError: (message) => {
+            throw new Error(message);
+          },
+        },
+        controller.signal,
+      );
+      if (activeRequest.current !== controller || !finalAnswer) return;
+      const data = finalAnswer;
       setAnswer(data);
       setConversation((current) => [
         ...current,
@@ -176,13 +190,11 @@ export default function ResearchWorkspace({
       setLoading(true);
       setProgressStep(0);
       setError("");
-      const timeout = window.setTimeout(() => controller.abort("timeout"), 90000);
+      const timeout = window.setTimeout(() => controller.abort("timeout"), 180000);
       try {
-        const res = await fetch("/api/ask", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          signal: controller.signal,
-          body: JSON.stringify({
+        let finalAnswer: AskResponse | null = null;
+        await consumeAskStream(
+          {
             question: startingQuestion,
             filters: startingFilters,
             chatHistory: [],
@@ -199,11 +211,25 @@ export default function ResearchWorkspace({
                 ),
               ),
             ),
-          }),
-        });
-        const data = (await safeJson(res)) as AskResponse;
-        if (!res.ok) throw new Error(responseError(data, "Request failed"));
-        if (!cancelled) {
+          },
+          {
+            onBaseline: (data) => {
+              if (!cancelled) setAnswer(data);
+            },
+            onPhase: (phase) => {
+              if (!cancelled) setProgressStep(phaseToProgressStep(phase.phase));
+            },
+            onComplete: (data) => {
+              finalAnswer = data;
+            },
+            onError: (message) => {
+              throw new Error(message);
+            },
+          },
+          controller.signal,
+        );
+        if (!cancelled && finalAnswer) {
+          const data = finalAnswer;
           setAnswer(data);
           setConversation([
             {

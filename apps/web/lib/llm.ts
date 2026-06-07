@@ -4,24 +4,12 @@ import type { ExpertWithCompanies } from "./types";
 
 const DEEPSEEK_BASE_URL = process.env.DEEPSEEK_BASE_URL ?? "https://api.deepseek.com";
 const DEEPSEEK_MODEL = normalizeDeepSeekModel(process.env.DEEPSEEK_MODEL ?? "deepseek-v4-flash");
-const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
-const MODEL = process.env.GEMINI_API_KEY ? GEMINI_MODEL : DEEPSEEK_MODEL;
+const MODEL = DEEPSEEK_MODEL;
 
 type DeepSeekChatResponse = {
   choices?: {
     message?: {
       content?: string | null;
-    };
-  }[];
-  error?: {
-    message?: string;
-  };
-};
-
-type GeminiResponse = {
-  candidates?: {
-    content?: {
-      parts?: { text?: string }[];
     };
   }[];
   error?: {
@@ -65,24 +53,21 @@ export function buildExpertContext(expert: ExpertWithCompanies): string {
 export interface GenResult {
   text: string;
   model: string;
-  grounded: boolean; // true if a real model produced it
+  grounded: boolean;
 }
 
-/** Whether a live model is configured. */
+/** Whether DeepSeek is configured for live generation. */
 export function hasModel(): boolean {
-  return Boolean(process.env.GEMINI_API_KEY || process.env.DEEPSEEK_API_KEY);
+  return Boolean(process.env.DEEPSEEK_API_KEY);
 }
 
 export async function complete(
   system: string,
   user: string,
-  options: { maxTokens?: number; responseFormat?: "json_object" } = {},
+  options: { maxTokens?: number; responseFormat?: "json_object"; model?: string } = {},
 ): Promise<string> {
-  if (process.env.GEMINI_API_KEY) {
-    return completeWithGemini(system, user, options);
-  }
   const apiKey = process.env.DEEPSEEK_API_KEY;
-  if (!apiKey) throw new Error("Set GEMINI_API_KEY or DEEPSEEK_API_KEY to use live AI generation.");
+  if (!apiKey) throw new Error("Set DEEPSEEK_API_KEY to use live AI generation.");
 
   const response = await fetch(`${DEEPSEEK_BASE_URL.replace(/\/$/, "")}/chat/completions`, {
     method: "POST",
@@ -91,7 +76,7 @@ export async function complete(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: DEEPSEEK_MODEL,
+      model: options.model ?? DEEPSEEK_MODEL,
       messages: [
         { role: "system", content: system },
         { role: "user", content: user },
@@ -109,36 +94,6 @@ export async function complete(
 
   const text = payload.choices?.[0]?.message?.content?.trim();
   if (!text) throw new Error("DeepSeek returned an empty completion.");
-  return text;
-}
-
-async function completeWithGemini(
-  system: string,
-  user: string,
-  options: { maxTokens?: number; responseFormat?: "json_object" } = {},
-): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error("Set GEMINI_API_KEY to use Gemini generation.");
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: system }] },
-      contents: [{ role: "user", parts: [{ text: user }] }],
-      generationConfig: {
-        maxOutputTokens: options.maxTokens ?? 1200,
-        temperature: 0.2,
-        ...(options.responseFormat === "json_object" ? { responseMimeType: "application/json" } : {}),
-      },
-    }),
-  });
-  const payload = (await response.json().catch(() => ({}))) as GeminiResponse;
-  if (!response.ok) {
-    throw new Error(payload.error?.message ?? `Gemini request failed with HTTP ${response.status}`);
-  }
-  const text = payload.candidates?.[0]?.content?.parts?.map((part) => part.text ?? "").join("").trim();
-  if (!text) throw new Error("Gemini returned an empty completion.");
   return text;
 }
 

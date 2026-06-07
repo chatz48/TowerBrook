@@ -183,18 +183,7 @@ class DeepSeekExtractor:
                 target_name = match.group(1).strip(" ,.")
                 break
 
-        for name in names:
-            people.append(
-                ExtractedPerson(
-                    name=name,
-                    headline="Potential sector expert",
-                    expert_type="operator",
-                    theme_ids=[theme_id] if theme_id else [],
-                    summary=f"Mentioned in {title or 'uploaded source'}.",
-                    why_relevant=evidence,
-                    confidence=0.45,
-                )
-            )
+        # Heuristic mode never auto-creates people — capitalized token pairs are too noisy for PE graphs.
 
         if target_name:
             companies.append(

@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import { PROMPTS } from "./constants";
-import type { AskResponse } from "./types";
+import type { AskResponse, ToolTrace } from "./types";
 import { collectCitations, formatTime, themeLabel } from "./utils";
 
 export function AskAnswerPanel({
@@ -63,12 +63,17 @@ export function AskAnswerPanel({
             <span className="font-semibold">Expert Engine</span>
             <span className="text-ink-faint">{formatTime(answer.generated_at)}</span>
             <span className="rounded-full border border-line px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-ink-faint">
-              {answer.model_refined
-                ? "Model refined"
-                : answer.backend_enriched
-                  ? "Backend enriched"
-                  : "Directory synthesis"}
+              {answer.intent
+                ? `LangGraph · ${answer.intent.replaceAll("_", " ")}`
+                : answer.grounded
+                  ? "Directory grounded"
+                  : answer.backend_enriched
+                    ? "LangGraph enriched"
+                    : "Directory synthesis"}
             </span>
+            {answer.model_used ? (
+              <span className="text-[10px] text-ink-faint">{answer.model_used}</span>
+            ) : null}
           </div>
           <p className="mt-1 text-sm text-ink-soft">{answer.answer_summary}</p>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -86,23 +91,38 @@ export function AskAnswerPanel({
               Open memo
             </Link>
           </div>
-          {answer.agentic_answer ? (
+          {answer.enrichment_warnings?.length ? (
+            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-900">
+              {answer.enrichment_warnings.map((warning) => (
+                <p key={warning}>{warning}</p>
+              ))}
+            </div>
+          ) : null}
+          {answer.structured?.key_findings?.length ? (
             <div className="mt-3 rounded-lg border border-line bg-paper p-3">
               <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
-                Live research synthesis
+                Key findings (LangGraph)
               </div>
-              <p className="mt-1 text-sm leading-relaxed text-ink-soft">{answer.agentic_answer}</p>
-              {answer.tool_calls?.length ? (
-                <p className="mt-2 text-[11px] text-ink-faint">
-                  Tools used: {answer.tool_calls.length} backend research step
-                  {answer.tool_calls.length === 1 ? "" : "s"}
-                </p>
-              ) : null}
+              <ul className="mt-1 list-disc space-y-1 pl-4 text-sm text-ink-soft">
+                {answer.structured.key_findings.slice(0, 5).map((finding) => (
+                  <li key={finding}>{finding}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          {answer.tool_calls?.length ? (
+            <div className="mt-3">
+              <ToolTracePanel traces={answer.tool_calls} />
             </div>
           ) : null}
           {answer.backend_error ? (
-            <p className="mt-2 text-[11px] text-amber-700">
+            <p className="mt-2 text-[11px] font-semibold text-amber-800">
               Live research unavailable: {answer.backend_error}
+            </p>
+          ) : null}
+          {answer.refine_failed ? (
+            <p className="mt-2 text-[11px] text-amber-800">
+              Model refinement failed — directory baseline retained.
             </p>
           ) : null}
         </div>
@@ -382,6 +402,30 @@ function CitationList({
       ))}
     </div>
   );
+}
+
+function ToolTracePanel({ traces }: { traces: ToolTrace[] }) {
+  return (
+    <details className="mt-2 rounded border border-line bg-paper px-2 py-1.5">
+      <summary className="cursor-pointer text-[11px] font-semibold text-ink-faint">
+        Research tool trace ({traces.length} step{traces.length === 1 ? "" : "s"})
+      </summary>
+      <ol className="mt-2 space-y-2 text-[11px] text-ink-soft">
+        {traces.map((trace, index) => (
+          <li key={`${trace.tool_name}-${index}`} className="rounded border border-line bg-white px-2 py-1.5">
+            <div className="font-semibold text-ink">{trace.tool_name}</div>
+            <div className="mt-0.5 text-ink-faint">Input: {summarizeTracePayload(trace.input)}</div>
+            <div className="text-ink-faint">Output: {summarizeTracePayload(trace.output)}</div>
+          </li>
+        ))}
+      </ol>
+    </details>
+  );
+}
+
+function summarizeTracePayload(payload: Record<string, unknown>): string {
+  const text = JSON.stringify(payload);
+  return text.length > 160 ? `${text.slice(0, 157)}...` : text;
 }
 
 function Avatar({ label, active = false }: { label: string; active?: boolean }) {
