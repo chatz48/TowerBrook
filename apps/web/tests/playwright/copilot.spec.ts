@@ -33,8 +33,8 @@ test.describe("Copilot page", () => {
 
     // Tabs
     await expect(page.locator("button:has-text('Ask')")).toBeVisible();
-    await expect(page.locator("button:has-text('Research Queue')")).toBeVisible();
     await expect(page.locator("button:has-text('Notes')")).toBeVisible();
+    await expect(page.locator("a:has-text('Open Discover')")).toBeVisible();
   });
 
   test("generates a response for a simple query", async ({ page }) => {
