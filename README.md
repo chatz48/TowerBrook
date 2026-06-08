@@ -1,410 +1,231 @@
 # TowerBrook People Expert Engine
 
-TowerBrook Expert Engine is a graph-backed people intelligence workflow for
-thematic private equity sourcing.
+TowerBrook People Expert Engine is a graph-backed origination platform for
+thematic private equity sourcing. It turns a sector thesis into a practical
+calling plan: the most relevant experts, the companies they can unlock, the
+evidence behind each recommendation, and the warmest relationship paths into the
+market.
 
-The product helps an investment professional move from a theme to the people
-most likely to reveal investable companies: founders, ex-founders, operators,
-bankers, lawyers, diligence providers, advisors, peer funds and dealmakers.
-Those expert relationships then drive target discovery, call prep, outreach,
-relationship paths, evidence-backed memos and review-gated live research.
+Hosted demo: `https://towerbrook-arun.vercel.app`
 
-Core principle:
-
-```text
-The graph is the database.
-Sources are the evidence.
-The LLM is the extraction, synthesis, and workflow layer.
-```
-
-The demo covers three themes:
+The demo focuses on three themes:
 
 - Clean Energy Advisory & Development
 - Grid Infrastructure & Connection
 - Smart Water Infrastructure & Analytics
 
-## What This Builds For TowerBrook
+## What I Built
 
-This is a people-first expert engine for thematic private-equity sourcing. It is
-designed around the assignment brief:
+I built a Next.js application with a supporting FastAPI backend for live
+research, source extraction and Copilot enrichment. The product is designed for
+investment teams that need to move quickly from a thesis to the right market
+conversations.
 
-- identify experts across the three themes: founders, ex-founders, operators,
-  bankers, lawyers, diligence providers, advisors, peer funds and dealmakers;
-- use those experts to derive interesting companies and new investment targets;
-- give a time-constrained investment professional a usable interface for
-  expert discovery, call preparation, company exploration and evidence review.
-
-The key product decision is to make experts the primary object. Deals, sources,
-companies and research jobs are supporting evidence that help answer:
+The core workflow is:
 
 ```text
-Who should TowerBrook call, why are they credible, what companies can they lead
-us to, and what evidence supports that view?
+Theme -> expert shortlist -> basket -> Copilot -> sourced report
 ```
 
-The discovery method prioritizes private-equity transactions, especially
-TowerBrook and peer-fund deals. Large and recent deals are used as the spine for
-finding named founders, advisors, lenders, lawyers and service providers. A
-separate founder-origination lane follows previously funded founders into new
-companies, board roles, angel investments and referral paths.
+In practice, the app helps a team identify who to call, why they matter, which
+companies they may unlock, how TowerBrook might reach them, and what evidence
+supports the recommendation.
 
-## How This Helps Find New Deals
+## Product Workflow
 
-The product is deliberately built around the origination question:
+The application is organised like an analyst workbench rather than a static
+database:
 
-```text
-Which credible people should TowerBrook speak to this week, and what companies
-or referrals could those conversations produce?
+1. Start in the command centre to pick a theme and review market coverage.
+2. Open the expert call list and shortlist the people most likely to unlock the
+   market.
+3. Review each expert's source evidence, deal history, company links and
+   warm-path signals.
+4. Assign ownership, set status and capture notes so the investment team can
+   coordinate coverage collaboratively.
+5. Save experts and companies to the basket as a working deal-team shortlist.
+6. Ask Copilot to turn the basket into a call plan, diligence sequence, target
+   review or memo outline.
+7. Move the answer into reports as a sourced output for a Monday meeting,
+   call-prep pack or IC-style memo.
+
+The main routes are:
+
+- `/` command centre for theme selection, market coverage and workflow entry.
+- `/experts` prioritised expert call list with ownership, status, notes,
+  evidence, basket actions and exportable meeting packs.
+- `/companies` target explorer showing companies surfaced through expert,
+  transaction and source evidence.
+- `/ask` Copilot workspace that returns ranked experts, ranked companies, call
+  sequence, risks, gaps and cited sources.
+- `/reports` memo workspace for sourced theme memos, company briefs and expert
+  call plans.
+- `/graph`, `/discover`, `/deals` and `/sources` for relationship mapping,
+  discovery, transaction evidence and source review.
+
+## Core Features
+
+The key features are prioritised expert lists, company target discovery,
+basket-based workflow state, team ownership, expert status tracking,
+collaborative notes, structured Copilot answers, source-backed reports, deal
+intelligence, source registers and an interactive relationship graph.
+
+Together, these create a repeatable path from "we like this theme" to "these are
+the people we should speak to this week, and this is why."
+
+### Relationship Graph
+
+The relationship graph is the core intelligence layer. Experts, companies,
+deals, source documents and TowerBrook contacts become nodes. Work history,
+board roles, advisory mandates, investments, transactions, shared employers,
+source citations and known TowerBrook relationships become edges.
+
+This makes the app more than a search tool. It can explain why a person is
+relevant, which companies they may unlock, what evidence supports that view, and
+which introduction path is likely to be most credible.
+
+The graph is designed for warm introductions. With fuller company data and
+verified internal contacts, the system would use LinkedIn profiles, work
+history, transaction history and board/advisor roles to identify overlapping
+time periods at the same company, fund, advisor, lender or board. Those overlaps
+would surface connected experts, second-degree routes and credible warm-intro
+paths into priority targets.
+
+### Source Ingestion
+
+Source ingestion is intended to compound the graph over time. A user should be
+able to add company documents, deal materials, PDFs, adviser lists or source
+URLs; LLM extraction then identifies named experts, companies, roles, dates,
+transactions and evidence.
+
+Those extracted facts become reviewable candidates before they enrich the
+canonical relationship graph. The goal is for every new company document or deal
+source to make the expert network more complete, more explainable and more
+useful for origination.
+
+## Architecture
+
+The web application is a Next.js product. The backend is a FastAPI service that
+supports Copilot orchestration, source extraction, discovery and graph
+enrichment.
+
+The app can run locally from static JSON data without credentials. Optional API
+keys enable live search, extraction, Supabase persistence and enriched Copilot
+answers.
+
+### Supabase Database
+
+Supabase is the intended production database for durable graph and workflow
+state. It stores canonical experts, companies, sources, research jobs, discovery
+candidates, entity-match candidates and review status.
+
+In the local demo, static JSON keeps the app easy to run. In a deployed version,
+Supabase is the layer that makes the product collaborative: ownership, status,
+notes, approved candidates and graph updates can be shared across an investment
+team rather than living in one browser session.
+
+### Copilot Architecture
+
+Copilot is deliberately directory-first. The web app gathers and ranks the
+curated data it already owns before asking the backend to synthesize anything.
+Most workflow prompts therefore return immediately from deterministic data:
+expert rankings, target companies, basket call plans, warm-intro routes, theme
+guidance and outreach drafts. Semantic retrieval can still add source chunks to
+that local evidence bundle. The backend LangGraph path is reserved for explicit
+live/deep research or cases where directory evidence is not enough.
+
+```mermaid
+flowchart TD
+  A[User question<br/>filters + theme + basket + page context]
+  B[Web context builder<br/>chat memory + basket + page context]
+  C[Deterministic intent + section plan<br/>answer-focus.ts]
+  D[Directory gather<br/>experts, companies, deals, warm paths]
+  E[Semantic retrieval<br/>Supabase source chunks when available]
+  F{Grounded local answer complete?}
+  G[Return structured answer<br/>ranked experts, companies, call sequence,<br/>gaps, risks, sources, follow-ups]
+  H{User asked for live/deep/outside-directory research?}
+
+  I[Backend LangGraph route node<br/>heuristic or LLM router]
+  J[Research node<br/>RAG entities, RAG sources,<br/>optional Keiro/web/fetch/report tools]
+  K[Synthesize node<br/>LLM drafts schema-shaped answer]
+  L[Verify node<br/>remove unsupported claims,<br/>attach warnings and confidence]
+  M[Merge with baseline<br/>preserve deterministic ranks,<br/>add live findings only when trusted]
+
+  A --> B --> C --> D --> E --> F
+  F -->|yes| G
+  F -->|no| H
+  H -->|yes| I --> J --> K --> L --> M --> G
+  H -->|no| G
 ```
 
-Workflow:
+This keeps the ranking authority with the curated TowerBrook directory and
+warm-path register, while still using the LLM where it is strongest: turning
+gathered evidence into concise, structured prose. The backend graph is
+observable as four nodes — route, research, synthesize and verify — and request
+traces record the timing and tool calls for each phase.
 
-1. Start with one of the three themes.
-2. Use major and recent PE transactions as the discovery spine.
-3. Extract the named people around those transactions: founders, operators,
-   advisors, lenders, lawyers, consultants, peer-fund dealmakers and board
-   members.
-4. Rank experts by theme relevance, PE evidence, recency, TowerBrook
-   relationship path, access quality and source confidence.
-5. Reverse-derive companies from the expert graph: current companies, former
-   companies, portfolio companies, board seats, advisory clients, investments
-   and referrals.
-6. Generate call prep, outreach and memo outputs so the user can act on the
-   expert pool immediately.
+## Key Design Choices
 
-The strongest demo path is:
+I made experts the primary object rather than companies or deals. In thematic PE
+origination, the highest-leverage question is often not "what company should we
+look at?" but "who can credibly explain the market and lead us to the right
+companies?"
 
-```text
-/ -> /experts (Call list) -> expert profile -> company profile -> /reports
-```
+The data model is graph-shaped because origination is relationship-shaped.
+Experts, companies, deals, sources and TowerBrook relationship paths are
+connected through typed evidence-backed relationships. That lets the UI rank
+experts, explain warm paths, derive target companies from people rather than
+from a flat company list, and show why one introduction route is stronger than
+another.
 
-`/campaign` redirects to `/experts` for backward-compatible links.
+Copilot responses are structured JSON, not free-form prose. The UI renders
+ranked experts, ranked companies, call sequence, risks, gaps, assumptions and
+sources deterministically, so the answer stays inspectable and reusable in
+reports.
 
-This makes the product more than a searchable database. It is an expert-led
-sourcing workflow where a theme becomes an assigned origination plan, validated
-company targets, and a memo-ready evidence pack.
+Live discovery is review-gated. Search and extraction can create candidate
+people, companies and facts, but canonical graph data is not mutated until a
+human review step approves the candidate.
 
-## Run Locally
+## How To Run Locally
+
+Install dependencies:
 
 ```bash
 pnpm install
+```
+
+Run the web app:
+
+```bash
 pnpm dev
 ```
 
 Open `http://localhost:3000`.
 
-The app can run as a static demo without credentials. Live discovery uses:
+To run the Python API for live Copilot enrichment and discovery:
+
+```bash
+cd apps/backend-api
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+cd ../..
+pnpm api:dev
+```
+
+Copy the example environment file if you want live integrations:
 
 ```bash
 cp .env.example .env
-# set SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, DATABASE_URL,
-# DEEPSEEK_API_KEY and KEIROLABS_API_KEY
-
-pnpm origination:jobs
-pnpm origination:dry-run:advisors
-pnpm origination:run:advisors
 ```
 
-Live discovery is intentionally review-gated:
-
-```text
-Keiro search/fetch -> DeepSeek extraction -> Supabase discovery_candidates
-and entity_match_candidates -> human approval -> canonical people/company graph
-```
-
-The system does not mutate canonical experts from live web output until a
-candidate is approved.
-
-## Deploy To Vercel
-
-Deploy the repository as two separate Vercel projects:
-
-| Project | Root directory | Required production environment variables |
-|---|---|---|
-| Web | `apps/web` | `BACKEND_API_URL`, `BACKEND_API_TOKEN`; add Supabase, DeepSeek, and OpenAI variables for the optional features that use them |
-| Backend API | `apps/backend-api` | `BACKEND_API_TOKEN`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DEEPSEEK_API_KEY`, `KEIROLABS_API_KEY`, `CRON_SECRET` |
-
-Deploy the Backend API first, then set its production URL as the web
-project's `BACKEND_API_URL`. Set the same random
-`BACKEND_API_TOKEN` on both projects so only the web project's server-side
-routes can call the API. The authenticated `GET /jobs/process-next` endpoint is
-called daily at midnight UTC by the Vercel Hobby-compatible cron schedule. Set
-`CRON_SECRET`; Vercel sends it as the scheduled request's bearer token.
-
-The FastAPI deployment runs as one Vercel Function, so each job must complete
-within the function duration allowed by the Vercel plan. Supabase holds durable
-job and graph state; do not rely on in-memory fallback state in production.
-
-## AI Usage
-
-AI is used in three places:
-
-- DeepSeek extracts structured people, companies, relationships, facts and
-  citations from searched/fetched sources.
-- The research copilot and report surfaces synthesize graph-grounded call prep,
-  diligence questions and memo sections.
-- Deterministic scripts generate research queues and review artifacts from the
-  curated source/deal graph.
-
-AI output is never treated as final truth. It is stored as review-gated
-candidates with source metadata, confidence and auditability.
-
-## Generated Data And Scripts
-
-Important generated artifacts:
-
-- `apps/web/data/private-equity-deal-census-candidates.json`
-- `apps/web/data/expert-first-pe-discovery-candidates.json`
-- `apps/web/data/origination-research-jobs.json`
-- `apps/web/data/government-investment-census-candidates.json`
-
-Regeneration commands:
-
-```bash
-pnpm private-equity:census
-pnpm expert:census
-pnpm origination:jobs
-pnpm government-investment:census
-pnpm ingest:validate
-```
-
-The live advisor-gap and profile-completion passes produced review-gated
-Supabase candidates for
-Canaccord Genuity, Bridgepoint Credit, EY, PwC, Baringa, Roland Berger, Fried
-Frank and Eight Advisory. Only the candidates with enough source-backed identity
-evidence were promoted to the canonical graph; weaker leads remain in review.
-
-## More Time
-
-With more time, I would:
-
-- add paid/private datasets such as PitchBook, LinkedIn Sales Navigator,
-  MergerMarket and Preqin to improve completeness and identity resolution;
-- add CRM/email/calendar overlays so TowerBrook can rank experts by warmest
-  relationship path and prior internal interaction;
-- build a call-notes ingestion loop so every expert call creates new expert,
-  company and referral candidates;
-- add a reviewer UI for approving, merging and rejecting Supabase discovery
-  candidates directly from the product;
-- add scheduled monitors for new PE deals and founder/company activity in the
-  three themes.
-
-## Product Flow
-
-| Route | What it does |
-|---|---|
-| `/` | Command Centre: the guided Monday-meeting workflow, coverage matrix, theme summaries, and global search. |
-| `/experts` | Call list (origination desk): ranked experts, assign owners, basket selections, outreach notes, copy meeting pack, and export CSV. Theme selection immediately limits the specialty dropdown to that theme. |
-| `/campaign` | Redirects to `/experts` (legacy route). |
-| `/experts/[id]` | Expert profile with evidence, company links, call prep, outreach, and source records. |
-| `/companies` | Company Watchlist: companies reverse-derived from expert evidence, with validation status and priority actions. |
-| `/companies/[id]` | Company profile with linked experts, material facts, evidence, and next diligence actions. |
-| `/reports` | Memo workspace with sourced sections, citations, source register, markdown, and export controls. |
-
-Supporting evidence and admin routes remain available by deep link from the
-main workflow, but are no longer primary navigation: `/graph`, `/deals`,
-`/discover`, `/ingest`, `/ask`, `/sources`, and `/themes/[theme]`.
-
-## Design System
-
-The UI follows the supplied `docs/mockups` reference system:
-
-- Light institutional research terminal, not a marketing site.
-- White global app chrome with compact navigation and command search.
-- Pale gray workspace background with thin bordered panels.
-- Dense 11-13px table typography and minimal 4-8px radii.
-- Blue active states/actions, green confidence/access bars, amber/red risk states.
-- Left workflow rails, central tables/canvases, right evidence inspectors.
-- Citation markers and source registers are visible in every generated workflow.
-
-See `docs/design-system.md` for implementation details.
-
-## Data And Graph Model
-
-Production demo data is static and sourced:
-
-- `data/experts.json`
-- `data/companies.json`
-- `data/deals.json`
-
-Current curated graph size after the June 2026 TowerBrook expansion:
-
-- 256 experts
-- 287 companies
-- Clean Energy Advisory & Development: 135 experts / 140 companies (theme-tagged; experts may span multiple themes)
-- Grid Infrastructure & Connection: 113 experts / 127 companies
-- Smart Water Infrastructure & Analytics: 93 experts / 119 companies
-
-The source register mirrors the production graph evidence surface with 182
-registered public sources, including every source URL cited by expert and
-company records. The discovery review queue now contains 15 structured
-candidates: 1 approved prototype, 13 `needs_review` records, and 1
-`needs_more_evidence` record.
-
-Domain types live in `lib/types.ts`. Experts and companies are graph nodes.
-Expert-company relationships are typed edges:
-
-```text
-founded, co-founded, led, partner, board, advised, invested-in,
-acquired, banked, legal-counsel, served
-```
-
-Derived graph helpers live in `lib/data.ts`; base/session scoring lives in
-`lib/score.ts`; TowerBrook-specific relationship scoring lives in
-`lib/towerbrook.ts`.
-
-## Deal Intelligence
-
-Deals are first-class graph records. Each deal carries a structured rubric:
-
-- Identity: name, theme, geography, status, type, announcement/completion date.
-- Parties: target, buyer/investor, seller, management, board, co-investors.
-- Transaction details: stake, valuation/economics when disclosed, financing,
-  and not-disclosed markers where sources do not provide economics.
-- Advisors and service providers: financial advisors, legal counsel, commercial
-  diligence, technical diligence, tax/accounting and other advisors.
-- Investment relevance: TowerBrook angle, surfaced companies, surfaced experts,
-  comparable deals, diligence questions and follow-up searches.
-- Evidence and confidence: every material fact has source IDs, evidence text,
-  confidence and review status.
-
-`/ingest` lets a user paste deal material or provide source metadata. The
-server route extracts a draft deal rubric, flags missing facts, generates
-targeted follow-up searches, and returns reviewable relationship candidates
-without mutating production data.
-
-## TowerBrook Lens
-
-TowerBrook is now a first-class graph node and product lens, not just the
-intended user of the workflow.
-
-The graph includes TowerBrook, relevant infrastructure portfolio companies
-(`JSM Group`, `Envevo`, `GMC Group`, `LiftWerx`), JSM transaction advisor
-firms, and named TowerBrook / portfolio people sourced from official
-TowerBrook pages. The UI exposes:
-
-- A global TowerBrook lens on `/` with a toggle between `Worked with` and
-  `Priority fit`.
-- A theme-specific TowerBrook score and network lens on `/themes/[theme]`.
-- A TowerBrook score column on expert and company tables.
-- A direct-network toggle in theme expert tables for experts TowerBrook has
-  worked with via TowerBrook, portfolio, or named advisor relationships.
-- Profile-level TowerBrook score explanations for experts and companies.
-
-Score interpretation:
-
-```text
-100          TowerBrook itself or direct TowerBrook team link
-90-99        TowerBrook portfolio company / portfolio operator
-80-89        Named TowerBrook transaction advisor
-60-79        High-priority TowerBrook infrastructure fit
-<60          Broader theme adjacency
-```
-
-## Session-Aware Ranking
-
-Base expert priority still uses transparent graph scoring:
-
-```text
-(base role + relationship edges + recency + access + signals + cross-theme) * confidence
-```
-
-The Theme Command Center now adds session calibration:
-
-- Objective: market structure, buyer pain, investable companies, deal process,
-  founder introductions, red-team thesis.
-- Preferred expert archetypes.
-- Optimization target: balanced, source confidence, access quality, momentum,
-  non-obvious names.
-
-The table displays base score, session score, and fit components so ranking
-changes are explainable.
-
-## Research Copilot
-
-`/api/ask` returns structured JSON rather than a single prose string:
-
-- `ranked_experts`
-- `ranked_companies`
-- `call_sequence`
-- `what_to_listen_for`
-- `gaps`
-- `risks`
-- `sources_used`
-- `confidence`
-- `assumptions`
-- `follow_up_actions`
-
-The UI renders those blocks deterministically with an evidence inspector.
-Without an API key, the endpoint returns the deterministic graph-grounded
-baseline. With a key, the model may refine wording and sequencing but must keep
-entity IDs, source IDs, names, URLs, and citations from the baseline.
-
-## Reports
-
-`/reports` builds evidence-backed memo objects, not one blob of prose.
-
-Templates:
-
-- Theme memo
-- Expert call plan
-- Company brief
-- Red-team thesis
-- IC appendix
-- Deal brief
-- Deal relationship map
-
-Each section carries status, confidence, source count, citations, actions, and
-export-ready markdown. Report data is generated by `lib/report.ts` from the
-same expert/company graph and source register.
-
-## Human-In-The-Loop Data Pipeline
-
-The ingestion prototype proves the compounding path without mutating production
-data:
-
-```text
-source register -> fetch/clean -> candidate JSON -> human review -> graph-ready output
-```
-
-Files:
-
-- `data/source-register.json`
-- `data/pipeline-clean.json`
-- `data/candidates.json`
-- `data/graph-ready.json`
-- `scripts/data-pipeline.mjs`
-- `docs/data-pipeline.md`
-
-Commands:
-
-```bash
-node scripts/data-pipeline.mjs run --offline
-node scripts/data-pipeline.mjs validate
-node scripts/data-pipeline.mjs review candidate-id approved --reviewer analyst
-pnpm ingest:validate
-```
-
-Only approved candidates are emitted to `data/graph-ready.json`. The script
-does not edit `data/experts.json` or `data/companies.json`.
-
-Current review queue coverage:
-
-- 178 registered sources
-- 15 structured review candidates
-- 12 high-priority production graph sources seeded for `/discover`
-
-## Verification
-
-```bash
-pnpm verify
-```
-
-`pnpm verify` runs lint, typecheck, build, ingest validation, backend tests, web unit tests, and the Copilot API contract test.
-
-`pnpm verify:agent` runs the full agent verification gate including Playwright smoke, basket, Copilot, and workflow suites. Requires `pnpm dev` and `pnpm api:dev` with `BACKEND_API_URL` configured. See [AGENTS.md](AGENTS.md).
-
-Individual steps:
+Important optional variables include `BACKEND_API_URL`, `BACKEND_API_TOKEN`,
+`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DEEPSEEK_API_KEY`,
+`KEIROLABS_API_KEY`, `GEMINI_API_KEY`, `TAVILY_API_KEY`, `SERPER_API_KEY` and
+`BRAVE_SEARCH_API_KEY`.
+
+Useful checks:
 
 ```bash
 pnpm lint
@@ -412,35 +233,77 @@ pnpm typecheck
 pnpm build
 pnpm ingest:validate
 pnpm api:test
-node apps/web/tests/ask-contract.test.mjs
+pnpm --dir apps/web test:unit
+```
+
+The full verification gate is:
+
+```bash
+pnpm verify
+```
+
+## Data And Generation Scripts
+
+The repo includes static demo data in `apps/web/data`, including:
+
+- `experts.json`
+- `companies.json`
+- `deals.json`
+- `sources.json`
+- `towerbrook-warm-paths.json`
+- `source-register.json`
+- `candidates.json`
+- `graph-ready.json`
+- generated census and origination candidate files
+
+Regenerate or validate the main generated artifacts with:
+
+```bash
+pnpm investment:census
+pnpm private-equity:census
+pnpm expert:census
+pnpm government-investment:census
+pnpm origination:jobs
+pnpm ingest:validate
+```
+
+The offline review pipeline can also be run directly:
+
+```bash
+node apps/web/scripts/data-pipeline.mjs run --offline
 node apps/web/scripts/data-pipeline.mjs validate
 ```
 
-Hosted demo (when deployed): `https://towerbrook-arun.vercel.app`
+## Where I Used AI
 
-During final verification, these routes returned HTTP 200 from `pnpm dev`:
+AI is used in the product and in the development process.
 
-```text
-/
-/themes/grid-infrastructure
-/experts/nick-boyle
-/companies/lightsource-bp
-/deals/bp-lightsource-bp-remaining-stake
-/ingest
-/graph
-/ask
-/reports
-/discover
-/sources
-```
+In the product, DeepSeek-style models support extraction, synthesis, Copilot
+answer drafting, call-plan generation and memo drafting. KeiroLabs and optional
+search providers support live source discovery. AI output is treated as
+candidate evidence, not final truth: generated entities and facts keep source
+metadata, confidence and review status.
 
-## Current Limitations
+In development, I used AI assistance to speed up product architecture, code
+generation, test iteration, data-pipeline design, copywriting and bug fixing.
+The main implementation decisions, workflow design, data-review posture and
+final acceptance checks were kept human-directed.
 
-- No authentication or multi-user state.
-- Shortlist, CRM sync, and contacted-state actions are UI prototypes.
-- Live discovery requires KeiroLabs, DeepSeek and Supabase credentials and
-  still returns review candidates, not production graph mutations.
-- User deal ingestion is deterministic and review-gated; pasted or URL-sourced
-  facts are not persisted into production graph data in this demo build.
-- Confidence is record-level and hand-curated; no learned source-quality model.
-- No paid data provider, email sending, or production deployment automation.
+## What I Would Do With More Time
+
+I would add paid data sources such as PitchBook, Preqin, MergerMarket and
+LinkedIn Sales Navigator to improve coverage and identity resolution. I would
+also add a broader set of experts, source material, company documents and
+verified internal contact data to the application database so the relationship
+graph could find overlapping work-history periods, shared employers, shared
+deals, board overlaps and credible warm-intro paths into connected experts and
+target companies.
+
+I would also build a first-class reviewer UI for approving and merging discovery
+candidates, add CRM/email/calendar overlays for real warm-path scoring, and
+close the loop by turning expert call notes into new expert, company and
+referral candidates.
+
+The next product step would be production hardening: authentication, multi-user
+workspaces, persistent basket state, audit logs, scheduled discovery monitors
+and deeper end-to-end tests around the full expert-to-memo workflow.
