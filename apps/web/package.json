@@ -24,8 +24,10 @@
     "test:e2e:ci": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
-    "test:e2e:smoke": "playwright test --grep smoke",
-    "test:e2e:copilot": "playwright test --grep copilot",
+    "test:e2e:smoke": "playwright test --grep @smoke",
+    "test:e2e:copilot": "playwright test --grep @copilot",
+    "test:e2e:basket": "playwright test --grep @basket",
+    "test:e2e:workflows": "playwright test --grep @workflow",
     "test:e2e:report": "playwright show-report playwright-report"
   },
   "dependencies": {

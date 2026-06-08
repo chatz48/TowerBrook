@@ -28,6 +28,9 @@
 # production
 /build
 
+# request traces (local debugging / analysis)
+.traces/
+
 # misc
 .DS_Store
 *.pem
@@ -55,3 +58,6 @@ next-env.d.ts
 REVIEW_AGENT_PROMPT.md
 VIDEO_SCRIPT.md
 REVIEW.md
+AGENTS.md
+.cursor/rules/agent-verification.mdc
+agent-verify-report.md

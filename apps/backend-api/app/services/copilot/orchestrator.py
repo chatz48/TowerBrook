@@ -12,14 +12,14 @@ from app.schemas.domain import ChatRequest, ChatResponse, Citation, ToolTrace
 from app.services.copilot.context import parse_message
 from app.services.copilot.graph import get_copilot_graph
 from app.services.copilot.intent import VALID_INTENTS
+from app.services.copilot.request_trace import record_copilot_trace
 
 logger = logging.getLogger("towerbrook.copilot")
 
 PHASE_LABELS = {
-    "route": "Routing intent with DeepSeek flash…",
-    "research": "Running Keiro search and retrieval tools…",
+    "route": "Routing question intent…",
+    "research": "Retrieving directory evidence…",
     "synthesize": "Synthesising structured answer…",
-    "finalize": "Finalising confidence scores…",
 }
 
 
@@ -91,6 +91,57 @@ def _phase_payload(node: str, patch: dict[str, Any], elapsed_ms: int) -> dict[st
     return payload
 
 
+def _trace_question(request: ChatRequest) -> str:
+    ctx = parse_message(request.message, request.theme_id)
+    return ctx.question
+
+
+def _trace_summary(response: ChatResponse) -> dict[str, Any]:
+    return {
+        "answer_preview": (response.answer or "")[:280],
+        "citation_count": len(response.citations),
+        "tool_count": len(response.tool_calls),
+        "confidence": response.confidence,
+        "model_used": response.model_used,
+    }
+
+
+def _write_copilot_trace(
+    *,
+    request: ChatRequest,
+    request_id: str,
+    session_id: str,
+    response: ChatResponse | None,
+    node_timings_ms: dict[str, int],
+    phases: list[dict[str, Any]] | None,
+    outcome: str,
+    errors: list[str] | None = None,
+    stream: bool,
+    started: float,
+) -> None:
+    total_ms = int((time.perf_counter() - started) * 1000)
+    tool_calls = (
+        [call.model_dump(mode="json") for call in response.tool_calls]
+        if response
+        else None
+    )
+    record_copilot_trace(
+        request_id=request_id,
+        question=_trace_question(request),
+        theme_id=request.theme_id,
+        intent=response.intent if response else None,
+        outcome=outcome,
+        durations_ms={"total": total_ms, **node_timings_ms},
+        tool_calls=tool_calls,
+        node_timings_ms=node_timings_ms or None,
+        phases=phases,
+        errors=errors,
+        session_id=session_id,
+        summary=_trace_summary(response) if response else None,
+        stream=stream,
+    )
+
+
 async def run_copilot(request: ChatRequest, request_id: str | None = None) -> ChatResponse:
     rid = request_id or str(uuid4())
     session_id = request.session_id or str(uuid4())
@@ -128,6 +179,17 @@ async def run_copilot(request: ChatRequest, request_id: str | None = None) -> Ch
         response.model_used or "deepseek-v4-flash",
         rid,
     )
+    _write_copilot_trace(
+        request=request,
+        request_id=rid,
+        session_id=session_id,
+        response=response,
+        node_timings_ms=node_timings_ms,
+        phases=None,
+        outcome="complete",
+        stream=False,
+        started=started,
+    )
     return response
 
 
@@ -137,6 +199,7 @@ async def run_copilot_stream(request: ChatRequest, request_id: str | None = None
     graph = get_copilot_graph()
     accumulated: dict[str, Any] = {}
     node_timings_ms: dict[str, int] = {}
+    phases: list[dict[str, Any]] = []
     started = time.perf_counter()
 
     yield _sse("started", {"session_id": session_id, "request_id": rid})
@@ -147,9 +210,23 @@ async def run_copilot_stream(request: ChatRequest, request_id: str | None = None
                 elapsed = int((time.perf_counter() - started) * 1000)
                 node_timings_ms[node] = elapsed
                 accumulated.update(patch)
-                yield _sse("phase", _phase_payload(node, patch, elapsed))
+                phase = _phase_payload(node, patch, elapsed)
+                phases.append(phase)
+                yield _sse("phase", phase)
     except Exception as exc:
         logger.exception("Copilot stream failed", extra={"request_id": rid})
+        _write_copilot_trace(
+            request=request,
+            request_id=rid,
+            session_id=session_id,
+            response=None,
+            node_timings_ms=node_timings_ms,
+            phases=phases,
+            outcome="error",
+            errors=[str(exc)],
+            stream=True,
+            started=started,
+        )
         yield _sse("error", {"message": str(exc), "request_id": rid})
         return
 
@@ -164,6 +241,17 @@ async def run_copilot_stream(request: ChatRequest, request_id: str | None = None
         response.intent or "find_experts",
         response.model_used or "deepseek-v4-flash",
         rid,
+    )
+    _write_copilot_trace(
+        request=request,
+        request_id=rid,
+        session_id=session_id,
+        response=response,
+        node_timings_ms=node_timings_ms,
+        phases=phases,
+        outcome="complete",
+        stream=True,
+        started=started,
     )
     yield _sse("complete", response.model_dump(mode="json"))
 

@@ -45,28 +45,27 @@ async def _node_research(state: CopilotState) -> CopilotState:
 
 
 async def _node_synthesize(state: CopilotState) -> CopilotState:
+    from app.services.copilot.tools import compute_confidence
+
     routed = state["routed"]
     ctx = state["ctx"]
+    citations = state.get("citations") or []
+    tool_calls = state.get("tool_calls") or []
     synthesis = await synthesize_answer(
         ctx,
         routed.intent,
         routed.model,
-        state.get("citations") or [],
-        state.get("tool_calls") or [],
+        citations,
+        tool_calls,
     )
     structured = synthesis.model_dump()
+    confidence = compute_confidence(citations, tool_calls)
     return {
         "synthesis": synthesis,
         "structured": structured,
         "answer": synthesis.answer_summary,
+        "confidence": confidence,
     }
-
-
-async def _node_finalize(state: CopilotState) -> CopilotState:
-    from app.services.copilot.tools import compute_confidence
-
-    confidence = compute_confidence(state.get("citations") or [], state.get("tool_calls") or [])
-    return {"confidence": confidence}
 
 
 def _build_graph() -> Any:
@@ -74,12 +73,10 @@ def _build_graph() -> Any:
     graph.add_node("route", _node_route)
     graph.add_node("research", _node_research)
     graph.add_node("synthesize", _node_synthesize)
-    graph.add_node("finalize", _node_finalize)
     graph.add_edge(START, "route")
     graph.add_edge("route", "research")
     graph.add_edge("research", "synthesize")
-    graph.add_edge("synthesize", "finalize")
-    graph.add_edge("finalize", END)
+    graph.add_edge("synthesize", END)
     return graph.compile()
 
 

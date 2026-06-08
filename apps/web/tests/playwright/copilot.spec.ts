@@ -1,156 +1,158 @@
 /**
  * Copilot interaction tests.
- * These are the most critical QA tests — the Copilot is the product's
- * differentiating feature and must work reliably.
  */
 import { test, expect } from "@playwright/test";
+import { clearBasketState, expectBasketCount, makeBasketItem, seedBasketOnPage } from "./helpers/basket";
+import { requireLiveBackend } from "./helpers/backend-guard";
+import {
+  ensureCopilotResponse,
+  rankedCompaniesHeading,
+  submitCopilotQuestion,
+  waitForCopilotBaseline,
+  waitForCopilotEnrichment,
+  waitForRankedExperts,
+} from "./helpers/copilot";
 
-test.describe("Copilot page", () => {
-  test("loads with all UI elements visible", async ({ page }) => {
+test.describe("Copilot page @copilot", () => {
+  test.beforeEach(async ({ page }) => {
+    await clearBasketState(page);
+  });
+
+  test("@copilot loads with all UI elements visible", async ({ page }) => {
     await page.goto("/ask");
 
-    // Core UI elements
+    const filters = page.getByRole("complementary");
     await expect(page.locator("h1")).toContainText("AI Copilot");
     await expect(page.locator("text=Session objective")).toBeVisible();
-    await expect(page.locator("text=Filters")).toBeVisible();
-
-    // Session objective buttons
+    await expect(page.getByRole("heading", { name: "Filters" })).toBeVisible();
     await expect(page.locator("text=Find experts")).toBeVisible();
     await expect(page.locator("text=Map companies")).toBeVisible();
     await expect(page.locator("text=Red-team thesis")).toBeVisible();
     await expect(page.locator("text=Prepare calls")).toBeVisible();
-
-    // Filter controls
-    await expect(page.locator("text=Theme")).toBeVisible();
-    await expect(page.locator("text=Geography")).toBeVisible();
-    await expect(page.locator("text=Expert archetype")).toBeVisible();
-
-    // Basket context (empty state)
-    await expect(page.locator("text=Basket context")).toBeVisible();
-
-    // Evidence sidebar
+    await expect(filters.getByText("Theme", { exact: true })).toBeVisible();
+    await expect(filters.getByText("Geography", { exact: true })).toBeVisible();
+    await expect(filters.getByText("Expert archetype", { exact: true })).toBeVisible();
     await expect(page.locator("text=Source evidence")).toBeVisible();
-
-    // Tabs
-    await expect(page.locator("button:has-text('Ask')")).toBeVisible();
-    await expect(page.locator("button:has-text('Notes')")).toBeVisible();
-    await expect(page.locator("a:has-text('Open Discover')")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Ask", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Notes" })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Open Discover/ })).toBeVisible();
   });
 
-  test("streams baseline before final answer", async ({ page }) => {
+  test("@copilot streams baseline before final answer", { timeout: 150_000 }, async ({ page }) => {
+    requireLiveBackend();
     await page.goto("/ask");
-    const textbox = page.locator('[role="textbox"], input[type="text"], textarea').first();
-    await textbox.fill("Who should I call first for grid interconnection?");
-    await textbox.press("Enter");
+    await submitCopilotQuestion(page, "Who should I call first for grid interconnection?");
+    await waitForCopilotBaseline(page);
+    await waitForRankedExperts(page);
+  });
 
-    await expect(page.locator("text=Initial answer (from directory)")).toBeVisible({ timeout: 45_000 });
-    await expect(page.locator("text=Ranked experts")).toBeVisible({ timeout: 120_000 });
-  }, 150_000);
-
-  test("generates a response for a simple query", async ({ page }) => {
+  test("@copilot live backend enrichment surfaces trust badge", { timeout: 150_000 }, async ({ page }) => {
+    requireLiveBackend();
     await page.goto("/ask");
+    await submitCopilotQuestion(page, "Who should I call first for Clean Energy Advisory?");
+    await waitForCopilotEnrichment(page);
+    await expect(page.getByTestId("copilot-trust-badge").first()).toBeVisible();
+  });
 
-    // Wait for any auto-submitted query to complete or timeout
-    // The Copilot may auto-submit the default question
-    try {
-      await page.waitForSelector("text=Ranked experts", { timeout: 30_000 });
-    } catch {
-      // If auto-submit didn't fire or timed out, submit manually
-      const textbox = page.locator('[role="textbox"], input[type="text"], textarea').first();
-      await textbox.fill("Who should I call first for Clean Energy Advisory?");
-      await textbox.press("Enter");
-      await page.waitForSelector("text=Ranked experts", { timeout: 30_000 });
-    }
-
-    // Verify the response structure
-    await expect(page.locator("text=Ranked experts")).toBeVisible();
-    await expect(page.locator("text=Ranked companies")).toBeVisible();
-
-    // Should have at least one citation
-    const citations = page.locator("button:has-text('[1]')");
-    await expect(citations.first()).toBeVisible({ timeout: 10_000 });
-
-    // Should have follow-up chips
-    await expect(page.locator("text=Ask a follow-up")).toBeVisible();
-
-    // Should have source evidence
-    const sourceEvidence = page.locator("text=Source evidence");
-    await expect(sourceEvidence).toBeVisible();
-  }, 60_000); // 60-second timeout for this test
-
-  test("response includes call sequence with phases", async ({ page }) => {
+  test("@copilot new chat clears the active conversation", { timeout: 120_000 }, async ({ page }) => {
+    requireLiveBackend();
     await page.goto("/ask");
+    await ensureCopilotResponse(page, "Who should I call first for Clean Energy Advisory?");
+    await expect(rankedExpertsHeading(page)).toBeVisible();
+    await page.getByTestId("copilot-new-chat").click();
+    await expect(rankedExpertsHeading(page)).not.toBeVisible();
+    await expect(page.getByTestId("copilot-new-chat")).not.toBeVisible();
+  });
 
-    // Wait for response
-    try {
-      await page.waitForSelector("text=Suggested call sequence", { timeout: 30_000 });
-    } catch {
-      const textbox = page.locator('[role="textbox"], input[type="text"], textarea').first();
-      await textbox.fill("Build a call plan for Grid Infrastructure");
-      await textbox.press("Enter");
-      await page.waitForSelector("text=Suggested call sequence", { timeout: 30_000 });
-    }
-
-    // Verify call sequence structure
-    await expect(page.locator("text=Market orientation")).toBeVisible();
-    await expect(page.locator("text=3 phases")).toBeVisible();
-  }, 60_000);
-
-  test("response includes conviction signals", async ({ page }) => {
+  test("@copilot generates a response for a simple query", { timeout: 120_000 }, async ({ page }) => {
+    requireLiveBackend();
     await page.goto("/ask");
+    await ensureCopilotResponse(page, "Who should I call first for Clean Energy Advisory?");
 
-    try {
-      await page.waitForSelector("text=What to listen for", { timeout: 30_000 });
-    } catch {
-      const textbox = page.locator('[role="textbox"], input[type="text"], textarea').first();
-      await textbox.fill("What should I listen for when talking to battery storage founders?");
-      await textbox.press("Enter");
-      await page.waitForSelector("text=What to listen for", { timeout: 30_000 });
-    }
+    await expect(rankedExpertsHeading(page)).toBeVisible();
+    await expect(rankedCompaniesHeading(page)).toBeVisible();
+    await expect(page.locator("button:has-text('[1]')").first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText("Ask a follow-up")).toBeVisible();
+    await expect(page.getByText("Source evidence")).toBeVisible();
+  });
 
-    // Verify conviction signal structure
-    await expect(page.locator("text=Raises")).toBeVisible();
-    await expect(page.locator("text=Reduces")).toBeVisible();
-  }, 60_000);
-
-  test("can save an expert to basket from response", async ({ page }) => {
+  test("@copilot response includes call sequence with phases", { timeout: 120_000 }, async ({ page }) => {
+    requireLiveBackend();
     await page.goto("/ask");
+    await ensureCopilotResponse(page, "Build a call plan for Grid Infrastructure");
+    await expect(page.getByText("Suggested call sequence")).toBeVisible();
+    await expect(page.getByText("Market orientation")).toBeVisible();
+    await expect(page.getByText("3 phases")).toBeVisible();
+  });
 
-    try {
-      await page.waitForSelector("button:has-text('Save')", { timeout: 30_000 });
-    } catch {
-      const textbox = page.locator('[role="textbox"], input[type="text"], textarea').first();
-      await textbox.fill("Who should I call first?");
-      await textbox.press("Enter");
-      await page.waitForSelector("button:has-text('Save')", { timeout: 30_000 });
-    }
-
-    // Click the first Save button in the ranked experts table
-    const saveButtons = page.locator("button:has-text('Save')");
-    const count = await saveButtons.count();
-    if (count > 0) {
-      await saveButtons.first().click();
-      // Should show "Saved" or update the basket count
-      await page.waitForTimeout(500);
-    }
-  }, 60_000);
-
-  test("source evidence sidebar populates with citations", async ({ page }) => {
+  test("@copilot response includes conviction signals", { timeout: 120_000 }, async ({ page }) => {
+    requireLiveBackend();
     await page.goto("/ask");
+    await ensureCopilotResponse(page, "What should I listen for when talking to battery storage founders?");
+    await expect(page.getByText("What to listen for")).toBeVisible();
+    await expect(page.getByText("Raises")).toBeVisible();
+    await expect(page.getByText("Reduces")).toBeVisible();
+  });
 
-    try {
-      await page.waitForSelector("text=Source evidence", { timeout: 30_000 });
-    } catch {
-      const textbox = page.locator('[role="textbox"], input[type="text"], textarea').first();
-      await textbox.fill("Who should I call first?");
-      await textbox.press("Enter");
-      await page.waitForSelector("text=Source evidence", { timeout: 30_000 });
-    }
+  test("@copilot can save an expert to basket from response", { timeout: 120_000 }, async ({ page }) => {
+    requireLiveBackend();
+    await page.goto("/ask");
+    await ensureCopilotResponse(page, "Who should I call first?");
+    const saveButton = page.getByRole("button", { name: "Save" }).first();
+    await saveButton.click();
+    await expect(saveButton).toHaveText(/Saved/);
+    await expectBasketCount(page, "1");
+  });
 
-    // The evidence sidebar should have sources (not just "Source evidence (0)")
-    await page.waitForTimeout(2000);
+  test("@copilot source evidence sidebar populates with citations", { timeout: 120_000 }, async ({ page }) => {
+    requireLiveBackend();
+    await page.goto("/ask");
+    await ensureCopilotResponse(page, "Who should I call first?");
     const evidenceText = await page.locator("text=Source evidence").textContent();
-    // Should show a count > 0 or list sources
     expect(evidenceText).toBeTruthy();
-  }, 60_000);
+  });
+
+  test("@copilot basket context panel shows quick actions", async ({ page }) => {
+    await seedBasketOnPage(
+      page,
+      [
+        makeBasketItem({
+          id: "james-knight",
+          kind: "call",
+          name: "James Knight",
+          href: "/experts/james-knight",
+          status: "shortlisted",
+        }),
+      ],
+      { skipAutoRun: true },
+    );
+    await page.goto("/ask");
+    await expect(page.getByTestId("basket-context-panel")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Gather research" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Draft outreach" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Prepare calls" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Draft memo section" })).toBeVisible();
+  });
+
+  test("@copilot basket auto-run submits review prompt", { timeout: 150_000 }, async ({ page }) => {
+    requireLiveBackend();
+    await seedBasketOnPage(page, [
+      makeBasketItem({
+        id: "james-knight",
+        kind: "call",
+        name: "James Knight",
+        href: "/experts/james-knight",
+        status: "shortlisted",
+      }),
+    ]);
+    await page.goto("/ask");
+    await waitForRankedExperts(page);
+  });
+
+  test("@copilot deep link with prompt auto-runs", { timeout: 150_000 }, async ({ page }) => {
+    requireLiveBackend();
+    const prompt = encodeURIComponent("Who should I call first for grid infrastructure?");
+    await page.goto(`/ask?prompt=${prompt}`);
+    await waitForRankedExperts(page);
+  });
 });

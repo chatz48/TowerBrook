@@ -136,7 +136,10 @@ export default function InvestorWorkspaceTray() {
   return (
     <div className="fixed bottom-4 left-4 z-50 print:hidden">
       {open ? (
-        <section className="w-[min(480px,calc(100vw-2rem))] overflow-hidden rounded-lg border border-line-strong bg-white shadow-xl">
+        <section
+          data-testid="basket-tray"
+          className="w-[min(480px,calc(100vw-2rem))] overflow-hidden rounded-lg border border-line-strong bg-white shadow-xl"
+        >
           <div className="flex items-start justify-between gap-3 border-b border-line bg-[#fbfcfe] p-3">
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
@@ -166,10 +169,20 @@ export default function InvestorWorkspaceTray() {
             <Link href="/experts" className="ee-button ee-button-secondary min-h-8 px-2 text-[11px]">
               Open plan
             </Link>
-            <Link href={`/ask?prompt=${basketPrompt}`} className="ee-button ee-button-primary min-h-8 px-2 text-[11px]">
+            <Link
+              href={`/ask?prompt=${basketPrompt}`}
+              data-testid="basket-call-plan"
+              className="ee-button ee-button-primary min-h-8 px-2 text-[11px]"
+            >
               Generate call plan
             </Link>
-            <button type="button" onClick={exportCsv} disabled={!items.length} className="ee-button ee-button-secondary min-h-8 px-2 text-[11px] disabled:opacity-50">
+            <button
+              type="button"
+              onClick={exportCsv}
+              disabled={!items.length}
+              data-testid="basket-export"
+              className="ee-button ee-button-secondary min-h-8 px-2 text-[11px] disabled:opacity-50"
+            >
               Export CSV
             </button>
             <button type="button" onClick={clearAll} disabled={!items.length} className="ee-button ee-button-secondary min-h-8 px-2 text-[11px] disabled:opacity-50">
@@ -201,11 +214,13 @@ export default function InvestorWorkspaceTray() {
         <button
           type="button"
           onClick={() => setOpen(true)}
+          data-testid="basket-tray-toggle"
           className="flex items-center gap-2 rounded-full border border-line-strong bg-white px-4 py-2.5 text-sm font-semibold text-ink shadow-lg transition hover:border-accent hover:text-accent"
         >
           Plan
           <span
             id="towerbrook-basket-counter"
+            data-testid="basket-counter"
             className="rounded-full bg-accent px-2 py-0.5 text-[11px] text-white transition-transform"
           >
             {items.length}

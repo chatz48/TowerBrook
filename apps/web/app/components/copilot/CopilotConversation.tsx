@@ -250,7 +250,7 @@ function BasketContextPanel({
   if (!items.length) return null;
 
   return (
-    <section className="rounded border border-[#cfd6e2] bg-[#f8fbff] p-3">
+    <section data-testid="basket-context-panel" className="rounded border border-[#cfd6e2] bg-[#f8fbff] p-3">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#344054]">

@@ -12,20 +12,72 @@ from app.services.keiro_search import keiro
 from app.services.report_generator import generate_report
 from app.services.url_safety import is_safe_fetch_url
 
-# Intent → ordered tool pipeline (predictable, no LLM tool roulette).
+# Intent → minimal directory-first pipeline. Live web search is opt-in only (see resolve_tools).
 INTENT_TOOL_PIPELINES: dict[str, list[str]] = {
-    "find_experts": ["rag_search_sources", "rag_search_entities", "web_search"],
-    "map_companies": ["rag_search_entities", "rag_search_sources", "web_search"],
-    "red_team": ["web_search", "rag_search_sources", "rag_search_entities"],
+    "find_experts": ["rag_search_entities", "rag_search_sources"],
+    "map_companies": ["rag_search_entities", "rag_search_sources"],
+    "red_team": ["rag_search_sources", "rag_search_entities"],
     "build_call_plan": ["rag_search_entities", "rag_search_sources"],
-    "market_research": ["web_search", "rag_search_sources", "fetch_source"],
-    "deep_discovery": ["web_search", "run_deep_discovery", "rag_search_sources"],
-    "draft_outreach": ["linkedin_link_search", "rag_search_entities", "draft_email"],
-    "generate_report": ["rag_search_sources", "web_search", "generate_report"],
-    "source_analysis": ["fetch_source", "web_search", "rag_search_sources"],
+    "market_research": ["rag_search_sources"],
+    "deep_discovery": ["run_deep_discovery", "rag_search_sources"],
+    "draft_outreach": ["rag_search_entities", "draft_email"],
+    "generate_report": ["rag_search_sources", "generate_report"],
+    "source_analysis": ["fetch_source", "rag_search_sources"],
 }
 
-PRO_INTENTS = frozenset({"red_team", "generate_report", "market_research"})
+PRO_INTENTS = frozenset({"red_team", "generate_report"})
+
+WEB_SEARCH_PHRASES = (
+    "search the web",
+    "web search",
+    "search online",
+    "look online",
+    "google ",
+    "find online",
+    "live web",
+    "internet search",
+    "recent news",
+    "latest news",
+    "current news",
+    "news about",
+)
+
+LINKEDIN_PHRASES = ("linkedin", "linked in", "linked-in")
+
+# When the web client already sent a directory baseline, one light RAG pass is enough.
+BASELINE_ENRICHMENT_INTENTS = frozenset({"find_experts", "map_companies", "build_call_plan"})
+
+
+def requests_web_search(ctx: CopilotContext) -> bool:
+    q = ctx.question.lower()
+    return any(phrase in q for phrase in WEB_SEARCH_PHRASES)
+
+
+def requests_linkedin_search(ctx: CopilotContext) -> bool:
+    q = ctx.question.lower()
+    return any(phrase in q for phrase in LINKEDIN_PHRASES)
+
+
+def resolve_tools(
+    intent: str,
+    ctx: CopilotContext,
+    tools_hint: list[str] | None = None,
+) -> list[str]:
+    if tools_hint:
+        return list(dict.fromkeys(tools_hint))
+
+    tools = list(INTENT_TOOL_PIPELINES.get(intent, INTENT_TOOL_PIPELINES["find_experts"]))
+
+    if ctx.baseline_summary and intent in BASELINE_ENRICHMENT_INTENTS:
+        tools = ["rag_search_sources"]
+
+    if requests_web_search(ctx) and "web_search" not in tools:
+        tools = [*tools, "web_search"]
+
+    if intent == "draft_outreach" and requests_linkedin_search(ctx) and "linkedin_link_search" not in tools:
+        tools = ["linkedin_link_search", *tools]
+
+    return tools
 
 
 async def run_tool(
@@ -146,7 +198,7 @@ async def _web_search(ctx: CopilotContext, citations: list[Citation], query: str
 
     settings = get_settings()
     provider = "keiro" if settings.keirolabs_api_key else "fallback"
-    results = await keiro.search(query, limit=5)
+    results = await keiro.search(query, limit=3)
     for item in results:
         metadata = item.get("metadata") if isinstance(item.get("metadata"), dict) else {}
         item_provider = metadata.get("provider") or provider

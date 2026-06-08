@@ -16,18 +16,18 @@ const PAGES = [
   { path: "/sources", label: "Source Register" },
 ];
 
-test("campaign route redirects to call list", async ({ page }) => {
+test("@smoke campaign route redirects to call list", async ({ page }) => {
   await page.goto("/campaign");
   await expect(page).toHaveURL(/\/experts/);
 });
 
-test("legacy theme route redirects to scoped home", async ({ page }) => {
+test("@smoke legacy theme route redirects to scoped home", async ({ page }) => {
   await page.goto("/themes/clean-energy-advisory");
   await expect(page).toHaveURL(/\?theme=clean-energy-advisory/);
 });
 
 for (const { path, label } of PAGES) {
-  test(`${label} (${path}) loads and shows content`, async ({ page }) => {
+  test(`@smoke ${label} (${path}) loads and shows content`, async ({ page }) => {
     const response = await page.goto(path);
     expect(response?.status()).toBe(200);
 
@@ -43,7 +43,7 @@ for (const { path, label } of PAGES) {
   });
 }
 
-test("Theme switcher changes scope", async ({ page }) => {
+test("@smoke Theme switcher changes scope", async ({ page }) => {
   await page.goto("/");
   const scopeNav = page.getByRole("navigation", { name: "Switch investment theme" });
   await expect(scopeNav).toContainText("Scope:");
@@ -52,7 +52,7 @@ test("Theme switcher changes scope", async ({ page }) => {
   await expect(scopeNav).toContainText("Clean Energy Advisory", { timeout: 15_000 });
 });
 
-test("Expert profile loads with key sections", async ({ page }) => {
+test("@smoke Expert profile loads with key sections", async ({ page }) => {
   await page.goto("/experts/james-knight");
 
   await expect(page.locator("h1")).toContainText("James Knight");
@@ -66,7 +66,7 @@ test("Expert profile loads with key sections", async ({ page }) => {
   await expect(page.getByRole("link", { name: "Augusta & Co" }).first()).toBeVisible();
 });
 
-test("Company profile loads with key sections", async ({ page }) => {
+test("@smoke Company profile loads with key sections", async ({ page }) => {
   await page.goto("/companies/zenobe");
 
   await expect(page.locator("h1")).toContainText("Zenob");

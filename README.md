@@ -400,7 +400,11 @@ Current review queue coverage:
 pnpm verify
 ```
 
-`pnpm verify` runs lint, typecheck, build, ingest validation, backend tests, and the Copilot API contract test. Individual steps:
+`pnpm verify` runs lint, typecheck, build, ingest validation, backend tests, web unit tests, and the Copilot API contract test.
+
+`pnpm verify:agent` runs the full agent verification gate including Playwright smoke, basket, Copilot, and workflow suites. Requires `pnpm dev` and `pnpm api:dev` with `BACKEND_API_URL` configured. See [AGENTS.md](AGENTS.md).
+
+Individual steps:
 
 ```bash
 pnpm lint

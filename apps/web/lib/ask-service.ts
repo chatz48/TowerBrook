@@ -12,6 +12,8 @@ import type { AskResponse, ChatTurn, PageContext, SourceRecord, ToolTrace } from
 import type { Company, Deal, Expert, ExpertType, Source, ThemeId } from "@/lib/types";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 import { warmPathsForExpert, warmPathStatusLabel } from "@/lib/warm-paths";
+import { inferIntent, planSections } from "@/lib/answer-focus";
+import { AskTraceCollector } from "@/lib/request-traces";
 
 type RankedExpert = AskResponse["ranked_experts"][number];
 type RankedCompany = AskResponse["ranked_companies"][number];
@@ -71,12 +73,24 @@ export async function handleAskRequest(request: Request) {
   if (wantsStream(request)) return handleAskStream(request);
 
   const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID();
+  let trace: AskTraceCollector | null = null;
   try {
     const body = (await request.json()) as AskRequest;
     const prepared = await prepareAskContext(body);
     if ("error" in prepared) {
+      const errorTrace = new AskTraceCollector(requestId, body.question?.trim() ?? "", body.filters, false);
+      errorTrace.setError(prepared.error);
+      await errorTrace.flush();
       return Response.json({ error: prepared.error }, { status: 400 });
     }
+
+    trace = new AskTraceCollector(
+      requestId,
+      prepared.question,
+      prepared.filters as Record<string, unknown>,
+      false,
+    );
+    trace.markBaseline();
 
     const agentic = await maybeAskIntelligenceApi(
       prepared.question,
@@ -84,27 +98,37 @@ export async function handleAskRequest(request: Request) {
       prepared.pageContext,
       prepared.chatHistory,
       prepared.baseline,
+      requestId,
     );
 
     if (agentic.result?.structured || agentic.result?.answer) {
       const merged = mergeBackendIntoBaseline(prepared.baseline, agentic.result);
-      return Response.json({
+      const payload = {
         ...merged,
         backend_enriched: true,
         request_id: requestId,
         backend_error: agentic.error,
-      });
+      };
+      trace!.finishFromResponse(payload);
+      await trace!.flush();
+      return Response.json(payload);
     }
 
-    return Response.json({
+    const payload = {
       ...prepared.baseline,
       backend_error: agentic.error,
       enrichment_warnings: agentic.error
         ? ["Live research unavailable; rankings and citations are from the directory only."]
         : prepared.baseline.enrichment_warnings,
       request_id: requestId,
-    });
+    };
+    trace!.finishFromResponse(payload);
+    await trace!.flush();
+    return Response.json(payload);
   } catch (e) {
+    const errorTrace = trace ?? new AskTraceCollector(requestId, "", undefined, false);
+    errorTrace.setError(e instanceof Error ? e.message : "Failed to answer");
+    await errorTrace.flush();
     return Response.json(
       { error: e instanceof Error ? e.message : "Failed to answer" },
       { status: 400 },
@@ -125,18 +149,34 @@ async function handleAskStream(request: Request): Promise<Response> {
         );
       };
 
+      let trace: AskTraceCollector | null = null;
+      let finalPayload: AskResponse | null = null;
+
       try {
         const prepared = await prepareAskContext(body);
         if ("error" in prepared) {
+          trace = new AskTraceCollector(requestId, body.question?.trim() ?? "", body.filters, true);
+          trace.setError(prepared.error);
           send("error", { message: prepared.error });
+          await trace.flush();
           controller.close();
           return;
         }
 
+        trace = new AskTraceCollector(
+          requestId,
+          prepared.question,
+          prepared.filters as Record<string, unknown>,
+          true,
+        );
+        trace.markBaseline();
         send("baseline", { ...prepared.baseline, request_id: requestId });
 
         if (!hasBackendApi()) {
-          send("complete", { ...prepared.baseline, request_id: requestId });
+          finalPayload = { ...prepared.baseline, request_id: requestId };
+          send("complete", finalPayload);
+          trace.finishFromResponse(finalPayload);
+          await trace.flush();
           controller.close();
           return;
         }
@@ -153,13 +193,16 @@ async function handleAskStream(request: Request): Promise<Response> {
           },
         );
 
-        const backendRes = await fetchBackendStream(external.message, external.theme_id);
+        const backendRes = await fetchBackendStream(external.message, external.theme_id, requestId);
         if (!backendRes.ok || !backendRes.body) {
-          send("complete", {
+          finalPayload = {
             ...prepared.baseline,
             backend_error: `Backend stream failed (${backendRes.status})`,
             request_id: requestId,
-          });
+          };
+          send("complete", finalPayload);
+          trace.finishFromResponse(finalPayload);
+          await trace.flush();
           controller.close();
           return;
         }
@@ -177,22 +220,35 @@ async function handleAskStream(request: Request): Promise<Response> {
 
           for (const sse of parsed.events) {
             if (sse.event === "phase") {
-              send("phase", JSON.parse(sse.data));
+              const phase = JSON.parse(sse.data);
+              trace.addPhase(phase);
+              send("phase", phase);
             }
             if (sse.event === "complete") {
               const backend = JSON.parse(sse.data) as BackendChatResult;
               const merged = mergeBackendIntoBaseline(prepared.baseline, backend);
-              send("complete", { ...merged, request_id: requestId });
+              finalPayload = { ...merged, request_id: requestId };
+              send("complete", finalPayload);
             }
             if (sse.event === "error") {
-              send("error", JSON.parse(sse.data));
+              const errorPayload = JSON.parse(sse.data) as { message?: string };
+              trace.setError(errorPayload.message ?? "Backend stream error");
+              send("error", errorPayload);
             }
           }
         }
 
+        if (finalPayload) {
+          trace.finishFromResponse(finalPayload);
+        }
+        await trace.flush();
         controller.close();
       } catch (e) {
-        send("error", { message: e instanceof Error ? e.message : "Stream failed" });
+        const message = e instanceof Error ? e.message : "Stream failed";
+        const errorTrace = trace ?? new AskTraceCollector(requestId, body.question?.trim() ?? "", body.filters, true);
+        errorTrace.setError(message);
+        await errorTrace.flush();
+        send("error", { message });
         controller.close();
       }
     },
@@ -203,6 +259,7 @@ async function handleAskStream(request: Request): Promise<Response> {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
       Connection: "keep-alive",
+      "X-Request-Id": requestId,
     },
   });
 }
@@ -239,7 +296,11 @@ async function prepareAskContext(body: AskRequest): Promise<
   };
 }
 
-async function fetchBackendStream(message: string, themeId?: string): Promise<Response> {
+async function fetchBackendStream(
+  message: string,
+  themeId?: string,
+  requestId?: string,
+): Promise<Response> {
   const baseUrl =
     process.env.BACKEND_API_URL?.replace(/\/$/, "") ??
     (process.env.NODE_ENV === "development" ? "http://127.0.0.1:8001" : null);
@@ -249,6 +310,7 @@ async function fetchBackendStream(message: string, themeId?: string): Promise<Re
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...(requestId ? { "X-Request-Id": requestId } : {}),
       ...(process.env.BACKEND_API_TOKEN
         ? { Authorization: `Bearer ${process.env.BACKEND_API_TOKEN}` }
         : {}),
@@ -263,6 +325,7 @@ async function maybeAskIntelligenceApi(
   pageContext?: PageContext,
   chatHistory: ChatTurn[] = [],
   baseline?: AskResponse,
+  requestId?: string,
 ): Promise<{ result: BackendChatResult | null; error?: string }> {
   if (!hasBackendApi()) return { result: null };
   try {
@@ -282,6 +345,7 @@ async function maybeAskIntelligenceApi(
     );
     const result = await callBackendApi<BackendChatResult>("/chat", {
       method: "POST",
+      headers: requestId ? { "X-Request-Id": requestId } : undefined,
       body: JSON.stringify({
         message: external.message,
         theme_id: external.theme_id,
@@ -310,15 +374,17 @@ function looksLikePromptLeak(text: string | undefined): boolean {
 
 function mergeBackendIntoBaseline(baseline: AskResponse, backend: BackendChatResult): AskResponse {
   const structured = backend.structured;
-  const mergedGaps = [...new Set([...(structured?.gaps ?? []), ...baseline.gaps])].slice(0, 8);
+  const mergedGaps = structured?.gaps?.length
+    ? structured.gaps.slice(0, 2)
+    : baseline.gaps.slice(0, 2);
   const mergedRisks = structured?.risks?.length
-    ? structured.risks.map((risk) => ({
+    ? structured.risks.slice(0, 1).map((risk) => ({
         risk,
         why_it_matters: "Surfaced during additional research — verify before circulation.",
         disconfirming_question: "What evidence would disprove this risk?",
         citations: baseline.sources_used.slice(0, 2).map((s) => s.source_id),
       }))
-    : baseline.risks;
+    : baseline.risks.slice(0, 2);
 
   const rawSummary = structured?.answer_summary || backend.answer;
   const synthesisSummary = looksLikePromptLeak(rawSummary) ? baseline.answer_summary : rawSummary;
@@ -357,15 +423,12 @@ function mergeBackendIntoBaseline(baseline: AskResponse, backend: BackendChatRes
         }
       : baseline.confidence,
     follow_up_actions: structured?.follow_ups?.length
-      ? [
-          ...baseline.follow_up_actions,
-          ...structured.follow_ups.slice(0, 3).map((prompt, index) => ({
-            action: `langgraph_follow_up_${index}`,
-            label: "Follow-up",
-            prompt,
-          })),
-        ].slice(0, 8)
-      : baseline.follow_up_actions,
+      ? structured.follow_ups.slice(0, 3).map((prompt, index) => ({
+          action: `langgraph_follow_up_${index}`,
+          label: "Follow-up",
+          prompt,
+        }))
+      : baseline.follow_up_actions.slice(0, 3),
   };
 }
 
@@ -396,6 +459,8 @@ async function buildStructuredAnswer(
   const words = tokenize(`${question} ${pageContextText}`);
   const themeId = inferTheme(`${question} ${pageContextText}`, filters.theme);
   const objective = filters.objective ?? inferObjective(question);
+  const sections = planSections(question, objective);
+  const intent = inferIntent(question, objective);
   const archetypes = normalizeArchetypes(filters.archetypes);
   const includeTowerBrookEmployees = filters.includeTowerBrookEmployees === true;
   const theme = themeId ? getTheme(themeId) : undefined;
@@ -433,7 +498,7 @@ async function buildStructuredAnswer(
       };
     })
     .sort((a, b) => b.score - a.score)
-    .slice(0, 5);
+    .slice(0, Math.max(sections.experts.limit, 3));
 
   const rankedCompanyInputs = companiesWithLinks(themeId, includeTowerBrookEmployees)
     .map((company) => ({
@@ -444,7 +509,7 @@ async function buildStructuredAnswer(
         keywordScore(words, companyText(company)) * 7,
     }))
     .sort((a, b) => b.score - a.score)
-    .slice(0, 5);
+    .slice(0, Math.max(sections.companies.limit, sections.companies.mode !== "hidden" ? 2 : 0));
 
   const rankedDealInputs = (await listDeals())
     .filter((deal) => !themeId || deal.theme === themeId)
@@ -463,7 +528,7 @@ async function buildStructuredAnswer(
     rankedCompanyInputs.map((x) => x.company),
     rankedDealInputs.map((x) => x.deal),
   );
-  const pageContextSourceId = addPageContextSource(sourceIndex, pageContext);
+  addPageContextSource(sourceIndex, pageContext);
 
   let vectorRetrievalFailed = false;
   if (hasDealDatabase()) {
@@ -489,7 +554,7 @@ async function buildStructuredAnswer(
 
   const sourceIds = [...sourceIndex.keys()];
 
-  const ranked_experts = rankedExpertInputs.map(({ expert, score, breakdown }, index) => {
+  const ranked_experts_all = rankedExpertInputs.map(({ expert, score, breakdown }, index) => {
     const citations = citationsFor(expert.sources, sourceIndex);
     return {
       expert_id: expert.id,
@@ -506,8 +571,12 @@ async function buildStructuredAnswer(
       citations,
     };
   });
+  const ranked_experts =
+    sections.experts.mode !== "hidden"
+      ? ranked_experts_all.slice(0, sections.experts.limit || ranked_experts_all.length)
+      : [];
 
-  const ranked_companies = rankedCompanyInputs.map(({ company }, index) => ({
+  const ranked_companies_all = rankedCompanyInputs.map(({ company }, index) => ({
     company_id: company.id,
     rank: index + 1,
     name: company.name,
@@ -518,104 +587,69 @@ async function buildStructuredAnswer(
     citations: citationsFor(company.sources, sourceIndex),
     confidence: company.confidence,
   }));
+  const ranked_companies =
+    sections.companies.mode !== "hidden"
+      ? ranked_companies_all.slice(0, sections.companies.limit || ranked_companies_all.length)
+      : [];
 
   const phases = ["Market orientation", "Operator diligence", "Transaction angle"];
-  const call_sequence = phases
-    .map((phase, index) => {
-      const expert = ranked_experts[index] ?? ranked_experts[ranked_experts.length - 1];
-      if (!expert) return null;
-      return {
-        phase,
-        expert_ids: [expert.expert_id],
-        goal: callGoal(phase, expert, ranked_companies[0]?.name),
-        citations: expert.citations.slice(0, 2),
-      };
-    })
-    .filter((x): x is NonNullable<typeof x> => x !== null);
+  const callExperts = ranked_experts.length ? ranked_experts : ranked_experts_all;
+  const call_sequence =
+    sections.callSequence.mode !== "hidden"
+      ? phases
+          .map((phase, index) => {
+            const expert = callExperts[index] ?? callExperts[callExperts.length - 1];
+            if (!expert) return null;
+            return {
+              phase,
+              expert_ids: [expert.expert_id],
+              goal: callGoal(phase, expert, ranked_companies_all[0]?.name),
+              citations: expert.citations.slice(0, 2),
+            };
+          })
+          .filter((x): x is NonNullable<typeof x> => x !== null)
+      : [];
 
   const topTheme = theme?.name ?? "the selected market";
   const primaryCitations = sourceIds.slice(0, 3);
-  const pageCitations = pageContextSourceId ? [pageContextSourceId] : [];
   const topDeal = rankedDealInputs[0]?.deal;
-  const what_to_listen_for = [
-    ...(pageContext
+  const what_to_listen_for =
+    sections.listenFor.mode !== "hidden"
       ? [
-          {
-            claim: `The current page is about ${pageContext.title || pageContext.pathname || "the selected workflow"}, so this answer is tuned to that visible context.`,
-            raises_conviction_if:
-              "The cited page rows and source evidence point to the same experts, companies, or gaps the user is inspecting.",
-            reduces_conviction_if:
-              "The page is only a broad index and the user needs a specific theme, expert, company, or deal selected.",
-            citations: pageCitations,
-          },
+        {
+          claim: `${topTheme} experts should surface buyer budgets, deal activity, or implementation bottlenecks from first-hand work.`,
+          raises_conviction_if: "They name specific companies, projects, or advisers with recent detail.",
+          reduces_conviction_if: "They only repeat generic market themes without verifiable examples.",
+          citations: primaryCitations.slice(0, 2),
+        },
         ]
-      : []),
-    {
-      claim: `${topTheme} has actionable people with direct operator, advisor, or transaction visibility.`,
-      raises_conviction_if:
-        "Experts cite specific buyer budgets, procurement friction, deal activity, or implementation bottlenecks from first-hand work.",
-      reduces_conviction_if:
-        "Experts only repeat market-level themes and cannot name specific companies, projects, customers, or advisers.",
-      citations: primaryCitations.slice(0, 2),
-    },
-    {
-      claim: "The highest-ranked companies are interesting because multiple sourced expert edges point to them.",
-      raises_conviction_if:
-        "Calls confirm the company is still independent, growing, and reachable through warm network paths.",
-      reduces_conviction_if:
-        "Calls reveal stale ownership, weak commercial traction, or relationships too distant for access.",
-      citations: primaryCitations.slice(1, 3),
-    },
-    ...(topDeal
-      ? [
-          {
-            claim: `${topDeal.name} is the strongest deal-specific evidence item in the current answer set.`,
-            raises_conviction_if:
-              "Follow-up sources fill advisor, counsel, valuation, financing, and completion-date gaps without contradictions.",
-            reduces_conviction_if:
-              "Missing facts remain undisclosed or sources disagree on economics, parties, or strategic rationale.",
-            citations: citationsFor(topDeal.sources, sourceIndex).slice(0, 2),
-          },
-        ]
-      : []),
-  ];
+      : [];
 
-  const gaps = [
-    ...(pageContext
+  const gaps =
+    sections.gapsRisks.mode !== "hidden"
       ? [
-          `Current-page context is limited to visible text from ${pageContext.title || pageContext.pathname || "the page"}; open the relevant profile, deal, company, or source record for tighter grounding.`,
-        ]
-      : []),
-    ...(topDeal
-      ? topDeal.missingFacts
-          .slice(0, 3)
-          .map((fact) => `Deal gap for ${topDeal.name}: ${fact.replaceAll("_", " ")}.`)
-      : []),
-    themeId
-      ? `Add more buyer-side and customer references in ${theme?.shortName ?? themeId}.`
-      : "Select a single theme to tighten ranking and reduce cross-theme noise.",
-    "Validate which experts are currently available for calls versus only useful as source context.",
-    "Add recent primary source notes from expert calls to distinguish live conviction from directory evidence.",
-  ];
+        ...(topDeal
+          ? topDeal.missingFacts
+              .slice(0, 1)
+              .map((fact) => `Deal gap for ${topDeal.name}: ${fact.replaceAll("_", " ")}.`)
+          : []),
+        themeId
+          ? `Coverage may be thin on buyer-side references in ${theme?.shortName ?? themeId}.`
+          : "Select a theme to tighten ranking.",
+        ].slice(0, sections.gapsRisks.limit)
+      : [];
 
-  const risks = [
-    {
-      risk: "Directory bias",
-      why_it_matters:
-        "Rankings favor people and companies already represented in the curated graph.",
-      disconfirming_question:
-        "Who is missing from the current map that a specialist buyer, lender, or trade operator would expect to see?",
-      citations: primaryCitations.slice(0, 2),
-    },
-    {
-      risk: "Source staleness",
-      why_it_matters:
-        "Some records are based on public profiles or deal pages and may lag current employment, ownership, or availability.",
-      disconfirming_question:
-        "What has changed since the cited source was published, and who can verify it this week?",
-      citations: primaryCitations.slice(1, 3),
-    },
-  ];
+  const risks =
+    sections.gapsRisks.mode !== "hidden"
+      ? [
+        {
+          risk: "Directory bias",
+          why_it_matters: "Rankings favor records already in the curated graph.",
+          disconfirming_question: "Who is missing that a specialist would expect to see?",
+          citations: primaryCitations.slice(0, 2),
+        },
+        ]
+      : [];
 
   const confidenceScore = average([
     ...rankedExpertInputs.map((x) => x.expert.confidence),
@@ -623,8 +657,8 @@ async function buildStructuredAnswer(
   ]);
 
   return {
-    intent: inferIntent(question, objective),
-    answer_summary: summaryFor(objective, ranked_experts, ranked_companies),
+    intent,
+    answer_summary: summaryFor(objective, ranked_experts_all, ranked_companies_all),
     generated_at: new Date().toISOString(),
     input_context: {
       question: displayQuestion,
@@ -649,7 +683,10 @@ async function buildStructuredAnswer(
     what_to_listen_for,
     gaps,
     risks,
-    sources_used: [...sourceIndex.values()],
+    sources_used:
+      sections.sources.mode !== "hidden"
+        ? [...sourceIndex.values()].slice(0, sections.sources.limit)
+        : [],
     confidence: {
       score: Number(confidenceScore.toFixed(2)),
       label: confidenceScore >= 0.84 ? "High" : confidenceScore >= 0.76 ? "Medium" : "Indicative",
@@ -670,46 +707,7 @@ async function buildStructuredAnswer(
     enrichment_warnings: vectorRetrievalFailed
       ? ["Deal vector retrieval failed (embedding dimension or API misconfiguration). Directory sources only."]
       : undefined,
-    follow_up_actions: [
-      {
-        action: "add_to_shortlist",
-        label: "Add experts to shortlist",
-        prompt: `Create a shortlist from ${ranked_experts.slice(0, 3).map((e) => e.name).join(", ")}.`,
-      },
-      {
-        action: "build_call_plan",
-        label: "Build call plan",
-        prompt: `Build a three-call plan for ${theme?.shortName ?? "this question"}.`,
-      },
-      {
-        action: "open_source_evidence",
-        label: "Open source evidence",
-        prompt: "Show the strongest source evidence and unresolved gaps.",
-      },
-      {
-        action: "build_deal_brief",
-        label: "Build deal brief",
-        prompt: topDeal
-          ? `Build a source-backed deal brief for ${topDeal.name}.`
-          : "Build a source-backed deal brief for the most relevant transaction.",
-      },
-      {
-        action: "ask_follow_up",
-        label: "Ask follow-up",
-        prompt: ranked_companies[0]
-          ? `Which experts can introduce us to ${ranked_companies[0].name}?`
-          : "Where is the directory coverage weakest?",
-      },
-      ...(pageContext
-        ? [
-            {
-              action: "search_more",
-              label: "Search around this page",
-              prompt: `Find more source-backed information related to ${pageContext.title || pageContext.pathname || "this page"}.`,
-            },
-          ]
-        : []),
-    ],
+    follow_up_actions: buildFollowUpActions(intent, ranked_experts_all, ranked_companies_all, theme?.shortName),
     grounded: true,
     model: "deterministic-fallback",
   };
@@ -733,7 +731,7 @@ function normalizeChatHistory(history: ChatTurn[] | undefined): ChatTurn[] {
       content: typeof turn.content === "string" ? turn.content.trim() : "",
     }))
     .filter((turn) => turn.content.length > 0)
-    .slice(-8);
+    .slice(-6);
 }
 
 function questionWithChatHistory(question: string, history: ChatTurn[]): string {
@@ -906,12 +904,101 @@ function inferObjective(question: string): string {
   return "Find experts";
 }
 
-function inferIntent(question: string, objective: string): string {
-  const q = question.toLowerCase();
-  if (objective === "Map companies") return "map_companies";
-  if (objective === "Red-team thesis") return "red_team";
-  if (q.includes("sequence") || q.includes("plan") || objective === "Prepare calls") return "build_call_plan";
-  return "find_experts";
+function buildFollowUpActions(
+  intent: string,
+  experts: RankedExpert[],
+  companies: RankedCompany[],
+  themeShortName?: string,
+): AskResponse["follow_up_actions"] {
+  const topExperts = experts.slice(0, 2).map((e) => e.name).join(" and ");
+  const topCompany = companies[0]?.name;
+  const theme = themeShortName ?? "this theme";
+
+  if (intent === "map_companies") {
+    return [
+      {
+        action: "validate_targets",
+        label: "Validate targets",
+        prompt: topCompany
+          ? `Which experts can validate ${topCompany}?`
+          : "Which experts validate the top targets?",
+      },
+      {
+        action: "shortlist_companies",
+        label: "Shortlist companies",
+        prompt: `Which of these companies are most actionable in ${theme}?`,
+      },
+      {
+        action: "red_team",
+        label: "Red-team thesis",
+        prompt: "What would disconfirm the current investment thesis?",
+      },
+    ];
+  }
+
+  if (intent === "build_call_plan") {
+    return [
+      {
+        action: "listen_for",
+        label: "Conviction signals",
+        prompt: `What should I listen for on calls with ${topExperts || "these experts"}?`,
+      },
+      {
+        action: "intro_paths",
+        label: "Warm intros",
+        prompt: topCompany
+          ? `Who can introduce us to ${topCompany}?`
+          : "Which warm intro paths are strongest?",
+      },
+      {
+        action: "red_team",
+        label: "Red-team",
+        prompt: "What would disconfirm the thesis after these calls?",
+      },
+    ];
+  }
+
+  if (intent === "red_team") {
+    return [
+      {
+        action: "disconfirm",
+        label: "Pressure-test",
+        prompt: "What is the single strongest bear-case point to verify first?",
+      },
+      {
+        action: "call_experts",
+        label: "Who to call",
+        prompt: `Who should I call to disconfirm the thesis — start with ${topExperts || "top experts"}?`,
+      },
+      {
+        action: "map_companies",
+        label: "Check targets",
+        prompt: topCompany
+          ? `Does ${topCompany} still fit if the bear case is right?`
+          : "Which companies are most exposed if the bear case is right?",
+      },
+    ];
+  }
+
+  return [
+    {
+      action: "build_call_plan",
+      label: "Build call plan",
+      prompt: `Build a three-call plan for ${theme}.`,
+    },
+    {
+      action: "map_companies",
+      label: "Map companies",
+      prompt: topCompany
+        ? `Which experts validate ${topCompany}?`
+        : "Which companies are most actionable here?",
+    },
+    {
+      action: "red_team",
+      label: "Red-team",
+      prompt: "What would disconfirm the current investment thesis?",
+    },
+  ];
 }
 
 function normalizeArchetypes(input?: string[]): ExpertType[] {
@@ -929,12 +1016,12 @@ function summaryFor(
   const companyNames = companies.slice(0, 2).map((company) => company.name).join(" and ");
   if (!experts.length) return "No strong expert matches in the current directory. Broaden the theme or archetype filters.";
   if (objective === "Map companies") {
-    return `Start with ${companyNames || "the highest-density companies"}, then use ${expertNames} to validate why those assets matter.`;
+    return `Prioritize ${companyNames || "the top targets"}; use ${expertNames || "linked experts"} to validate access.`;
   }
   if (objective === "Red-team thesis") {
-    return `Use ${expertNames} to pressure-test the thesis, with ${companyNames || "linked companies"} as concrete evidence checks.`;
+    return `Pressure-test with ${expertNames}${companyNames ? ` and check ${companyNames}` : ""}.`;
   }
-  return `Start with ${expertNames}; they provide the best mix of relevance, source coverage, access, and graph links for this session.`;
+  return `Call ${expertNames} first for this question.`;
 }
 
 function callGoal(phase: string, expert: RankedExpert, company?: string): string {

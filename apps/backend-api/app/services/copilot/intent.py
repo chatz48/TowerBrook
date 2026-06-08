@@ -5,7 +5,11 @@ from dataclasses import dataclass
 
 from app.services.copilot.context import CopilotContext
 from app.services.copilot.prompts import INTENT_ROUTER_SYSTEM
-from app.services.copilot.tools import INTENT_TOOL_PIPELINES
+from app.services.copilot.tools import (
+    INTENT_TOOL_PIPELINES,
+    requests_web_search,
+    resolve_tools,
+)
 from app.services.deepseek_llm import FLASH_MODEL, PRO_MODEL, llm
 
 logger = logging.getLogger("towerbrook.copilot.intent")
@@ -23,34 +27,76 @@ class RoutedIntent:
     reasoning: str
 
 
-def _heuristic_route(ctx: CopilotContext) -> RoutedIntent:
+def _match_intent_heuristic(ctx: CopilotContext) -> str | None:
     q = ctx.question.lower()
     if any(k in q for k in ("red team", "red-team", "disconfirm", "bear case")):
-        intent = "red_team"
-    elif any(k in q for k in ("memo", "report")):
-        intent = "generate_report"
-    elif any(k in q for k in ("email", "outreach")):
-        intent = "draft_outreach"
-    elif any(k in q for k in ("dig deeper", "deep discovery", "find more")):
-        intent = "deep_discovery"
-    elif "http://" in q or "https://" in q:
-        intent = "source_analysis"
-    elif any(k in q for k in ("company", "companies", "target")):
-        intent = "map_companies"
-    elif any(k in q for k in ("call plan", "sequence", "three-call")):
-        intent = "build_call_plan"
-    elif any(k in q for k in ("market", "buyer", "sector trend")):
-        intent = "market_research"
-    else:
-        intent = "find_experts"
-    complexity = "high" if intent in {"red_team", "generate_report", "market_research"} else "low"
+        return "red_team"
+    if any(k in q for k in ("memo", "report")):
+        return "generate_report"
+    if any(k in q for k in ("email", "outreach")):
+        return "draft_outreach"
+    if any(k in q for k in ("dig deeper", "deep discovery", "find more")):
+        return "deep_discovery"
+    if "http://" in q or "https://" in q:
+        return "source_analysis"
+    if any(k in q for k in ("company", "companies", "target")):
+        return "map_companies"
+    if any(k in q for k in ("call plan", "sequence", "three-call")):
+        return "build_call_plan"
+    if any(k in q for k in ("market", "buyer", "sector trend")):
+        return "market_research"
+    return None
+
+
+def _needs_llm_routing(ctx: CopilotContext) -> bool:
+    if _match_intent_heuristic(ctx):
+        return False
+    q = ctx.question.lower()
+    signals = [
+        any(k in q for k in ("expert", "who should", "call")),
+        any(k in q for k in ("company", "companies", "target")),
+        any(k in q for k in ("market", "sector", "buyer")),
+        any(k in q for k in ("email", "outreach", "memo", "report")),
+        "http://" in q or "https://" in q,
+    ]
+    if sum(signals) >= 2:
+        return True
+    return len(ctx.question.split()) > 45
+
+
+def _complexity_for(intent: str, ctx: CopilotContext) -> str:
+    if intent in {"red_team", "generate_report"}:
+        return "high"
+    if intent == "market_research" and requests_web_search(ctx):
+        return "high"
+    return "low"
+
+
+def _build_routed(
+    intent: str,
+    ctx: CopilotContext,
+    tools_hint: list[str] | None,
+    reasoning: str,
+    search_queries: list[str] | None = None,
+) -> RoutedIntent:
+    complexity = _complexity_for(intent, ctx)
     model = PRO_MODEL if complexity == "high" else FLASH_MODEL
     return RoutedIntent(
         intent=intent,
         complexity=complexity,
         model=model,
-        tools=INTENT_TOOL_PIPELINES[intent],
-        search_queries=[ctx.search_query()],
+        tools=resolve_tools(intent, ctx, tools_hint),
+        search_queries=search_queries or [ctx.search_query()],
+        reasoning=reasoning,
+    )
+
+
+def _heuristic_route(ctx: CopilotContext) -> RoutedIntent:
+    intent = _match_intent_heuristic(ctx) or "find_experts"
+    return _build_routed(
+        intent,
+        ctx,
+        tools_hint=None,
         reasoning="Heuristic intent routing (DeepSeek unavailable).",
     )
 
@@ -58,18 +104,22 @@ def _heuristic_route(ctx: CopilotContext) -> RoutedIntent:
 async def route_intent(ctx: CopilotContext, tools_hint: list[str] | None = None) -> RoutedIntent:
     if tools_hint:
         intent = _intent_from_tools(tools_hint)
-        complexity = "high" if intent in {"red_team", "generate_report"} else "low"
-        return RoutedIntent(
-            intent=intent,
-            complexity=complexity,
-            model=PRO_MODEL if complexity == "high" else FLASH_MODEL,
-            tools=list(dict.fromkeys(tools_hint)),
-            search_queries=[ctx.search_query()],
+        return _build_routed(
+            intent,
+            ctx,
+            tools_hint,
             reasoning="Explicit tools hint from client.",
         )
 
-    if not llm.configured:
-        return _heuristic_route(ctx)
+    if not llm.configured or not _needs_llm_routing(ctx):
+        matched = _match_intent_heuristic(ctx)
+        intent = matched or "find_experts"
+        return _build_routed(
+            intent,
+            ctx,
+            tools_hint=None,
+            reasoning="Fast heuristic routing." if matched else "Default expert lookup routing.",
+        )
 
     try:
         parsed = await llm.parse_json(
@@ -80,19 +130,14 @@ async def route_intent(ctx: CopilotContext, tools_hint: list[str] | None = None)
         intent = str(parsed.get("intent") or "find_experts")
         if intent not in VALID_INTENTS:
             intent = "find_experts"
-        complexity = str(parsed.get("complexity") or "low")
-        if complexity not in {"low", "high"}:
-            complexity = "high" if intent in {"red_team", "generate_report", "market_research"} else "low"
         queries = parsed.get("search_queries")
         search_queries = [str(q) for q in queries[:2]] if isinstance(queries, list) and queries else [ctx.search_query()]
-        model = PRO_MODEL if complexity == "high" else FLASH_MODEL
-        return RoutedIntent(
-            intent=intent,
-            complexity=complexity,
-            model=model,
-            tools=INTENT_TOOL_PIPELINES[intent],
-            search_queries=search_queries,
+        return _build_routed(
+            intent,
+            ctx,
+            tools_hint=None,
             reasoning=str(parsed.get("reasoning") or ""),
+            search_queries=search_queries,
         )
     except Exception:
         logger.exception("Intent routing failed; using heuristic fallback")

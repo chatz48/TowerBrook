@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
-import { copilotTrustDetail, copilotTrustLabel } from "@/lib/copilot-copy";
-import { PROMPTS } from "./constants";
+import { copilotTrustLabel } from "@/lib/copilot-copy";
+import { planSections, type SectionMode } from "@/lib/answer-focus";
 import type { AskResponse, ToolTrace } from "./types";
-import { collectCitations, formatTime, themeLabel } from "./utils";
+import { formatTime, themeLabel } from "./utils";
 
 export function AskAnswerPanel({
   answer,
@@ -20,40 +20,33 @@ export function AskAnswerPanel({
   compact?: boolean;
 }) {
   const theme = themeLabel(answer.input_context.theme);
-  const [copied, setCopied] = useState(false);
-
-  async function copyCallPack() {
-    const lines = [
-      answer.answer_summary,
-      "",
-      "Ranked experts:",
-      ...answer.ranked_experts.slice(0, 8).map((expert) => `${expert.rank}. ${expert.name} — ${expert.why}`),
-      "",
-      "Call sequence:",
-      ...answer.call_sequence.map((step, index) => `${index + 1}. ${step.phase}: ${step.goal}`),
-    ];
-    try {
-      await navigator.clipboard.writeText(lines.join("\n"));
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setCopied(false);
-    }
-  }
+  const sections = planSections(answer.input_context.question, answer.input_context.objective);
+  const followUps = answer.follow_up_actions.slice(0, 3);
 
   if (compact) {
     return (
       <div className="rounded-md border border-line bg-paper px-3 py-2">
         <p className="text-[13px] leading-relaxed text-ink-soft">{answer.answer_summary}</p>
-        <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
-          <span className="text-ink-faint">{answer.ranked_experts.length} experts ranked</span>
-          <Link href="/experts?readiness=actionable" className="font-semibold text-accent hover:underline">
-            Open call list
-          </Link>
-        </div>
+        {answer.ranked_experts.length > 0 ? (
+          <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
+            <span className="text-ink-faint">{answer.ranked_experts.length} experts</span>
+            <Link href="/experts?readiness=actionable" className="font-semibold text-accent hover:underline">
+              Open call list
+            </Link>
+          </div>
+        ) : null}
       </div>
     );
   }
+
+  const expertPreview = answer.ranked_experts
+    .slice(0, 3)
+    .map((expert) => expert.name)
+    .join(", ");
+  const companyPreview = answer.ranked_companies
+    .slice(0, 2)
+    .map((company) => company.name)
+    .join(", ");
 
   return (
     <div className="space-y-3">
@@ -63,49 +56,20 @@ export function AskAnswerPanel({
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="font-semibold">Expert Engine</span>
             <span className="text-ink-faint">{formatTime(answer.generated_at)}</span>
-            <span className="rounded-full border border-line px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-soft">
+            <span
+              data-testid="copilot-trust-badge"
+              className="rounded-full border border-line px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-soft"
+            >
               {copilotTrustLabel(answer)}
             </span>
           </div>
-          <p className="mt-1 text-[11px] text-ink-faint">{copilotTrustDetail(answer)}</p>
-          <p className="mt-2 text-sm text-ink-soft">{answer.answer_summary}</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Link href="/experts?readiness=actionable" className="ee-button ee-button-secondary min-h-7 px-2.5 text-[11px]">
-              Add to call list
-            </Link>
-            <button
-              type="button"
-              onClick={() => void copyCallPack()}
-              className="ee-button ee-button-secondary min-h-7 px-2.5 text-[11px]"
-            >
-              {copied ? "Copied" : "Copy call pack"}
-            </button>
-            <Link href="/reports" className="ee-button ee-button-primary min-h-7 px-2.5 text-[11px]">
-              Open memo
-            </Link>
-          </div>
+          <p className="mt-2 text-sm leading-relaxed text-ink">{answer.answer_summary}</p>
+
           {answer.enrichment_warnings?.length ? (
-            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-900">
-              {answer.enrichment_warnings.map((warning) => (
+            <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-900">
+              {answer.enrichment_warnings.slice(0, 2).map((warning) => (
                 <p key={warning}>{warning}</p>
               ))}
-            </div>
-          ) : null}
-          {answer.structured?.key_findings?.length ? (
-            <div className="mt-3 rounded-lg border border-line bg-paper p-3">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
-                Key findings
-              </div>
-              <ul className="mt-1 list-disc space-y-1 pl-4 text-sm text-ink-soft">
-                {answer.structured.key_findings.slice(0, 5).map((finding) => (
-                  <li key={finding}>{finding}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-          {answer.tool_calls?.length ? (
-            <div className="mt-3">
-              <ToolTracePanel traces={answer.tool_calls} />
             </div>
           ) : null}
           {answer.backend_error ? (
@@ -113,17 +77,243 @@ export function AskAnswerPanel({
               Live research unavailable: {answer.backend_error}
             </p>
           ) : null}
-          {answer.request_id ? (
-            <p className="mt-2 font-mono text-[10px] text-ink-faint">Request {answer.request_id}</p>
-          ) : null}
-          {answer.verification_warnings?.length ? (
-            <div className="mt-2 rounded border border-amber-200 bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900">
-              {answer.verification_warnings.map((warning) => (
-                <p key={warning}>{warning}</p>
-              ))}
-            </div>
-          ) : null}
         </div>
+      </div>
+
+      {followUps.length > 0 ? (
+        <div className="rounded-lg border border-line bg-paper p-3">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
+            Suggested follow-ups
+          </div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {followUps.map((action) => (
+              <button
+                key={action.action}
+                type="button"
+                onClick={() => onPrompt(action.prompt)}
+                className="rounded border border-line bg-white px-3 py-2 text-left text-xs text-ink-soft transition hover:border-accent hover:text-accent"
+              >
+                {action.prompt}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {sections.experts.mode !== "hidden" && answer.ranked_experts.length > 0 ? (
+        <Panel
+          title="Ranked experts"
+          meta={`${answer.ranked_experts.length} to call`}
+          mode={sections.experts.mode}
+          preview={expertPreview}
+          testId="ranked-experts"
+        >
+          <ul className="space-y-2">
+            {answer.ranked_experts.map((expert) => (
+              <li
+                key={expert.expert_id}
+                className="flex flex-wrap items-start gap-3 rounded border border-line bg-paper px-3 py-2"
+              >
+                <span className="font-mono text-sm text-accent">{expert.rank}</span>
+                <div className="min-w-0 flex-1">
+                  <Link href={`/experts/${expert.expert_id}`} className="font-semibold text-accent hover:underline">
+                    {expert.name}
+                  </Link>
+                  <p className="mt-0.5 text-[11px] text-ink-faint">
+                    {expert.title} · {expert.firm}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-ink-soft">{expert.why}</p>
+                </div>
+                <WorkspaceActionButton
+                  item={{
+                    id: expert.expert_id,
+                    kind: "call",
+                    name: expert.name,
+                    sub: `${expert.title}, ${expert.firm}`,
+                    href: `/experts/${expert.expert_id}`,
+                    theme,
+                    note: expert.why,
+                    status: "call shortlist",
+                  }}
+                  className="rounded border border-line bg-white px-2 py-1.5 text-[11px] font-semibold text-ink-soft hover:border-accent hover:text-accent"
+                >
+                  Save
+                </WorkspaceActionButton>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      ) : null}
+
+      {sections.companies.mode !== "hidden" && answer.ranked_companies.length > 0 ? (
+        <Panel title="Ranked companies" meta="Targets" mode={sections.companies.mode} preview={companyPreview}>
+          <ul className="space-y-2">
+            {answer.ranked_companies.map((company) => (
+              <li
+                key={company.company_id}
+                className="flex flex-wrap items-start gap-3 rounded border border-line bg-paper px-3 py-2"
+              >
+                <span className="font-mono text-sm text-accent">{company.rank}</span>
+                <div className="min-w-0 flex-1">
+                  <Link href={`/companies/${company.company_id}`} className="font-semibold text-accent hover:underline">
+                    {company.name}
+                  </Link>
+                  <p className="mt-0.5 text-[11px] text-ink-faint">
+                    {company.category} · {company.stage}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-ink-soft">{company.why}</p>
+                </div>
+                <WorkspaceActionButton
+                  item={{
+                    id: company.company_id,
+                    kind: "target",
+                    name: company.name,
+                    sub: `${company.category} / ${company.stage}`,
+                    href: `/companies/${company.company_id}`,
+                    theme,
+                    note: company.why,
+                    status: "copilot target",
+                  }}
+                  className="rounded border border-line bg-white px-2 py-1.5 text-[11px] font-semibold text-ink-soft hover:border-accent hover:text-accent"
+                >
+                  Save
+                </WorkspaceActionButton>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      ) : null}
+
+      {sections.callSequence.mode !== "hidden" && answer.call_sequence.length > 0 ? (
+        <Panel
+          title="Suggested call sequence"
+          meta="3 phases"
+          mode={sections.callSequence.mode}
+          preview={answer.call_sequence.map((step) => step.phase).join(" → ")}
+        >
+          <div className="space-y-2">
+            {answer.call_sequence.map((step, index) => {
+              const expertNames = step.expert_ids
+                .map((id) => answer.ranked_experts.find((expert) => expert.expert_id === id)?.name)
+                .filter(Boolean)
+                .join(", ");
+              return (
+                <div key={`${step.phase}-${index}`} className="rounded border border-line bg-paper p-3">
+                  <div className="text-xs font-semibold">
+                    {index + 1}. {step.phase}
+                  </div>
+                  {expertNames ? <div className="mt-0.5 text-[11px] text-ink-faint">{expertNames}</div> : null}
+                  <p className="mt-1 text-xs leading-relaxed text-ink-soft">{step.goal}</p>
+                </div>
+              );
+            })}
+          </div>
+        </Panel>
+      ) : null}
+
+      {sections.listenFor.mode !== "hidden" && answer.what_to_listen_for.length > 0 ? (
+        <Panel
+          title="What to listen for"
+          meta="On calls"
+          mode={sections.listenFor.mode}
+          preview="Conviction signals for expert calls"
+        >
+          <div className="space-y-2">
+            {answer.what_to_listen_for.map((item) => (
+              <div key={item.claim} className="rounded border border-line bg-paper p-3 text-xs leading-relaxed text-ink-soft">
+                <p className="font-semibold text-ink">{item.claim}</p>
+                <p className="mt-1">
+                  <span className="font-semibold text-emerald-700">Raises:</span> {item.raises_conviction_if}
+                </p>
+                <p className="mt-1">
+                  <span className="font-semibold text-orange-700">Reduces:</span> {item.reduces_conviction_if}
+                </p>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      ) : null}
+
+      {sections.gapsRisks.mode !== "hidden" && (answer.gaps.length > 0 || answer.risks.length > 0) ? (
+        <Panel
+          title="Gaps and risks"
+          meta={answer.confidence.label}
+          mode={sections.gapsRisks.mode}
+          preview={answer.gaps[0] ?? answer.risks[0]?.risk}
+        >
+          {answer.gaps.length > 0 ? (
+            <ul className="space-y-1.5 text-xs leading-relaxed text-ink-soft">
+              {answer.gaps.map((gap) => (
+                <li key={gap}>{gap}</li>
+              ))}
+            </ul>
+          ) : null}
+          {answer.risks.map((risk) => (
+            <div key={risk.risk} className="mt-2 rounded border border-line bg-paper p-2 text-xs">
+              <div className="font-semibold text-ink">{risk.risk}</div>
+              <p className="mt-1 text-ink-soft">{risk.why_it_matters}</p>
+            </div>
+          ))}
+        </Panel>
+      ) : null}
+
+      {sections.sources.mode !== "hidden" && answer.sources_used.length > 0 ? (
+        <Panel
+          title="Sources cited"
+          meta={`${answer.sources_used.length} records`}
+          mode={sections.sources.mode}
+          preview={answer.sources_used
+            .slice(0, 2)
+            .map((source) => source.title)
+            .join(" · ")}
+          citations={answer.sources_used.map((source) => source.source_id)}
+          onSourceSelect={onSourceSelect}
+        >
+          <ul className="space-y-2">
+            {answer.sources_used.map((source) => (
+              <li key={source.source_id} className="rounded border border-line bg-paper px-3 py-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => onSourceSelect(source.source_id)}
+                  className="font-mono text-[11px] font-semibold text-accent hover:underline"
+                >
+                  [{source.source_id.replace("S", "")}]
+                </button>{" "}
+                <a href={source.url} target="_blank" rel="noreferrer" className="font-semibold text-ink hover:text-accent">
+                  {source.title}
+                </a>
+                {source.snippet ? (
+                  <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-ink-soft">{source.snippet}</p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      ) : null}
+
+      {answer.structured?.key_findings?.length ? (
+        <Panel
+          title="Key findings"
+          meta={`${answer.structured.key_findings.length} points`}
+          mode="expandable"
+          preview={answer.structured.key_findings[0]}
+        >
+          <ul className="list-disc space-y-1 pl-4 text-xs leading-relaxed text-ink-soft">
+            {answer.structured.key_findings.map((finding) => (
+              <li key={finding}>{finding}</li>
+            ))}
+          </ul>
+        </Panel>
+      ) : null}
+
+      {answer.tool_calls?.length ? (
+        <ToolTracePanel traces={answer.tool_calls} />
+      ) : null}
+
+      <div className="flex flex-wrap gap-2">
+        <Link href="/experts?readiness=actionable" className="ee-button ee-button-secondary min-h-7 px-2.5 text-[11px]">
+          Open call list
+        </Link>
         <WorkspaceActionButton
           item={{
             id: `copilot-${answer.generated_at}`,
@@ -140,252 +330,6 @@ export function AskAnswerPanel({
           Save to basket
         </WorkspaceActionButton>
       </div>
-
-      {answer.sources_used.length ? (
-        <Panel
-          title="Sources cited"
-          meta={`${answer.sources_used.length} records`}
-          citations={answer.sources_used.map((source) => source.source_id)}
-          onSourceSelect={onSourceSelect}
-          defaultOpen
-        >
-          <ul className="space-y-2">
-            {answer.sources_used.map((source) => (
-              <li key={source.source_id} className="rounded border border-line bg-paper px-3 py-2">
-                <div className="flex flex-wrap items-start gap-2">
-                  <button
-                    type="button"
-                    onClick={() => onSourceSelect(source.source_id)}
-                    className="font-mono text-[11px] font-semibold text-accent hover:underline"
-                  >
-                    [{source.source_id.replace("S", "")}]
-                  </button>
-                  <div className="min-w-0 flex-1">
-                    <a
-                      href={source.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-xs font-semibold text-ink hover:text-accent hover:underline"
-                    >
-                      {source.title}
-                    </a>
-                    <div className="mt-0.5 text-[11px] text-ink-faint">
-                      {source.publisher}
-                      {source.confidence ? ` · ${Math.round(source.confidence * 100)}% confidence` : ""}
-                    </div>
-                    {source.snippet ? (
-                      <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-ink-soft">
-                        {source.snippet}
-                      </p>
-                    ) : null}
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Panel>
-      ) : null}
-
-      <Panel
-        title="1. Ranked experts"
-        meta={`${answer.ranked_experts.length} candidates`}
-        citations={collectCitations(answer.ranked_experts)}
-        onSourceSelect={onSourceSelect}
-        defaultOpen
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] table-fixed border-collapse text-left text-xs">
-            <thead>
-              <tr className="border-b border-[#e6eaf0] bg-[#f8fafc] text-[10px] uppercase tracking-[0.12em] text-[#667085]">
-                <th className="w-11 px-3 py-2">#</th>
-                <th className="w-[140px] px-3 py-2">Expert</th>
-                <th className="w-[190px] px-3 py-2">Role & access</th>
-                <th className="px-3 py-2">Why top-ranked</th>
-                <th className="w-[90px] px-3 py-2">Evidence</th>
-                <th className="w-[82px] px-3 py-2">Basket</th>
-              </tr>
-            </thead>
-            <tbody>
-              {answer.ranked_experts.map((expert) => (
-                <tr key={expert.expert_id} className="border-b border-[#edf0f5] align-top last:border-0">
-                  <td className="px-3 py-2.5 font-mono text-sm">{expert.rank}</td>
-                  <td className="px-3 py-2.5">
-                    <Link href={`/experts/${expert.expert_id}`} className="font-semibold text-[#0b5bd3] hover:underline">
-                      {expert.name}
-                    </Link>
-                    <div className="mt-0.5 text-[11px] text-[#667085]">{expert.archetype}</div>
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <div className="max-w-[190px] text-[#344054]">{expert.title}</div>
-                    <div className="mt-0.5 text-[11px] text-[#667085]">{expert.firm}</div>
-                    <div className="mt-1 text-[11px] leading-snug text-[#667085]">{expert.access}</div>
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <div className="line-clamp-2 max-w-[270px] leading-relaxed text-[#344054]">{expert.why}</div>
-                    <CitationList citations={expert.citations} onSourceSelect={onSourceSelect} />
-                  </td>
-                  <td className="px-3 py-2.5 text-[#344054]">
-                    {expert.citations.length} cited source{expert.citations.length === 1 ? "" : "s"}
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <WorkspaceActionButton
-                      item={{
-                        id: expert.expert_id,
-                        kind: "call",
-                        name: expert.name,
-                        sub: `${expert.title}, ${expert.firm}`,
-                        href: `/experts/${expert.expert_id}`,
-                        theme,
-                        note: expert.why,
-                        status: "call shortlist",
-                      }}
-                      className="rounded border border-[#d8dee8] bg-white px-2 py-1.5 text-[11px] font-semibold text-[#344054] hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
-                    >
-                      Save
-                    </WorkspaceActionButton>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="mt-3 border-t border-[#edf0f5] pt-3">
-          <Link href="/experts" className="text-xs font-medium text-[#0b5bd3] hover:underline">
-            Open the full expert call list →
-          </Link>
-        </div>
-      </Panel>
-
-      <div className="grid gap-3 lg:grid-cols-[1.05fr_0.95fr]">
-        <Panel title="2. Ranked companies" meta="Target evidence" citations={collectCitations(answer.ranked_companies)} onSourceSelect={onSourceSelect} defaultOpen>
-          <div className="space-y-2">
-            {answer.ranked_companies.map((company) => (
-              <div key={company.company_id} className="grid grid-cols-[26px_minmax(0,1fr)_58px_70px] gap-2 border-b border-[#edf0f5] pb-2 last:border-0 last:pb-0">
-                <div className="grid h-6 place-items-center rounded bg-[#eef5ff] font-mono text-xs text-[#0b5bd3]">
-                  {company.rank}
-                </div>
-                <div className="min-w-0">
-                  <Link href={`/companies/${company.company_id}`} className="truncate font-semibold text-[#0b5bd3] hover:underline">
-                    {company.name}
-                  </Link>
-                  <div className="text-[11px] text-[#667085]">{company.category} / {company.stage}</div>
-                  <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[#344054]">{company.why}</p>
-                  <CitationList citations={company.citations} onSourceSelect={onSourceSelect} />
-                </div>
-                <div className="text-right">
-                  <div className="font-mono text-sm font-semibold">{company.expert_density}</div>
-                  <div className="text-[10px] uppercase tracking-[0.12em] text-[#667085]">Edges</div>
-                </div>
-                <div className="text-right">
-                  <WorkspaceActionButton
-                    item={{
-                      id: company.company_id,
-                      kind: "target",
-                      name: company.name,
-                      sub: `${company.category} / ${company.stage}`,
-                      href: `/companies/${company.company_id}`,
-                      theme,
-                      note: company.why,
-                      status: "copilot target",
-                    }}
-                    className="rounded border border-[#d8dee8] bg-white px-2 py-1.5 text-[11px] font-semibold text-[#344054] hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
-                  >
-                    Save
-                  </WorkspaceActionButton>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Panel>
-
-        <Panel title="3. Suggested call sequence" meta="3 phases" citations={collectCitations(answer.call_sequence)} onSourceSelect={onSourceSelect} defaultOpen>
-          <div className="space-y-2">
-            {answer.call_sequence.map((step, index) => {
-              const expertNames = step.expert_ids
-                .map((id) => answer.ranked_experts.find((expert) => expert.expert_id === id)?.name)
-                .filter(Boolean)
-                .join(", ");
-              return (
-                <div key={`${step.phase}-${index}`} className="flex gap-3 rounded border border-[#e6eaf0] bg-[#fbfcfe] p-3">
-                  <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-[#0b5bd3] font-mono text-xs text-[#0b5bd3]">
-                    {index + 1}
-                  </div>
-                  <div>
-                    <div className="text-xs font-semibold">{step.phase}</div>
-                    <div className="mt-0.5 text-[11px] text-[#667085]">{expertNames}</div>
-                    <p className="mt-1 text-xs leading-relaxed text-[#344054]">{step.goal}</p>
-                    <CitationList citations={step.citations} onSourceSelect={onSourceSelect} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Panel>
-      </div>
-
-      <div className="grid gap-3 lg:grid-cols-2">
-        <Panel title="4. What to listen for" meta="Claims to validate" citations={collectCitations(answer.what_to_listen_for)} onSourceSelect={onSourceSelect} defaultOpen>
-          <div className="space-y-3">
-            {answer.what_to_listen_for.map((item) => (
-              <div key={item.claim} className="border-b border-[#edf0f5] pb-3 last:border-0 last:pb-0">
-                <div className="text-xs font-semibold">{item.claim}</div>
-                <div className="mt-2 grid gap-2 text-[11px] leading-relaxed text-[#344054]">
-                  <div><span className="font-semibold text-[#07883f]">Raises:</span> {item.raises_conviction_if}</div>
-                  <div><span className="font-semibold text-[#c2410c]">Reduces:</span> {item.reduces_conviction_if}</div>
-                </div>
-                <CitationList citations={item.citations} onSourceSelect={onSourceSelect} />
-              </div>
-            ))}
-          </div>
-        </Panel>
-
-        <Panel title="5. Gaps and risks" meta={answer.confidence.label} citations={collectCitations(answer.risks)} onSourceSelect={onSourceSelect} defaultOpen>
-          <div className="grid gap-3">
-            <div>
-              <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#667085]">Gaps to fill</div>
-              <ul className="space-y-1.5 text-xs leading-relaxed text-[#344054]">
-                {answer.gaps.map((gap) => (
-                  <li key={gap} className="flex gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#0b5bd3]" />
-                    <span>{gap}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="border-t border-[#edf0f5] pt-3">
-              <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#667085]">Risks</div>
-              <div className="space-y-2">
-                {answer.risks.map((risk) => (
-                  <div key={risk.risk} className="rounded border border-[#e6eaf0] bg-[#fbfcfe] p-2">
-                    <div className="text-xs font-semibold">{risk.risk}</div>
-                    <p className="mt-1 text-[11px] leading-relaxed text-[#344054]">{risk.why_it_matters}</p>
-                    <p className="mt-1 text-[11px] text-[#667085]">Ask: {risk.disconfirming_question}</p>
-                    <CitationList citations={risk.citations} onSourceSelect={onSourceSelect} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </Panel>
-      </div>
-
-      <Panel title="Ask a follow-up" meta="Action chips">
-        <div className="flex flex-wrap gap-2">
-          {[...PROMPTS, ...answer.follow_up_actions.map((action) => action.prompt)].slice(0, 6).map((prompt) => (
-            <button
-              key={prompt}
-              onClick={() => onPrompt(prompt)}
-              className="rounded border border-[#d8dee8] bg-white px-3 py-2 text-xs text-[#344054] transition hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
-            >
-              {prompt}
-            </button>
-          ))}
-        </div>
-      </Panel>
-
-      <div className="text-[11px] text-[#667085]">
-        Rankings come from the expert directory. AI-drafted wording and gaps should be checked against cited sources before anything goes external.
-      </div>
     </div>
   );
 }
@@ -393,30 +337,41 @@ export function AskAnswerPanel({
 function Panel({
   title,
   meta,
+  mode,
+  preview,
   citations,
   children,
   onSourceSelect,
-  defaultOpen = false,
+  testId,
 }: {
   title: string;
   meta?: string;
+  mode: SectionMode;
+  preview?: string;
   citations?: string[];
   children: ReactNode;
   onSourceSelect?: (sourceId: string) => void;
-  defaultOpen?: boolean;
+  testId?: string;
 }) {
+  const defaultOpen = mode === "primary";
+
   return (
-    <details className="ee-panel overflow-hidden rounded-lg" open={defaultOpen}>
-      <summary className="flex min-h-9 cursor-pointer list-none items-center gap-3 border-b border-line px-3 py-2 marker:hidden">
-        <h2 className="text-sm font-semibold">{title}</h2>
-        {meta ? <span className="text-[11px] text-ink-faint">{meta}</span> : null}
-        <div className="ml-auto flex items-center gap-2">
+    <details data-testid={testId} className="ee-panel overflow-hidden rounded-lg" open={defaultOpen}>
+      <summary className="flex min-h-9 cursor-pointer list-none items-center gap-2 border-b border-line px-3 py-2 marker:hidden">
+        <h2 className="shrink-0 text-sm font-semibold">{title}</h2>
+        {meta ? <span className="shrink-0 text-[11px] text-ink-faint">{meta}</span> : null}
+        {!defaultOpen && preview ? (
+          <span className="min-w-0 flex-1 truncate text-[11px] text-ink-faint">{preview}</span>
+        ) : (
+          <span className="flex-1" />
+        )}
+        <div className="ml-auto flex shrink-0 items-center gap-2">
           {citations?.length && onSourceSelect ? (
             <div onClick={(event) => event.stopPropagation()}>
               <CitationList citations={citations} onSourceSelect={onSourceSelect} />
             </div>
           ) : null}
-          <span className="text-[11px] font-semibold text-accent">Expand</span>
+          <span className="text-[11px] font-semibold text-accent">{defaultOpen ? "Collapse" : "Expand"}</span>
         </div>
       </summary>
       <div className="p-3">{children}</div>
@@ -433,12 +388,13 @@ function CitationList({
 }) {
   if (!citations.length) return null;
   return (
-    <div className="mt-1 flex flex-wrap gap-1">
-      {citations.map((citation) => (
+    <div className="flex flex-wrap gap-1">
+      {citations.slice(0, 3).map((citation) => (
         <button
           key={citation}
+          type="button"
           onClick={() => onSourceSelect(citation)}
-          className="font-mono text-[11px] text-[#0b5bd3] hover:underline"
+          className="font-mono text-[11px] text-accent hover:underline"
         >
           [{citation.replace("S", "")}]
         </button>
@@ -449,7 +405,7 @@ function CitationList({
 
 function ToolTracePanel({ traces }: { traces: ToolTrace[] }) {
   return (
-    <details className="mt-2 rounded border border-line bg-paper px-2 py-1.5">
+    <details className="rounded border border-line bg-paper px-2 py-1.5">
       <summary className="cursor-pointer text-[11px] font-semibold text-ink-faint">
         Research steps ({traces.length})
       </summary>
@@ -457,8 +413,6 @@ function ToolTracePanel({ traces }: { traces: ToolTrace[] }) {
         {traces.map((trace, index) => (
           <li key={`${trace.tool_name}-${index}`} className="rounded border border-line bg-white px-2 py-1.5">
             <div className="font-semibold text-ink">{trace.tool_name}</div>
-            <div className="mt-0.5 text-ink-faint">Input: {summarizeTracePayload(trace.input)}</div>
-            <div className="text-ink-faint">Output: {summarizeTracePayload(trace.output)}</div>
           </li>
         ))}
       </ol>
@@ -466,16 +420,11 @@ function ToolTracePanel({ traces }: { traces: ToolTrace[] }) {
   );
 }
 
-function summarizeTracePayload(payload: Record<string, unknown>): string {
-  const text = JSON.stringify(payload);
-  return text.length > 160 ? `${text.slice(0, 157)}...` : text;
-}
-
 function Avatar({ label, active = false }: { label: string; active?: boolean }) {
   return (
     <span
       className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-semibold ${
-        active ? "bg-[#0b5bd3] text-white" : "border border-[#cfd6e2] bg-[#eef1f6] text-[#344054]"
+        active ? "bg-accent text-white" : "border border-line bg-paper text-ink-soft"
       }`}
     >
       {label}

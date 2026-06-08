@@ -38,6 +38,9 @@ export function defaultQuestion(theme: ThemeFocus) {
   return "Who should I call first across the three investment themes?";
 }
 
+/** Last three Q&A pairs — enough for follow-ups without bloating prompts. */
+export const MAX_CHAT_HISTORY_TURNS = 6;
+
 export function toChatHistory(messages: ConversationMessage[]): ChatTurn[] {
   return messages
     .map((message) => ({
@@ -48,7 +51,7 @@ export function toChatHistory(messages: ConversationMessage[]): ChatTurn[] {
           : message.content,
     }))
     .filter((message) => message.content.trim().length > 0)
-    .slice(-8);
+    .slice(-MAX_CHAT_HISTORY_TURNS);
 }
 
 function assistantHistoryContent(summary: string, answer: AskResponse): string {

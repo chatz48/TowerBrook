@@ -61,7 +61,7 @@ jobs:
             fi
             sleep 2
           done
-          BASE_URL=http://localhost:3000 pnpm test:e2e:ci --grep smoke
+          BASE_URL=http://localhost:3000 pnpm test:e2e:ci --grep @smoke
 
       - uses: actions/upload-artifact@v4
         if: failure()

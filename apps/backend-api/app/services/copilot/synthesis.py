@@ -11,6 +11,20 @@ from app.services.deepseek_extractor import extractor
 from app.services.deepseek_llm import llm
 
 
+def _trim_synthesis(synthesis: CopilotSynthesis) -> CopilotSynthesis:
+    summary = synthesis.answer_summary.strip()
+    if len(summary) > 420:
+        summary = f"{summary[:417].rstrip()}..."
+    return CopilotSynthesis(
+        answer_summary=summary,
+        key_findings=synthesis.key_findings[:2],
+        gaps=synthesis.gaps[:2],
+        risks=synthesis.risks[:1],
+        follow_ups=synthesis.follow_ups[:3],
+        uncertainty_notes=synthesis.uncertainty_notes[:200].strip(),
+    )
+
+
 async def synthesize_answer(
     ctx: CopilotContext,
     intent: str,
@@ -35,7 +49,7 @@ async def synthesize_answer(
                 user_json,
                 CopilotSynthesis,
                 model=model,
-                max_tokens=1800 if model.endswith("pro") else 1200,
+                max_tokens=900 if model.endswith("pro") else 600,
             )
         except Exception:
             synthesis = None
@@ -46,17 +60,18 @@ async def synthesize_answer(
             user_payload,
         )
         synthesis = CopilotSynthesis(
-            answer_summary=prose[:1200],
+            answer_summary=prose[:420],
             key_findings=[],
-            gaps=["Model structured synthesis unavailable — review citations directly."],
+            gaps=[],
             risks=[],
             follow_ups=[],
             uncertainty_notes="Fallback synthesis path used.",
         )
 
+    synthesis = _trim_synthesis(synthesis)
     verified, warnings = verify_synthesis(synthesis, citations)
     if warnings:
         verified.uncertainty_notes = (
             f"{verified.uncertainty_notes} {'; '.join(warnings[:3])}".strip()
         )
-    return verified
+    return _trim_synthesis(verified)

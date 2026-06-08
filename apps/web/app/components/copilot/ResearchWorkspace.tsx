@@ -24,11 +24,11 @@ import { consumeAskStream, phaseToProgressStep } from "@/lib/ask-stream-client";
 import {
   buildBasketPrompt,
   buildWorkspacePageContext,
-  formatSourceId,
-  mergePageContext,
   defaultQuestion,
+  formatSourceId,
   makeInitialFilters,
   makeMessageId,
+  mergePageContext,
   toChatHistory,
   type ConversationMessage,
 } from "./utils";
@@ -175,6 +175,22 @@ export default function ResearchWorkspace({
     setLoading(false);
     setError("The Copilot request was stopped. Adjust filters or ask again.");
   }
+
+  function startNewChat() {
+    if (loading) return;
+    activeRequest.current?.abort("new-chat");
+    activeRequest.current = null;
+    setConversation([]);
+    setAnswer(null);
+    setError("");
+    setSelectedSourceId(null);
+    setProgressStep(0);
+    const nextQuestion = defaultQuestion(isThemeFocus(filters.theme) ? filters.theme : "all");
+    setQuestion(nextQuestion);
+    setLoadingQuestion(nextQuestion);
+  }
+
+  const hasActiveChat = conversation.length > 0 || Boolean(answer);
 
   useEffect(() => {
     if (!autoRunInitial) {
@@ -328,7 +344,21 @@ export default function ResearchWorkspace({
                 <p className="mt-1 text-xs text-ink-faint">
                   Ask questions, action the current basket, and save useful outputs back into the workflow.
                 </p>
+                <p className="mt-1 text-[11px] text-ink-faint">
+                  This chat stays in the tab until you start a new chat or refresh. Basket and notes are saved separately in your browser.
+                </p>
               </div>
+              {hasActiveChat ? (
+                <button
+                  type="button"
+                  data-testid="copilot-new-chat"
+                  onClick={startNewChat}
+                  disabled={loading}
+                  className="ee-button ee-button-secondary min-h-8 shrink-0 px-3 text-xs"
+                >
+                  New chat
+                </button>
+              ) : null}
             </div>
 
             <div className="mt-3 flex flex-wrap items-end justify-between gap-3 border-b border-line pb-0">
