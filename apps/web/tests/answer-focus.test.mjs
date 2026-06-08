@@ -20,6 +20,11 @@ test("inferIntent routes basket call plan to build_call_plan", () => {
   );
 });
 
+test("inferIntent routes plain memo prompts to memo-style call plan", () => {
+  assert.equal(resolveObjective("Find experts", "write a memo for me"), "Prepare calls");
+  assert.equal(inferIntent("write a memo for me", "Prepare calls"), "build_call_plan");
+});
+
 test("inferIntent routes theme focus questions to prioritize_theme", () => {
   assert.equal(
     inferIntent("Which specific theme should we focus on first?", "Find experts"),

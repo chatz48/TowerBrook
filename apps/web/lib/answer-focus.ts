@@ -27,7 +27,7 @@ export function resolveObjective(stated: string | undefined, question: string): 
 
 export function inferObjectiveFromQuestion(question: string): string {
   const q = question.toLowerCase();
-  if (/investment memo|partner memo|memo section|memo and call plan/i.test(q)) {
+  if (isMemoDraftQuestion(question)) {
     return "Prepare calls";
   }
   if (isWarmIntroQuestion(question)) return "Prepare calls";
@@ -87,7 +87,8 @@ export function inferIntent(question: string, objective: string): string {
   }
   if (
     objective === "Prepare calls" ||
-    /call plan|three-call|call sequence|investment memo and call plan|memo and call plan|call brief/i.test(q)
+    /call plan|three-call|call sequence|memo and call plan|call brief/i.test(q) ||
+    isMemoDraftQuestion(question)
   ) {
     return "build_call_plan";
   }
@@ -121,6 +122,15 @@ export function isWarmIntroQuestion(question: string): boolean {
     /\b(intro|introduction)\s+(path|route|paths|routes)\b/.test(q) ||
     /\b(strongest|best)\s+(intro|introduction|access)\s+(path|route|paths|routes)\b/.test(q) ||
     /\bwho\s+can\s+(introduce|connect)\s+us\b/.test(q)
+  );
+}
+
+export function isMemoDraftQuestion(question: string): boolean {
+  const q = question.toLowerCase();
+  return (
+    /investment memo|partner memo|memo section|memo and call plan/i.test(q) ||
+    /\b(write|draft|prepare|create|build)\s+(a\s+|an\s+)?(partner\s+|investment\s+)?memo\b/.test(q) ||
+    /\bmemo\s+(for me|from|using|about|on)\b/.test(q)
   );
 }
 
@@ -164,7 +174,7 @@ export function planSections(question: string, objective: string): Record<Sectio
 
   if (intent === "build_call_plan") {
     const listenPrimary = mentionsListen && !callsInQuestion;
-    const memoStyle = /investment memo|partner memo|memo and call plan|what each person unlocks/i.test(q);
+    const memoStyle = isMemoDraftQuestion(question) || /what each person unlocks/i.test(q);
     return {
       experts: memoStyle ? primary(4) : expandable(4),
       companies: mentionsCompanies ? expandable(3) : expandable(2),

@@ -72,8 +72,11 @@ export function normalizeAnswerSummary(text: string): string {
 }
 
 export function isMemoCallPlanQuestion(question: string): boolean {
-  return /investment memo|partner memo|memo section|memo and call plan|call brief|what each person unlocks/i.test(
-    question,
+  const q = question.toLowerCase();
+  return (
+    /investment memo|partner memo|memo section|memo and call plan|call brief|what each person unlocks/i.test(q) ||
+    /\b(write|draft|prepare|create|build)\s+(a\s+|an\s+)?(partner\s+|investment\s+)?memo\b/.test(q) ||
+    /\bmemo\s+(for me|from|using|about|on)\b/.test(q)
   );
 }
 
@@ -286,6 +289,10 @@ export function resolveCompactDisplaySummary(answer: AskResponse): string {
   }
 
   const full = resolveDisplaySummary(answer);
+  if (isMemoCallPlanQuestion(answer.input_context?.question ?? "")) {
+    const line = full.split("\n").find((part) => part.trim()) ?? full;
+    return line.length > 220 ? `${line.slice(0, 217).trim()}...` : line;
+  }
   if (answer.intent === "build_call_plan" && answer.call_sequence?.length) {
     const firstStep = answer.call_sequence[0];
     const expert = answer.ranked_experts.find((item) =>

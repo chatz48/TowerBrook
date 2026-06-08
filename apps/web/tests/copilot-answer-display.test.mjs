@@ -223,6 +223,39 @@ test("resolveDisplaySummary uses memo call plan layout for investment memo promp
   assert.doesNotMatch(text, /No information on James Knight exists/i);
 });
 
+test("resolveDisplaySummary uses memo layout for plain write memo prompts", () => {
+  const text = resolveDisplaySummary({
+    intent: "build_call_plan",
+    input_context: {
+      question: "write a memo for me",
+      theme: "Clean Energy Advisory",
+    },
+    answer_summary: "ignored",
+    ranked_experts: [
+      {
+        expert_id: "nicholas-beatty",
+        name: "Nicholas Beatty",
+        firm: "Zenobe",
+        why: "Co-founded a grid-scale battery operator backed by infrastructure capital.",
+      },
+    ],
+    ranked_companies: [],
+    gaps: ["Confirm buyer-side references."],
+    call_sequence: [
+      {
+        phase: "Market orientation",
+        expert_ids: ["nicholas-beatty"],
+        goal: "Validate grid-scale battery demand and diligence gaps.",
+        citations: [],
+      },
+    ],
+  });
+  assert.match(text, /Investment memo \+ call plan/);
+  assert.match(text, /What each expert unlocks/);
+  assert.match(text, /Nicholas Beatty/);
+  assert.doesNotMatch(text, /^Start with/i);
+});
+
 test("resolveDisplaySummary formats call plans from call_sequence", () => {
   const text = resolveDisplaySummary({
     intent: "build_call_plan",
