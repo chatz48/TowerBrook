@@ -3,13 +3,40 @@ from __future__ import annotations
 import hashlib
 import logging
 import math
+import shutil
 from os import getenv
+from pathlib import Path
 
 from app.config import get_settings
 
 logger = logging.getLogger("towerbrook.embeddings")
 
 BGE_MODEL_DEFAULT = "BAAI/bge-small-en-v1.5"
+_CORRUPT_CACHE_MARKERS = (
+    "no_suchfile",
+    "file doesn't exist",
+    "corrupted",
+    "could not load model",
+    "model_optimized.onnx",
+)
+
+
+def _resolve_fastembed_cache_dir() -> Path:
+    override = getenv("FASTEMBED_CACHE_PATH")
+    if override:
+        return Path(override).expanduser()
+    return Path.home() / ".cache" / "towerbrook" / "fastembed"
+
+
+def _is_corrupt_cache_error(exc: Exception) -> bool:
+    message = str(exc).lower()
+    return any(marker in message for marker in _CORRUPT_CACHE_MARKERS)
+
+
+def _clear_fastembed_cache(cache_dir: Path) -> None:
+    if cache_dir.exists():
+        shutil.rmtree(cache_dir, ignore_errors=True)
+    cache_dir.mkdir(parents=True, exist_ok=True)
 
 
 class BgeEmbeddingService:
@@ -28,17 +55,44 @@ class BgeEmbeddingService:
             return
         if getenv("BGE_SEMANTIC_ENABLED", "true").lower() == "false":
             return
-        try:
-            from fastembed import TextEmbedding
 
-            self._fastembed = TextEmbedding(model_name=self.model_name)
-            self.semantic_search_available = True
-            logger.info("Loaded semantic embeddings: %s (%sd)", self.model_name, self.dimensions)
-        except Exception as exc:
-            logger.warning(
-                "fastembed unavailable (%s); using hash fallback. pip install fastembed to enable semantic RAG.",
-                exc,
-            )
+        cache_dir = _resolve_fastembed_cache_dir()
+        for attempt in range(2):
+            try:
+                from fastembed import TextEmbedding
+
+                self._fastembed = TextEmbedding(
+                    model_name=self.model_name,
+                    cache_dir=str(cache_dir),
+                )
+                self.semantic_search_available = True
+                logger.info(
+                    "Loaded semantic embeddings: %s (%sd) cache=%s",
+                    self.model_name,
+                    self.dimensions,
+                    cache_dir,
+                )
+                return
+            except ImportError as exc:
+                logger.warning(
+                    "fastembed unavailable (%s); using hash fallback. pip install fastembed to enable semantic RAG.",
+                    exc,
+                )
+                return
+            except Exception as exc:
+                if attempt == 0 and _is_corrupt_cache_error(exc):
+                    logger.warning(
+                        "fastembed cache corrupt (%s); clearing %s and retrying download",
+                        exc,
+                        cache_dir,
+                    )
+                    _clear_fastembed_cache(cache_dir)
+                    continue
+                logger.warning(
+                    "fastembed unavailable (%s); using hash fallback. pip install fastembed to enable semantic RAG.",
+                    exc,
+                )
+                return
 
     def embed(self, text: str) -> list[float]:
         if self.semantic_search_available and self._fastembed is not None:

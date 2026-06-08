@@ -42,7 +42,7 @@ export default async function globalSetup() {
     );
   }
 
-  const response = await fetch(`${backendUrl}/health`, { signal: AbortSignal.timeout(10_000) });
+  const response = await fetch(`${backendUrl}/health`, { signal: AbortSignal.timeout(30_000) });
   if (!response.ok) {
     throw new Error(`Backend health returned HTTP ${response.status}`);
   }

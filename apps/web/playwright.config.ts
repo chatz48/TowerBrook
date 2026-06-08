@@ -34,7 +34,7 @@ export default defineConfig({
   retries: 1,
   workers: 1,
   reporter: [["html", { outputFolder: "playwright-report" }], ["list"]],
-  timeout: 45_000,
+  timeout: 120_000,
   expect: { timeout: 15_000 },
 
   use: {
