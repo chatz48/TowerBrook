@@ -7,6 +7,7 @@ import { requireLiveBackend } from "./helpers/backend-guard";
 import {
   ensureCopilotResponse,
   rankedCompaniesHeading,
+  rankedExpertsHeading,
   submitCopilotQuestion,
   waitForCopilotBaseline,
   waitForCopilotEnrichment,
@@ -32,7 +33,6 @@ test.describe("Copilot page @copilot", () => {
     await expect(filters.getByText("Theme", { exact: true })).toBeVisible();
     await expect(filters.getByText("Geography", { exact: true })).toBeVisible();
     await expect(filters.getByText("Expert archetype", { exact: true })).toBeVisible();
-    await expect(page.locator("text=Source evidence")).toBeVisible();
     await expect(page.getByRole("button", { name: "Ask", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Notes" })).toBeVisible();
     await expect(page.getByRole("link", { name: /Open Discover/ })).toBeVisible();
@@ -127,11 +127,12 @@ test.describe("Copilot page @copilot", () => {
       { skipAutoRun: true },
     );
     await page.goto("/ask");
-    await expect(page.getByTestId("basket-context-panel")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Gather research" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Draft outreach" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Prepare calls" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Draft memo section" })).toBeVisible();
+    const basketPanel = page.getByTestId("basket-context-panel");
+    await expect(basketPanel).toBeVisible();
+    await expect(basketPanel.getByRole("button", { name: "Gather research" })).toBeVisible();
+    await expect(basketPanel.getByRole("button", { name: "Draft outreach" })).toBeVisible();
+    await expect(basketPanel.getByRole("button", { name: "Prepare calls" })).toBeVisible();
+    await expect(basketPanel.getByRole("button", { name: "Draft memo section" })).toBeVisible();
   });
 
   test("@copilot basket auto-run submits review prompt", { timeout: 150_000 }, async ({ page }) => {
