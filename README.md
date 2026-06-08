@@ -1,5 +1,7 @@
 # TowerBrook People Expert Engine
 
+Live Site: [https://towerbrook-arun.vercel.app](https://towerbrook-arun.vercel.app)
+
 TowerBrook People Expert Engine is a graph-backed origination platform for
 thematic private equity sourcing. It turns a sector thesis into a practical
 calling plan: the most relevant experts, the companies they can unlock, the
@@ -38,30 +40,30 @@ database:
 
 1. Start in the command centre to pick a theme and review market coverage.
 2. Open the expert call list and shortlist the people most likely to unlock the
-   market.
+  market.
 3. Review each expert's source evidence, deal history, company links and
-   warm-path signals.
+  warm-path signals.
 4. Assign ownership, set status and capture notes so the investment team can
-   coordinate coverage collaboratively.
+  coordinate coverage collaboratively.
 5. Save experts and companies to the basket as a working deal-team shortlist.
 6. Ask Copilot to turn the basket into a call plan, diligence sequence, target
-   review or memo outline.
+  review or memo outline.
 7. Move the answer into reports as a sourced output for a Monday meeting,
-   call-prep pack or IC-style memo.
+  call-prep pack or IC-style memo.
 
 The main routes are:
 
 - `/` command centre for theme selection, market coverage and workflow entry.
 - `/experts` prioritised expert call list with ownership, status, notes,
-  evidence, basket actions and exportable meeting packs.
+evidence, basket actions and exportable meeting packs.
 - `/companies` target explorer showing companies surfaced through expert,
-  transaction and source evidence.
+transaction and source evidence.
 - `/ask` Copilot workspace that returns ranked experts, ranked companies, call
-  sequence, risks, gaps and cited sources.
+sequence, risks, gaps and cited sources.
 - `/reports` memo workspace for sourced theme memos, company briefs and expert
-  call plans.
+call plans.
 - `/graph`, `/discover`, `/deals` and `/sources` for relationship mapping,
-  discovery, transaction evidence and source review.
+discovery, transaction evidence and source review.
 
 ## Core Features
 
@@ -180,6 +182,8 @@ flowchart TD
   H -->|yes| I --> J --> K --> L --> M --> G
   H -->|no| G
 ```
+
+
 
 This keeps the ranking authority with the curated TowerBrook directory and
 warm-path register, while still using the LLM where it is strongest: turning
