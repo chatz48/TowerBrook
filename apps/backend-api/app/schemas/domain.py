@@ -153,6 +153,15 @@ class ResearchJob(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
+class MemorySummarizeRequest(BaseModel):
+    prior_summary: str = ""
+    pairs: list[dict[str, str]] = Field(default_factory=list)
+
+
+class MemorySummarizeResponse(BaseModel):
+    summary: str
+
+
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=12000)
     session_id: str | None = None

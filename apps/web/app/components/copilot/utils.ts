@@ -38,8 +38,8 @@ export function defaultQuestion(theme: ThemeFocus) {
   return "Who should I call first across the three investment themes?";
 }
 
-/** Last three Q&A pairs — enough for follow-ups without bloating prompts. */
-export const MAX_CHAT_HISTORY_TURNS = 6;
+/** Send enough turns for server-side memory compaction (summarise after five Q&A pairs). */
+export const MAX_CHAT_HISTORY_TURNS = 24;
 
 export function toChatHistory(messages: ConversationMessage[]): ChatTurn[] {
   return messages

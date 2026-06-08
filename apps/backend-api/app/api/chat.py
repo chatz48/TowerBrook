@@ -3,10 +3,26 @@ from uuid import uuid4
 from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 
-from app.schemas.domain import ChatRequest, ChatResponse
+from app.schemas.domain import (
+    ChatRequest,
+    ChatResponse,
+    MemorySummarizeRequest,
+    MemorySummarizeResponse,
+)
+from app.services.copilot.memory import summarize_conversation
 from app.services.copilot.orchestrator import run_copilot, run_copilot_stream
 
 router = APIRouter(prefix="/chat", tags=["chat"])
+
+
+@router.post("/memory/summarize", response_model=MemorySummarizeResponse)
+async def summarize_memory(request: MemorySummarizeRequest) -> MemorySummarizeResponse:
+    """Compress older copilot turns while preserving names, goals, and open questions."""
+    summary = await summarize_conversation(
+        request.prior_summary or None,
+        request.pairs,
+    )
+    return MemorySummarizeResponse(summary=summary)
 
 
 @router.post("", response_model=ChatResponse)

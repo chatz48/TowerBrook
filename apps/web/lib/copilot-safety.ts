@@ -57,6 +57,8 @@ export type ExternalChatPayload = {
     headings?: string[];
   };
   prior_entity_ids?: { expert_ids: string[]; company_ids: string[] };
+  conversation_summary?: string;
+  recent_turns?: Array<{ role: string; content: string }>;
 };
 
 /** Structured backend payload for LangGraph intent router + Keiro research. */
@@ -74,6 +76,10 @@ export function buildExternalChatPayload(
     answer_summary: string;
     ranked_expert_names: string[];
     ranked_company_names: string[];
+  },
+  memory?: {
+    conversation_summary?: string;
+    recent_turns?: Array<{ role: string; content: string }>;
   },
 ): { message: string; theme_id?: string } {
   const safe = sanitizePageContextForExternal(pageContext);
@@ -99,6 +105,8 @@ export function buildExternalChatPayload(
         }
       : {}),
     ...(entityIds ? { prior_entity_ids: entityIds } : {}),
+    ...(memory?.conversation_summary ? { conversation_summary: memory.conversation_summary } : {}),
+    ...(memory?.recent_turns?.length ? { recent_turns: memory.recent_turns.slice(0, 4) } : {}),
   };
   return {
     message: JSON.stringify(payload),

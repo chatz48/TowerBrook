@@ -19,6 +19,11 @@ import {
   subscribeCopilotPreferences,
   writeSkipBasketAutoRun,
 } from "@/lib/copilot-preferences";
+import {
+  clearConversationSummary,
+  readConversationSummary,
+  writeConversationSummary,
+} from "@/lib/copilot-session-memory";
 import { outreachStorageKey, readOutreachState } from "@/lib/outreach-plan";
 import { consumeAskStream, phaseToProgressStep } from "@/lib/ask-stream-client";
 import {
@@ -57,6 +62,9 @@ export default function ResearchWorkspace({
   const [filters, setFilters] = useState<CopilotFilters>(startingFilters);
   const [answer, setAnswer] = useState<AskResponse | null>(null);
   const [conversation, setConversation] = useState<ConversationMessage[]>([]);
+  const [conversationSummary, setConversationSummary] = useState<string | undefined>(
+    () => readConversationSummary(),
+  );
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingQuestion, setLoadingQuestion] = useState(startingQuestion);
@@ -106,6 +114,7 @@ export default function ResearchWorkspace({
           question: cleanQuestion,
           filters: nextFilters,
           chatHistory,
+          conversationSummary,
           pageContext: pageContextFor(nextFilters),
         },
         {
@@ -140,6 +149,10 @@ export default function ResearchWorkspace({
         },
       ]);
       setSelectedSourceId(data.sources_used?.[0]?.source_id ?? null);
+      if (data.conversation_summary) {
+        setConversationSummary(data.conversation_summary);
+        writeConversationSummary(data.conversation_summary);
+      }
     } catch (e) {
       if (activeRequest.current !== controller) return;
       const isAbort = e instanceof DOMException && e.name === "AbortError";
@@ -182,6 +195,8 @@ export default function ResearchWorkspace({
     activeRequest.current = null;
     setConversation([]);
     setAnswer(null);
+    setConversationSummary(undefined);
+    clearConversationSummary();
     setError("");
     setSelectedSourceId(null);
     setProgressStep(0);
@@ -345,8 +360,13 @@ export default function ResearchWorkspace({
                   Ask questions, action the current basket, and save useful outputs back into the workflow.
                 </p>
                 <p className="mt-1 text-[11px] text-ink-faint">
-                  This chat stays in the tab until you start a new chat or refresh. Basket and notes are saved separately in your browser.
+                  This chat stays in the tab until you start a new chat or refresh. After five Q&A pairs, older context is summarised so follow-ups stay sharp. Basket and notes are saved separately.
                 </p>
+                {conversationSummary ? (
+                  <p className="mt-1 text-[11px] text-ink-faint" data-testid="copilot-memory-active">
+                    Earlier turns are compressed into session memory ({conversationSummary.split("\n").length} notes).
+                  </p>
+                ) : null}
               </div>
               {hasActiveChat ? (
                 <button

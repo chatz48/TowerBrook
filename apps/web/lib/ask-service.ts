@@ -13,6 +13,13 @@ import type { Company, Deal, Expert, ExpertType, Source, ThemeId } from "@/lib/t
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 import { warmPathsForExpert, warmPathStatusLabel } from "@/lib/warm-paths";
 import { inferIntent, planSections } from "@/lib/answer-focus";
+import {
+  buildEffectiveChatMemory,
+  groupQAPairs,
+  questionWithChatMemory,
+  VERBATIM_PAIR_WINDOW,
+  type ResolvedChatMemory,
+} from "@/lib/chat-memory";
 import { AskTraceCollector } from "@/lib/request-traces";
 
 type RankedExpert = AskResponse["ranked_experts"][number];
@@ -21,6 +28,7 @@ type RankedCompany = AskResponse["ranked_companies"][number];
 type AskRequest = {
   question?: string;
   chatHistory?: ChatTurn[];
+  conversationSummary?: string;
   filters?: {
     objective?: string;
     theme?: string;
@@ -98,6 +106,7 @@ export async function handleAskRequest(request: Request) {
       prepared.pageContext,
       prepared.chatHistory,
       prepared.baseline,
+      prepared.chatMemory,
       requestId,
     );
 
@@ -191,6 +200,13 @@ async function handleAskStream(request: Request): Promise<Response> {
             ranked_expert_names: prepared.baseline.ranked_experts.map((e) => e.name),
             ranked_company_names: prepared.baseline.ranked_companies.map((c) => c.name),
           },
+          {
+            conversation_summary: prepared.chatMemory.summary,
+            recent_turns: prepared.chatMemory.effectiveHistory.map((turn) => ({
+              role: turn.role === "assistant" ? "assistant" : "user",
+              content: turn.content ?? "",
+            })),
+          },
         );
 
         const backendRes = await fetchBackendStream(external.message, external.theme_id, requestId);
@@ -270,6 +286,7 @@ async function prepareAskContext(body: AskRequest): Promise<
       filters: NonNullable<AskRequest["filters"]>;
       pageContext?: PageContext;
       chatHistory: ChatTurn[];
+      chatMemory: ResolvedChatMemory;
       baseline: AskResponse;
     }
   | { error: string }
@@ -278,8 +295,13 @@ async function prepareAskContext(body: AskRequest): Promise<
   if (!question) return { error: "Ask a question first." };
 
   const chatHistory = normalizeChatHistory(body.chatHistory);
+  const chatMemory = await resolveChatMemory(chatHistory, body.conversationSummary);
   const pageContext = normalizePageContext(body.pageContext);
-  const contextualQuestion = questionWithChatHistory(question, chatHistory);
+  const contextualQuestion = questionWithChatMemory(
+    question,
+    chatMemory.effectiveHistory,
+    chatMemory.summary,
+  );
   const baseline = await buildStructuredAnswer(
     contextualQuestion,
     body.filters ?? {},
@@ -292,8 +314,51 @@ async function prepareAskContext(body: AskRequest): Promise<
     filters: body.filters ?? {},
     pageContext,
     chatHistory,
-    baseline,
+    chatMemory,
+    baseline: {
+      ...baseline,
+      conversation_summary: chatMemory.summary,
+      memory_pairs_compressed: chatMemory.pairsCompressed,
+      memory_total_pairs: chatMemory.totalPairs,
+    },
   };
+}
+
+async function resolveChatMemory(
+  history: ChatTurn[],
+  priorSummary?: string,
+): Promise<ResolvedChatMemory> {
+  const built = buildEffectiveChatMemory(history, priorSummary);
+  if (built.pairsCompressed === 0) {
+    return built;
+  }
+
+  const pairs = groupQAPairs(history);
+  const toCompress = pairs.slice(0, -VERBATIM_PAIR_WINDOW);
+  const llmSummary = await summarizeConversationViaBackend(priorSummary, toCompress);
+  return {
+    ...built,
+    summary: llmSummary ?? built.summary,
+  };
+}
+
+async function summarizeConversationViaBackend(
+  priorSummary: string | undefined,
+  pairs: Array<{ user: string; assistant: string }>,
+): Promise<string | undefined> {
+  if (!hasBackendApi() || !pairs.length) return undefined;
+  try {
+    const result = await callBackendApi<{ summary: string }>("/chat/memory/summarize", {
+      method: "POST",
+      body: JSON.stringify({
+        prior_summary: priorSummary ?? "",
+        pairs,
+      }),
+    });
+    return result?.summary?.trim() || undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 async function fetchBackendStream(
@@ -325,6 +390,7 @@ async function maybeAskIntelligenceApi(
   pageContext?: PageContext,
   chatHistory: ChatTurn[] = [],
   baseline?: AskResponse,
+  chatMemory?: ResolvedChatMemory,
   requestId?: string,
 ): Promise<{ result: BackendChatResult | null; error?: string }> {
   if (!hasBackendApi()) return { result: null };
@@ -340,6 +406,15 @@ async function maybeAskIntelligenceApi(
             answer_summary: baseline.answer_summary,
             ranked_expert_names: baseline.ranked_experts.map((e) => e.name),
             ranked_company_names: baseline.ranked_companies.map((c) => c.name),
+          }
+        : undefined,
+      chatMemory
+        ? {
+            conversation_summary: chatMemory.summary,
+            recent_turns: chatMemory.effectiveHistory.map((turn) => ({
+              role: turn.role === "assistant" ? "assistant" : "user",
+              content: turn.content ?? "",
+            })),
           }
         : undefined,
     );
@@ -731,16 +806,7 @@ function normalizeChatHistory(history: ChatTurn[] | undefined): ChatTurn[] {
       content: typeof turn.content === "string" ? turn.content.trim() : "",
     }))
     .filter((turn) => turn.content.length > 0)
-    .slice(-6);
-}
-
-function questionWithChatHistory(question: string, history: ChatTurn[]): string {
-  if (!history.length) return question;
-  const context = history
-    .slice(-6)
-    .map((turn) => `${turn.role === "assistant" ? "Assistant" : "User"}: ${turn.content}`)
-    .join("\n");
-  return `${question}\n\nUse this prior conversation only to resolve follow-up references; prioritize the latest user question.\n${context}`;
+    .slice(-24);
 }
 
 function buildSourceIndex(experts: Expert[], companies: Company[], deals: Deal[] = []): Map<string, SourceRecord> {
