@@ -10,7 +10,6 @@ ToolName = Literal[
     "rag_search_entities",
     "web_search",
     "fetch_source",
-    "graph_query",
     "generate_report",
     "run_deep_discovery",
     "linkedin_link_search",
@@ -22,7 +21,6 @@ ALLOWED_TOOLS = {
     "rag_search_entities",
     "web_search",
     "fetch_source",
-    "graph_query",
     "generate_report",
     "run_deep_discovery",
     "linkedin_link_search",
@@ -160,6 +158,18 @@ class MemorySummarizeRequest(BaseModel):
 
 class MemorySummarizeResponse(BaseModel):
     summary: str
+
+
+class ChitchatRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=1200)
+    conversation_summary: str = ""
+    recent_turns: list[dict[str, str]] = Field(default_factory=list)
+    theme_scope: str = "all themes"
+
+
+class ChitchatResponse(BaseModel):
+    reply: str
+    model_used: str
 
 
 class ChatRequest(BaseModel):

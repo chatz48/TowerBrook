@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
+from collections.abc import Callable
+from typing import Any, TypeVar
 from uuid import uuid4
 import hashlib
 
@@ -8,6 +9,8 @@ from supabase import Client, create_client
 
 from app.config import get_settings
 from app.schemas.domain import ResearchJob, ResearchJobRequest, SourceRecord
+
+T = TypeVar("T")
 
 
 class SupabaseRepository:
@@ -26,6 +29,11 @@ class SupabaseRepository:
         self.memory_discovery_candidates: dict[str, dict[str, Any]] = {}
         self.memory_entity_match_candidates: dict[str, dict[str, Any]] = {}
 
+    def _dispatch(self, client_fn: Callable[[Client], T], memory_fn: Callable[[], T]) -> T:
+        if self.client:
+            return client_fn(self.client)
+        return memory_fn()
+
     def health(self) -> dict[str, Any]:
         return {"supabase_enabled": self.enabled}
 
@@ -40,26 +48,34 @@ class SupabaseRepository:
             "priority": request.priority,
             "metadata": request.metadata,
         }
-        if self.client:
-            row = self.client.table("research_jobs").insert(payload).execute().data[0]
+
+        def client_create(client: Client) -> ResearchJob:
+            row = client.table("research_jobs").insert(payload).execute().data[0]
             return self._job_from_row(row)
 
-        job_id = str(uuid4())
-        row = {"id": job_id, **payload, "progress_completed": 0, "progress_total": 0}
-        self.memory_jobs[job_id] = row
-        return self._job_from_row(row)
+        def memory_create() -> ResearchJob:
+            job_id = str(uuid4())
+            row = {"id": job_id, **payload, "progress_completed": 0, "progress_total": 0}
+            self.memory_jobs[job_id] = row
+            return self._job_from_row(row)
+
+        return self._dispatch(client_create, memory_create)
 
     def get_job(self, job_id: str) -> ResearchJob | None:
-        if self.client:
-            rows = self.client.table("research_jobs").select("*").eq("id", job_id).limit(1).execute().data
+        def client_get(client: Client) -> ResearchJob | None:
+            rows = client.table("research_jobs").select("*").eq("id", job_id).limit(1).execute().data
             return self._job_from_row(rows[0]) if rows else None
-        row = self.memory_jobs.get(job_id)
-        return self._job_from_row(row) if row else None
+
+        def memory_get() -> ResearchJob | None:
+            row = self.memory_jobs.get(job_id)
+            return self._job_from_row(row) if row else None
+
+        return self._dispatch(client_get, memory_get)
 
     def claim_next_job(self) -> ResearchJob | None:
-        if self.client:
+        def client_claim(client: Client) -> ResearchJob | None:
             rows = (
-                self.client.table("research_jobs")
+                client.table("research_jobs")
                 .select("*")
                 .eq("status", "queued")
                 .order("priority", desc=True)
@@ -72,7 +88,7 @@ class SupabaseRepository:
                 return None
             job_id = rows[0]["id"]
             updated = (
-                self.client.table("research_jobs")
+                client.table("research_jobs")
                 .update({"status": "running"})
                 .eq("id", job_id)
                 .execute()
@@ -80,16 +96,19 @@ class SupabaseRepository:
             )
             return self._job_from_row(updated)
 
-        for row in sorted(self.memory_jobs.values(), key=lambda x: (-x.get("priority", 0), x["id"])):
-            if row["status"] == "queued":
-                row["status"] = "running"
-                return self._job_from_row(row)
-        return None
+        def memory_claim() -> ResearchJob | None:
+            for row in sorted(self.memory_jobs.values(), key=lambda x: (-x.get("priority", 0), x["id"])):
+                if row["status"] == "queued":
+                    row["status"] = "running"
+                    return self._job_from_row(row)
+            return None
+
+        return self._dispatch(client_claim, memory_claim)
 
     def claim_job(self, job_id: str) -> ResearchJob | None:
-        if self.client:
+        def client_claim(client: Client) -> ResearchJob | None:
             rows = (
-                self.client.table("research_jobs")
+                client.table("research_jobs")
                 .select("*")
                 .eq("id", job_id)
                 .eq("status", "queued")
@@ -100,7 +119,7 @@ class SupabaseRepository:
             if not rows:
                 return None
             updated = (
-                self.client.table("research_jobs")
+                client.table("research_jobs")
                 .update({"status": "running"})
                 .eq("id", job_id)
                 .eq("status", "queued")
@@ -109,11 +128,14 @@ class SupabaseRepository:
             )
             return self._job_from_row(updated[0]) if updated else None
 
-        row = self.memory_jobs.get(job_id)
-        if not row or row["status"] != "queued":
-            return None
-        row["status"] = "running"
-        return self._job_from_row(row)
+        def memory_claim() -> ResearchJob | None:
+            row = self.memory_jobs.get(job_id)
+            if not row or row["status"] != "queued":
+                return None
+            row["status"] = "running"
+            return self._job_from_row(row)
+
+        return self._dispatch(client_claim, memory_claim)
 
     def update_job(self, job_id: str, values: dict[str, Any]) -> None:
         if self.client:
@@ -136,73 +158,91 @@ class SupabaseRepository:
             "storage_path": source.get("storage_path"),
             "metadata": source.get("metadata", {}),
         }
-        if self.client:
-            rows = self.client.table("sources").upsert(payload, on_conflict="external_id").execute().data
+
+        def client_upsert(client: Client) -> SourceRecord:
+            rows = client.table("sources").upsert(payload, on_conflict="external_id").execute().data
             return SourceRecord(**rows[0])
 
-        source_id = str(uuid4())
-        row = {"id": source_id, **payload}
-        self.memory_sources[source_id] = row
-        return SourceRecord(**row)
+        def memory_upsert() -> SourceRecord:
+            source_id = str(uuid4())
+            row = {"id": source_id, **payload}
+            self.memory_sources[source_id] = row
+            return SourceRecord(**row)
+
+        return self._dispatch(client_upsert, memory_upsert)
 
     def insert_chunks(self, chunks: list[dict[str, Any]]) -> None:
-        if not chunks:
-            return
-        if self.client:
+        if chunks and self.client:
             self.client.table("source_chunks").insert(chunks).execute()
 
     def upsert_people(self, people: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not people:
             return []
-        if self.client:
-            return self.client.table("people").upsert(people, on_conflict="external_id").execute().data
-        rows = []
-        for person in people:
-            row = {"id": str(uuid4()), **person}
-            self.memory_people[row["id"]] = row
-            rows.append(row)
-        return rows
+
+        def client_upsert(client: Client) -> list[dict[str, Any]]:
+            return client.table("people").upsert(people, on_conflict="external_id").execute().data
+
+        def memory_upsert() -> list[dict[str, Any]]:
+            rows = []
+            for person in people:
+                row = {"id": str(uuid4()), **person}
+                self.memory_people[row["id"]] = row
+                rows.append(row)
+            return rows
+
+        return self._dispatch(client_upsert, memory_upsert)
 
     def upsert_companies(self, companies: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not companies:
             return []
-        if self.client:
-            return self.client.table("companies").upsert(companies, on_conflict="external_id").execute().data
-        rows = []
-        for company in companies:
-            row = {"id": str(uuid4()), **company}
-            self.memory_companies[row["id"]] = row
-            rows.append(row)
-        return rows
+
+        def client_upsert(client: Client) -> list[dict[str, Any]]:
+            return client.table("companies").upsert(companies, on_conflict="external_id").execute().data
+
+        def memory_upsert() -> list[dict[str, Any]]:
+            rows = []
+            for company in companies:
+                row = {"id": str(uuid4()), **company}
+                self.memory_companies[row["id"]] = row
+                rows.append(row)
+            return rows
+
+        return self._dispatch(client_upsert, memory_upsert)
 
     def upsert_discovery_candidates(self, candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not candidates:
             return []
-        if self.client:
+
+        def client_upsert(client: Client) -> list[dict[str, Any]]:
             return (
-                self.client.table("discovery_candidates")
+                client.table("discovery_candidates")
                 .upsert(candidates, on_conflict="external_id")
                 .execute()
                 .data
             )
-        rows = []
-        existing_by_external_id = {
-            row["external_id"]: candidate_id
-            for candidate_id, row in self.memory_discovery_candidates.items()
-        }
-        for candidate in candidates:
-            candidate_id = existing_by_external_id.get(candidate["external_id"], str(uuid4()))
-            row = {"id": candidate_id, **candidate}
-            self.memory_discovery_candidates[candidate_id] = row
-            rows.append(row)
-        return rows
+
+        def memory_upsert() -> list[dict[str, Any]]:
+            rows = []
+            existing_by_external_id = {
+                row["external_id"]: candidate_id
+                for candidate_id, row in self.memory_discovery_candidates.items()
+            }
+            for candidate in candidates:
+                candidate_id = existing_by_external_id.get(candidate["external_id"], str(uuid4()))
+                row = {"id": candidate_id, **candidate}
+                self.memory_discovery_candidates[candidate_id] = row
+                rows.append(row)
+            return rows
+
+        return self._dispatch(client_upsert, memory_upsert)
 
     def upsert_entity_match_candidates(self, matches: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not matches:
             return []
-        if self.client:
+
+        def client_upsert(client: Client) -> list[dict[str, Any]]:
             return (
-                self.client.table("entity_match_candidates")
+                client.table("entity_match_candidates")
                 .upsert(
                     matches,
                     on_conflict=(
@@ -213,46 +253,58 @@ class SupabaseRepository:
                 .execute()
                 .data
             )
-        rows = []
-        for match in matches:
-            row = {"id": str(uuid4()), **match}
-            self.memory_entity_match_candidates[row["id"]] = row
-            rows.append(row)
-        return rows
+
+        def memory_upsert() -> list[dict[str, Any]]:
+            rows = []
+            for match in matches:
+                row = {"id": str(uuid4()), **match}
+                self.memory_entity_match_candidates[row["id"]] = row
+                rows.append(row)
+            return rows
+
+        return self._dispatch(client_upsert, memory_upsert)
 
     def find_people_by_name(self, name: str, limit: int = 10) -> list[dict[str, Any]]:
-        if self.client:
+        def client_find(client: Client) -> list[dict[str, Any]]:
             return (
-                self.client.table("people")
+                client.table("people")
                 .select("*")
                 .ilike("name", name)
                 .limit(limit)
                 .execute()
                 .data
             )
-        lowered = name.casefold()
-        return [
-            row
-            for row in self.memory_people.values()
-            if str(row.get("name", "")).casefold() == lowered
-        ][:limit]
+
+        def memory_find() -> list[dict[str, Any]]:
+            lowered = name.casefold()
+            return [
+                row
+                for row in self.memory_people.values()
+                if str(row.get("name", "")).casefold() == lowered
+            ][:limit]
+
+        return self._dispatch(client_find, memory_find)
 
     def find_companies_by_name(self, name: str, limit: int = 10) -> list[dict[str, Any]]:
-        if self.client:
+        def client_find(client: Client) -> list[dict[str, Any]]:
             return (
-                self.client.table("companies")
+                client.table("companies")
                 .select("*")
                 .ilike("name", name)
                 .limit(limit)
                 .execute()
                 .data
             )
-        lowered = name.casefold()
-        return [
-            row
-            for row in self.memory_companies.values()
-            if str(row.get("name", "")).casefold() == lowered
-        ][:limit]
+
+        def memory_find() -> list[dict[str, Any]]:
+            lowered = name.casefold()
+            return [
+                row
+                for row in self.memory_companies.values()
+                if str(row.get("name", "")).casefold() == lowered
+            ][:limit]
+
+        return self._dispatch(client_find, memory_find)
 
     def insert_relationships(self, relationships: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not relationships:

@@ -150,7 +150,7 @@ export default function ResearchWorkspace({
       const isAbort = e instanceof DOMException && e.name === "AbortError";
       setError(
         isAbort
-          ? "The Copilot request was stopped. Adjust filters or ask again."
+          ? "The Copilot request was stopped. Ask again when ready."
           : e instanceof Error
             ? e.message
             : "Something went wrong",
@@ -168,7 +168,7 @@ export default function ResearchWorkspace({
     activeRequest.current?.abort("cancelled");
     activeRequest.current = null;
     setLoading(false);
-    setError("The Copilot request was stopped. Adjust filters or ask again.");
+    setError("The Copilot request was stopped. Ask again when ready.");
   }
 
   function startNewChat() {
@@ -262,7 +262,7 @@ export default function ResearchWorkspace({
       } catch (e) {
         if (!cancelled) {
           const isAbort = e instanceof DOMException && e.name === "AbortError";
-          setError(isAbort ? "The Copilot request was stopped. Adjust filters or ask again." : e instanceof Error ? e.message : "Something went wrong");
+          setError(isAbort ? "The Copilot request was stopped. Ask again when ready." : e instanceof Error ? e.message : "Something went wrong");
         }
       } finally {
         window.clearTimeout(timeout);

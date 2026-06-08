@@ -251,7 +251,7 @@ export default function ExpertFilters({
                 navigate({ q: query });
               }
             }}
-            placeholder="banker, BESS…"
+            placeholder="banker, advisor, founder…"
             className={fieldClass}
           />
         </label>

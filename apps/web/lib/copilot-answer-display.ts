@@ -81,6 +81,51 @@ export function isListenForQuestion(question: string): boolean {
   return /listen for|conviction signal|what to ask on calls/i.test(question);
 }
 
+function isThemeGuidanceQuestion(question: string): boolean {
+  return /which (specific )?theme|what theme|focus on first|prioriti[sz]e theme|theme should we|which investment theme|start with which theme/i.test(
+    question,
+  );
+}
+
+export function isExpertiseQuestion(question: string): boolean {
+  return /expertise|specialt(y|ies)|specific areas|tell me about|who is |background of|what does .+ do|areas of|why is .+ relevant|what .+ known for/i.test(
+    question,
+  );
+}
+
+export function buildExpertiseSummary(
+  experts: Array<{
+    name: string;
+    title: string;
+    firm: string;
+    archetype: string;
+    why: string;
+    specialties?: string[];
+  }>,
+): string {
+  if (!experts.length) {
+    return "No matching experts in the directory — check spelling or broaden the theme filter.";
+  }
+
+  return experts
+    .map((expert, index) => {
+      const role = [expert.title, expert.firm].filter(Boolean).join(" · ");
+      const specialtyLine = expert.specialties?.length
+        ? `\n   Specialties: ${expert.specialties.join(", ")}`
+        : "";
+      return `${index + 1}. ${expert.name}${role ? ` — ${role}` : ""}\n   ${expert.archetype}${specialtyLine}\n   ${expert.why}`;
+    })
+    .join("\n\n");
+}
+
+function listenForSectionIsPrimary(question: string): boolean {
+  const q = question.toLowerCase();
+  const callsInQuestion = /call plan|call sequence|three-call|prepare a call|prepare calls|call order/.test(
+    q,
+  );
+  return /listen for|conviction signal|what to ask/.test(q) && !callsInQuestion;
+}
+
 export function buildListenForSummary(
   experts: AskResponse["ranked_experts"],
   listenFor: AskResponse["what_to_listen_for"],
@@ -180,9 +225,24 @@ export function resolveDisplaySummary(answer: AskResponse): string {
     return outreachIntro(answer);
   }
 
+  const question = answer.input_context?.question ?? "";
+  if (answer.intent === "prioritize_theme" || isThemeGuidanceQuestion(question)) {
+    const summary = normalizeAnswerSummary(answer.answer_summary);
+    if (summary && !looksLikeLeakedSynthesis(summary)) return summary;
+  }
+  if (
+    (answer.intent === "profile_experts" || isExpertiseQuestion(question)) &&
+    answer.ranked_experts.length
+  ) {
+    return buildExpertiseSummary(answer.ranked_experts);
+  }
+
   if (answer.intent === "build_call_plan") {
-    const question = answer.input_context?.question ?? "";
     if (isListenForQuestion(question) && answer.what_to_listen_for?.length) {
+      if (listenForSectionIsPrimary(question)) {
+        const name = answer.ranked_experts[0]?.name ?? "these experts";
+        return `Conviction signals for calls with ${name}.`;
+      }
       const listenSummary = buildListenForSummary(answer.ranked_experts, answer.what_to_listen_for);
       if (listenSummary) return listenSummary;
     }

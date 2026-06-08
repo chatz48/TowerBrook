@@ -38,7 +38,42 @@ export function inferObjectiveFromQuestion(question: string): string {
   return "Find experts";
 }
 
+export function isChitchatQuestion(question: string): boolean {
+  const q = question.trim().toLowerCase();
+  if (!q || q.length > 240) return false;
+
+  if (
+    /expert|compan(y|ies)|target|call plan|memo|outreach|basket|who should|investment|deal|diligence|ranked|graph|sourc|validate|actionable|listen for|red[- ]team|disconfirm|bear case|expertise|specialt|theme should|which theme|focus on first/i.test(
+      q,
+    )
+  ) {
+    return false;
+  }
+
+  const patterns = [
+    /^(hi|hello|hey|howdy|good (morning|afternoon|evening))\b/,
+    /^thanks?( you)?[!.\s]*$/i,
+    /\bthank you\b/,
+    /\bhow are you\b/,
+    /\bwhat can you (do|help)\b/,
+    /\bhow (do|can) (you|i) (work|use)\b/,
+    /\bwho are you\b/,
+    /\bnice to meet\b/,
+    /^(ok|okay|got it|sounds good|great|perfect|cool|lovely)[!.\s]*$/i,
+    /\byou're welcome\b/,
+    /\bno problem\b/,
+  ];
+  if (patterns.some((pattern) => pattern.test(q))) return true;
+
+  const wordCount = q.split(/\s+/).length;
+  if (wordCount <= 5 && !q.includes("?")) return true;
+
+  return false;
+}
+
 export function inferIntent(question: string, objective: string): string {
+  if (isChitchatQuestion(question)) return "chitchat";
+
   const q = question.toLowerCase();
   if (objective === "Map companies" || /compan(y|ies)|target|actionable/.test(q)) {
     if (objective === "Map companies" || (/(compan(y|ies)|target)/.test(q) && !/who should|call|expert/.test(q))) {
@@ -60,6 +95,20 @@ export function inferIntent(question: string, objective: string): string {
   if (/draft.*(outreach|email)|outreach email|email template|full email|write.*email|linkedin outreach/i.test(q)) {
     return "draft_outreach";
   }
+  if (
+    /expertise|specialt(y|ies)|specific areas|tell me about|who is |background of|what does .+ do|what .+ known for/i.test(
+      q,
+    )
+  ) {
+    return "profile_experts";
+  }
+  if (
+    /which (specific )?theme|what theme|focus on first|prioriti[sz]e theme|theme should we|which investment theme|start with which theme/i.test(
+      q,
+    )
+  ) {
+    return "prioritize_theme";
+  }
   return "find_experts";
 }
 
@@ -69,13 +118,26 @@ export function planSections(question: string, objective: string): Record<Sectio
   const q = question.toLowerCase();
   const mentionsCompanies =
     objective === "Map companies" || /compan(y|ies)|target|actionable/.test(q);
-  const mentionsCalls =
-    objective === "Prepare calls" || /call plan|sequence|three-call/.test(q);
+  const callsInQuestion = /call plan|call sequence|three-call|prepare a call|prepare calls|call order/.test(
+    q,
+  );
+  const mentionsCalls = objective === "Prepare calls" || callsInQuestion;
   const mentionsListen = /listen for|conviction signal|what to ask/.test(q);
   const mentionsRisks =
     objective === "Red-team thesis" || /risk|red team|disconfirm|bear case|\bgaps?\b/.test(q);
 
   const sources = expandable(6);
+
+  if (intent === "chitchat") {
+    return {
+      experts: HIDDEN,
+      companies: HIDDEN,
+      callSequence: HIDDEN,
+      listenFor: HIDDEN,
+      gapsRisks: HIDDEN,
+      sources: HIDDEN,
+    };
+  }
 
   if (intent === "map_companies") {
     return {
@@ -89,7 +151,7 @@ export function planSections(question: string, objective: string): Record<Sectio
   }
 
   if (intent === "build_call_plan") {
-    const listenPrimary = mentionsListen && !mentionsCalls;
+    const listenPrimary = mentionsListen && !callsInQuestion;
     const memoStyle = /investment memo|partner memo|memo and call plan|what each person unlocks/i.test(q);
     return {
       experts: memoStyle ? primary(4) : expandable(4),
@@ -120,6 +182,28 @@ export function planSections(question: string, objective: string): Record<Sectio
       listenFor: HIDDEN,
       gapsRisks: HIDDEN,
       sources: expandable(4),
+    };
+  }
+
+  if (intent === "profile_experts") {
+    return {
+      experts: primary(6),
+      companies: mentionsCompanies ? expandable(2) : HIDDEN,
+      callSequence: HIDDEN,
+      listenFor: HIDDEN,
+      gapsRisks: HIDDEN,
+      sources: expandable(4),
+    };
+  }
+
+  if (intent === "prioritize_theme") {
+    return {
+      experts: expandable(3),
+      companies: expandable(3),
+      callSequence: HIDDEN,
+      listenFor: HIDDEN,
+      gapsRisks: HIDDEN,
+      sources: HIDDEN,
     };
   }
 

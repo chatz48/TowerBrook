@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  buildExpertiseSummary,
   buildLocalOutreachDraft,
   buildMemoCallPlanSummary,
   extractDraftEmailFromTools,
@@ -109,6 +110,56 @@ test("resolveOutreachDraft rebuilds from ranked expert when synthesis meta leaks
   assert.ok(draft);
   assert.match(draft.body, /renewables M&A advisory/);
   assert.doesNotMatch(draft.body, /here is a full email template/i);
+});
+
+test("buildExpertiseSummary lists each named expert with why and specialties", () => {
+  const text = buildExpertiseSummary([
+    {
+      name: "James Knight",
+      title: "Managing Partner & co-founder",
+      firm: "Augusta & Co",
+      archetype: "Banker",
+      why: "Co-founder of a leading European renewables M&A boutique.",
+      specialties: ["M&A advisory", "Renewables"],
+    },
+    {
+      name: "Nicholas Beatty",
+      title: "Co-founder & Chairman",
+      firm: "Zenobē",
+      archetype: "Ex-founder",
+      why: "Co-founded the UK's leading grid-scale battery operator.",
+      specialties: ["Battery storage (BESS)", "EV charging infrastructure"],
+    },
+  ]);
+  assert.match(text, /James Knight/);
+  assert.match(text, /renewables M&A boutique/i);
+  assert.match(text, /Nicholas Beatty/);
+  assert.match(text, /Battery storage/);
+  assert.doesNotMatch(text, /Call .* first/i);
+});
+
+test("resolveDisplaySummary answers expertise questions from ranked experts", () => {
+  const text = resolveDisplaySummary({
+    intent: "profile_experts",
+    input_context: {
+      question:
+        "What are the specific expertise areas of Nicholas Beatty, Jeff McDermott, and James Knight?",
+    },
+    answer_summary: "ignored",
+    ranked_experts: [
+      {
+        expert_id: "james-knight",
+        name: "James Knight",
+        title: "Managing Partner",
+        firm: "Augusta & Co",
+        archetype: "Banker",
+        why: "Renewables M&A advisory.",
+      },
+    ],
+  });
+  assert.match(text, /James Knight/);
+  assert.match(text, /Renewables M&A advisory/);
+  assert.doesNotMatch(text, /Call James Knight first/i);
 });
 
 test("buildMemoCallPlanSummary covers unlocks, order, and gaps", () => {

@@ -26,30 +26,22 @@ def _validate_source_text(source_text: str | None) -> str:
     return text
 
 
-@router.post("/source")
-async def ingest_source(
-    url: str | None = Form(default=None),
-    title: str | None = Form(default=None),
-    text: str | None = Form(default=None),
-    theme_id: str | None = Form(default=None),
-    file: UploadFile | None = File(default=None),
-):
-    uploaded_text, uploaded_title = await parse_upload(file, text)
-    source_text = uploaded_text
-    fetched = None
-    if url and not source_text:
-        fetched = await keiro.fetch_content(url)
-        source_text = fetched.get("content", "")
-        title = title or fetched.get("title")
-    source_text = _validate_source_text(source_text)
-
+async def _ingest_validated_source(
+    *,
+    url: str | None,
+    title: str | None,
+    source_text: str,
+    theme_id: str | None,
+    source_type: str,
+    metadata: dict,
+) -> dict:
     source = repo.upsert_source(
         {
             "url": url,
-            "title": title or uploaded_title or (fetched or {}).get("title") or "Submitted source",
-            "source_type": "user_upload" if file or text else "url",
+            "title": title or url or "Submitted source",
+            "source_type": source_type,
             "raw_text": source_text,
-            "metadata": {"theme_id": theme_id, "upload_filename": uploaded_title},
+            "metadata": metadata,
         }
     )
     chunks = chunk_text(source_text)
@@ -73,33 +65,41 @@ async def ingest_source(
     }
 
 
+@router.post("/source")
+async def ingest_source(
+    url: str | None = Form(default=None),
+    title: str | None = Form(default=None),
+    text: str | None = Form(default=None),
+    theme_id: str | None = Form(default=None),
+    file: UploadFile | None = File(default=None),
+):
+    uploaded_text, uploaded_title = await parse_upload(file, text)
+    source_text = uploaded_text
+    fetched = None
+    if url and not source_text:
+        fetched = await keiro.fetch_content(url)
+        source_text = fetched.get("content", "")
+        title = title or fetched.get("title")
+    source_text = _validate_source_text(source_text)
+
+    return await _ingest_validated_source(
+        url=url,
+        title=title or uploaded_title or (fetched or {}).get("title"),
+        source_text=source_text,
+        theme_id=theme_id,
+        source_type="user_upload" if file or text else "url",
+        metadata={"theme_id": theme_id, "upload_filename": uploaded_title},
+    )
+
+
 @router.post("/json")
 async def ingest_json(body: SourceInput):
     source_text = _validate_source_text(body.text)
-    source = repo.upsert_source(
-        {
-            "url": body.url,
-            "title": body.title or body.url or "Submitted source",
-            "source_type": body.source_type,
-            "raw_text": source_text,
-            "metadata": {"theme_id": body.theme_id, **body.metadata},
-        }
+    return await _ingest_validated_source(
+        url=body.url,
+        title=body.title,
+        source_text=source_text,
+        theme_id=body.theme_id,
+        source_type=body.source_type,
+        metadata={"theme_id": body.theme_id, **body.metadata},
     )
-    chunks = chunk_text(source_text)
-    vectors = embeddings.embed_many(chunks)
-    extraction = await extractor.extract(source_text, source.title, source.url, body.theme_id)
-    job = repo.create_job(
-        ResearchJobRequest(
-            job_type="ingest_review",
-            theme_id=body.theme_id,
-            query=source.title,
-            metadata={"source_id": source.id, "review_gated": True},
-        )
-    )
-    persisted = await persist_candidate_extraction(extraction, source, chunks, vectors, body.theme_id, job)
-    return {
-        "source": source.model_dump(),
-        "extraction": extraction.model_dump(),
-        "persisted": persisted,
-        "review_gated": True,
-    }

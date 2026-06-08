@@ -6,7 +6,6 @@ export interface ExpertRoleDisplay {
   role: string;
 }
 
-/** Split headline into company-first display parts for dense tables. */
 export function expertRoleDisplay(
   expert: Pick<Expert, "headline" | "org" | "type">,
   companyName?: string,
@@ -40,17 +39,17 @@ export type CallPhase = "Market orientation" | "Buyer validation" | "Deal intell
 
 const CURATED_CALL_ANGLE: Record<string, string> = {
   "jerome-guillet":
-    "Offshore-wind project finance operator with EUR30bn+ transaction visibility. Use him to test financing constraints, bidder behavior, and advisory routes.",
+    "Offshore-wind project finance operator with EUR30bn+ transaction visibility — strong on financing constraints, bidder behavior, and advisory routes.",
   "greg-jackson":
-    "Octopus founder with buyer, software-platform, and renewables-generation context. Use him to separate real customer demand from market narrative.",
+    "Octopus founder spanning buyer, software-platform, and renewables-generation — good for separating customer demand from market narrative.",
   "piers-clark":
-    "Water technology connector with utility, founder, and water-PE visibility. Use him for market mapping and high-signal founder referrals.",
+    "Water technology connector with utility, founder, and water-PE visibility — useful for market mapping and founder referrals.",
   "tom-ferguson":
-    "Water-focused investor with a broad early-stage pipeline view. Use him to identify which smart-water segments are investable now.",
+    "Water-focused investor with a broad early-stage pipeline — can rank which smart-water segments are investable now.",
   "jeff-mcdermott":
-    "Energy-transition banker with two decades of decarbonisation M&A. Use him to test which assets are live, bankable, and reachable.",
+    "Energy-transition banker with two decades of decarbonisation M&A — ask which assets are live, bankable, and reachable.",
   "reese-tisdale":
-    "Independent water-market intelligence lead. Use him to map buyers, technologies, and investors across smart-water infrastructure.",
+    "Independent water-market intelligence lead — maps buyers, technologies, and investors across smart-water infrastructure.",
 };
 
 interface ArchetypeProfile {
@@ -77,17 +76,17 @@ function archetypeProfile(expert: Expert): ArchetypeProfile {
   let callAngle = curated ?? expert.whyRelevant;
   if (!curated) {
     if (expert.type === "ex-founder") {
-      callAngle = `${expert.headline}${org}. Use the call to test founder economics, buyer urgency, and referral paths${specialty ? ` in ${specialty}` : ""}.`;
+      callAngle = `${expert.headline}${org}. Pressure-test founder economics, buyer urgency, and referral paths${specialty ? ` in ${specialty}` : ""}.`;
     } else if (expert.type === "operator") {
-      callAngle = `${expert.headline}${org}. Focus on implementation bottlenecks, customer adoption, and which company claims are diligence-ready.`;
+      callAngle = `${expert.headline}${org}. Validate implementation bottlenecks, adoption timing, and which operating claims survive diligence.`;
     } else if (expert.type === "banker") {
-      callAngle = `${expert.headline}${org}. Ask which assets are actionable, who controls the process, and where TowerBrook can get warm access.`;
+      callAngle = `${expert.headline}${org}. Clarify which assets are actionable, who owns the process, and where warm access exists.`;
     } else if (expert.type === "lawyer") {
-      callAngle = `${expert.headline}${org}. Use the call to verify deal parties, diligence issues, and counsel-level transaction evidence.`;
+      callAngle = `${expert.headline}${org}. Confirm deal parties, diligence issues, and counsel-level transaction evidence.`;
     } else if (expert.type === "investor") {
-      callAngle = `${expert.headline}${org}. Test sponsor appetite, valuation pressure, and financing constraints across the current theme.`;
+      callAngle = `${expert.headline}${org}. Gauge sponsor appetite, valuation pressure, and financing constraints in the theme.`;
     } else if (companyCount > 0) {
-      callAngle = `${expert.headline}${org}. Use ${companyCount} mapped company edge${companyCount === 1 ? "" : "s"} to identify named decision-makers and live diligence gaps.`;
+      callAngle = `${expert.headline}${org}. Work through ${companyCount} mapped company edge${companyCount === 1 ? "" : "s"} to surface decision-makers and diligence gaps.`;
     }
   }
 

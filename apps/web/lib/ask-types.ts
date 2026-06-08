@@ -47,6 +47,21 @@ export type AskResponse = {
       headings: string[];
     };
   };
+  theme_guidance?: {
+    theme: { id: string; name: string; shortName: string; description: string };
+    expertCount: number;
+    targetCount: number;
+    companyCount: number;
+    score: number;
+    topExpert?: {
+      id: string;
+      name: string;
+      title: string;
+      firm: string;
+      why: string;
+      archetype: string;
+    };
+  }[];
   ranked_experts: {
     expert_id: string;
     rank: number;
@@ -64,6 +79,7 @@ export type AskResponse = {
     access: string;
     momentum: string;
     why: string;
+    specialties?: string[];
     citations: string[];
   }[];
   ranked_companies: {

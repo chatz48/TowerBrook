@@ -1,7 +1,8 @@
 import type { ThemeFocus } from "@/lib/theme-focus";
 import { buildOutreachContextText, type OutreachPlanState } from "@/lib/outreach-plan";
 import { workspaceKindLabel, type WorkspaceItem } from "@/lib/workspace";
-import { THEMES } from "./constants";
+import { getTheme } from "@/lib/themes";
+import type { ThemeId } from "@/lib/types";
 import type { AskResponse, ChatTurn, CopilotFilters, PageContext } from "./types";
 
 export type ConversationMessage = {
@@ -36,6 +37,38 @@ export function defaultQuestion(theme: ThemeFocus) {
     return "Who should I call first to assess smart-water infrastructure and analytics opportunities?";
   }
   return "Who should I call first across the three investment themes?";
+}
+
+export type IdleStarter =
+  | { kind: "prompt"; label: string; prompt: string }
+  | { kind: "link"; label: string; href: string };
+
+/** Empty-state chips — only actions the directory and graph can support. */
+export function idlePromptSuggestions(theme: string): IdleStarter[] {
+  const focus = theme as ThemeFocus;
+  const themeName =
+    focus === "grid-infrastructure"
+      ? "grid infrastructure"
+      : focus === "clean-energy-advisory"
+        ? "clean energy advisory"
+        : focus === "smart-water"
+          ? "smart water"
+          : "the current theme";
+
+  return [
+    { kind: "prompt", label: "Top experts", prompt: defaultQuestion(focus) },
+    {
+      kind: "prompt",
+      label: "Actionable targets",
+      prompt: "Which companies are most actionable and which experts validate them?",
+    },
+    { kind: "link", label: "Relationship graph", href: "/graph" },
+    {
+      kind: "prompt",
+      label: "Draft outreach",
+      prompt: `Draft concise outreach for the top-ranked expert on ${themeName}, grounded in their role, linked companies, and why they are relevant.`,
+    },
+  ];
 }
 
 /** Send enough turns for server-side memory compaction (summarise after five Q&A pairs). */
@@ -155,7 +188,8 @@ export function buildBasketPrompt(items: WorkspaceItem[], theme: string, instruc
 }
 
 export function themeLabel(value: string): string {
-  return THEMES.find((theme) => theme.value === value)?.label ?? value;
+  if (value === "all") return "All themes";
+  return getTheme(value as ThemeId)?.name ?? value;
 }
 
 export function formatSourceId(sourceId: string): string {

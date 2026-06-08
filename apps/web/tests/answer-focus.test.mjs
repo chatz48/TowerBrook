@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { inferIntent, resolveObjective } from "../lib/answer-focus.ts";
+import { inferIntent, isChitchatQuestion, resolveObjective } from "../lib/answer-focus.ts";
 
 test("resolveObjective infers Prepare calls when filters still say Find experts", () => {
   assert.equal(
@@ -18,6 +18,24 @@ test("inferIntent routes basket call plan to build_call_plan", () => {
     inferIntent("Prepare a call plan from the saved basket", "Prepare calls"),
     "build_call_plan",
   );
+});
+
+test("inferIntent routes theme focus questions to prioritize_theme", () => {
+  assert.equal(
+    inferIntent("Which specific theme should we focus on first?", "Find experts"),
+    "prioritize_theme",
+  );
+});
+
+test("inferIntent routes greetings to chitchat", () => {
+  assert.equal(inferIntent("Hello!", "Find experts"), "chitchat");
+  assert.equal(inferIntent("Thanks — that helps.", "Find experts"), "chitchat");
+});
+
+test("chitchat detection excludes workflow questions", () => {
+  assert.equal(isChitchatQuestion("Hello!"), true);
+  assert.equal(isChitchatQuestion("Who should I call first?"), false);
+  assert.equal(isChitchatQuestion("Which companies are most actionable?"), false);
 });
 
 test("resolveObjective does not treat reduce conviction as red-team", () => {

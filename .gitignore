@@ -19,7 +19,6 @@
 /test-results
 **/playwright-report
 **/test-results
-apps/backend-api/tests
 
 # next.js
 /.next/
@@ -62,5 +61,3 @@ REVIEW.md
 AGENTS.md
 .cursor/rules/agent-verification.mdc
 agent-verify-report.md
-
-apps/backend-api/tests

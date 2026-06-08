@@ -6,13 +6,28 @@ from fastapi.responses import StreamingResponse
 from app.schemas.domain import (
     ChatRequest,
     ChatResponse,
+    ChitchatRequest,
+    ChitchatResponse,
     MemorySummarizeRequest,
     MemorySummarizeResponse,
 )
+from app.services.copilot.chitchat import reply_chitchat
 from app.services.copilot.memory import summarize_conversation
 from app.services.copilot.orchestrator import run_copilot, run_copilot_stream
 
 router = APIRouter(prefix="/chat", tags=["chat"])
+
+
+@router.post("/chitchat", response_model=ChitchatResponse)
+async def chitchat(request: ChitchatRequest) -> ChitchatResponse:
+    """Short friendly replies for greetings and meta questions — DeepSeek v4 flash."""
+    reply, model_used = await reply_chitchat(
+        request.question,
+        conversation_summary=request.conversation_summary or None,
+        recent_turns=request.recent_turns,
+        theme_scope=request.theme_scope or None,
+    )
+    return ChitchatResponse(reply=reply, model_used=model_used)
 
 
 @router.post("/memory/summarize", response_model=MemorySummarizeResponse)

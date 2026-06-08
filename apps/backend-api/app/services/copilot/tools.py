@@ -94,8 +94,6 @@ async def run_tool(
         return await _web_search(ctx, citations, search_query)
     if tool_name == "fetch_source":
         return await _fetch_source(ctx, citations)
-    if tool_name == "graph_query":
-        return await _graph_query(ctx, search_query)
     if tool_name == "generate_report":
         return await _generate_report(ctx, citations)
     if tool_name == "run_deep_discovery":
@@ -115,7 +113,7 @@ async def run_pipeline(
     citations: list[Citation] = []
     traces: list[ToolTrace] = []
     # Run independent retrieval tools in parallel for latency.
-    retrieval = [t for t in tools if t in {"rag_search_sources", "rag_search_entities", "web_search", "graph_query"}]
+    retrieval = [t for t in tools if t in {"rag_search_sources", "rag_search_entities", "web_search"}]
     sequential = [t for t in tools if t not in retrieval]
 
     if retrieval:
@@ -230,13 +228,6 @@ async def _fetch_source(ctx: CopilotContext, citations: list[Citation]) -> ToolT
             )
         )
     return ToolTrace(tool_name="fetch_source", input={"url": url}, output=fetched)
-
-
-async def _graph_query(ctx: CopilotContext, query: str) -> ToolTrace:
-    if not embeddings.semantic_search_available:
-        return ToolTrace(tool_name="graph_query", input={"query": query}, output={"count": 0}, status="skipped")
-    rows = repo.search_entities(embeddings.embed(query), None, limit=10)
-    return ToolTrace(tool_name="graph_query", input={"query": query}, output={"entities": rows[:5]})
 
 
 async def _generate_report(ctx: CopilotContext, citations: list[Citation]) -> ToolTrace:

@@ -6,6 +6,13 @@ import { COMPANY_CATEGORY_LABEL, EXPERT_TYPE_LABEL } from "@/lib/labels";
 import { buildExternalChatPayload, geographyToSession, objectiveToSession } from "@/lib/copilot-safety";
 import { rankExpertsForSession, type SessionCalibration } from "@/lib/score";
 import { parseSseChunk } from "@/lib/sse";
+import {
+  buildThemeGuidanceSummary,
+  computeThemeDirectoryStats,
+  expertsForThemeGuidance,
+  isThemeGuidanceQuestion,
+  type ThemeDirectoryStat,
+} from "@/lib/theme-guidance";
 import { getTheme, THEMES } from "@/lib/themes";
 import { callBackendApi, hasBackendApi } from "@/lib/backend-api";
 import type { AskResponse, ChatTurn, PageContext, SourceRecord, ToolTrace } from "@/lib/ask-types";
@@ -13,17 +20,21 @@ import type { Company, Deal, Expert, ExpertType, Source, ThemeId } from "@/lib/t
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 import { warmPathsForExpert, warmPathStatusLabel } from "@/lib/warm-paths";
 import { inferIntent, planSections, resolveObjective } from "@/lib/answer-focus";
+import { buildChitchatAnswer, chitchatThemeScope, generateChitchatReply } from "@/lib/chitchat";
 import {
   hasBasketContext,
+  orderExpertsByQuestion,
   parseBasketContext,
   resolveBasketCompanies,
   resolveBasketExperts,
 } from "@/lib/basket-context";
 import {
+  buildExpertiseSummary,
   buildListenForSummary,
   buildLocalOutreachDraft,
   buildMemoCallPlanSummary,
   extractDraftEmailFromTools,
+  isExpertiseQuestion,
   isMemoCallPlanQuestion,
   isOutreachQuestion,
   normalizeAnswerSummary,
@@ -326,6 +337,32 @@ async function prepareAskContext(body: AskRequest): Promise<
   const chatHistory = normalizeChatHistory(body.chatHistory);
   const chatMemory = await resolveChatMemory(chatHistory, body.conversationSummary);
   const pageContext = normalizePageContext(body.pageContext);
+  const filters = body.filters ?? {};
+  const objective = resolveObjective(filters.objective, question);
+
+  if (inferIntent(question, objective) === "chitchat") {
+    const { text, model } = await generateChitchatReply({
+      question,
+      conversationSummary: chatMemory.summary,
+      recentTurns: chatMemory.effectiveHistory,
+      themeScope: chitchatThemeScope(filters.theme),
+    });
+    const baseline = buildChitchatAnswer(question, text, model, filters);
+    return {
+      question,
+      filters,
+      pageContext,
+      chatHistory,
+      chatMemory,
+      baseline: {
+        ...baseline,
+        conversation_summary: chatMemory.summary,
+        memory_pairs_compressed: chatMemory.pairsCompressed,
+        memory_total_pairs: chatMemory.totalPairs,
+      },
+    };
+  }
+
   const contextualQuestion = questionWithChatMemory(
     question,
     chatMemory.effectiveHistory,
@@ -479,6 +516,7 @@ function shouldSkipBackendEnrichment(
   pageContext?: PageContext,
   chatHistory?: ChatTurn[],
 ): boolean {
+  if (baseline.intent === "chitchat") return true;
   if (!baseline.grounded) return false;
 
   if (
@@ -507,6 +545,17 @@ function shouldSkipBackendEnrichment(
     (baseline.intent === "draft_outreach" || isOutreachQuestion(question)) &&
     baseline.ranked_experts.length > 0
   ) {
+    return true;
+  }
+
+  if (
+    (baseline.intent === "profile_experts" || isExpertiseQuestion(question)) &&
+    baseline.ranked_experts.length > 0
+  ) {
+    return true;
+  }
+
+  if (baseline.intent === "prioritize_theme" || isThemeGuidanceQuestion(question)) {
     return true;
   }
 
@@ -565,18 +614,23 @@ function mergeBackendIntoBaseline(baseline: AskResponse, backend: BackendChatRes
   }
 
   if (
-    baseline.intent === "build_call_plan" &&
-    (hasBasketContext(baseline.input_context.question) ||
-      isMemoCallPlanQuestion(baseline.input_context.question)) &&
-    baseline.ranked_experts.length > 0
+    (baseline.intent === "build_call_plan" &&
+      (hasBasketContext(baseline.input_context.question) ||
+        isMemoCallPlanQuestion(baseline.input_context.question))) ||
+    baseline.intent === "profile_experts" ||
+    baseline.intent === "prioritize_theme" ||
+    isExpertiseQuestion(baseline.input_context.question) ||
+    isThemeGuidanceQuestion(baseline.input_context.question)
   ) {
-    return sanitizeAnswerForDisplay({
-      ...baseline,
-      tool_calls: backend.tool_calls,
-      request_id: backend.request_id,
-      node_timings_ms: backend.node_timings_ms,
-      backend_enriched: true,
-    });
+    if (baseline.ranked_experts.length > 0 || baseline.theme_guidance?.length) {
+      return sanitizeAnswerForDisplay({
+        ...baseline,
+        tool_calls: backend.tool_calls,
+        request_id: backend.request_id,
+        node_timings_ms: backend.node_timings_ms,
+        backend_enriched: true,
+      });
+    }
   }
 
   const structured = backend.structured;
@@ -676,13 +730,23 @@ async function buildStructuredAnswer(
   chatHistory: ChatTurn[] = [],
 ): Promise<AskResponse> {
   const pageContextText = pageContextSearchText(pageContext);
-  const words = tokenize(`${question} ${pageContextText}`);
-  const themeId = inferTheme(`${question} ${pageContextText}`, filters.theme);
   const objective = resolveObjective(filters.objective, displayQuestion);
-  const sections = planSections(question, objective);
-  const intent = inferIntent(question, objective);
+  const intent = inferIntent(displayQuestion, objective);
+  const sections = planSections(displayQuestion, objective);
   const archetypes = normalizeArchetypes(filters.archetypes);
   const includeTowerBrookEmployees = filters.includeTowerBrookEmployees === true;
+
+  let themeGuidanceStats: ThemeDirectoryStat[] | undefined;
+  if (intent === "prioritize_theme") {
+    themeGuidanceStats = computeThemeDirectoryStats(includeTowerBrookEmployees);
+  }
+
+  const rankingText = intent === "prioritize_theme" ? displayQuestion : question;
+  const words = tokenize(`${rankingText} ${pageContextText}`);
+  const themeId =
+    intent === "prioritize_theme" && themeGuidanceStats?.[0]
+      ? themeGuidanceStats[0].theme.id
+      : inferTheme(`${rankingText} ${pageContextText}`, filters.theme);
   const theme = themeId ? getTheme(themeId) : undefined;
 
   const sessionCalibration: SessionCalibration = {
@@ -699,47 +763,67 @@ async function buildStructuredAnswer(
     chatHistory,
     includeTowerBrookEmployees,
   );
-  const pinnedExperts = resolveBasketExperts(basketEntries, includeTowerBrookEmployees);
+  let pinnedExperts = resolveBasketExperts(basketEntries, includeTowerBrookEmployees);
+  if (pinnedExperts.length > 1) {
+    pinnedExperts = orderExpertsByQuestion(displayQuestion, pinnedExperts);
+  }
   const pinnedCompanies = resolveBasketCompanies(basketEntries, includeTowerBrookEmployees);
 
-  let rankedExpertInputs = rankExpertsForSession(
-    filterTowerBrookEmployees(
-      getExperts().filter((expert) => {
-        if (themeId && !expert.themes.includes(themeId)) return false;
-        if (archetypes.length > 0 && !archetypes.includes(expert.type)) return false;
-        return true;
-      }),
-      includeTowerBrookEmployees,
-    ),
-    sessionCalibration,
-  )
-    .map(({ expert, score }) => {
-      const keywordBoost = keywordScore(words, expertText(expert)) * 8 + (expert.access === "proprietary" ? 4 : 0);
-      return {
+  let rankedExpertInputs;
+  if (intent === "prioritize_theme" && themeGuidanceStats) {
+    rankedExpertInputs = expertsForThemeGuidance(themeGuidanceStats, includeTowerBrookEmployees).map(
+      (expert, index) => ({
         expert,
-        score: score.total + keywordBoost,
+        score: 100 - index,
         breakdown: {
-          base: score.baseTotal,
-          session_fit: score.sessionFit,
-          objective_fit: score.objectiveFit,
-          keyword_boost: keywordBoost,
+          base: 90,
+          session_fit: 5,
+          objective_fit: 5,
+          keyword_boost: 0,
         },
-      };
-    })
-    .sort((a, b) => b.score - a.score)
-    .slice(0, Math.max(sections.experts.limit, 3));
+      }),
+    );
+  } else {
+    rankedExpertInputs = rankExpertsForSession(
+      filterTowerBrookEmployees(
+        getExperts().filter((expert) => {
+          if (themeId && !expert.themes.includes(themeId)) return false;
+          if (archetypes.length > 0 && !archetypes.includes(expert.type)) return false;
+          return true;
+        }),
+        includeTowerBrookEmployees,
+      ),
+      sessionCalibration,
+    )
+      .map(({ expert, score }) => {
+        const keywordBoost =
+          keywordScore(words, expertText(expert)) * 8 + (expert.access === "proprietary" ? 4 : 0);
+        return {
+          expert,
+          score: score.total + keywordBoost,
+          breakdown: {
+            base: score.baseTotal,
+            session_fit: score.sessionFit,
+            objective_fit: score.objectiveFit,
+            keyword_boost: keywordBoost,
+          },
+        };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, Math.max(sections.experts.limit, 3));
 
-  if (pinnedExperts.length) {
-    rankedExpertInputs = pinnedExperts.map((expert, index) => ({
-      expert,
-      score: 120 - index,
-      breakdown: {
-        base: 100,
-        session_fit: 10,
-        objective_fit: 10,
-        keyword_boost: 0,
-      },
-    }));
+    if (pinnedExperts.length) {
+      rankedExpertInputs = pinnedExperts.map((expert, index) => ({
+        expert,
+        score: 120 - index,
+        breakdown: {
+          base: 100,
+          session_fit: 10,
+          objective_fit: 10,
+          keyword_boost: 0,
+        },
+      }));
+    }
   }
 
   let rankedCompanyInputs = companiesWithLinks(themeId, includeTowerBrookEmployees)
@@ -752,6 +836,17 @@ async function buildStructuredAnswer(
     }))
     .sort((a, b) => b.score - a.score)
     .slice(0, Math.max(sections.companies.limit, sections.companies.mode !== "hidden" ? 2 : 0));
+
+  if (intent === "prioritize_theme" && themeGuidanceStats?.[0]) {
+    rankedCompanyInputs = companiesWithLinks(themeGuidanceStats[0].theme.id, includeTowerBrookEmployees)
+      .filter((company) => company.category === "target")
+      .sort((a, b) => b.confidence - a.confidence)
+      .slice(0, Math.max(sections.companies.limit, 3))
+      .map((company, index) => ({
+        company,
+        score: 90 - index,
+      }));
+  }
 
   if (pinnedCompanies.length) {
     const linkedDirectory = companiesWithLinks(themeId, includeTowerBrookEmployees);
@@ -822,6 +917,7 @@ async function buildStructuredAnswer(
       access: expertAccessLabel(expert),
       momentum: momentumLabel(expert),
       why: expert.whyRelevant,
+      ...(expert.specialties?.length ? { specialties: expert.specialties.slice(0, 6) } : {}),
       citations,
     };
   });
@@ -932,14 +1028,44 @@ async function buildStructuredAnswer(
     intent === "build_call_plan" &&
     /listen for/i.test(displayQuestion) &&
     what_to_listen_for.length
-      ? buildListenForSummary(ranked_experts_all, what_to_listen_for)
+      ? sections.listenFor.mode === "primary"
+        ? `Conviction signals for calls with ${ranked_experts_all[0]?.name ?? "these experts"}.`
+        : buildListenForSummary(ranked_experts_all, what_to_listen_for)
       : undefined;
+
+  const expertiseSummary =
+    (intent === "profile_experts" || isExpertiseQuestion(displayQuestion)) &&
+    ranked_experts_all.length
+      ? buildExpertiseSummary(ranked_experts_all)
+      : undefined;
+
+  const themeGuidanceSummary =
+    intent === "prioritize_theme" && themeGuidanceStats
+      ? buildThemeGuidanceSummary(themeGuidanceStats)
+      : undefined;
+
+  const serializedThemeGuidance = themeGuidanceStats?.map((item) => ({
+    theme: {
+      id: item.theme.id,
+      name: item.theme.name,
+      shortName: item.theme.shortName,
+      description: item.theme.description,
+    },
+    expertCount: item.expertCount,
+    targetCount: item.targetCount,
+    companyCount: item.companyCount,
+    score: item.score,
+    topExpert: item.topExpert,
+  }));
 
   return sanitizeAnswerForDisplay({
     intent,
+    theme_guidance: serializedThemeGuidance,
     answer_summary: outreach_draft
       ? `Outreach draft for ${outreachExpert!.name}. Review and personalise before sending.`
-      : memoCallPlanSummary ??
+      : themeGuidanceSummary ??
+        expertiseSummary ??
+        memoCallPlanSummary ??
         listenForSummary ??
         summaryFor(objective, ranked_experts_all, ranked_companies_all, intent, call_sequence),
     outreach_draft,
@@ -947,7 +1073,10 @@ async function buildStructuredAnswer(
     input_context: {
       question: displayQuestion,
       objective,
-      theme: theme?.name ?? "All themes",
+      theme:
+        intent === "prioritize_theme" && themeGuidanceStats?.[0]
+          ? themeGuidanceStats[0].theme.name
+          : theme?.name ?? "All themes",
       geography: filters.geography ?? "Global / Europe priority",
       archetypes: archetypes.map((type) => EXPERT_TYPE_LABEL[type]),
       source_scope: filters.sourceScope ?? "Local sourced directory",
@@ -988,7 +1117,13 @@ async function buildStructuredAnswer(
       "Company rank is directional and driven by linked expert density plus record confidence.",
     ],
     vector_retrieval_failed: vectorRetrievalFailed,
-    follow_up_actions: buildFollowUpActions(intent, ranked_experts_all, ranked_companies_all, theme?.shortName),
+    follow_up_actions: buildFollowUpActions(
+      intent,
+      ranked_experts_all,
+      ranked_companies_all,
+      theme?.shortName,
+      themeGuidanceStats?.[1]?.theme.shortName,
+    ),
     grounded: true,
     model: "deterministic-fallback",
   });
@@ -1173,10 +1308,32 @@ function buildFollowUpActions(
   experts: RankedExpert[],
   companies: RankedCompany[],
   themeShortName?: string,
+  alternateThemeShortName?: string,
 ): AskResponse["follow_up_actions"] {
   const topExperts = experts.slice(0, 2).map((e) => e.name).join(" and ");
   const topCompany = companies[0]?.name;
   const theme = themeShortName ?? "this theme";
+
+  if (intent === "prioritize_theme") {
+    const alternate = alternateThemeShortName ?? "the next theme";
+    return [
+      {
+        action: "call_first",
+        label: "Who to call",
+        prompt: `Who should I call first for ${theme}?`,
+      },
+      {
+        action: "map_targets",
+        label: "Actionable targets",
+        prompt: `Which companies are most actionable in ${theme}?`,
+      },
+      {
+        action: "compare_theme",
+        label: "Compare themes",
+        prompt: `Why might ${alternate} be a better starting point than ${theme}?`,
+      },
+    ];
+  }
 
   if (intent === "map_companies") {
     return [
@@ -1218,6 +1375,28 @@ function buildFollowUpActions(
         action: "red_team",
         label: "Red-team",
         prompt: "What would disconfirm the thesis after these calls?",
+      },
+    ];
+  }
+
+  if (intent === "profile_experts") {
+    const names = experts.map((expert) => expert.name).join(", ");
+    const lead = experts[0]?.name ?? "the top expert";
+    return [
+      {
+        action: "call_plan",
+        label: "Build call plan",
+        prompt: `Build a three-call plan using ${names || "these experts"}.`,
+      },
+      {
+        action: "outreach",
+        label: "Draft outreach",
+        prompt: `Draft concise outreach for ${lead}, grounded in their role and linked companies.`,
+      },
+      {
+        action: "linked_companies",
+        label: "Linked companies",
+        prompt: `Which companies in the directory are most linked to ${lead}?`,
       },
     ];
   }

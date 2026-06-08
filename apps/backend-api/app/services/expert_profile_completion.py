@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from app.schemas.domain import ExtractionResult, SourceRecord
+from app.services.search_query_utils import join_quoted, unique_strings
 
 
 PROFILE_FIELDS = (
@@ -53,12 +54,12 @@ def build_initial_profile_queries(metadata: dict[str, Any]) -> list[str]:
     deals = _deal_names(metadata.get("target_deals"))
     themes = _list_text(metadata.get("target_themes"))
 
-    return _unique(
+    return unique_strings(
         [
-            _join_quoted([name, *organizations], "profile OR bio OR biography OR LinkedIn"),
-            _join_quoted([name, *organizations], "partner OR managing director OR director OR advisor"),
-            _join_quoted([name, *deals[:2], *companies[:2]], "deal OR transaction OR advised OR counsel OR investment"),
-            _join_quoted([name, *companies[:2], *themes[:2]], "board OR founder OR investor OR advisor OR portfolio"),
+            join_quoted([name, *organizations], "profile OR bio OR biography OR LinkedIn"),
+            join_quoted([name, *organizations], "partner OR managing director OR director OR advisor"),
+            join_quoted([name, *deals[:2], *companies[:2]], "deal OR transaction OR advised OR counsel OR investment"),
+            join_quoted([name, *companies[:2], *themes[:2]], "board OR founder OR investor OR advisor OR portfolio"),
         ]
     )
 
@@ -73,20 +74,20 @@ def build_follow_up_profile_queries(coverage: ProfileCoverage) -> list[str]:
     if "official_profile" in coverage.missing_fields:
         queries.extend(
             [
-                _join_quoted([name, *organizations[:1]], "site:*.com profile bio"),
-                _join_quoted([name, *organizations[:1]], "LinkedIn"),
+                join_quoted([name, *organizations[:1]], "site:*.com profile bio"),
+                join_quoted([name, *organizations[:1]], "LinkedIn"),
             ]
         )
     if "current_role" in coverage.missing_fields:
-        queries.append(_join_quoted([name, *organizations], "current role partner director managing"))
+        queries.append(join_quoted([name, *organizations], "current role partner director managing"))
     if "deal_connection" in coverage.missing_fields:
-        queries.append(_join_quoted([name, *deals[:2], *organizations[:1]], "transaction deal advised counsel"))
+        queries.append(join_quoted([name, *deals[:2], *organizations[:1]], "transaction deal advised counsel"))
     if "company_connections" in coverage.missing_fields:
-        queries.append(_join_quoted([name, *companies[:3]], "company board advisor founder investor"))
+        queries.append(join_quoted([name, *companies[:3]], "company board advisor founder investor"))
     if "outreach_signal" in coverage.missing_fields:
-        queries.append(_join_quoted([name, *organizations[:1]], "email contact speaker podcast conference"))
+        queries.append(join_quoted([name, *organizations[:1]], "email contact speaker podcast conference"))
 
-    return _unique(queries)
+    return unique_strings(queries)
 
 
 def create_profile_coverage(metadata: dict[str, Any]) -> ProfileCoverage:
@@ -195,7 +196,7 @@ def _deal_names(value: Any) -> list[str]:
             )
         elif isinstance(item, str):
             names.append(item)
-    return _unique(names)
+    return unique_strings(names)
 
 
 def _list_text(value: Any) -> list[str]:
@@ -203,19 +204,3 @@ def _list_text(value: Any) -> list[str]:
         return []
     return [item for item in value if isinstance(item, str) and item.strip()]
 
-
-def _join_quoted(terms: list[str], suffix: str) -> str:
-    quoted = " ".join(f'"{term}"' for term in terms if term)
-    return f"{quoted} {suffix}".strip()
-
-
-def _unique(items: list[str]) -> list[str]:
-    seen = set()
-    output = []
-    for item in items:
-        normalized = " ".join(item.split())
-        if not normalized or normalized in seen:
-            continue
-        seen.add(normalized)
-        output.append(normalized)
-    return output

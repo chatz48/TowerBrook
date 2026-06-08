@@ -113,7 +113,6 @@ def health_payload(detailed: bool = False):
         payload.update(
             {
                 "deepseek_configured": bool(settings.deepseek_api_key),
-                "gemini_configured": bool(settings.gemini_api_key),
                 "keirolabs_configured": bool(settings.keirolabs_api_key),
                 "live_search_configured": bool(
                     settings.keirolabs_api_key

@@ -148,6 +148,15 @@ function normalizeName(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
+export function orderExpertsByQuestion(question: string, experts: Expert[]): Expert[] {
+  const normalized = question.toLowerCase();
+  return [...experts].sort((a, b) => {
+    const aIndex = normalized.indexOf(a.name.toLowerCase());
+    const bIndex = normalized.indexOf(b.name.toLowerCase());
+    return (aIndex < 0 ? Number.MAX_SAFE_INTEGER : aIndex) - (bIndex < 0 ? Number.MAX_SAFE_INTEGER : bIndex);
+  });
+}
+
 export function resolveBasketExperts(
   entries: ParsedBasketEntry[],
   includeTowerBrookEmployees: boolean,

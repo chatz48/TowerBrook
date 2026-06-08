@@ -80,18 +80,6 @@ def _build_graph() -> Any:
     return graph.compile()
 
 
-# Per-intent compiled graphs share topology; intent-specific behaviour lives in route_intent.
-_INTENT_GRAPHS: dict[str, Any] = {}
-
-
-def get_intent_graph(intent: str) -> Any:
-    """Return a LangGraph workflow for the routed intent (cached singleton per intent)."""
-    if intent not in _INTENT_GRAPHS:
-        _INTENT_GRAPHS[intent] = _build_graph()
-    return _INTENT_GRAPHS[intent]
-
-
-# Master orchestrator graph — entry point for all copilot requests.
 _copilot_graph = _build_graph()
 
 

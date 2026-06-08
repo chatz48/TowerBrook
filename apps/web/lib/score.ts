@@ -1,18 +1,7 @@
 import type { Expert, ExpertType, RelationshipType, ThemeId } from "./types";
 
-/**
- * Relevance scoring — the product's point of view on "who should I call first?".
- *
- * This is deliberately simple and transparent: an investment professional must
- * be able to understand *why* someone ranks highly. Every contribution is
- * additive and explainable, and the breakdown is surfaced in the UI.
- *
- * ▶ TUNE ME: the weights below encode a judgment call. The current view favours
- *   exit-proven founders and people who are timely to reach (recent moves /
- *   fundraises). Adjust to match how your deal team actually prioritises.
- */
+// Tune weights to match how the deal team prioritises experts.
 export const SCORE_WEIGHTS = {
-  /** Base points by what kind of expert they are. */
   byType: {
     "ex-founder": 30,
     investor: 26,
@@ -28,7 +17,6 @@ export const SCORE_WEIGHTS = {
     lawyer: 16,
   } satisfies Record<ExpertType, number>,
 
-  /** Points per company edge, by relationship strength. */
   byRelationship: {
     founded: 14,
     "co-founded": 13,

@@ -46,8 +46,6 @@ class Settings:
     cron_secret: str | None = getenv("CRON_SECRET")
     deepseek_api_key: str | None = getenv("DEEPSEEK_API_KEY")
     deepseek_model: str = _deepseek_model()
-    gemini_api_key: str | None = getenv("GEMINI_API_KEY")
-    gemini_model: str = getenv("GEMINI_MODEL", "gemini-2.5-flash")
     tavily_api_key: str | None = getenv("TAVILY_API_KEY")
     serper_api_key: str | None = getenv("SERPER_API_KEY")
     brave_search_api_key: str | None = getenv("BRAVE_SEARCH_API_KEY")

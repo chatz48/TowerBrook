@@ -2,50 +2,18 @@ from fastapi import APIRouter, HTTPException, Request
 
 from app.config import get_settings
 from app.repositories.supabase_repo import repo
-from app.services.chunker import chunk_text
-from app.services.deepseek_extractor import extractor
-from app.services.embeddings_bge import embeddings
 from app.services.expert_profile_completion import (
-    build_follow_up_profile_queries,
     build_initial_profile_queries,
     create_profile_coverage,
-    update_profile_coverage,
 )
-from app.services.graph_builder import persist_candidate_extraction
-from app.services.keiro_search import keiro
+from app.services.job_processor import run_discovery_queries, run_profile_completion_queries
 from app.services.material_fact_completion import (
     build_company_fact_queries,
     build_expert_contact_queries,
 )
+from app.services.theme_job_queries import THEME_QUERIES
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
-
-THEME_QUERIES = {
-    "clean-energy-advisory": [
-        'site:towerbrook.com ("investment" OR "partnership") (renewable OR wind OR "energy transition")',
-        '("private equity" OR "infrastructure fund") ("renewable energy services" OR "energy transition platform") (acquisition OR investment)',
-        '("portfolio company" OR "sponsor-backed") (renewable OR wind OR solar) ("add-on acquisition" OR sale)',
-        '("secondary buyout" OR "majority investment") ("clean energy" OR renewable) (partner OR managing director)',
-        '("clean energy" OR renewable) (founder OR CEO OR chair) ("private equity" OR "portfolio company")',
-        '("clean energy" OR renewable) ("financial advisor" OR "legal counsel" OR "commercial due diligence") (partner OR managing director)',
-    ],
-    "grid-infrastructure": [
-        'site:towerbrook.com ("investment" OR "partnership") ("grid connection" OR "high voltage" OR infrastructure)',
-        '("private equity" OR "infrastructure fund") ("grid services" OR "power infrastructure") (acquisition OR investment)',
-        '("portfolio company" OR "sponsor-backed") ("grid infrastructure" OR electrical OR transmission) ("add-on acquisition" OR sale)',
-        '("secondary buyout" OR "majority investment") ("grid services" OR "power solutions") (partner OR managing director)',
-        '("grid services" OR "power infrastructure") (founder OR CEO OR chair) ("private equity" OR "portfolio company")',
-        '("grid services" OR "power infrastructure") ("financial advisor" OR "legal counsel" OR "commercial due diligence") (partner OR managing director)',
-    ],
-    "smart-water": [
-        'site:towerbrook.com ("investment" OR "partnership") (water OR "infrastructure services")',
-        '("private equity" OR "infrastructure fund") ("water infrastructure" OR "water technology") (acquisition OR investment)',
-        '("portfolio company" OR "sponsor-backed") (water OR wastewater) ("add-on acquisition" OR sale)',
-        '("secondary buyout" OR "majority investment") (water OR wastewater) (partner OR managing director)',
-        '("water infrastructure" OR "water technology") (founder OR CEO OR chair) ("private equity" OR "portfolio company")',
-        '("water infrastructure" OR "water technology") ("financial advisor" OR "legal counsel" OR "commercial due diligence") (partner OR managing director)',
-    ],
-}
 
 
 @router.post("/process-next")
@@ -130,97 +98,31 @@ async def _process_claimed_job(job):
         if job.job_type == "expert_profile_completion":
             return await _process_expert_profile_completion(job, settings, provider_status)
 
-        totals = {
-            "sources": 0,
-            "people_candidates": 0,
-            "company_candidates": 0,
-            "relationship_candidates": 0,
-            "fact_candidates": 0,
-            "entity_match_candidates": 0,
-        }
-        requests_used = 0
-        for index, query in enumerate(queries, start=1):
-            if requests_used >= settings.keirolabs_max_requests_per_job:
-                break
-            results = await keiro.search(query, limit=settings.keirolabs_search_results)
-            requests_used += 1
-            totals["sources"] += len(results)
-            fallback_fetches = 0
-            for result in results:
-                content = result.get("content") or result.get("snippet") or ""
-                can_fetch = (
-                    not result.get("content")
-                    and result.get("url")
-                    and fallback_fetches < settings.keirolabs_fetches_per_query
-                    and requests_used < settings.keirolabs_max_requests_per_job
-                )
-                if can_fetch:
-                    fetched = await keiro.fetch_content(result["url"])
-                    requests_used += 1
-                    fallback_fetches += 1
-                    content = fetched.get("content") or content
-                    result["title"] = fetched.get("title") or result.get("title")
-                source = repo.upsert_source(
-                    {
-                        "url": result.get("url"),
-                        "title": result.get("title") or query,
-                        "publisher": result.get("publisher"),
-                        "source_type": "web_search",
-                        "raw_text": content,
-                        "metadata": {
-                            "theme_id": job.theme_id,
-                            "query": query,
-                            "job_id": job.id,
-                            "job_type": job.job_type,
-                            "research_objective": job.metadata.get("objective"),
-                            "review_gated": True,
-                        },
-                    }
-                )
-                chunks = chunk_text(content)
-                extraction = await extractor.extract(
-                    content,
-                    source.title,
-                    source.url,
-                    job.theme_id,
-                    objective=job.metadata.get("objective"),
-                    target_context=job.metadata,
-                )
-                persisted = await persist_candidate_extraction(
-                    extraction,
-                    source,
-                    chunks,
-                    embeddings.embed_many(chunks),
-                    job.theme_id,
-                    job,
-                )
-                for key in (
-                    "people_candidates",
-                    "company_candidates",
-                    "relationship_candidates",
-                    "fact_candidates",
-                    "entity_match_candidates",
-                ):
-                    totals[key] += persisted[key]
-            repo.update_job(job.id, {"progress_completed": index})
+        batch = await run_discovery_queries(job, queries, settings)
+        totals = batch.totals
         repo.update_job(
             job.id,
             {
                 "status": "completed",
-                "sources_found": totals["sources"],
-                "entities_created": totals["people_candidates"] + totals["company_candidates"],
-                "relationships_created": totals["relationship_candidates"],
+                "sources_found": totals.sources,
+                "entities_created": totals.people_candidates + totals.company_candidates,
+                "relationships_created": totals.relationship_candidates,
                 "metadata": {
                     **job.metadata,
-                    "keirolabs_requests_used": requests_used,
+                    "keirolabs_requests_used": batch.requests_used,
                     "provider_status": provider_status,
                     "review_gated": True,
-                    "entity_match_candidates": totals["entity_match_candidates"],
-                    "fact_candidates": totals["fact_candidates"],
+                    "entity_match_candidates": totals.entity_match_candidates,
+                    "fact_candidates": totals.fact_candidates,
                 },
             },
         )
-        return {"processed": True, "job_id": job.id, "keirolabs_requests_used": requests_used, **totals}
+        return {
+            "processed": True,
+            "job_id": job.id,
+            "keirolabs_requests_used": batch.requests_used,
+            **totals.__dict__,
+        }
     except Exception:
         error = "Research job failed during processing. Check server logs with the request id for details."
         repo.update_job(job.id, {"status": "failed", "error": error})
@@ -275,111 +177,20 @@ async def _process_expert_profile_completion(job, settings, provider_status):
         repo.update_job(job.id, {"status": "failed", "error": error})
         return {"processed": True, "job_id": job.id, "error": error}
 
-    max_rounds = int(job.metadata.get("max_rounds", 2))
-    max_queries = int(job.metadata.get("max_queries", 8))
-    results_per_query = int(job.metadata.get("results_per_query", 3))
-    executed_queries: list[str] = []
-    totals = {
-        "sources": 0,
-        "people_candidates": 0,
-        "company_candidates": 0,
-        "relationship_candidates": 0,
-        "fact_candidates": 0,
-        "entity_match_candidates": 0,
-    }
-    requests_used = 0
-    repo.update_job(job.id, {"progress_total": max_queries})
-
-    for round_index in range(max_rounds):
-        if round_index > 0:
-            queries = build_follow_up_profile_queries(coverage)
-        if not queries:
-            break
-        for query in queries:
-            if len(executed_queries) >= max_queries:
-                break
-            if requests_used >= settings.keirolabs_max_requests_per_job:
-                break
-            if query in executed_queries:
-                continue
-            executed_queries.append(query)
-            results = await keiro.search(query, limit=min(settings.keirolabs_search_results, results_per_query))
-            requests_used += 1
-            totals["sources"] += len(results)
-            fallback_fetches = 0
-            for result in results:
-                url = result.get("url")
-                if url and url in coverage.seen_urls:
-                    continue
-                content = result.get("content") or result.get("snippet") or ""
-                can_fetch = (
-                    not result.get("content")
-                    and url
-                    and fallback_fetches < settings.keirolabs_fetches_per_query
-                    and requests_used < settings.keirolabs_max_requests_per_job
-                )
-                if can_fetch:
-                    fetched = await keiro.fetch_content(url)
-                    requests_used += 1
-                    fallback_fetches += 1
-                    content = fetched.get("content") or content
-                    result["title"] = fetched.get("title") or result.get("title")
-                source = repo.upsert_source(
-                    {
-                        "url": url,
-                        "title": result.get("title") or query,
-                        "publisher": result.get("publisher"),
-                        "source_type": "web_search",
-                        "raw_text": content,
-                        "metadata": {
-                            "theme_id": job.theme_id,
-                            "query": query,
-                            "job_id": job.id,
-                            "job_type": job.job_type,
-                            "research_objective": job.metadata.get("objective"),
-                            "profile_completion_round": round_index + 1,
-                            "review_gated": True,
-                        },
-                    }
-                )
-                chunks = chunk_text(content)
-                extraction = await extractor.extract(
-                    content,
-                    source.title,
-                    source.url,
-                    job.theme_id,
-                    objective=job.metadata.get("objective"),
-                    target_context={
-                        **job.metadata,
-                        "profile_coverage": coverage.fields,
-                        "missing_profile_fields": coverage.missing_fields,
-                    },
-                )
-                update_profile_coverage(coverage, extraction, source)
-                persisted = await persist_candidate_extraction(
-                    extraction,
-                    source,
-                    chunks,
-                    embeddings.embed_many(chunks),
-                    job.theme_id,
-                    job,
-                )
-                for key in (
-                    "people_candidates",
-                    "company_candidates",
-                    "relationship_candidates",
-                    "fact_candidates",
-                    "entity_match_candidates",
-                ):
-                    totals[key] += persisted[key]
-            repo.update_job(job.id, {"progress_completed": len(executed_queries)})
-        if coverage.complete or len(executed_queries) >= max_queries:
-            break
-
+    batch = await run_profile_completion_queries(
+        job,
+        queries,
+        settings,
+        coverage,
+        max_rounds=int(job.metadata.get("max_rounds", 2)),
+        max_queries=int(job.metadata.get("max_queries", 8)),
+        results_per_query=int(job.metadata.get("results_per_query", 3)),
+    )
+    totals = batch.totals
     metadata = {
         **job.metadata,
-        "executed_queries": executed_queries,
-        "keirolabs_requests_used": requests_used,
+        "executed_queries": batch.executed_queries,
+        "keirolabs_requests_used": batch.requests_used,
         "provider_status": provider_status,
         "review_gated": True,
         "profile_completion": {
@@ -390,23 +201,23 @@ async def _process_expert_profile_completion(job, settings, provider_status):
             "complete": coverage.complete,
             "evidence": coverage.evidence,
         },
-        "entity_match_candidates": totals["entity_match_candidates"],
-        "fact_candidates": totals["fact_candidates"],
+        "entity_match_candidates": totals.entity_match_candidates,
+        "fact_candidates": totals.fact_candidates,
     }
     repo.update_job(
         job.id,
         {
             "status": "completed",
-            "sources_found": totals["sources"],
-            "entities_created": totals["people_candidates"] + totals["company_candidates"],
-            "relationships_created": totals["relationship_candidates"],
+            "sources_found": totals.sources,
+            "entities_created": totals.people_candidates + totals.company_candidates,
+            "relationships_created": totals.relationship_candidates,
             "metadata": metadata,
         },
     )
     return {
         "processed": True,
         "job_id": job.id,
-        "keirolabs_requests_used": requests_used,
+        "keirolabs_requests_used": batch.requests_used,
         "profile_completion": metadata["profile_completion"],
-        **totals,
+        **totals.__dict__,
     }

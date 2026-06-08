@@ -1,11 +1,3 @@
-// Core domain model for the People Expert Engine.
-//
-// The whole product hinges on one idea: experts and companies are NODES in a
-// graph, joined by TYPED EDGES (founded / advised / banked / legal-counsel /
-// invested-in / ...). That lets us do the thing the brief actually asks for —
-// *derive* interesting companies from the pool of discovered experts, and show
-// a provenance trail for every claim.
-
 export type ThemeId =
   | "clean-energy-advisory"
   | "grid-infrastructure"
@@ -15,41 +7,37 @@ export interface Theme {
   id: ThemeId;
   name: string;
   shortName: string;
-  /** One-line pitch a non-technical IP can read at a glance. */
   description: string;
-  /** Search terms used by the live-discovery agent (later feature). */
   keywords: string[];
-  accent: string; // tailwind-friendly hex for theme color
+  accent: string;
 }
 
-/** How an expert relates to the theme — drives filtering and the "coverage" view. */
 export type ExpertType =
-  | "ex-founder" // founded / co-founded a company in the space
-  | "operator" // current or former senior operator / executive
-  | "advisor" // independent advisor / board member / NED
-  | "strategy-consultant" // strategy / market / commercial advisory
-  | "commercial-dd" // commercial diligence provider
-  | "technical-dd" // operational, technical, environmental or ESG diligence
-  | "engineering-consultant" // engineering design / delivery / asset advisory
-  | "regulatory-policy" // regulatory, policy or government-affairs expert
-  | "banker" // M&A / capital-markets coverage of the space
-  | "lawyer" // legal counsel on deals in the space
-  | "service-provider" // legacy umbrella for consultants / service providers
-  | "investor"; // peer funds / dealmakers active in the space
+  | "ex-founder"
+  | "operator"
+  | "advisor"
+  | "strategy-consultant"
+  | "commercial-dd"
+  | "technical-dd"
+  | "engineering-consultant"
+  | "regulatory-policy"
+  | "banker"
+  | "lawyer"
+  | "service-provider"
+  | "investor";
 
-/** The edge label between an expert and a company. */
 export type RelationshipType =
   | "founded"
   | "co-founded"
-  | "led" // CEO / senior exec
-  | "partner" // partner / principal at an advisory or law firm
-  | "board" // board member / chair / NED
-  | "advised" // strategic / technical advisor
+  | "led"
+  | "partner"
+  | "board"
+  | "advised"
   | "invested-in"
-  | "acquired" // company they founded was acquired by this company
-  | "banked" // acted as financial advisor on a deal
-  | "legal-counsel" // acted as legal counsel on a deal
-  | "served"; // service-provider engagement
+  | "acquired"
+  | "banked"
+  | "legal-counsel"
+  | "served";
 
 export type DealStatus =
   | "announced"

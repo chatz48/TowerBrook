@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from app.services.search_query_utils import dedupe_queries, first_text, join_terms
+
 
 COMPANY_FACT_TYPES = {
     "seed_round",
@@ -28,15 +30,15 @@ def build_company_fact_queries(metadata: dict[str, Any]) -> list[str]:
     queries: list[str] = []
     for fact in facts:
         queries.extend(_company_fact_queries(target, fact, website))
-    return _dedupe(queries)
+    return dedupe_queries(queries)
 
 
 def build_expert_contact_queries(metadata: dict[str, Any]) -> list[str]:
     target = _target_name(metadata)
     if not target:
         return []
-    company = _first_text(metadata, "target_company", "organization", "current_organization")
-    role = _first_text(metadata, "role", "headline")
+    company = first_text(metadata, "target_company", "organization", "current_organization")
+    role = first_text(metadata, "role", "headline")
     facts = _fact_types(metadata, EXPERT_CONTACT_FACT_TYPES)
     if not facts:
         facts = ["linkedin", "email"]
@@ -46,34 +48,34 @@ def build_expert_contact_queries(metadata: dict[str, Any]) -> list[str]:
         if fact == "email":
             queries.extend(
                 [
-                    _join(target, company, role, "email contact public profile"),
-                    _join(target, company, "email address contact"),
-                    _join(target, "speaker bio email contact"),
+                    join_terms(target, company, role, "email contact public profile"),
+                    join_terms(target, company, "email address contact"),
+                    join_terms(target, "speaker bio email contact"),
                 ]
             )
         elif fact == "linkedin":
             queries.extend(
                 [
-                    _join(target, company, role, "LinkedIn profile"),
-                    _join(target, company, "linkedin.com/in"),
-                    _join(target, "public profile current role LinkedIn"),
+                    join_terms(target, company, role, "LinkedIn profile"),
+                    join_terms(target, company, "linkedin.com/in"),
+                    join_terms(target, "public profile current role LinkedIn"),
                 ]
             )
         elif fact == "website":
             queries.extend(
                 [
-                    _join(target, company, "personal website biography"),
-                    _join(target, role, "profile bio website"),
+                    join_terms(target, company, "personal website biography"),
+                    join_terms(target, role, "profile bio website"),
                 ]
             )
         elif fact == "intro_path":
             queries.extend(
                 [
-                    _join(target, company, "deal advisor board investor relationship"),
-                    _join(target, company, "conference speaker deal team"),
+                    join_terms(target, company, "deal advisor board investor relationship"),
+                    join_terms(target, company, "conference speaker deal team"),
                 ]
             )
-    return _dedupe(queries)
+    return dedupe_queries(queries)
 
 
 def _company_fact_queries(target: str, fact: str, website: str | None) -> list[str]:
@@ -125,7 +127,7 @@ def _company_fact_queries(target: str, fact: str, website: str | None) -> list[s
 
 
 def _target_name(metadata: dict[str, Any]) -> str | None:
-    return _first_text(metadata, "target_name", "company_name", "expert_name", "name")
+    return first_text(metadata, "target_name", "company_name", "expert_name", "name")
 
 
 def _fact_types(metadata: dict[str, Any], allowed: set[str]) -> list[str]:
@@ -141,30 +143,7 @@ def _fact_types(metadata: dict[str, Any], allowed: set[str]) -> list[str]:
     ]
 
 
-def _first_text(metadata: dict[str, Any], *keys: str) -> str | None:
-    for key in keys:
-        value = metadata.get(key)
-        if isinstance(value, str) and value.strip():
-            return value.strip()
-    return None
-
-
 def _domain(value: Any) -> str | None:
     if not isinstance(value, str) or not value:
         return None
     return value.replace("https://", "").replace("http://", "").split("/", 1)[0].removeprefix("www.")
-
-
-def _join(*parts: str | None) -> str:
-    return " ".join(part for part in parts if part)
-
-
-def _dedupe(queries: list[str]) -> list[str]:
-    seen = set()
-    result = []
-    for query in queries:
-        normalized = query.strip()
-        if normalized and normalized not in seen:
-            seen.add(normalized)
-            result.append(normalized)
-    return result

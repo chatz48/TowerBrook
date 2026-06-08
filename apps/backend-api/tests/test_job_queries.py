@@ -1,4 +1,5 @@
-from app.api.jobs import THEME_QUERIES, _queries_for_job
+from app.api.jobs import _queries_for_job
+from app.services.theme_job_queries import THEME_QUERIES
 
 
 def test_theme_queries_are_private_equity_led():

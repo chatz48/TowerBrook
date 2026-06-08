@@ -5,9 +5,8 @@ import Link from "next/link";
 import { copilotProgressLabel } from "@/lib/copilot-copy";
 import { workspaceKindLabel, type WorkspaceItem } from "@/lib/workspace";
 import { AskAnswerPanel } from "./AskAnswerPanel";
-import { PROMPTS } from "./constants";
 import type { AskResponse } from "./types";
-import { buildBasketPrompt, themeLabel, type ConversationMessage } from "./utils";
+import { buildBasketPrompt, idlePromptSuggestions, themeLabel, type ConversationMessage } from "./utils";
 
 type CopilotConversationProps = {
   question: string;
@@ -169,6 +168,7 @@ export function CopilotConversation({
         ) : !loading ? (
           <IdlePrompt
             question={answer?.input_context.question ?? question}
+            theme={filtersTheme}
             onPrompt={(prompt) => {
               onQuestionChange(prompt);
               onPrompt(prompt);
@@ -199,13 +199,17 @@ function conversationTurnsNewestFirst(messages: ConversationMessage[]): Conversa
 
 function IdlePrompt({
   question,
+  theme,
   onPrompt,
 }: {
   question: string;
+  theme: string;
   onPrompt: (prompt: string) => void;
 }) {
+  const starters = idlePromptSuggestions(theme);
+
   return (
-    <div className="space-y-4 rounded border border-[#dfe3eb] bg-[#fbfcfe] p-4">
+    <div className="space-y-4 rounded border border-[#dfe3eb] bg-[#fbfcfe] p-4" data-testid="copilot-idle-prompt">
       <div className="flex gap-3">
         <Avatar label="AB" />
         <div>
@@ -217,16 +221,26 @@ function IdlePrompt({
         </div>
       </div>
       <div className="flex flex-wrap gap-2">
-        {[question, ...PROMPTS].filter(Boolean).slice(0, 5).map((prompt) => (
-          <button
-            key={prompt}
-            type="button"
-            onClick={() => onPrompt(prompt)}
-            className="rounded border border-[#d8dee8] bg-white px-3 py-2 text-xs font-medium text-[#344054] transition hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
-          >
-            Try: {prompt}
-          </button>
-        ))}
+        {starters.map((starter) =>
+          starter.kind === "link" ? (
+            <Link
+              key={starter.href}
+              href={starter.href}
+              className="rounded border border-[#d8dee8] bg-white px-3 py-2 text-xs font-medium text-[#344054] transition hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
+            >
+              {starter.label}
+            </Link>
+          ) : (
+            <button
+              key={starter.prompt}
+              type="button"
+              onClick={() => onPrompt(starter.prompt)}
+              className="rounded border border-[#d8dee8] bg-white px-3 py-2 text-xs font-medium text-[#344054] transition hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
+            >
+              {starter.label}
+            </button>
+          ),
+        )}
       </div>
     </div>
   );
