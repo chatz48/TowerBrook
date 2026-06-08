@@ -7,8 +7,8 @@
  * those sources into candidates, and prints them as JSON in our Expert schema.
  *
  * Usage:
- *   DEEPSEEK_API_KEY=sk-... BACKEND_API_URL=https://... node scripts/discover.mjs clean-energy-advisory
- *   DEEPSEEK_API_KEY=sk-... BACKEND_API_URL=https://... node scripts/discover.mjs smart-water > /tmp/new.json
+ *   DEEPSEEK_API_KEY=replace-with-your-key BACKEND_API_URL=https://... node scripts/discover.mjs clean-energy-advisory
+ *   DEEPSEEK_API_KEY=replace-with-your-key BACKEND_API_URL=https://... node scripts/discover.mjs smart-water > /tmp/new.json
  *
  * Themes: clean-energy-advisory | grid-infrastructure | smart-water
  *

@@ -20,7 +20,7 @@ _error_count = 0
 _settings = get_settings()
 _allowed_origins = [
     origin.strip()
-    for origin in (_settings.cors_allowed_origins or "https://towerbrook-arun.vercel.app,http://localhost:3000").split(",")
+    for origin in (_settings.cors_allowed_origins or "http://localhost:3000").split(",")
     if origin.strip()
 ]
 

@@ -34,9 +34,7 @@
     "test:e2e:basket": "pnpm --dir apps/web test:e2e:basket",
     "test:e2e:copilot": "pnpm --dir apps/web test:e2e:copilot",
     "test:e2e:workflows": "pnpm --dir apps/web test:e2e:workflows",
-    "verify": "pnpm lint && pnpm typecheck && pnpm build && pnpm ingest:validate && pnpm api:test && pnpm --dir apps/web test:unit && node apps/web/tests/ask-contract.test.mjs",
-    "verify:agent": "node scripts/agent-verify.mjs",
-    "traces:recent": "node scripts/trace-recent.mjs"
+    "verify": "pnpm lint && pnpm typecheck && pnpm build && pnpm ingest:validate && pnpm api:test && pnpm --dir apps/web test:unit && node apps/web/tests/ask-contract.test.mjs"
   },
   "devDependencies": {
     "eslint": "^9",

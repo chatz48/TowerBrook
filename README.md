@@ -6,7 +6,7 @@ calling plan: the most relevant experts, the companies they can unlock, the
 evidence behind each recommendation, and the warmest relationship paths into the
 market.
 
-Hosted demo: `https://towerbrook-arun.vercel.app`
+Hosted demo: add your deployment URL here.
 
 The demo focuses on three themes:
 
@@ -102,6 +102,29 @@ Those extracted facts become reviewable candidates before they enrich the
 canonical relationship graph. The goal is for every new company document or deal
 source to make the expert network more complete, more explainable and more
 useful for origination.
+
+### Expert Discovery Methodology
+
+Experts were uncovered by working backwards from evidence rather than starting
+with a generic contact list. The discovery process looked for named operators,
+board members, advisers, investors and sector specialists who repeatedly appeared
+around priority companies, transactions, infrastructure projects and thematic
+market activity.
+
+The primary source base was public and semi-structured business evidence:
+company websites, leadership biographies, annual reports, transaction
+announcements, investor presentations, fund and portfolio company statements,
+regulatory or procurement references, and adviser-authored market material. Where
+available, the research also used professional services signals such as
+accounting firm commentary, legal adviser announcements, restructuring or deal
+team references, and specialist consultant publications.
+
+Each source was used to extract the same core facts: the person, their role, the
+organisation or transaction they were linked to, the date or context of that
+link, and the reason the connection mattered for the theme. Those facts were then
+converted into graph relationships so the product could show not only who the
+expert is, but why they are relevant, which companies they may unlock and what
+evidence supports the recommendation.
 
 ## Architecture
 
