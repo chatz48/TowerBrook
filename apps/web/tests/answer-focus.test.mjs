@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { inferIntent, isChitchatQuestion, resolveObjective } from "../lib/answer-focus.ts";
+import { inferIntent, isChitchatQuestion, isWarmIntroQuestion, resolveObjective } from "../lib/answer-focus.ts";
 
 test("resolveObjective infers Prepare calls when filters still say Find experts", () => {
   assert.equal(
@@ -27,6 +27,22 @@ test("inferIntent routes theme focus questions to prioritize_theme", () => {
   );
 });
 
+test("inferIntent routes warm intro prompts to warm_intro_paths", () => {
+  assert.equal(
+    inferIntent("Which warm intro paths are strongest?", "Find experts"),
+    "warm_intro_paths",
+  );
+  assert.equal(
+    resolveObjective("Find experts", "Which warm intro paths are strongest?"),
+    "Prepare calls",
+  );
+});
+
+test("warm intro detection avoids generic grid connection questions", () => {
+  assert.equal(isWarmIntroQuestion("Who should I call first for grid connection delays?"), false);
+  assert.equal(isWarmIntroQuestion("Who can introduce us to Envevo?"), true);
+});
+
 test("inferIntent routes greetings to chitchat", () => {
   assert.equal(inferIntent("Hello!", "Find experts"), "chitchat");
   assert.equal(inferIntent("Thanks — that helps.", "Find experts"), "chitchat");
@@ -36,6 +52,7 @@ test("chitchat detection excludes workflow questions", () => {
   assert.equal(isChitchatQuestion("Hello!"), true);
   assert.equal(isChitchatQuestion("Who should I call first?"), false);
   assert.equal(isChitchatQuestion("Which companies are most actionable?"), false);
+  assert.equal(isChitchatQuestion("Warm intros"), false);
 });
 
 test("resolveObjective does not treat reduce conviction as red-team", () => {

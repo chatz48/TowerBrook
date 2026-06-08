@@ -23,6 +23,10 @@ export interface TowerBrookWarmPath {
 
 const paths = warmPathData.paths as TowerBrookWarmPath[];
 
+export function allWarmPaths(): TowerBrookWarmPath[] {
+  return [...paths].sort((a, b) => b.strength - a.strength || b.confidence - a.confidence);
+}
+
 export function warmPathsForExpert(expertId: string): TowerBrookWarmPath[] {
   return paths
     .filter((path) => path.target_expert_id === expertId)

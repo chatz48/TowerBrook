@@ -8,7 +8,7 @@ from app.schemas.domain import Citation, ToolTrace
 from app.services.copilot.context import CopilotContext
 from app.services.copilot.intent import RoutedIntent, route_intent
 from app.services.copilot.models import CopilotSynthesis
-from app.services.copilot.synthesis import synthesize_answer
+from app.services.copilot.synthesis import draft_synthesis, verify_answer_synthesis
 from app.services.copilot.tools import run_pipeline
 
 
@@ -24,6 +24,7 @@ class CopilotState(TypedDict, total=False):
     confidence: float
     intent: str
     model_used: str
+    verification_warnings: list[str]
 
 
 async def _node_route(state: CopilotState) -> CopilotState:
@@ -51,20 +52,30 @@ async def _node_synthesize(state: CopilotState) -> CopilotState:
     ctx = state["ctx"]
     citations = state.get("citations") or []
     tool_calls = state.get("tool_calls") or []
-    synthesis = await synthesize_answer(
+    synthesis = await draft_synthesis(
         ctx,
         routed.intent,
         routed.model,
         citations,
         tool_calls,
     )
-    structured = synthesis.model_dump()
     confidence = compute_confidence(citations, tool_calls)
     return {
         "synthesis": synthesis,
-        "structured": structured,
-        "answer": synthesis.answer_summary,
         "confidence": confidence,
+    }
+
+
+async def _node_verify(state: CopilotState) -> CopilotState:
+    routed = state["routed"]
+    citations = state.get("citations") or []
+    synthesis = state["synthesis"]
+    verified, warnings = verify_answer_synthesis(synthesis, citations, routed.intent)
+    return {
+        "synthesis": verified,
+        "structured": verified.model_dump(),
+        "answer": verified.answer_summary,
+        "verification_warnings": warnings,
     }
 
 
@@ -73,10 +84,12 @@ def _build_graph() -> Any:
     graph.add_node("route", _node_route)
     graph.add_node("research", _node_research)
     graph.add_node("synthesize", _node_synthesize)
+    graph.add_node("verify", _node_verify)
     graph.add_edge(START, "route")
     graph.add_edge("route", "research")
     graph.add_edge("research", "synthesize")
-    graph.add_edge("synthesize", END)
+    graph.add_edge("synthesize", "verify")
+    graph.add_edge("verify", END)
     return graph.compile()
 
 

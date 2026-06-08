@@ -33,7 +33,7 @@ export async function waitForCopilotEnrichment(page: Page) {
 
 export async function ensureCopilotResponse(page: Page, fallbackQuestion: string) {
   try {
-    await rankedExpertsHeading(page).waitFor({ timeout: 30_000 });
+    await rankedExpertsHeading(page).waitFor({ timeout: 1_000 });
   } catch {
     await submitCopilotQuestion(page, fallbackQuestion);
     await rankedExpertsHeading(page).waitFor({ timeout: 120_000 });

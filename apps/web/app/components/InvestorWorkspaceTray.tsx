@@ -166,12 +166,17 @@ export default function InvestorWorkspaceTray() {
           </div>
 
           <div className="grid gap-2 border-b border-line p-3 sm:grid-cols-2">
-            <Link href="/experts" className="ee-button ee-button-secondary min-h-8 px-2 text-[11px]">
+            <Link
+              href="/experts"
+              onClick={() => setOpen(false)}
+              className="ee-button ee-button-secondary min-h-8 px-2 text-[11px]"
+            >
               Open plan
             </Link>
             <Link
               href={`/ask?prompt=${basketPrompt}`}
               data-testid="basket-call-plan"
+              onClick={() => setOpen(false)}
               className="ee-button ee-button-primary min-h-8 px-2 text-[11px]"
             >
               Generate call plan

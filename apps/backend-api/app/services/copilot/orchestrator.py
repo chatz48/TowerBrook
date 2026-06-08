@@ -20,6 +20,7 @@ PHASE_LABELS = {
     "route": "Routing question intent…",
     "research": "Retrieving directory evidence…",
     "synthesize": "Synthesising structured answer…",
+    "verify": "Verifying claims against citations…",
 }
 
 
@@ -44,11 +45,11 @@ def _build_response(
     tool_calls: list[ToolTrace] = final.get("tool_calls") or []
     intent: str = final.get("intent") or "find_experts"
     structured = final.get("structured") or {}
-    verification_warnings: list[str] = []
+    verification_warnings: list[str] = list(final.get("verification_warnings") or [])
     if isinstance(structured, dict):
         notes = structured.get("uncertainty_notes")
         if isinstance(notes, str) and "Removed unverified" in notes:
-            verification_warnings = [
+            verification_warnings = verification_warnings or [
                 part.strip()
                 for part in notes.split(";")
                 if "Removed unverified" in part or "limited citation overlap" in part

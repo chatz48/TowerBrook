@@ -30,6 +30,7 @@ export function inferObjectiveFromQuestion(question: string): string {
   if (/investment memo|partner memo|memo section|memo and call plan/i.test(q)) {
     return "Prepare calls";
   }
+  if (isWarmIntroQuestion(question)) return "Prepare calls";
   if (q.includes("company") || q.includes("target")) return "Map companies";
   if (/red[- ]team|\brisk\b|disconfirm|bear case/.test(q)) return "Red-team thesis";
   if (/call plan|prepare calls|call order|outreach|listen for|\bcall\b|\bprep\b/.test(q)) {
@@ -43,7 +44,7 @@ export function isChitchatQuestion(question: string): boolean {
   if (!q || q.length > 240) return false;
 
   if (
-    /expert|compan(y|ies)|target|call plan|memo|outreach|basket|who should|investment|deal|diligence|ranked|graph|sourc|validate|actionable|listen for|red[- ]team|disconfirm|bear case|expertise|specialt|theme should|which theme|focus on first/i.test(
+    /expert|compan(y|ies)|target|call plan|memo|outreach|intro|introduction|warm path|basket|who should|investment|deal|diligence|ranked|graph|sourc|validate|actionable|listen for|red[- ]team|disconfirm|bear case|expertise|specialt|theme should|which theme|focus on first/i.test(
       q,
     )
   ) {
@@ -75,6 +76,7 @@ export function inferIntent(question: string, objective: string): string {
   if (isChitchatQuestion(question)) return "chitchat";
 
   const q = question.toLowerCase();
+  if (isWarmIntroQuestion(question)) return "warm_intro_paths";
   if (objective === "Map companies" || /compan(y|ies)|target|actionable/.test(q)) {
     if (objective === "Map companies" || (/(compan(y|ies)|target)/.test(q) && !/who should|call|expert/.test(q))) {
       return "map_companies";
@@ -110,6 +112,16 @@ export function inferIntent(question: string, objective: string): string {
     return "prioritize_theme";
   }
   return "find_experts";
+}
+
+export function isWarmIntroQuestion(question: string): boolean {
+  const q = question.toLowerCase();
+  return (
+    /\bwarm\s+(intro|introduction|path|route|access)\b/.test(q) ||
+    /\b(intro|introduction)\s+(path|route|paths|routes)\b/.test(q) ||
+    /\b(strongest|best)\s+(intro|introduction|access)\s+(path|route|paths|routes)\b/.test(q) ||
+    /\bwho\s+can\s+(introduce|connect)\s+us\b/.test(q)
+  );
 }
 
 /** Primary sections open by default; supplementary sections stay collapsed until expanded. */
@@ -155,11 +167,22 @@ export function planSections(question: string, objective: string): Record<Sectio
     const memoStyle = /investment memo|partner memo|memo and call plan|what each person unlocks/i.test(q);
     return {
       experts: memoStyle ? primary(4) : expandable(4),
-      companies: mentionsCompanies ? expandable(2) : HIDDEN,
+      companies: mentionsCompanies ? expandable(3) : expandable(2),
       callSequence: listenPrimary ? expandable(3) : primary(3),
       listenFor: listenPrimary ? primary(1) : mentionsListen ? expandable(1) : HIDDEN,
       gapsRisks: mentionsRisks || memoStyle ? primary(2) : HIDDEN,
       sources: expandable(4),
+    };
+  }
+
+  if (intent === "warm_intro_paths") {
+    return {
+      experts: primary(5),
+      companies: HIDDEN,
+      callSequence: HIDDEN,
+      listenFor: HIDDEN,
+      gapsRisks: expandable(2),
+      sources: expandable(6),
     };
   }
 

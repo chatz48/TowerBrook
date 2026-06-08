@@ -18,7 +18,12 @@ import { callBackendApi, hasBackendApi } from "@/lib/backend-api";
 import type { AskResponse, ChatTurn, PageContext, SourceRecord, ToolTrace } from "@/lib/ask-types";
 import type { Company, Deal, Expert, ExpertType, Source, ThemeId } from "@/lib/types";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
-import { warmPathsForExpert, warmPathStatusLabel } from "@/lib/warm-paths";
+import {
+  allWarmPaths,
+  warmPathsForExpert,
+  warmPathStatusLabel,
+  type TowerBrookWarmPath,
+} from "@/lib/warm-paths";
 import { inferIntent, planSections, resolveObjective } from "@/lib/answer-focus";
 import { buildChitchatAnswer, chitchatThemeScope, generateChitchatReply } from "@/lib/chitchat";
 import {
@@ -184,10 +189,25 @@ async function handleAskStream(request: Request): Promise<Response> {
 
   const stream = new ReadableStream({
     async start(controller) {
+      let closed = false;
       const send = (event: string, data: unknown) => {
-        controller.enqueue(
-          encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`),
-        );
+        if (closed) return;
+        try {
+          controller.enqueue(
+            encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`),
+          );
+        } catch {
+          closed = true;
+        }
+      };
+      const close = () => {
+        if (closed) return;
+        closed = true;
+        try {
+          controller.close();
+        } catch {
+          // The browser may have already closed the stream after receiving the final event.
+        }
       };
 
       let trace: AskTraceCollector | null = null;
@@ -200,7 +220,7 @@ async function handleAskStream(request: Request): Promise<Response> {
           trace.setError(prepared.error);
           send("error", { message: prepared.error });
           await trace.flush();
-          controller.close();
+          close();
           return;
         }
 
@@ -226,7 +246,7 @@ async function handleAskStream(request: Request): Promise<Response> {
           send("complete", finalPayload);
           trace.finishFromResponse(finalPayload);
           await trace.flush();
-          controller.close();
+          close();
           return;
         }
 
@@ -259,7 +279,7 @@ async function handleAskStream(request: Request): Promise<Response> {
           send("complete", finalPayload);
           trace.finishFromResponse(finalPayload);
           await trace.flush();
-          controller.close();
+          close();
           return;
         }
 
@@ -298,14 +318,14 @@ async function handleAskStream(request: Request): Promise<Response> {
           trace.finishFromResponse(finalPayload);
         }
         await trace.flush();
-        controller.close();
+        close();
       } catch (e) {
         const message = e instanceof Error ? e.message : "Stream failed";
         const errorTrace = trace ?? new AskTraceCollector(requestId, body.question?.trim() ?? "", body.filters, true);
         errorTrace.setError(message);
         await errorTrace.flush();
         send("error", { message });
-        controller.close();
+        close();
       }
     },
   });
@@ -509,6 +529,12 @@ function questionReferencesBasket(question: string): boolean {
   );
 }
 
+function asksForLiveResearch(question: string): boolean {
+  return /\b(live|latest|current web|web search|outside (the )?directory|beyond (the )?directory|deep research|deep discovery|fresh research|new sources)\b/i.test(
+    question,
+  );
+}
+
 /** Directory baseline already answers these — skip slow backend synthesis. */
 function shouldSkipBackendEnrichment(
   question: string,
@@ -518,6 +544,16 @@ function shouldSkipBackendEnrichment(
 ): boolean {
   if (baseline.intent === "chitchat") return true;
   if (!baseline.grounded) return false;
+  if (asksForLiveResearch(question)) return false;
+
+  if (
+    baseline.ranked_experts.length > 0 ||
+    baseline.ranked_companies.length > 0 ||
+    baseline.theme_guidance?.length ||
+    baseline.sources_used.length > 0
+  ) {
+    return true;
+  }
 
   if (
     hasBasketContext(question, pageContext, chatHistory) ||
@@ -769,8 +805,44 @@ async function buildStructuredAnswer(
   }
   const pinnedCompanies = resolveBasketCompanies(basketEntries, includeTowerBrookEmployees);
 
+  const directoryExperts = filterTowerBrookEmployees(getExperts(), includeTowerBrookEmployees);
+  const expertById = new Map(directoryExperts.map((expert) => [expert.id, expert]));
+  const warmPathByExpert = new Map<string, TowerBrookWarmPath>();
   let rankedExpertInputs;
-  if (intent === "prioritize_theme" && themeGuidanceStats) {
+  if (intent === "warm_intro_paths") {
+    const warmPathInputs = allWarmPaths()
+      .map((path) => {
+        const expert = expertById.get(path.target_expert_id);
+        return expert ? { expert, path } : null;
+      })
+      .filter((item): item is { expert: Expert; path: TowerBrookWarmPath } => {
+        if (!item) return false;
+        if (item.path.status === "not_found") return false;
+        if (themeId && !item.expert.themes.includes(themeId)) return false;
+        if (archetypes.length > 0 && !archetypes.includes(item.expert.type)) return false;
+        return true;
+      })
+      .sort((a, b) => warmPathScore(b.path) - warmPathScore(a.path))
+      .filter((item, index, list) =>
+        list.findIndex((candidate) => candidate.expert.id === item.expert.id) === index
+      )
+      .slice(0, Math.max(sections.experts.limit, 5));
+
+    for (const item of warmPathInputs) {
+      warmPathByExpert.set(item.expert.id, item.path);
+    }
+
+    rankedExpertInputs = warmPathInputs.map(({ expert, path }) => ({
+      expert,
+      score: warmPathScore(path),
+      breakdown: {
+        base: path.strength,
+        session_fit: Math.round(path.confidence * 10),
+        objective_fit: path.status === "verified" ? 10 : path.status === "org_level" ? 7 : 4,
+        keyword_boost: keywordScore(words, `${path.intro_route} ${path.recommended_intro} ${path.evidence}`) * 5,
+      },
+    }));
+  } else if (intent === "prioritize_theme" && themeGuidanceStats) {
     rankedExpertInputs = expertsForThemeGuidance(themeGuidanceStats, includeTowerBrookEmployees).map(
       (expert, index) => ({
         expert,
@@ -785,14 +857,11 @@ async function buildStructuredAnswer(
     );
   } else {
     rankedExpertInputs = rankExpertsForSession(
-      filterTowerBrookEmployees(
-        getExperts().filter((expert) => {
+      directoryExperts.filter((expert) => {
           if (themeId && !expert.themes.includes(themeId)) return false;
           if (archetypes.length > 0 && !archetypes.includes(expert.type)) return false;
           return true;
         }),
-        includeTowerBrookEmployees,
-      ),
       sessionCalibration,
     )
       .map(({ expert, score }) => {
@@ -876,6 +945,7 @@ async function buildStructuredAnswer(
     rankedExpertInputs.map((x) => x.expert),
     rankedCompanyInputs.map((x) => x.company),
     rankedDealInputs.map((x) => x.deal),
+    [...warmPathByExpert.values()],
   );
   addPageContextSource(sourceIndex, pageContext);
 
@@ -904,7 +974,10 @@ async function buildStructuredAnswer(
   const sourceIds = [...sourceIndex.keys()];
 
   const ranked_experts_all = rankedExpertInputs.map(({ expert, score, breakdown }, index) => {
-    const citations = citationsFor(expert.sources, sourceIndex);
+    const warmPath = warmPathByExpert.get(expert.id);
+    const citations = warmPath
+      ? citationsFor(warmPath.sources, sourceIndex)
+      : citationsFor(expert.sources, sourceIndex);
     return {
       expert_id: expert.id,
       rank: index + 1,
@@ -914,9 +987,13 @@ async function buildStructuredAnswer(
       archetype: EXPERT_TYPE_LABEL[expert.type],
       relevance: clamp(Math.round(score), 1, 99),
       score_breakdown: breakdown,
-      access: expertAccessLabel(expert),
+      access: warmPath
+        ? `${warmPathStatusLabel(warmPath.status)} via ${warmPath.intro_route}`
+        : expertAccessLabel(expert),
       momentum: momentumLabel(expert),
-      why: expert.whyRelevant,
+      why: warmPath
+        ? `${warmPath.evidence} Recommended intro: ${warmPath.recommended_intro}`
+        : expert.whyRelevant,
       ...(expert.specialties?.length ? { specialties: expert.specialties.slice(0, 6) } : {}),
       citations,
     };
@@ -1044,6 +1121,9 @@ async function buildStructuredAnswer(
       ? buildThemeGuidanceSummary(themeGuidanceStats)
       : undefined;
 
+  const warmIntroSummary =
+    intent === "warm_intro_paths" ? buildWarmIntroSummary(ranked_experts_all) : undefined;
+
   const serializedThemeGuidance = themeGuidanceStats?.map((item) => ({
     theme: {
       id: item.theme.id,
@@ -1064,6 +1144,7 @@ async function buildStructuredAnswer(
     answer_summary: outreach_draft
       ? `Outreach draft for ${outreachExpert!.name}. Review and personalise before sending.`
       : themeGuidanceSummary ??
+        warmIntroSummary ??
         expertiseSummary ??
         memoCallPlanSummary ??
         listenForSummary ??
@@ -1150,7 +1231,12 @@ function normalizeChatHistory(history: ChatTurn[] | undefined): ChatTurn[] {
     .slice(-24);
 }
 
-function buildSourceIndex(experts: Expert[], companies: Company[], deals: Deal[] = []): Map<string, SourceRecord> {
+function buildSourceIndex(
+  experts: Expert[],
+  companies: Company[],
+  deals: Deal[] = [],
+  warmPaths: TowerBrookWarmPath[] = [],
+): Map<string, SourceRecord> {
   const sources = new Map<string, SourceRecord>();
   const add = (
     source: Source,
@@ -1213,6 +1299,16 @@ function buildSourceIndex(experts: Expert[], companies: Company[], deals: Deal[]
           ...deal.parties.map((party) => party.name),
           ...deal.advisors.map((advisor) => `${advisor.name} (${DEAL_ADVISOR_LABEL[advisor.role]})`),
         ],
+      });
+    }
+  }
+  for (const warmPath of warmPaths) {
+    for (const source of warmPath.sources.slice(0, 3)) {
+      add(source, {
+        name: warmPath.id,
+        description: `${warmPathStatusLabel(warmPath.status)}: ${warmPath.evidence}`,
+        confidence: warmPath.confidence,
+        entities: warmPath.path_nodes,
       });
     }
   }
@@ -1475,7 +1571,7 @@ function summaryFor(
   if (!experts.length) {
     return "No strong expert matches in the current directory. Broaden the theme or name experts explicitly.";
   }
-  if (objective === "Map companies") {
+  if (intent === "map_companies" || objective === "Map companies") {
     return `Prioritize ${companyNames || "the top targets"}; use ${expertNames || "linked experts"} to validate access.`;
   }
   if (objective === "Red-team thesis") {
@@ -1493,6 +1589,29 @@ function summaryFor(
     return `Suggested call order: ${expertNames}.`;
   }
   return `Start with ${expertNames} for this question.`;
+}
+
+function buildWarmIntroSummary(experts: RankedExpert[]): string {
+  if (!experts.length) {
+    return "No warm intro paths matched the current filters. Broaden the theme or include organization-level paths in CRM review.";
+  }
+
+  const lines = experts.slice(0, 5).map((expert, index) => {
+    return `${index + 1}. ${expert.name} — ${expert.access}. ${expert.why}`;
+  });
+
+  return `Strongest warm intro paths from the TowerBrook register:\n\n${lines.join("\n\n")}`;
+}
+
+function warmPathScore(path: TowerBrookWarmPath): number {
+  const statusWeight = {
+    verified: 1000,
+    org_level: 700,
+    nearest_public_path: 400,
+    not_found: 0,
+  } satisfies Record<TowerBrookWarmPath["status"], number>;
+
+  return statusWeight[path.status] + path.strength + path.confidence * 10;
 }
 
 function basketCallPhases(expertCount: number): string[] {

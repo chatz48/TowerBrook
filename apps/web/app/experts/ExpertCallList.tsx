@@ -90,6 +90,7 @@ export default function ExpertCallList({
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [savedExpertId, setSavedExpertId] = useState<string | null>(null);
   const selectAllRef = useRef<HTMLInputElement>(null);
   const workspaceItems = useWorkspaceItems();
 
@@ -167,6 +168,13 @@ export default function ExpertCallList({
 
   function toggleExpand(expertId: string) {
     setExpandedId((current) => (current === expertId ? null : expertId));
+  }
+
+  function confirmNotesSaved(expertId: string) {
+    setSavedExpertId(expertId);
+    window.setTimeout(() => {
+      setSavedExpertId((current) => (current === expertId ? null : current));
+    }, 1800);
   }
 
   function toggleBasket(row: RankedExpertRow) {
@@ -468,32 +476,57 @@ export default function ExpertCallList({
                             {warmPath.recommended_intro}
                           </p>
                         ) : null}
-                        <div className="mt-2 grid gap-2 md:grid-cols-2">
-                          <label className="block">
-                            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-ink-faint">
-                              Call objective
-                            </span>
-                            <textarea
-                              value={objectiveValue}
-                              onChange={(event) =>
-                                updateExpert(row.expert.id, { objective: event.target.value })
-                              }
-                              rows={2}
-                              aria-label={`Call objective for ${row.expert.name}`}
-                            />
-                          </label>
-                          <label className="block">
-                            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-ink-faint">
-                              Notes
-                            </span>
-                            <textarea
-                              value={current.note}
-                              onChange={(event) => updateExpert(row.expert.id, { note: event.target.value })}
-                              placeholder="Outreach notes, intro path, scheduling…"
-                              rows={2}
-                              aria-label={`Notes for ${row.expert.name}`}
-                            />
-                          </label>
+                        <div className="mt-3 rounded-lg border border-line bg-white p-3 shadow-sm">
+                          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                              <h4 className="text-[12px] font-semibold text-ink">Call prep notes</h4>
+                              <p className="mt-0.5 text-[11px] text-ink-faint">
+                                Objective and outreach notes are saved to this call list.
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                updateExpert(row.expert.id, {
+                                  objective: objectiveValue,
+                                  note: current.note,
+                                });
+                                confirmNotesSaved(row.expert.id);
+                              }}
+                              className="ee-button ee-button-primary min-h-7 px-3 text-[11px]"
+                            >
+                              {savedExpertId === row.expert.id ? "Saved" : "Save notes"}
+                            </button>
+                          </div>
+                          <div className="grid gap-3 md:grid-cols-2">
+                            <label className="block">
+                              <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-ink-faint">
+                                Call objective
+                              </span>
+                              <textarea
+                                value={objectiveValue}
+                                onChange={(event) =>
+                                  updateExpert(row.expert.id, { objective: event.target.value })
+                                }
+                                rows={3}
+                                aria-label={`Call objective for ${row.expert.name}`}
+                                className="min-h-24 w-full resize-y rounded-md border border-line-strong bg-[#fbfcff] px-3 py-2 text-[12px] leading-relaxed text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-accent focus:bg-white focus:ring-2 focus:ring-accent/10"
+                              />
+                            </label>
+                            <label className="block">
+                              <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-ink-faint">
+                                Notes
+                              </span>
+                              <textarea
+                                value={current.note}
+                                onChange={(event) => updateExpert(row.expert.id, { note: event.target.value })}
+                                placeholder="Outreach notes, intro path, scheduling…"
+                                rows={3}
+                                aria-label={`Notes for ${row.expert.name}`}
+                                className="min-h-24 w-full resize-y rounded-md border border-line-strong bg-[#fbfcff] px-3 py-2 text-[12px] leading-relaxed text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-accent focus:bg-white focus:ring-2 focus:ring-accent/10"
+                              />
+                            </label>
+                          </div>
                         </div>
                       </div>
                   </ExpandedRowPanel>

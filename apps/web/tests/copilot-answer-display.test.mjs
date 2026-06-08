@@ -9,7 +9,6 @@ import {
   parseEmailFromText,
   resolveDisplaySummary,
   resolveOutreachDraft,
-  sanitizeAnswerForDisplay,
 } from "../lib/copilot-answer-display.ts";
 
 test("normalizeAnswerSummary extracts truncated JSON blobs", () => {

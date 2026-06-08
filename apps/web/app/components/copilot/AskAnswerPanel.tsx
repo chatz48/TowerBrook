@@ -75,6 +75,7 @@ export function AskAnswerPanel({
             </span>
           </div>
           <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-ink">{displaySummary}</p>
+          <AnswerMetaStrip answer={answer} />
           {outreachDraft ? <OutreachEmailDraft draft={outreachDraft} /> : null}
           {answer.backend_error ? (
             <p className="mt-2 text-[11px] font-semibold text-amber-800">
@@ -126,6 +127,13 @@ export function AskAnswerPanel({
                   <p className="mt-0.5 text-[11px] text-ink-faint">
                     {expert.title} · {expert.firm}
                   </p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    <EvidencePill label={expert.access} tone="accent" />
+                    <EvidencePill label={`${expert.relevance}% relevance`} />
+                    {expert.citations.length ? (
+                      <EvidencePill label={`${expert.citations.length} citation${expert.citations.length === 1 ? "" : "s"}`} />
+                    ) : null}
+                  </div>
                   <p className="mt-1 text-xs leading-relaxed text-ink-soft">{expert.why}</p>
                 </div>
                 <WorkspaceActionButton
@@ -165,6 +173,13 @@ export function AskAnswerPanel({
                   <p className="mt-0.5 text-[11px] text-ink-faint">
                     {company.category} · {company.stage}
                   </p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    <EvidencePill label={`${Math.round(company.confidence * 100)}% confidence`} />
+                    <EvidencePill label={`${company.expert_density} linked expert${company.expert_density === 1 ? "" : "s"}`} />
+                    {company.citations.length ? (
+                      <EvidencePill label={`${company.citations.length} citation${company.citations.length === 1 ? "" : "s"}`} />
+                    ) : null}
+                  </div>
                   <p className="mt-1 text-xs leading-relaxed text-ink-soft">{company.why}</p>
                 </div>
                 <WorkspaceActionButton
@@ -191,7 +206,7 @@ export function AskAnswerPanel({
       {sections.callSequence.mode !== "hidden" && answer.call_sequence.length > 0 ? (
         <Panel
           title="Suggested call sequence"
-          meta="3 phases"
+          meta={`${answer.call_sequence.length} phase${answer.call_sequence.length === 1 ? "" : "s"}`}
           mode={sections.callSequence.mode}
           preview={answer.call_sequence.map((step) => step.phase).join(" → ")}
         >
@@ -364,6 +379,57 @@ function OutreachEmailDraft({ draft }: { draft: { subject: string; body: string 
         </div>
       </div>
     </div>
+  );
+}
+
+function AnswerMetaStrip({ answer }: { answer: AskResponse }) {
+  const items = [
+    answer.grounded
+      ? "Directory grounded"
+      : answer.backend_enriched
+        ? "Live synthesis"
+        : "AI-assisted",
+    `${answer.confidence.label} confidence`,
+    `${answer.ranked_experts.length} expert${answer.ranked_experts.length === 1 ? "" : "s"}`,
+    answer.ranked_companies.length
+      ? `${answer.ranked_companies.length} compan${answer.ranked_companies.length === 1 ? "y" : "ies"}`
+      : null,
+    answer.sources_used.length
+      ? `${answer.sources_used.length} source${answer.sources_used.length === 1 ? "" : "s"}`
+      : null,
+  ].filter((item): item is string => Boolean(item));
+
+  return (
+    <div className="mt-3 flex flex-wrap gap-1.5" aria-label="Answer evidence summary">
+      {items.map((item, index) => (
+        <EvidencePill
+          key={item}
+          label={item}
+          tone={index === 0 && answer.grounded ? "success" : index === 0 ? "accent" : "neutral"}
+        />
+      ))}
+    </div>
+  );
+}
+
+function EvidencePill({
+  label,
+  tone = "neutral",
+}: {
+  label: string;
+  tone?: "neutral" | "accent" | "success";
+}) {
+  const toneClass =
+    tone === "success"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+      : tone === "accent"
+        ? "border-accent/20 bg-[#eef5ff] text-accent"
+        : "border-line bg-white text-ink-faint";
+
+  return (
+    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${toneClass}`}>
+      {label}
+    </span>
   );
 }
 

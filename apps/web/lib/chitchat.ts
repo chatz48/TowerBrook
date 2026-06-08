@@ -2,7 +2,8 @@ import { callBackendApi, hasBackendApi } from "@/lib/backend-api";
 import { complete, hasModel } from "@/lib/llm";
 import type { ChatTurn } from "@/lib/ask-types";
 import type { AskResponse } from "@/lib/ask-types";
-import { getTheme, type ThemeId } from "@/lib/themes";
+import { getTheme } from "@/lib/themes";
+import type { ThemeId } from "@/lib/types";
 
 const CHITCHAT_MODEL = "deepseek-v4-flash";
 

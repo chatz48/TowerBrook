@@ -73,8 +73,11 @@ export async function seedBasketOnPage(
 export async function clearBasketState(page: Page) {
   await page.addInitScript(
     ({ key, skipKey }) => {
+      const clearFlag = "__playwright_basket_cleared";
+      if (sessionStorage.getItem(clearFlag) === "1") return;
       localStorage.removeItem(key);
       localStorage.removeItem(skipKey);
+      sessionStorage.setItem(clearFlag, "1");
     },
     { key: WORKSPACE_STORAGE_KEY, skipKey: SKIP_BASKET_AUTO_RUN_KEY },
   );

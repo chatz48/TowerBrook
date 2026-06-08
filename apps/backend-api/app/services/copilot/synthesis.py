@@ -53,7 +53,7 @@ def _parse_fallback_synthesis(raw: str) -> CopilotSynthesis | None:
     )
 
 
-async def synthesize_answer(
+async def draft_synthesis(
     ctx: CopilotContext,
     intent: str,
     model: str,
@@ -101,10 +101,29 @@ async def synthesize_answer(
                 uncertainty_notes="Fallback synthesis path used.",
             )
 
-    synthesis = _trim_synthesis(synthesis, intent)
+    return _trim_synthesis(synthesis, intent)
+
+
+def verify_answer_synthesis(
+    synthesis: CopilotSynthesis,
+    citations: list[Citation],
+    intent: str,
+) -> tuple[CopilotSynthesis, list[str]]:
     verified, warnings = verify_synthesis(synthesis, citations)
     if warnings:
         verified.uncertainty_notes = (
             f"{verified.uncertainty_notes} {'; '.join(warnings[:3])}".strip()
         )
-    return _trim_synthesis(verified, intent)
+    return _trim_synthesis(verified, intent), warnings
+
+
+async def synthesize_answer(
+    ctx: CopilotContext,
+    intent: str,
+    model: str,
+    citations: list[Citation],
+    tool_calls: list[ToolTrace],
+) -> CopilotSynthesis:
+    synthesis = await draft_synthesis(ctx, intent, model, citations, tool_calls)
+    verified, _warnings = verify_answer_synthesis(synthesis, citations, intent)
+    return verified

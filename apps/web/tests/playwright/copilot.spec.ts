@@ -34,7 +34,7 @@ test.describe("Copilot page @copilot", () => {
   test("@copilot streams baseline before final answer", { timeout: 150_000 }, async ({ page }) => {
     requireLiveBackend();
     await page.goto("/ask");
-    await submitCopilotQuestion(page, "Who should I call first for grid interconnection?");
+    await submitCopilotQuestion(page, "Who should I call first for grid interconnection? Use live research.");
     await waitForCopilotBaseline(page);
     await waitForRankedExperts(page);
   });
@@ -65,7 +65,7 @@ test.describe("Copilot page @copilot", () => {
     await expect(rankedExpertsHeading(page)).toBeVisible();
     await expect(rankedCompaniesHeading(page)).toBeVisible();
     await expect(page.locator("button:has-text('[1]')").first()).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText("Ask a follow-up")).toBeVisible();
+    await expect(page.getByText("Suggested follow-ups")).toBeVisible();
     await expect(page.getByText("Source evidence")).toBeVisible();
   });
 
@@ -74,7 +74,7 @@ test.describe("Copilot page @copilot", () => {
     await page.goto("/ask");
     await ensureCopilotResponse(page, "Build a call plan for Grid Infrastructure");
     await expect(page.getByText("Suggested call sequence")).toBeVisible();
-    await expect(page.getByText("Market orientation")).toBeVisible();
+    await expect(page.getByText("1. Market orientation", { exact: true })).toBeVisible();
     await expect(page.getByText("3 phases")).toBeVisible();
   });
 
