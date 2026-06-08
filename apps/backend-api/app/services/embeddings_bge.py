@@ -21,10 +21,16 @@ _CORRUPT_CACHE_MARKERS = (
 )
 
 
+def _is_serverless() -> bool:
+    return bool(getenv("VERCEL")) or bool(getenv("AWS_LAMBDA_FUNCTION_NAME"))
+
+
 def _resolve_fastembed_cache_dir() -> Path:
     override = getenv("FASTEMBED_CACHE_PATH")
     if override:
         return Path(override).expanduser()
+    if _is_serverless():
+        return Path("/tmp/towerbrook/fastembed")
     return Path.home() / ".cache" / "towerbrook" / "fastembed"
 
 

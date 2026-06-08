@@ -260,6 +260,13 @@ def _sse(event: str, data: dict[str, Any]) -> str:
     return f"event: {event}\ndata: {json.dumps(data, default=str)}\n\n"
 
 
+_PERSISTED_TOOL_STATUSES = frozenset({"queued", "running", "completed", "failed"})
+
+
+def _persist_tool_status(status: str) -> str:
+    return status if status in _PERSISTED_TOOL_STATUSES else "completed"
+
+
 def _persist_chat(
     session_id: str,
     user_message: str,
@@ -297,7 +304,7 @@ def _persist_chat(
                     "tool_name": call.tool_name,
                     "input": call.input,
                     "output": call.output,
-                    "status": call.status,
+                    "status": _persist_tool_status(call.status),
                 }
             ).execute()
     except Exception:

@@ -1,10 +1,17 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger("towerbrook.request_trace")
+
+
+def _is_serverless() -> bool:
+    return bool(os.getenv("VERCEL")) or bool(os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
 
 
 def traces_enabled() -> bool:
@@ -13,6 +20,8 @@ def traces_enabled() -> bool:
         return False
     if flag == "1":
         return True
+    if _is_serverless():
+        return False
     return os.getenv("NODE_ENV", os.getenv("ENV", "development")) == "development"
 
 
@@ -20,10 +29,18 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[5]
 
 
+def _trace_root() -> Path:
+    override = os.getenv("REQUEST_TRACE_DIR")
+    if override:
+        return Path(override)
+    if _is_serverless():
+        return Path("/tmp/towerbrook/traces")
+    return _repo_root() / ".traces"
+
+
 def _trace_dir(surface: str) -> Path:
-    root = Path(os.getenv("REQUEST_TRACE_DIR", str(_repo_root() / ".traces")))
     day = datetime.now(UTC).strftime("%Y-%m-%d")
-    return root / surface / day
+    return _trace_root() / surface / day
 
 
 def record_copilot_trace(
@@ -64,7 +81,11 @@ def record_copilot_trace(
     }
 
     directory = _trace_dir("backend-copilot")
-    directory.mkdir(parents=True, exist_ok=True)
     file_path = directory / f"{request_id}.json"
-    file_path.write_text(f"{json.dumps(record, indent=2, default=str)}\n", encoding="utf-8")
-    return str(file_path)
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+        file_path.write_text(f"{json.dumps(record, indent=2, default=str)}\n", encoding="utf-8")
+        return str(file_path)
+    except OSError as exc:
+        logger.warning("Failed to write copilot trace to %s: %s", directory, exc)
+        return None

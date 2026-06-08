@@ -40,3 +40,35 @@ def test_record_copilot_trace_disabled(monkeypatch):
         )
         is None
     )
+
+
+def test_record_copilot_trace_disabled_on_vercel(monkeypatch):
+    monkeypatch.delenv("REQUEST_TRACES", raising=False)
+    monkeypatch.setenv("VERCEL", "1")
+    assert (
+        record_copilot_trace(
+            request_id="trace-test-3",
+            question="test",
+            theme_id=None,
+            intent=None,
+            outcome="complete",
+            durations_ms={"total": 1},
+        )
+        is None
+    )
+
+
+def test_record_copilot_trace_write_failure_is_non_fatal(monkeypatch):
+    monkeypatch.setenv("REQUEST_TRACES", "1")
+    monkeypatch.setenv("REQUEST_TRACE_DIR", "/.traces")
+    assert (
+        record_copilot_trace(
+            request_id="trace-test-4",
+            question="test",
+            theme_id=None,
+            intent=None,
+            outcome="complete",
+            durations_ms={"total": 1},
+        )
+        is None
+    )
