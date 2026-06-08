@@ -31,6 +31,8 @@ import {
 import { getIncludeTowerBrookEmployees } from "@/lib/employee-scope-server";
 import { companyReadiness, targetScorecard } from "@/lib/investment-readiness";
 import ReadinessBadge from "@/app/components/ReadinessBadge";
+import ScoreHelp from "@/app/components/ScoreHelp";
+import { TARGET_SCORE_FOOTNOTE, targetScorecardLines } from "@/lib/target-score-copy";
 
 export function generateStaticParams() {
   return getCompanies().map((c) => ({ id: c.id }));
@@ -154,8 +156,14 @@ export default async function CompanyPage({
             <div className="flex items-center gap-3">
               <ReadinessBadge badge={readiness} />
               <div className="rounded-lg border border-line bg-paper px-4 py-2 text-right">
-                <div className="text-[22px] font-semibold tabular-nums">{scorecard.total}/100</div>
-                <div className="text-[10px] uppercase tracking-[0.14em] text-ink-faint">PE readiness</div>
+                <ScoreHelp
+                  title="Target score"
+                  display={`${scorecard.total}/100`}
+                  lines={targetScorecardLines(scorecard)}
+                  footnote={TARGET_SCORE_FOOTNOTE}
+                  pillClassName="text-[22px] font-semibold tabular-nums text-ink cursor-help underline decoration-dotted decoration-ink-faint underline-offset-4"
+                />
+                <div className="text-[10px] uppercase tracking-[0.14em] text-ink-faint">Target priority</div>
               </div>
             </div>
           </div>

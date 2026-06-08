@@ -103,6 +103,17 @@ export default async function CompaniesPage({
         companiesCount={companies.length}
       />
 
+      <details className="mb-3 text-[12px] text-ink-soft">
+        <summary className="cursor-pointer list-none font-semibold text-accent marker:hidden">
+          How we score targets
+        </summary>
+        <p className="mt-1 max-w-3xl leading-relaxed">
+          Target score combines market fit, ownership status, named expert validation, source evidence,
+          scale signals, and TowerBrook relationship path. Hover any score for the component breakdown.
+          Readiness is separate — it flags whether ownership and scale are verified enough to diligence.
+        </p>
+      </details>
+
       <section className="ee-panel mb-5 overflow-hidden rounded-lg">
         <div className="border-b border-line px-4 py-3">
           <h2 className="text-[14px] font-semibold text-ink">Actionable targets</h2>

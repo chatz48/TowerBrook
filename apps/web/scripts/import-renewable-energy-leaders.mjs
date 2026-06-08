@@ -72,7 +72,6 @@ for (const row of rows) {
     : `csv:${slugify(fullName)}`;
 
   if (companyName && !companyDomainMap.has(companyExternalId)) {
-    let companyId = companyExternalId;
     const { data: existing } = await supabase
       .from("companies")
       .select("id")

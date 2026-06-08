@@ -3,7 +3,11 @@ import Link from "next/link";
 import { getCompanies, getExperts, getExpert, resolveExpert } from "@/lib/data";
 import { DEAL_TYPE_LABEL, dealDate } from "@/lib/deals";
 import { listDealsForExpert } from "@/lib/deal-repository";
+import ScoreHelp from "@/app/components/ScoreHelp";
+import { RELEVANCE_SCORE_FOOTNOTE, relevanceScoreLines } from "@/lib/score-copy";
+import { scoreExpert } from "@/lib/score";
 import { towerBrookExpertScore } from "@/lib/towerbrook";
+import { TOWERBROOK_SCORE_FOOTNOTE, towerBrookScoreLines } from "@/lib/target-score-copy";
 import {
   warmPathsForExpert,
   warmPathStatusLabel,
@@ -50,6 +54,7 @@ export default async function ExpertPage({
   const outreachKey = outreachStorageKey(themeFocus, includeTowerBrookEmployees);
   const companiesById = new Map(getCompanies().map((company) => [company.id, company]));
   const towerBrook = towerBrookExpertScore(base, companiesById);
+  const relevance = scoreExpert(base);
   const warmPaths = warmPathsForExpert(expert.id);
   const bestWarmPath = warmPaths[0] ?? null;
   const readiness = expertReadiness(expert);
@@ -286,6 +291,13 @@ export default async function ExpertPage({
               <div className="ee-label text-ink">Trust dossier</div>
               <div className="mt-3 flex flex-wrap gap-2">
                 <ReadinessBadge badge={readiness} />
+                <ScoreHelp
+                  title="Relevance score"
+                  display={`Score ${relevance.total}`}
+                  lines={relevanceScoreLines(relevance)}
+                  footnote={RELEVANCE_SCORE_FOOTNOTE}
+                  compact
+                />
                 <span className="rounded-full border border-line bg-paper px-2.5 py-1 text-[11px] font-semibold text-ink-soft">
                   {Math.round(expert.confidence * 100)}% profile confidence
                 </span>
@@ -352,8 +364,18 @@ export default async function ExpertPage({
                 </div>
               ) : (
                 <>
-                  <div className="mt-3 text-[14px] font-semibold">
-                    {towerBrook.isDirect ? towerBrook.label : "No public TowerBrook path mapped"}
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <ScoreHelp
+                      title="TowerBrook relationship"
+                      display={
+                        towerBrook.isDirect
+                          ? `${towerBrook.score} · ${towerBrook.label}`
+                          : "No public path"
+                      }
+                      lines={towerBrookScoreLines(towerBrook)}
+                      footnote={TOWERBROOK_SCORE_FOOTNOTE}
+                      pillClassName="text-[14px] font-semibold text-ink cursor-help underline decoration-dotted decoration-ink-faint underline-offset-2"
+                    />
                   </div>
                   <ul className="mt-3 space-y-2 text-[12px] leading-relaxed text-ink-soft">
                     {(towerBrook.isDirect && towerBrook.reasons.length

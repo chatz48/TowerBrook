@@ -30,7 +30,8 @@
     "api:evaluate": "cd apps/backend-api && PY=$([ -x .venv/bin/python ] && echo .venv/bin/python || echo python3) && $PY -m app.cli.evaluate",
     "discovery:dry-run": "cd apps/backend-api && PY=$([ -x .venv/bin/python ] && echo .venv/bin/python || echo python3) && $PY -m app.cli.discovery --theme grid-infrastructure --dry-run",
     "test:e2e": "pnpm --dir apps/web test:e2e",
-    "test:e2e:smoke": "pnpm --dir apps/web test:e2e:smoke"
+    "test:e2e:smoke": "pnpm --dir apps/web test:e2e:smoke",
+    "verify": "pnpm lint && pnpm typecheck && pnpm build && pnpm ingest:validate && pnpm api:test && node apps/web/tests/ask-contract.test.mjs"
   },
   "devDependencies": {
     "eslint": "^9",

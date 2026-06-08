@@ -49,7 +49,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full bg-paper text-ink">
-        <header className="sticky top-0 z-40 border-b border-line bg-white">
+        <header className="sticky top-0 z-40 border-b border-line bg-white" role="banner">
           <div className="flex h-12 items-center gap-4 px-4">
             <Link href="/" className="flex min-w-[200px] items-center gap-3 group">
               <span className="flex h-9 w-8 flex-col justify-center gap-1" aria-hidden="true">

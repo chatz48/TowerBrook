@@ -128,7 +128,7 @@ export default function ResearchWorkspace({
         controller.signal,
       );
       if (activeRequest.current !== controller || !finalAnswer) return;
-      const data = finalAnswer;
+      const data: AskResponse = finalAnswer;
       setAnswer(data);
       setConversation((current) => [
         ...current,
@@ -229,7 +229,7 @@ export default function ResearchWorkspace({
           controller.signal,
         );
         if (!cancelled && finalAnswer) {
-          const data = finalAnswer;
+          const data: AskResponse = finalAnswer;
           setAnswer(data);
           setConversation([
             {
@@ -283,6 +283,8 @@ export default function ResearchWorkspace({
     );
     setQuestion(prompt);
     void submit(prompt, startingFilters);
+    // submit is intentionally omitted — basket bootstrap runs once when items load.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot basket auto-run
   }, [autoRunInitial, initialPrompt, skipBasketAutoRun, startingFilters, workspaceItems]);
 
   useEffect(() => {

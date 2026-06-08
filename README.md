@@ -75,8 +75,10 @@ Workflow:
 The strongest demo path is:
 
 ```text
-/ -> /campaign (Origination Desk) -> expert profile -> company profile -> /reports
+/ -> /experts (Call list) -> expert profile -> company profile -> /reports
 ```
+
+`/campaign` redirects to `/experts` for backward-compatible links.
 
 This makes the product more than a searchable database. It is an expert-led
 sourcing workflow where a theme becomes an assigned origination plan, validated
@@ -192,8 +194,8 @@ With more time, I would:
 | Route | What it does |
 |---|---|
 | `/` | Command Centre: the guided Monday-meeting workflow, coverage matrix, theme summaries, and global search. |
-| `/campaign` | Origination Desk: assign expert calls and target-company validation, track owner/status/notes, copy a meeting pack, and export CSV. |
-| `/experts` | Expert Call List: searchable and filterable expert pool. Theme selection immediately limits the specialty dropdown to that theme. |
+| `/experts` | Call list (origination desk): ranked experts, assign owners, basket selections, outreach notes, copy meeting pack, and export CSV. Theme selection immediately limits the specialty dropdown to that theme. |
+| `/campaign` | Redirects to `/experts` (legacy route). |
 | `/experts/[id]` | Expert profile with evidence, company links, call prep, outreach, and source records. |
 | `/companies` | Company Watchlist: companies reverse-derived from expert evidence, with validation status and priority actions. |
 | `/companies/[id]` | Company profile with linked experts, material facts, evidence, and next diligence actions. |
@@ -227,11 +229,11 @@ Production demo data is static and sourced:
 
 Current curated graph size after the June 2026 TowerBrook expansion:
 
-- 146 experts
-- 176 companies
-- Clean Energy Advisory & Development: 69 experts / 85 companies
-- Grid Infrastructure & Connection: 76 experts / 94 companies
-- Smart Water Infrastructure & Analytics: 67 experts / 81 companies
+- 256 experts
+- 287 companies
+- Clean Energy Advisory & Development: 135 experts / 140 companies (theme-tagged; experts may span multiple themes)
+- Grid Infrastructure & Connection: 113 experts / 127 companies
+- Smart Water Infrastructure & Analytics: 93 experts / 119 companies
 
 The source register mirrors the production graph evidence surface with 182
 registered public sources, including every source URL cited by expert and
@@ -395,12 +397,22 @@ Current review queue coverage:
 ## Verification
 
 ```bash
-pnpm lint
-pnpm exec tsc --noEmit --pretty false
-pnpm build
-node scripts/data-pipeline.mjs validate
-pnpm ingest:validate
+pnpm verify
 ```
+
+`pnpm verify` runs lint, typecheck, build, ingest validation, backend tests, and the Copilot API contract test. Individual steps:
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm build
+pnpm ingest:validate
+pnpm api:test
+node apps/web/tests/ask-contract.test.mjs
+node apps/web/scripts/data-pipeline.mjs validate
+```
+
+Hosted demo (when deployed): `https://towerbrook-arun.vercel.app`
 
 During final verification, these routes returned HTTP 200 from `pnpm dev`:
 

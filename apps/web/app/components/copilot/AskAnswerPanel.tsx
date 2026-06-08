@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
+import { copilotTrustDetail, copilotTrustLabel } from "@/lib/copilot-copy";
 import { PROMPTS } from "./constants";
 import type { AskResponse, ToolTrace } from "./types";
 import { collectCitations, formatTime, themeLabel } from "./utils";
@@ -62,20 +63,12 @@ export function AskAnswerPanel({
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="font-semibold">Expert Engine</span>
             <span className="text-ink-faint">{formatTime(answer.generated_at)}</span>
-            <span className="rounded-full border border-line px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-ink-faint">
-              {answer.intent
-                ? `LangGraph · ${answer.intent.replaceAll("_", " ")}`
-                : answer.grounded
-                  ? "Directory grounded"
-                  : answer.backend_enriched
-                    ? "LangGraph enriched"
-                    : "Directory synthesis"}
+            <span className="rounded-full border border-line px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-soft">
+              {copilotTrustLabel(answer)}
             </span>
-            {answer.model_used ? (
-              <span className="text-[10px] text-ink-faint">{answer.model_used}</span>
-            ) : null}
           </div>
-          <p className="mt-1 text-sm text-ink-soft">{answer.answer_summary}</p>
+          <p className="mt-1 text-[11px] text-ink-faint">{copilotTrustDetail(answer)}</p>
+          <p className="mt-2 text-sm text-ink-soft">{answer.answer_summary}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link href="/experts?readiness=actionable" className="ee-button ee-button-secondary min-h-7 px-2.5 text-[11px]">
               Add to call list
@@ -101,7 +94,7 @@ export function AskAnswerPanel({
           {answer.structured?.key_findings?.length ? (
             <div className="mt-3 rounded-lg border border-line bg-paper p-3">
               <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
-                Key findings (LangGraph)
+                Key findings
               </div>
               <ul className="mt-1 list-disc space-y-1 pl-4 text-sm text-ink-soft">
                 {answer.structured.key_findings.slice(0, 5).map((finding) => (
@@ -135,7 +128,7 @@ export function AskAnswerPanel({
           item={{
             id: `copilot-${answer.generated_at}`,
             kind: "memo",
-            name: `AI synthesis: ${theme}`,
+            name: `Copilot brief: ${theme}`,
             sub: answer.input_context.question,
             href: "/ask",
             theme,
@@ -147,6 +140,51 @@ export function AskAnswerPanel({
           Save to basket
         </WorkspaceActionButton>
       </div>
+
+      {answer.sources_used.length ? (
+        <Panel
+          title="Sources cited"
+          meta={`${answer.sources_used.length} records`}
+          citations={answer.sources_used.map((source) => source.source_id)}
+          onSourceSelect={onSourceSelect}
+          defaultOpen
+        >
+          <ul className="space-y-2">
+            {answer.sources_used.map((source) => (
+              <li key={source.source_id} className="rounded border border-line bg-paper px-3 py-2">
+                <div className="flex flex-wrap items-start gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onSourceSelect(source.source_id)}
+                    className="font-mono text-[11px] font-semibold text-accent hover:underline"
+                  >
+                    [{source.source_id.replace("S", "")}]
+                  </button>
+                  <div className="min-w-0 flex-1">
+                    <a
+                      href={source.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs font-semibold text-ink hover:text-accent hover:underline"
+                    >
+                      {source.title}
+                    </a>
+                    <div className="mt-0.5 text-[11px] text-ink-faint">
+                      {source.publisher}
+                      {source.confidence ? ` · ${Math.round(source.confidence * 100)}% confidence` : ""}
+                    </div>
+                    {source.snippet ? (
+                      <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-ink-soft">
+                        {source.snippet}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      ) : null}
 
       <Panel
         title="1. Ranked experts"
@@ -199,7 +237,7 @@ export function AskAnswerPanel({
                         href: `/experts/${expert.expert_id}`,
                         theme,
                         note: expert.why,
-                        status: "copilot shortlist",
+                        status: "call shortlist",
                       }}
                       className="rounded border border-[#d8dee8] bg-white px-2 py-1.5 text-[11px] font-semibold text-[#344054] hover:border-[#0b5bd3] hover:text-[#0b5bd3]"
                     >
@@ -219,7 +257,7 @@ export function AskAnswerPanel({
       </Panel>
 
       <div className="grid gap-3 lg:grid-cols-[1.05fr_0.95fr]">
-        <Panel title="2. Ranked companies" meta="Target evidence" citations={collectCitations(answer.ranked_companies)} onSourceSelect={onSourceSelect}>
+        <Panel title="2. Ranked companies" meta="Target evidence" citations={collectCitations(answer.ranked_companies)} onSourceSelect={onSourceSelect} defaultOpen>
           <div className="space-y-2">
             {answer.ranked_companies.map((company) => (
               <div key={company.company_id} className="grid grid-cols-[26px_minmax(0,1fr)_58px_70px] gap-2 border-b border-[#edf0f5] pb-2 last:border-0 last:pb-0">
@@ -260,7 +298,7 @@ export function AskAnswerPanel({
           </div>
         </Panel>
 
-        <Panel title="3. Suggested call sequence" meta="3 phases" citations={collectCitations(answer.call_sequence)} onSourceSelect={onSourceSelect}>
+        <Panel title="3. Suggested call sequence" meta="3 phases" citations={collectCitations(answer.call_sequence)} onSourceSelect={onSourceSelect} defaultOpen>
           <div className="space-y-2">
             {answer.call_sequence.map((step, index) => {
               const expertNames = step.expert_ids
@@ -286,7 +324,7 @@ export function AskAnswerPanel({
       </div>
 
       <div className="grid gap-3 lg:grid-cols-2">
-        <Panel title="4. What to listen for" meta="Claims to validate" citations={collectCitations(answer.what_to_listen_for)} onSourceSelect={onSourceSelect}>
+        <Panel title="4. What to listen for" meta="Claims to validate" citations={collectCitations(answer.what_to_listen_for)} onSourceSelect={onSourceSelect} defaultOpen>
           <div className="space-y-3">
             {answer.what_to_listen_for.map((item) => (
               <div key={item.claim} className="border-b border-[#edf0f5] pb-3 last:border-0 last:pb-0">
@@ -301,7 +339,7 @@ export function AskAnswerPanel({
           </div>
         </Panel>
 
-        <Panel title="5. Gaps and risks" meta={answer.confidence.label} citations={collectCitations(answer.risks)} onSourceSelect={onSourceSelect}>
+        <Panel title="5. Gaps and risks" meta={answer.confidence.label} citations={collectCitations(answer.risks)} onSourceSelect={onSourceSelect} defaultOpen>
           <div className="grid gap-3">
             <div>
               <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#667085]">Gaps to fill</div>
@@ -346,7 +384,7 @@ export function AskAnswerPanel({
       </Panel>
 
       <div className="text-[11px] text-[#667085]">
-        Answers can contain directory errors and should be verified before outreach.
+        Rankings come from the expert directory. AI-drafted wording and gaps should be checked against cited sources before anything goes external.
       </div>
     </div>
   );
@@ -413,7 +451,7 @@ function ToolTracePanel({ traces }: { traces: ToolTrace[] }) {
   return (
     <details className="mt-2 rounded border border-line bg-paper px-2 py-1.5">
       <summary className="cursor-pointer text-[11px] font-semibold text-ink-faint">
-        Research tool trace ({traces.length} step{traces.length === 1 ? "" : "s"})
+        Research steps ({traces.length})
       </summary>
       <ol className="mt-2 space-y-2 text-[11px] text-ink-soft">
         {traces.map((trace, index) => (

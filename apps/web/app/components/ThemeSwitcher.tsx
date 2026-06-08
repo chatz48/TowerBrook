@@ -104,7 +104,7 @@ export default function ThemeSwitcher({
         aria-label="Switch investment theme"
         className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 px-4 py-1.5"
       >
-        <span className="shrink-0 text-[11px] text-ink-soft">
+        <span className="shrink-0 text-[11px] text-ink-soft" data-testid="theme-scope-label">
           <span className="font-semibold text-ink">Scope:</span> {scopeLabel}
         </span>
         <span className="hidden h-4 w-px bg-line sm:inline" aria-hidden="true" />

@@ -116,6 +116,17 @@ export default async function ExpertsPage({
         className="mb-2 gap-1 border-b border-line pb-2 [&_.ee-data-page-meta]:text-[12px] [&_.ee-data-page-title]:text-[18px]"
       />
 
+      <details className="mb-2 text-[12px] text-ink-soft">
+        <summary className="cursor-pointer list-none font-semibold text-accent marker:hidden">
+          How we rank experts
+        </summary>
+        <p className="mt-1 max-w-3xl leading-relaxed">
+          Relevance combines expert type, company relationship edges, recent signals, recency, and access
+          quality, then scales by source confidence. Hover any score in an expanded row for the breakdown.
+          Readiness is separate — it shows whether contact details and evidence are strong enough to call.
+        </p>
+      </details>
+
       <section className="ee-panel overflow-hidden rounded-lg">
         <ExpertFilters
           compact
@@ -145,6 +156,7 @@ export default async function ExpertsPage({
             return {
               expert,
               score: score.total,
+              scoreBreakdown: score,
               readiness: expertReadiness(expert),
               callObjective: callObjective(expert),
               graphHref: `/graph?focus=${encodeURIComponent(`expert:${expert.id}`)}`,

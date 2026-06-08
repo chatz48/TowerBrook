@@ -111,7 +111,7 @@ export default async function DealsPage() {
                         {deal.missingFacts[0] ? (
                           <>
                             <div className="mb-2">
-                              Missing: {deal.missingFacts[0].replaceAll("_", " ")}. Run Keiro + DeepSeek to source and verify.
+                              Missing: {deal.missingFacts[0].replaceAll("_", " ")}. Run a sourced research pass to fill and verify.
                             </div>
                             <DealEnrichmentButton dealId={deal.id} label="Enrich deal" />
                           </>

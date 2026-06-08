@@ -49,11 +49,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# docs — review reports are ephemeral; strategy docs are committed
-/docs
-/docs/*-review-*.md
-/docs/copilot-test-report-*.md
-/docs/systematic-review-*.md
-!docs/systematic-review-2026-06-06-v3.md
+# Local-only docs (strategy, reviews, demo scripts — not published to GitHub)
+/docs/
 /research-screenshots/
+REVIEW_AGENT_PROMPT.md
 VIDEO_SCRIPT.md
+REVIEW.md

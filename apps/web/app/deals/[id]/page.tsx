@@ -241,7 +241,7 @@ export default async function DealPage({
                 ))}
               </ul>
               <div className="mt-4">
-                <DealEnrichmentButton dealId={deal.id} label="Run Keiro + DeepSeek job" />
+                <DealEnrichmentButton dealId={deal.id} label="Run sourced research job" />
               </div>
               <Link href={`/graph?focus=deal:${deal.id}`} className="ee-button ee-button-secondary mt-3 w-full">
                 View relationships

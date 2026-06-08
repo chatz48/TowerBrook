@@ -120,9 +120,8 @@ export type AskResponse = {
   request_id?: string;
   node_timings_ms?: Record<string, number>;
   model: string;
-  intent?: string;
   model_used?: string;
-  /** LangGraph structured synthesis from backend (gaps, risks, findings). */
+  /** Optional structured synthesis from live research (gaps, risks, findings). */
   structured?: {
     answer_summary?: string;
     key_findings?: string[];

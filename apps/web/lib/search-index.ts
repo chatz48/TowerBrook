@@ -1,11 +1,12 @@
 import { getCompanies, getExperts } from "@/lib/data";
+import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 import type { SearchItem } from "@/app/components/SearchBox";
 
 export function buildSearchIndex(
   themeFocus: string,
   includeTowerBrookEmployees: boolean,
 ): SearchItem[] {
-  const experts = getExperts()
+  const experts = filterTowerBrookEmployees(getExperts(), includeTowerBrookEmployees)
     .filter((expert) => themeFocus === "all" || expert.themes.includes(themeFocus as never))
     .map((expert) => ({
       id: expert.id,

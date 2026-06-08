@@ -43,7 +43,7 @@ test.describe("Copilot page", () => {
     await textbox.fill("Who should I call first for grid interconnection?");
     await textbox.press("Enter");
 
-    await expect(page.locator("text=Directory baseline")).toBeVisible({ timeout: 45_000 });
+    await expect(page.locator("text=Initial answer (from directory)")).toBeVisible({ timeout: 45_000 });
     await expect(page.locator("text=Ranked experts")).toBeVisible({ timeout: 120_000 });
   }, 150_000);
 

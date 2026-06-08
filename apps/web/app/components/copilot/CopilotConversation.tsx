@@ -130,7 +130,7 @@ export function CopilotConversation({
         {loading && answer ? (
           <div className="rounded-lg border border-dashed border-line bg-paper/60 p-2">
             <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-faint">
-              Directory baseline (live)
+              Initial answer (from directory)
             </div>
             <AskAnswerPanel
               answer={answer}
@@ -143,10 +143,10 @@ export function CopilotConversation({
         {loading ? (
           <div className="space-y-2">
             <div className="text-[11px] text-ink-faint">
-              {progressStep === 0 ? "Directory baseline ready — starting LangGraph…" :
-               progressStep === 1 ? "Routing intent (DeepSeek flash)…" :
-               progressStep === 2 ? "Keiro search & retrieval tools…" :
-               progressStep === 3 ? "Structured synthesis (DeepSeek)…" :
+              {progressStep === 0 ? "Building answer from directory…" :
+               progressStep === 1 ? "Matching your question to the workflow…" :
+               progressStep === 2 ? "Searching additional sources…" :
+               progressStep === 3 ? "Drafting structured summary…" :
                progressStep === 4 ? "Finalising confidence…" :
                "Preparing response…"}
             </div>

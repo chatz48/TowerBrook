@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import type { ScoreBreakdown } from "@/lib/score";
+import { RELEVANCE_SCORE_FOOTNOTE, relevanceScoreLines } from "@/lib/score-copy";
 import type { Expert } from "@/lib/types";
+import ScoreHelp from "@/app/components/ScoreHelp";
 import { DataTable } from "@/app/components/ui";
 import { EXPERT_TYPE_LABEL, EXPERT_TYPE_STYLE } from "@/lib/labels";
 import { callPhase, formatExpertRoleLine, type ExpertRoleDisplay } from "@/lib/expert-copy";
@@ -50,6 +53,7 @@ const COL_SPAN = 7;
 export interface RankedExpertRow {
   expert: Expert;
   score: number;
+  scoreBreakdown: ScoreBreakdown;
   readiness: ReadinessBadgeModel;
   callObjective: string;
   graphHref: string;
@@ -441,9 +445,13 @@ export default function ExpertCallList({
                           <span className="ee-type-pill border-line bg-paper text-ink-soft">
                             {callPhase(row.expert)}
                           </span>
-                          <span className="ee-score-pill" title="Relevance score">
-                            Score {row.score}
-                          </span>
+                          <ScoreHelp
+                            title="Relevance score"
+                            display={`Score ${row.score}`}
+                            lines={relevanceScoreLines(row.scoreBreakdown)}
+                            footnote={RELEVANCE_SCORE_FOOTNOTE}
+                            compact
+                          />
                           {warmPath ? (
                             <span
                               className={`ee-type-pill ${warmPathTone(warmPath.status)}`}

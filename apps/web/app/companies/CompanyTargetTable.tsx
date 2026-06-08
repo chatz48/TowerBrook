@@ -13,8 +13,10 @@ import {
   rowExpandClass,
 } from "@/app/components/table/ExpandableTableRow";
 import type { EntityGraphModel } from "@/lib/entity-graph";
+import ScoreHelp from "@/app/components/ScoreHelp";
 import { companyReadiness, targetScorecard } from "@/lib/investment-readiness";
 import { askHref } from "@/lib/links";
+import { TARGET_SCORE_FOOTNOTE, targetScorecardLines } from "@/lib/target-score-copy";
 
 const COL_SPAN = 7;
 
@@ -113,9 +115,15 @@ export default function CompanyTargetTable({
                     <td className="max-w-[140px]">
                       <ReadinessBadge badge={readiness} compact />
                     </td>
-                    <td className="whitespace-nowrap tabular-nums">
-                      <div className="text-[15px] font-semibold text-ink">{scorecard.total}</div>
-                      <div className="text-[12px] text-ink-faint">{scorecard.label}</div>
+                    <td className="whitespace-nowrap tabular-nums" onClick={(event) => event.stopPropagation()}>
+                      <ScoreHelp
+                        title="Target score"
+                        display={String(scorecard.total)}
+                        lines={targetScorecardLines(scorecard)}
+                        footnote={TARGET_SCORE_FOOTNOTE}
+                        pillClassName="text-[15px] font-semibold text-ink cursor-help underline decoration-dotted decoration-ink-faint underline-offset-2"
+                      />
+                      <div className="mt-0.5 text-[12px] text-ink-faint">{scorecard.label}</div>
                     </td>
                     <td onClick={(event) => event.stopPropagation()}>
                       <div className="flex flex-wrap gap-1.5">
@@ -197,7 +205,13 @@ export default function CompanyTargetTable({
                 </div>
                 <div className="mt-2 flex items-center gap-2">
                   <ReadinessBadge badge={readiness} compact />
-                  <span className="text-[13px] font-semibold tabular-nums">{scorecard.total}</span>
+                  <ScoreHelp
+                    title="Target score"
+                    display={String(scorecard.total)}
+                    lines={targetScorecardLines(scorecard)}
+                    footnote={TARGET_SCORE_FOOTNOTE}
+                    pillClassName="text-[13px] font-semibold tabular-nums text-ink cursor-help underline decoration-dotted decoration-ink-faint underline-offset-2"
+                  />
                 </div>
               </button>
               <div className="flex flex-wrap gap-2 border-t border-line px-4 py-2">
@@ -258,8 +272,15 @@ function CompanyRowDetail({
           <div className="text-[11px] font-semibold uppercase tracking-wide text-ink-faint">
             Diligence signal
           </div>
-          <p className="mt-1 text-[13px] text-ink-soft">
-            Score {scorecard.total} · {scorecard.label}
+          <p className="mt-1 flex flex-wrap items-center gap-2 text-[13px] text-ink-soft">
+            <ScoreHelp
+              title="Target score"
+              display={`Score ${scorecard.total}`}
+              lines={targetScorecardLines(scorecard)}
+              footnote={TARGET_SCORE_FOOTNOTE}
+              compact
+            />
+            <span>{scorecard.label}</span>
           </p>
           <ul className="mt-2 space-y-1 text-[13px] text-ink-soft">
             {readiness.reasons.slice(0, 3).map((reason) => (

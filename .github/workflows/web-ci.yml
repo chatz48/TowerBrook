@@ -44,14 +44,23 @@ jobs:
 
       - name: Start app and run Playwright smoke tests
         run: |
+          set -euo pipefail
           pnpm start &
+          SERVER_PID=$!
+          cleanup() {
+            kill "$SERVER_PID" 2>/dev/null || true
+          }
+          trap cleanup EXIT
           for i in $(seq 1 30); do
             if curl -fsS http://localhost:3000/ > /dev/null; then
               break
             fi
+            if [ "$i" -eq 30 ]; then
+              echo "Server failed to start on http://localhost:3000"
+              exit 1
+            fi
             sleep 2
           done
-          curl -fsS http://localhost:3000/ > /dev/null
           BASE_URL=http://localhost:3000 pnpm test:e2e:ci --grep smoke
 
       - uses: actions/upload-artifact@v4

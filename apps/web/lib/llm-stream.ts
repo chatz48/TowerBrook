@@ -1,6 +1,24 @@
 const DEEPSEEK_BASE_URL = process.env.DEEPSEEK_BASE_URL ?? "https://api.deepseek.com";
 const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL ?? "deepseek-v4-flash";
 
+/** Wrap token chunks as SSE for call-prep / outreach streaming routes. */
+export function sseTextStream(generator: AsyncIterable<string>): ReadableStream<Uint8Array> {
+  const iterator = generator[Symbol.asyncIterator]();
+  const encoder = new TextEncoder();
+
+  return new ReadableStream({
+    async pull(controller) {
+      const { value, done } = await iterator.next();
+      if (done) {
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+        controller.close();
+        return;
+      }
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: value })}\n\n`));
+    },
+  });
+}
+
 /** Stream text tokens from DeepSeek. */
 export async function* streamComplete(
   system: string,

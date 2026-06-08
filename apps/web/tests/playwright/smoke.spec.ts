@@ -31,14 +31,10 @@ for (const { path, label } of PAGES) {
     const response = await page.goto(path);
     expect(response?.status()).toBe(200);
 
-    // Every page should have the header
-    await expect(page.locator("header")).toBeVisible();
-
-    // Every page should have the Expert Engine branding
-    await expect(page.locator("text=EXPERT ENGINE")).toBeVisible();
-
-    // Every page should have a main content area
-    await expect(page.locator("main")).toBeVisible();
+    // Global app chrome (layout may nest additional <header>/<main> inside pages)
+    await expect(page.locator("header.sticky")).toBeVisible();
+    await expect(page.getByRole("link", { name: /EXPERT ENGINE/i })).toBeVisible();
+    await expect(page.locator("main").first()).toBeVisible();
 
     // No raw error strings exposed to users
     const body = await page.textContent("body");
@@ -49,36 +45,30 @@ for (const { path, label } of PAGES) {
 
 test("Theme switcher changes scope", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator("text=Scope:")).toBeVisible();
+  const scopeNav = page.getByRole("navigation", { name: "Switch investment theme" });
+  await expect(scopeNav).toContainText("Scope:");
 
-  // Click a specific theme
-  await page.click("button:has-text('Clean Energy Advisory')");
-  await page.waitForTimeout(500);
-
-  // Scope should reflect the selected theme
-  const scopeText = await page.locator("text=Scope:").textContent();
-  expect(scopeText).toContain("Clean Energy Advisory");
+  await scopeNav.getByRole("button", { name: "Clean Energy Advisory" }).click();
+  await expect(scopeNav).toContainText("Clean Energy Advisory", { timeout: 15_000 });
 });
 
 test("Expert profile loads with key sections", async ({ page }) => {
   await page.goto("/experts/james-knight");
 
   await expect(page.locator("h1")).toContainText("James Knight");
-  await expect(page.locator("text=Why call")).toBeVisible();
-  await expect(page.locator("text=Call-ready")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Why call James/i })).toBeVisible();
+  await expect(page.getByText("Call-ready").first()).toBeVisible();
 
-  // Should have action buttons
-  await expect(page.locator("text=Prepare call")).toBeVisible();
-  await expect(page.locator("text=View relationships")).toBeVisible();
-  await expect(page.locator("text=Call list outreach")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Prepare call" }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "View relationships" }).first()).toBeVisible();
+  await expect(page.getByText("Call list outreach")).toBeVisible();
 
-  // Should show companies
-  await expect(page.locator("text=Augusta")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Augusta & Co" }).first()).toBeVisible();
 });
 
 test("Company profile loads with key sections", async ({ page }) => {
   await page.goto("/companies/zenobe");
 
   await expect(page.locator("h1")).toContainText("Zenob");
-  await expect(page.locator("text=Investment")).toBeVisible();
+  await expect(page.getByText("PE target scorecard")).toBeVisible();
 });

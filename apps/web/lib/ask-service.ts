@@ -100,7 +100,7 @@ export async function handleAskRequest(request: Request) {
       ...prepared.baseline,
       backend_error: agentic.error,
       enrichment_warnings: agentic.error
-        ? ["LangGraph copilot unavailable; directory baseline only."]
+        ? ["Live research unavailable; rankings and citations are from the directory only."]
         : prepared.baseline.enrichment_warnings,
       request_id: requestId,
     });
@@ -292,7 +292,7 @@ async function maybeAskIntelligenceApi(
   } catch (error) {
     return {
       result: null,
-      error: error instanceof Error ? error.message : "LangGraph copilot unavailable",
+      error: error instanceof Error ? error.message : "Live research unavailable",
     };
   }
 }
@@ -314,7 +314,7 @@ function mergeBackendIntoBaseline(baseline: AskResponse, backend: BackendChatRes
   const mergedRisks = structured?.risks?.length
     ? structured.risks.map((risk) => ({
         risk,
-        why_it_matters: "Identified by LangGraph research workflow.",
+        why_it_matters: "Surfaced during additional research — verify before circulation.",
         disconfirming_question: "What evidence would disprove this risk?",
         citations: baseline.sources_used.slice(0, 2).map((s) => s.source_id),
       }))
@@ -335,12 +335,12 @@ function mergeBackendIntoBaseline(baseline: AskResponse, backend: BackendChatRes
     structured,
     agentic_answer: synthesisSummary,
     tool_calls: backend.tool_calls,
-    intent: backend.intent,
+    intent: backend.intent ?? baseline.intent,
     model_used: backend.model_used,
     request_id: backend.request_id,
     verification_warnings: backend.verification_warnings,
     node_timings_ms: backend.node_timings_ms,
-    model: `langgraph/${backend.model_used ?? "deepseek"} (${backend.intent ?? "copilot"})`,
+    model: baseline.model,
     grounded: false,
     backend_enriched: true,
     enrichment_warnings: [
@@ -353,7 +353,7 @@ function mergeBackendIntoBaseline(baseline: AskResponse, backend: BackendChatRes
       ? {
           score: backend.confidence,
           label: backend.confidence >= 0.8 ? "High" : backend.confidence >= 0.65 ? "Medium" : "Indicative",
-          rationale: `LangGraph copilot confidence from ${backend.tool_calls?.length ?? 0} research steps.`,
+          rationale: `Confidence after ${backend.tool_calls?.length ?? 0} research step${(backend.tool_calls?.length ?? 0) === 1 ? "" : "s"} — verify citations before outreach.`,
         }
       : baseline.confidence,
     follow_up_actions: structured?.follow_ups?.length
@@ -1054,8 +1054,4 @@ function stringArray(value: unknown, fallback: string[]): string[] {
     (item): item is string => typeof item === "string" && item.trim().length > 0,
   );
   return next.length ? next : fallback;
-}
-
-function cleanCitations(value: unknown, allowed: Set<string>): string[] {
-  return stringArray(value, []).filter((id) => allowed.has(id)).slice(0, 3);
 }
