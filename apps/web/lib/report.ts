@@ -7,6 +7,8 @@ import { getTheme } from "@/lib/themes";
 import type { CompanyWithLinks, Expert, Source, ThemeId } from "@/lib/types";
 import type { ThemeFocus } from "@/lib/theme-focus";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
+import { expertsPageHref } from "@/lib/experts-url";
+import { bestWarmPathForExpert } from "@/lib/warm-paths";
 
 export type ReportTemplateId =
   | "theme-memo"
@@ -53,7 +55,13 @@ export interface ReportSection {
     detail: string;
     metric?: string;
     citations: string[];
+    href?: string;
+    signals?: { label: string; value: string | number }[];
+    metricTone?: "strong" | "developing" | "thin";
   }[];
+  headlineStats?: { label: string; value: string | number; tone?: "strong" | "watch" | "neutral" }[];
+  viewMoreHref?: string;
+  viewMoreLabel?: string;
   actions: string[];
 }
 
@@ -232,6 +240,11 @@ export async function buildReport(
   const topCompanies = companies.slice(0, 8);
   const topDeals = deals.slice(0, 5);
   const specialties = topSpecialties(experts, companies);
+  const clusterStats = specialties.map((specialty) =>
+    specialtyClusterStats(experts, companies, specialty),
+  );
+  const warmClusterCount = clusterStats.filter((cluster) => cluster.warmPathCount > 0).length;
+  const thinClusterCount = clusterStats.filter((cluster) => cluster.tier === "thin").length;
 
   const sections: ReportSection[] = [
     {
@@ -258,17 +271,39 @@ export async function buildReport(
       confidence: 0.84,
       wordCount: 1024,
       citations: sourceIds.register,
-      summary: `The market map clusters the theme into ${specialties.slice(0, 5).join(", ")} and adjacent coverage areas. Blank spaces are where source density or expert coverage is still thin.`,
-      rows: specialties.slice(0, 5).map((specialty, index) => ({
-        label: specialty,
-        value: `${countSpecialty(experts, companies, specialty)} mapped records`,
-        detail:
-          index < 2
-            ? "High coverage: enough experts and companies for immediate diligence calls."
-            : "Watchlist: coverage exists, but should be validated with additional primary calls.",
-        metric: index < 2 ? "High" : "Watch",
+      summary: `${specialties.length} specialty clusters are mapped across ${stats.expertCount} experts and ${stats.companyCount} companies. Strongest density sits in ${specialties.slice(0, 3).join(", ")}; thin areas need primary calls before treating the graph as complete.`,
+      headlineStats: [
+        { label: "Clusters tracked", value: specialties.length, tone: "neutral" },
+        { label: "Warm-path clusters", value: warmClusterCount, tone: warmClusterCount > 0 ? "strong" : "watch" },
+        { label: "Thin coverage", value: thinClusterCount, tone: thinClusterCount > 2 ? "watch" : "neutral" },
+      ],
+      bullets: [
+        `${clusterStats[0]?.topExpert?.name ?? "The lead expert"} is the highest-signal entry point for ${clusterStats[0]?.specialty ?? "the top cluster"}.`,
+        `${warmClusterCount} cluster${warmClusterCount === 1 ? "" : "s"} include TowerBrook warm-path connectors for faster outreach.`,
+        thinClusterCount > 0
+          ? `${thinClusterCount} cluster${thinClusterCount === 1 ? "" : "s"} have thin expert + company density — validate before sizing the market.`
+          : "No cluster is flagged as thin on current graph density.",
+      ],
+      rows: clusterStats.slice(0, 8).map((cluster) => ({
+        label: cluster.specialty,
+        value: `${cluster.expertCount} expert${cluster.expertCount === 1 ? "" : "s"} · ${cluster.companyCount} compan${cluster.companyCount === 1 ? "y" : "ies"}`,
+        detail: cluster.implication,
+        metric: cluster.tierLabel,
+        metricTone: cluster.tier,
+        signals: [
+          { label: "Experts", value: cluster.expertCount },
+          { label: "Companies", value: cluster.companyCount },
+          { label: "Warm paths", value: cluster.warmPathCount },
+          { label: "Sources", value: cluster.sourceCount },
+        ],
+        href: expertsPageHref({
+          theme: themeId === "all" ? undefined : themeId,
+          specialty: cluster.specialty,
+        }),
         citations: sourceIds.register.slice(0, 2),
       })),
+      viewMoreHref: expertsPageHref({ theme: themeId === "all" ? undefined : themeId }),
+      viewMoreLabel: "View full call list by cluster",
       actions: ["Review coverage gaps", "Open evidence"],
     },
     {
@@ -490,15 +525,69 @@ function topSpecialties(experts: Expert[], companies: CompanyWithLinks[]): strin
     .map(([specialty]) => specialty);
 }
 
-function countSpecialty(
+type SpecialtyClusterStats = {
+  specialty: string;
+  expertCount: number;
+  companyCount: number;
+  warmPathCount: number;
+  sourceCount: number;
+  topExpert?: Expert;
+  topCompany?: CompanyWithLinks;
+  tier: "strong" | "developing" | "thin";
+  tierLabel: string;
+  implication: string;
+};
+
+function specialtyClusterStats(
   experts: Expert[],
   companies: CompanyWithLinks[],
   specialty: string,
-): number {
-  return (
-    experts.filter((expert) => expert.specialties?.includes(specialty)).length +
-    companies.filter((company) => company.specialties?.includes(specialty)).length
-  );
+): SpecialtyClusterStats {
+  const clusterExperts = experts.filter((expert) => expert.specialties?.includes(specialty));
+  const clusterCompanies = companies.filter((company) => company.specialties?.includes(specialty));
+  const warmPathCount = clusterExperts.filter((expert) => bestWarmPathForExpert(expert.id)).length;
+  const sourceCount =
+    clusterExperts.reduce((sum, expert) => sum + expert.sources.length, 0) +
+    clusterCompanies.reduce((sum, company) => sum + company.sources.length, 0);
+  const topExpert = rankExperts(clusterExperts)[0]?.expert;
+  const topCompany = clusterCompanies[0];
+
+  const tier =
+    (clusterExperts.length >= 3 && clusterCompanies.length >= 2) ||
+    warmPathCount >= 2 ||
+    clusterExperts.length + clusterCompanies.length >= 8
+      ? "strong"
+      : clusterExperts.length >= 2 || clusterCompanies.length >= 2 || warmPathCount >= 1
+        ? "developing"
+        : "thin";
+
+  const tierLabel =
+    tier === "strong" ? "Strong" : tier === "developing" ? "Developing" : "Thin";
+
+  const leads = [
+    topExpert ? `Lead expert: ${topExpert.name}` : null,
+    topCompany ? `Lead company: ${topCompany.name}` : null,
+  ].filter(Boolean);
+
+  const implication =
+    tier === "strong"
+      ? `${leads.join(" · ") || "Multiple mapped entities"}. Enough density for immediate diligence calls.`
+      : tier === "developing"
+        ? `${leads.join(" · ") || "Early coverage"}. Validate with 1–2 primary calls before expanding the longlist.`
+        : `${leads.join(" · ") || "Sparse graph coverage"}. Treat as a watchlist until more experts or companies are ingested.`;
+
+  return {
+    specialty,
+    expertCount: clusterExperts.length,
+    companyCount: clusterCompanies.length,
+    warmPathCount,
+    sourceCount,
+    topExpert,
+    topCompany,
+    tier,
+    tierLabel,
+    implication,
+  };
 }
 
 function averageConfidence(items: { confidence: number }[]): number {

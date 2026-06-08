@@ -4,6 +4,11 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import { copilotTrustLabel } from "@/lib/copilot-copy";
+import {
+  resolveCompactDisplaySummary,
+  resolveDisplaySummary,
+  resolveOutreachDraft,
+} from "@/lib/copilot-answer-display";
 import { planSections, type SectionMode } from "@/lib/answer-focus";
 import type { AskResponse, ToolTrace } from "./types";
 import { formatTime, themeLabel } from "./utils";
@@ -22,11 +27,17 @@ export function AskAnswerPanel({
   const theme = themeLabel(answer.input_context.theme);
   const sections = planSections(answer.input_context.question, answer.input_context.objective);
   const followUps = answer.follow_up_actions.slice(0, 3);
+  const outreachDraft = resolveOutreachDraft(answer);
+  const displaySummary = resolveDisplaySummary(answer);
+  const compactSummary = resolveCompactDisplaySummary(answer);
 
   if (compact) {
     return (
       <div className="rounded-md border border-line bg-paper px-3 py-2">
-        <p className="text-[13px] leading-relaxed text-ink-soft">{answer.answer_summary}</p>
+        <p className="text-[13px] leading-relaxed text-ink-soft">{compactSummary}</p>
+        {outreachDraft ? (
+          <p className="mt-1 text-[11px] text-ink-faint">Email draft included — expand for full text.</p>
+        ) : null}
         {answer.ranked_experts.length > 0 ? (
           <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
             <span className="text-ink-faint">{answer.ranked_experts.length} experts</span>
@@ -63,15 +74,8 @@ export function AskAnswerPanel({
               {copilotTrustLabel(answer)}
             </span>
           </div>
-          <p className="mt-2 text-sm leading-relaxed text-ink">{answer.answer_summary}</p>
-
-          {answer.enrichment_warnings?.length ? (
-            <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-900">
-              {answer.enrichment_warnings.slice(0, 2).map((warning) => (
-                <p key={warning}>{warning}</p>
-              ))}
-            </div>
-          ) : null}
+          <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-ink">{displaySummary}</p>
+          {outreachDraft ? <OutreachEmailDraft draft={outreachDraft} /> : null}
           {answer.backend_error ? (
             <p className="mt-2 text-[11px] font-semibold text-amber-800">
               Live research unavailable: {answer.backend_error}
@@ -329,6 +333,35 @@ export function AskAnswerPanel({
         >
           Save to basket
         </WorkspaceActionButton>
+      </div>
+    </div>
+  );
+}
+
+function OutreachEmailDraft({ draft }: { draft: { subject: string; body: string } }) {
+  return (
+    <div
+      className="mt-3 rounded-lg border border-line bg-paper"
+      data-testid="outreach-email-draft"
+    >
+      <div className="border-b border-line px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-faint">
+        Email draft
+      </div>
+      <div className="space-y-3 px-4 py-3 font-mono text-[13px] leading-relaxed text-ink">
+        <div>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-faint">
+            Subject
+          </span>
+          <p className="mt-1 text-ink">{draft.subject}</p>
+        </div>
+        <div>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-faint">
+            Body
+          </span>
+          <pre className="mt-1 whitespace-pre-wrap font-sans text-sm leading-relaxed text-ink-soft">
+            {draft.body}
+          </pre>
+        </div>
       </div>
     </div>
   );

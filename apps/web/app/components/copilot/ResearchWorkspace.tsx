@@ -12,13 +12,8 @@ import {
   type WorkspaceItem,
 } from "@/lib/workspace";
 import { CopilotConversation, CopilotConversationInput } from "./CopilotConversation";
-import { CopilotFiltersPanel } from "./CopilotFiltersPanel";
 import type { AskResponse, CopilotFilters, SourceRecord } from "./types";
-import {
-  readSkipBasketAutoRun,
-  subscribeCopilotPreferences,
-  writeSkipBasketAutoRun,
-} from "@/lib/copilot-preferences";
+import { readSkipBasketAutoRun } from "@/lib/copilot-preferences";
 import {
   clearConversationSummary,
   readConversationSummary,
@@ -26,6 +21,7 @@ import {
 } from "@/lib/copilot-session-memory";
 import { outreachStorageKey, readOutreachState } from "@/lib/outreach-plan";
 import { consumeAskStream, phaseToProgressStep } from "@/lib/ask-stream-client";
+import { sanitizeAnswerForDisplay } from "@/lib/copilot-answer-display";
 import {
   buildBasketPrompt,
   buildWorkspacePageContext,
@@ -59,7 +55,7 @@ export default function ResearchWorkspace({
   );
   const startingQuestion = useMemo(() => initialPrompt ?? defaultQuestion(initialTheme), [initialPrompt, initialTheme]);
   const [question, setQuestion] = useState(startingQuestion);
-  const [filters, setFilters] = useState<CopilotFilters>(startingFilters);
+  const filters = startingFilters;
   const [answer, setAnswer] = useState<AskResponse | null>(null);
   const [conversation, setConversation] = useState<ConversationMessage[]>([]);
   const [conversationSummary, setConversationSummary] = useState<string | undefined>(
@@ -73,11 +69,7 @@ export default function ResearchWorkspace({
   const activeRequest = useRef<AbortController | null>(null);
   const basketBootstrapped = useRef(false);
   const workspaceItems = useWorkspaceItems();
-  const [skipBasketAutoRun, setSkipBasketAutoRun] = useState(() => readSkipBasketAutoRun());
-
-  useEffect(() => {
-    return subscribeCopilotPreferences(() => setSkipBasketAutoRun(readSkipBasketAutoRun()));
-  }, []);
+  const skipBasketAutoRun = readSkipBasketAutoRun();
 
   function pageContextFor(filters: CopilotFilters) {
     const outreachState = readOutreachState(
@@ -137,7 +129,7 @@ export default function ResearchWorkspace({
         controller.signal,
       );
       if (activeRequest.current !== controller || !finalAnswer) return;
-      const data: AskResponse = finalAnswer;
+      const data = sanitizeAnswerForDisplay(finalAnswer);
       setAnswer(data);
       setConversation((current) => [
         ...current,
@@ -170,16 +162,6 @@ export default function ResearchWorkspace({
         setLoading(false);
       }
     }
-  }
-
-  function runWithFilters(nextFilters: CopilotFilters) {
-    if (answer || conversation.length > 0) {
-      submit(question || answer?.input_context.question || loadingQuestion, nextFilters);
-      return;
-    }
-    const nextDefault = defaultQuestion(isThemeFocus(nextFilters.theme) ? nextFilters.theme : "all");
-    setQuestion(nextDefault);
-    setLoadingQuestion(nextDefault);
   }
 
   function cancelRequest() {
@@ -260,7 +242,7 @@ export default function ResearchWorkspace({
           controller.signal,
         );
         if (!cancelled && finalAnswer) {
-          const data: AskResponse = finalAnswer;
+          const data = sanitizeAnswerForDisplay(finalAnswer);
           setAnswer(data);
           setConversation([
             {
@@ -318,14 +300,6 @@ export default function ResearchWorkspace({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot basket auto-run
   }, [autoRunInitial, initialPrompt, skipBasketAutoRun, startingFilters, workspaceItems]);
 
-  useEffect(() => {
-    if (!loading) return;
-    const timers = [900, 2400, 5200].map((delay, index) =>
-      window.setTimeout(() => setProgressStep(index + 1), delay),
-    );
-    return () => timers.forEach((timer) => window.clearTimeout(timer));
-  }, [loading, loadingQuestion]);
-
   const selectedSource = useMemo(() => {
     if (!answer?.sources_used.length) return null;
     return (
@@ -340,27 +314,17 @@ export default function ResearchWorkspace({
 
   return (
     <div className="min-h-[calc(100vh-3.5rem)] bg-paper text-ink">
-      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,200px)_minmax(0,1fr)] lg:grid-cols-[220px_minmax(0,1fr)] 2xl:grid-cols-[260px_minmax(0,1fr)_320px]">
-        <CopilotFiltersPanel
-          filters={filters}
-          resetFilters={startingFilters}
-          onFiltersChange={setFilters}
-          onQuestionChange={setQuestion}
-          onRun={runWithFilters}
-          skipBasketAutoRun={skipBasketAutoRun}
-          onSkipBasketAutoRunChange={writeSkipBasketAutoRun}
-        />
-
-        <main className="min-w-0 border-x border-line bg-card">
+      <div className="grid grid-cols-1 2xl:grid-cols-[minmax(0,1fr)_320px]">
+        <main className="min-w-0 bg-card">
           <div className="border-b border-line px-3 py-4 sm:px-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h1 className="text-xl font-semibold tracking-tight">AI Copilot</h1>
                 <p className="mt-1 text-xs text-ink-faint">
-                  Ask questions, action the current basket, and save useful outputs back into the workflow.
+                  Ask in plain language — theme scope follows the global filter bar. Basket quick actions sit in the chat.
                 </p>
                 <p className="mt-1 text-[11px] text-ink-faint">
-                  This chat stays in the tab until you start a new chat or refresh. After five Q&A pairs, older context is summarised so follow-ups stay sharp. Basket and notes are saved separately.
+                  Chat persists until you start a new chat or refresh. After five Q&A pairs, older turns are summarised for sharper follow-ups.
                 </p>
                 {conversationSummary ? (
                   <p className="mt-1 text-[11px] text-ink-faint" data-testid="copilot-memory-active">
@@ -429,6 +393,7 @@ export default function ResearchWorkspace({
               conversation={conversation}
               loading={loading}
               progressStep={progressStep}
+              loadingQuestion={loadingQuestion}
               error={error}
               answer={answer}
               workspaceItems={workspaceItems}

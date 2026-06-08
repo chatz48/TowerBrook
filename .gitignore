@@ -19,6 +19,7 @@
 /test-results
 **/playwright-report
 **/test-results
+apps/backend-api/tests
 
 # next.js
 /.next/
@@ -52,7 +53,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Local-only docs (strategy, reviews, demo scripts — not published to GitHub)
+# Local-only docs (strategy, reviews)
 /docs/
 /research-screenshots/
 REVIEW_AGENT_PROMPT.md
@@ -61,3 +62,5 @@ REVIEW.md
 AGENTS.md
 .cursor/rules/agent-verification.mdc
 agent-verify-report.md
+
+apps/backend-api/tests

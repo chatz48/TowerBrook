@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
+import { copilotProgressLabel } from "@/lib/copilot-copy";
 import { workspaceKindLabel, type WorkspaceItem } from "@/lib/workspace";
 import { AskAnswerPanel } from "./AskAnswerPanel";
 import { PROMPTS } from "./constants";
@@ -13,6 +15,7 @@ type CopilotConversationProps = {
   conversation: ConversationMessage[];
   loading: boolean;
   progressStep: number;
+  loadingQuestion?: string;
   error: string;
   answer: AskResponse | null;
   workspaceItems: WorkspaceItem[];
@@ -74,6 +77,7 @@ export function CopilotConversation({
   conversation,
   loading,
   progressStep,
+  loadingQuestion,
   error,
   answer,
   workspaceItems,
@@ -85,6 +89,18 @@ export function CopilotConversation({
   const latestAssistantId = [...conversation]
     .reverse()
     .find((message) => message.role === "assistant" && message.answer)?.id;
+  const activityRef = useRef<HTMLDivElement>(null);
+
+  const visibleConversation = useMemo(() => {
+    if (!loading || conversation.length === 0) return conversation;
+    const last = conversation[conversation.length - 1];
+    if (last?.role === "user") return conversation.slice(0, -1);
+    return conversation;
+  }, [conversation, loading]);
+
+  useEffect(() => {
+    activityRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [loading, conversation.length, loadingQuestion]);
 
   return (
     <div className="space-y-3 px-3 py-4 sm:px-5">
@@ -94,9 +110,41 @@ export function CopilotConversation({
           onOpenNotes={onOpenNotes}
           onPrompt={onPrompt}
         />
-        {conversation.length > 0 ? (
+        {error ? (
+          <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {error}
+          </div>
+        ) : null}
+        {loading ? (
+          <div ref={activityRef} className="space-y-2" data-testid="copilot-activity">
+            {loadingQuestion ? (
+              <div className="rounded-md border border-line bg-paper px-3 py-2">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-faint">
+                  You
+                </div>
+                <p className="mt-1 text-[13px] leading-relaxed text-ink">{loadingQuestion}</p>
+              </div>
+            ) : null}
+            <div className="text-[11px] text-ink-faint">{copilotProgressLabel(progressStep)}</div>
+            <LoadingBlocks />
+            {answer ? (
+              <div className="rounded-lg border border-dashed border-line bg-paper/60 p-2">
+                <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-faint">
+                  Initial answer (from directory)
+                </div>
+                <AskAnswerPanel
+                  answer={answer}
+                  onSourceSelect={onSourceSelect}
+                  onPrompt={onPrompt}
+                  compact
+                />
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+        {visibleConversation.length > 0 ? (
           <div className="space-y-3">
-            {conversation.map((message) => (
+            {conversationTurnsNewestFirst(visibleConversation).map((message) => (
               <div key={message.id} className="space-y-1">
                 <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-faint">
                   {message.role === "user" ? "You" : "Copilot"}
@@ -118,7 +166,7 @@ export function CopilotConversation({
               </div>
             ))}
           </div>
-        ) : (
+        ) : !loading ? (
           <IdlePrompt
             question={answer?.input_context.question ?? question}
             onPrompt={(prompt) => {
@@ -126,40 +174,27 @@ export function CopilotConversation({
               onPrompt(prompt);
             }}
           />
-        )}
-        {loading && answer ? (
-          <div className="rounded-lg border border-dashed border-line bg-paper/60 p-2">
-            <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-faint">
-              Initial answer (from directory)
-            </div>
-            <AskAnswerPanel
-              answer={answer}
-              onSourceSelect={onSourceSelect}
-              onPrompt={onPrompt}
-              compact
-            />
-          </div>
-        ) : null}
-        {loading ? (
-          <div className="space-y-2">
-            <div className="text-[11px] text-ink-faint">
-              {progressStep === 0 ? "Building answer from directory…" :
-               progressStep === 1 ? "Matching your question to the workflow…" :
-               progressStep === 2 ? "Searching additional sources…" :
-               progressStep === 3 ? "Drafting structured summary…" :
-               progressStep === 4 ? "Finalising confidence…" :
-               "Preparing response…"}
-            </div>
-            <LoadingBlocks />
-          </div>
-        ) : null}
-        {error ? (
-          <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            {error}
-          </div>
         ) : null}
     </div>
   );
+}
+
+/** Newest Q&A turns first; within each turn, user message stays above the assistant reply. */
+function conversationTurnsNewestFirst(messages: ConversationMessage[]): ConversationMessage[] {
+  const turns: ConversationMessage[][] = [];
+  let current: ConversationMessage[] = [];
+
+  for (const message of messages) {
+    if (message.role === "user") {
+      if (current.length) turns.push(current);
+      current = [message];
+      continue;
+    }
+    current.push(message);
+  }
+  if (current.length) turns.push(current);
+
+  return turns.reverse().flat();
 }
 
 function IdlePrompt({
@@ -176,7 +211,7 @@ function IdlePrompt({
         <div>
           <div className="text-xs">
             <span className="font-semibold">Ready to ask</span>
-            <span className="ml-2 text-[#667085]">Set filters first or start here</span>
+            <span className="ml-2 text-[#667085]">Theme scope follows the global filter bar</span>
           </div>
           <p className="mt-1 text-sm text-[#344054]">{question}</p>
         </div>

@@ -3,6 +3,7 @@ import type { ReportModel, ReportSection, ReportSource } from "@/lib/report";
 import { WorkspaceActionButton } from "@/app/components/InvestorWorkspaceTray";
 import ReportExportControls from "./ReportExportControls";
 import LiveReportEnhance from "./LiveReportEnhance";
+import MarketMapSection from "./MarketMapSection";
 import MemoBasketPanel from "./MemoBasketPanel";
 import { DataPageHeader, PageShell } from "@/app/components/ui";
 
@@ -151,6 +152,9 @@ function ReportSectionCard({
         </div>
       </div>
 
+      {section.id === "market-map" ? (
+        <MarketMapSection section={section} sources={sources} />
+      ) : (
       <div className="p-5">
         <p className="text-[13px] leading-relaxed text-ink">{section.summary}</p>
 
@@ -214,6 +218,7 @@ function ReportSectionCard({
           </div>
         </div>
       </div>
+      )}
     </article>
   );
 }

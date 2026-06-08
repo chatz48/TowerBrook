@@ -1,9 +1,20 @@
 import asyncio
 
 from app.services.copilot.models import CopilotSynthesis
-from app.services.copilot.synthesis import synthesize_answer
+from app.services.copilot.synthesis import _parse_fallback_synthesis, synthesize_answer
 from app.services.copilot.context import CopilotContext
 from app.schemas.domain import Citation, ToolTrace
+
+
+def test_parse_fallback_synthesis_reads_json_blob():
+    raw = (
+        '{ "answer_summary": "Subject: Intro\\n\\nHi James,\\n\\nQuick note.", '
+        '"key_findings": ["template ready"] }'
+    )
+    parsed = _parse_fallback_synthesis(raw)
+    assert parsed is not None
+    assert parsed.answer_summary.startswith("Subject: Intro")
+    assert "Hi James" in parsed.answer_summary
 
 
 def test_synthesis_fallback_does_not_leak_prompt():

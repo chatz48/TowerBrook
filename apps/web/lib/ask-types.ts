@@ -133,6 +133,11 @@ export type AskResponse = {
   /** Legacy supplemental prose slot — mirrors structured.answer_summary when present. */
   agentic_answer?: string;
   tool_calls?: ToolTrace[];
+  /** Formatted outreach email when the user asks for draft outreach. */
+  outreach_draft?: {
+    subject: string;
+    body: string;
+  };
   /** Rolling summary of older turns once the thread exceeds five Q&A pairs. */
   conversation_summary?: string;
   memory_pairs_compressed?: number;

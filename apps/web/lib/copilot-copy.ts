@@ -27,8 +27,8 @@ export function copilotTrustDetail(
 export const COPILOT_PROGRESS_LABELS = [
   "Building answer from directory…",
   "Matching your question to the workflow…",
-  "Searching additional sources…",
-  "Drafting structured summary…",
+  "Checking directory citations…",
+  "Refining answer…",
   "Finalising confidence…",
 ] as const;
 

@@ -22,18 +22,11 @@ test.describe("Copilot page @copilot", () => {
   test("@copilot loads with all UI elements visible", async ({ page }) => {
     await page.goto("/ask");
 
-    const filters = page.getByRole("complementary");
     await expect(page.locator("h1")).toContainText("AI Copilot");
-    await expect(page.locator("text=Session objective")).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Filters" })).toBeVisible();
-    await expect(page.locator("text=Find experts")).toBeVisible();
-    await expect(page.locator("text=Map companies")).toBeVisible();
-    await expect(page.locator("text=Red-team thesis")).toBeVisible();
-    await expect(page.locator("text=Prepare calls")).toBeVisible();
-    await expect(filters.getByText("Theme", { exact: true })).toBeVisible();
-    await expect(filters.getByText("Geography", { exact: true })).toBeVisible();
-    await expect(filters.getByText("Expert archetype", { exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Ask", exact: true })).toBeVisible();
+    await expect(
+      page.getByPlaceholder("Ask over experts, companies, relationships, and sources..."),
+    ).toBeVisible();
+    await expect(page.locator("form").getByRole("button", { name: "Ask" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Notes" })).toBeVisible();
     await expect(page.getByRole("link", { name: /Open Discover/ })).toBeVisible();
   });
@@ -110,6 +103,64 @@ test.describe("Copilot page @copilot", () => {
     await ensureCopilotResponse(page, "Who should I call first?");
     const evidenceText = await page.locator("text=Source evidence").textContent();
     expect(evidenceText).toBeTruthy();
+  });
+
+  test("@copilot investment memo prompt names James Knight from expert list", async ({ page }) => {
+    await page.goto("/ask");
+    const prompt =
+      "Draft an investment memo and call plan using these experts: James Knight. Summarise what each person unlocks, recommended call order, and evidence gaps.";
+    await submitCopilotQuestion(page, prompt);
+    await expect(page.getByText(/What each expert unlocks/i)).toBeVisible({ timeout: 45_000 });
+    await expect(page.getByText(/James Knight/i).first()).toBeVisible();
+    await expect(page.locator("text=No information on James Knight exists")).toHaveCount(0);
+    await expect(page.locator("text=answer_summary")).toHaveCount(0);
+  });
+
+  test("@copilot basket prepare calls avoids JSON in chat summary", async ({ page }) => {
+    await seedBasketOnPage(
+      page,
+      [
+        makeBasketItem({
+          id: "james-knight",
+          kind: "call",
+          name: "James Knight",
+          sub: "Augusta & Co — Managing Partner & co-founder",
+          href: "/experts/james-knight",
+          status: "shortlisted",
+        }),
+      ],
+      { skipAutoRun: true },
+    );
+    await page.goto("/ask");
+    await page.getByTestId("basket-context-panel").getByRole("button", { name: "Prepare calls" }).click();
+    await expect(page.getByText("Suggested call sequence")).toBeVisible({ timeout: 45_000 });
+    await expect(page.locator("text=answer_summary")).toHaveCount(0);
+    await expect(page.getByText(/Call plan for James Knight|Call plan with James Knight/i)).toBeVisible();
+  });
+
+  test("@copilot basket draft outreach renders email draft", async ({ page }) => {
+    await seedBasketOnPage(
+      page,
+      [
+        makeBasketItem({
+          id: "james-knight",
+          kind: "call",
+          name: "James Knight",
+          sub: "Augusta & Co — Managing Partner & co-founder",
+          href: "/experts/james-knight",
+          status: "shortlisted",
+        }),
+      ],
+      { skipAutoRun: true },
+    );
+    await page.goto("/ask");
+    await page.getByTestId("basket-context-panel").getByRole("button", { name: "Draft outreach" }).click();
+    await expect(page.getByTestId("outreach-email-draft")).toBeVisible({ timeout: 45_000 });
+    await expect(page.getByTestId("outreach-email-draft")).toContainText("Hi James");
+    await expect(page.getByTestId("outreach-email-draft")).toContainText("Managing Partner");
+    await expect(page.getByTestId("outreach-email-draft")).toContainText("renewables");
+    await expect(page.getByTestId("outreach-email-draft")).not.toContainText('"answer_summary"');
+    await expect(page.locator("text=here is a full email template")).toHaveCount(0);
   });
 
   test("@copilot basket context panel shows quick actions", async ({ page }) => {

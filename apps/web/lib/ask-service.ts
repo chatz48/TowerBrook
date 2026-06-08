@@ -12,7 +12,24 @@ import type { AskResponse, ChatTurn, PageContext, SourceRecord, ToolTrace } from
 import type { Company, Deal, Expert, ExpertType, Source, ThemeId } from "@/lib/types";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
 import { warmPathsForExpert, warmPathStatusLabel } from "@/lib/warm-paths";
-import { inferIntent, planSections } from "@/lib/answer-focus";
+import { inferIntent, planSections, resolveObjective } from "@/lib/answer-focus";
+import {
+  hasBasketContext,
+  parseBasketContext,
+  resolveBasketCompanies,
+  resolveBasketExperts,
+} from "@/lib/basket-context";
+import {
+  buildListenForSummary,
+  buildLocalOutreachDraft,
+  buildMemoCallPlanSummary,
+  extractDraftEmailFromTools,
+  isMemoCallPlanQuestion,
+  isOutreachQuestion,
+  normalizeAnswerSummary,
+  parseEmailFromText,
+  sanitizeAnswerForDisplay,
+} from "@/lib/copilot-answer-display";
 import {
   buildEffectiveChatMemory,
   groupQAPairs,
@@ -100,15 +117,22 @@ export async function handleAskRequest(request: Request) {
     );
     trace.markBaseline();
 
-    const agentic = await maybeAskIntelligenceApi(
+    const agentic = shouldSkipBackendEnrichment(
       prepared.question,
-      prepared.filters,
+      prepared.baseline,
       prepared.pageContext,
       prepared.chatHistory,
-      prepared.baseline,
-      prepared.chatMemory,
-      requestId,
-    );
+    )
+      ? { result: null as BackendChatResult | null, error: undefined }
+      : await maybeAskIntelligenceApi(
+          prepared.question,
+          prepared.filters,
+          prepared.pageContext,
+          prepared.chatHistory,
+          prepared.baseline,
+          prepared.chatMemory,
+          requestId,
+        );
 
     if (agentic.result?.structured || agentic.result?.answer) {
       const merged = mergeBackendIntoBaseline(prepared.baseline, agentic.result);
@@ -126,9 +150,6 @@ export async function handleAskRequest(request: Request) {
     const payload = {
       ...prepared.baseline,
       backend_error: agentic.error,
-      enrichment_warnings: agentic.error
-        ? ["Live research unavailable; rankings and citations are from the directory only."]
-        : prepared.baseline.enrichment_warnings,
       request_id: requestId,
     };
     trace!.finishFromResponse(payload);
@@ -181,7 +202,15 @@ async function handleAskStream(request: Request): Promise<Response> {
         trace.markBaseline();
         send("baseline", { ...prepared.baseline, request_id: requestId });
 
-        if (!hasBackendApi()) {
+        if (
+          !hasBackendApi() ||
+          shouldSkipBackendEnrichment(
+            prepared.question,
+            prepared.baseline,
+            prepared.pageContext,
+            prepared.chatHistory,
+          )
+        ) {
           finalPayload = { ...prepared.baseline, request_id: requestId };
           send("complete", finalPayload);
           trace.finishFromResponse(finalPayload);
@@ -307,6 +336,7 @@ async function prepareAskContext(body: AskRequest): Promise<
     body.filters ?? {},
     pageContext,
     question,
+    chatHistory,
   );
 
   return {
@@ -436,6 +466,79 @@ async function maybeAskIntelligenceApi(
   }
 }
 
+function questionReferencesBasket(question: string): boolean {
+  return /basket:|saved basket|from the saved basket|using the saved basket|these saved experts|using these experts/i.test(
+    question,
+  );
+}
+
+/** Directory baseline already answers these — skip slow backend synthesis. */
+function shouldSkipBackendEnrichment(
+  question: string,
+  baseline: AskResponse,
+  pageContext?: PageContext,
+  chatHistory?: ChatTurn[],
+): boolean {
+  if (!baseline.grounded) return false;
+
+  if (
+    hasBasketContext(question, pageContext, chatHistory) ||
+    questionReferencesBasket(question)
+  ) {
+    return true;
+  }
+
+  if (
+    baseline.intent === "build_call_plan" &&
+    ((baseline.call_sequence?.length ?? 0) > 0 || baseline.ranked_experts.length > 0)
+  ) {
+    return true;
+  }
+
+  if (
+    isMemoCallPlanQuestion(question) &&
+    baseline.ranked_experts.length > 0 &&
+    baseline.grounded
+  ) {
+    return true;
+  }
+
+  if (
+    (baseline.intent === "draft_outreach" || isOutreachQuestion(question)) &&
+    baseline.ranked_experts.length > 0
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+function looksLikeRawJsonSummary(text: string | undefined): boolean {
+  if (!text) return false;
+  const trimmed = text.trim();
+  return trimmed.startsWith("{") && trimmed.includes('"answer_summary"');
+}
+
+function enrichmentSummaryUntrusted(
+  rawSummary: string | undefined,
+  backend: BackendChatResult,
+): boolean {
+  if (!rawSummary) return true;
+  if (looksLikePromptLeak(rawSummary) || looksLikeRawJsonSummary(rawSummary)) return true;
+
+  const notes = backend.structured?.uncertainty_notes ?? "";
+  if (notes.includes("Fallback synthesis path used")) return true;
+  if (/filtered\s+\d+\s+weak claim/i.test(notes)) return true;
+  if (/no information on .+ exists in the provided citations/i.test(rawSummary)) return true;
+
+  const warnings = backend.verification_warnings ?? [];
+  if (warnings.some((warning) => /limited citation overlap|removed unverified/i.test(warning))) {
+    return true;
+  }
+
+  return false;
+}
+
 function looksLikePromptLeak(text: string | undefined): boolean {
   if (!text) return false;
   const markers = [
@@ -448,6 +551,34 @@ function looksLikePromptLeak(text: string | undefined): boolean {
 }
 
 function mergeBackendIntoBaseline(baseline: AskResponse, backend: BackendChatResult): AskResponse {
+  if (
+    baseline.outreach_draft?.body ||
+    baseline.intent === "draft_outreach" ||
+    isOutreachQuestion(baseline.input_context.question)
+  ) {
+    return sanitizeAnswerForDisplay({
+      ...baseline,
+      tool_calls: backend.tool_calls,
+      request_id: backend.request_id,
+      node_timings_ms: backend.node_timings_ms,
+    });
+  }
+
+  if (
+    baseline.intent === "build_call_plan" &&
+    (hasBasketContext(baseline.input_context.question) ||
+      isMemoCallPlanQuestion(baseline.input_context.question)) &&
+    baseline.ranked_experts.length > 0
+  ) {
+    return sanitizeAnswerForDisplay({
+      ...baseline,
+      tool_calls: backend.tool_calls,
+      request_id: backend.request_id,
+      node_timings_ms: backend.node_timings_ms,
+      backend_enriched: true,
+    });
+  }
+
   const structured = backend.structured;
   const mergedGaps = structured?.gaps?.length
     ? structured.gaps.slice(0, 2)
@@ -462,15 +593,33 @@ function mergeBackendIntoBaseline(baseline: AskResponse, backend: BackendChatRes
     : baseline.risks.slice(0, 2);
 
   const rawSummary = structured?.answer_summary || backend.answer;
-  const synthesisSummary = looksLikePromptLeak(rawSummary) ? baseline.answer_summary : rawSummary;
-  const enrichmentWarnings: string[] = [];
-  if (structured?.uncertainty_notes) {
-    enrichmentWarnings.push(structured.uncertainty_notes);
+  const normalizedRaw = rawSummary ? normalizeAnswerSummary(rawSummary) : undefined;
+  const outreachDraft =
+    extractDraftEmailFromTools(backend.tool_calls) ??
+    (normalizedRaw ? parseEmailFromText(normalizedRaw) : undefined) ??
+    baseline.outreach_draft;
+
+  let synthesisSummary = baseline.answer_summary;
+  if (rawSummary && !enrichmentSummaryUntrusted(rawSummary, backend)) {
+    const cleaned = normalizedRaw ?? normalizeAnswerSummary(rawSummary);
+    if (cleaned && !looksLikeRawJsonSummary(cleaned)) {
+      synthesisSummary = cleaned;
+    }
   }
 
-  return {
+  if (outreachDraft) {
+    const recipient =
+      baseline.ranked_experts[0]?.name ??
+      (typeof backend.tool_calls?.[0]?.input?.recipient === "string"
+        ? backend.tool_calls[0].input.recipient
+        : "expert");
+    synthesisSummary = `Outreach draft for ${recipient}. Review and personalise before sending.`;
+  }
+
+  return sanitizeAnswerForDisplay({
     ...baseline,
     answer_summary: synthesisSummary,
+    outreach_draft: outreachDraft,
     gaps: mergedGaps,
     risks: mergedRisks,
     structured,
@@ -484,12 +633,7 @@ function mergeBackendIntoBaseline(baseline: AskResponse, backend: BackendChatRes
     model: baseline.model,
     grounded: false,
     backend_enriched: true,
-    enrichment_warnings: [
-      ...enrichmentWarnings,
-      ...(backend.verification_warnings ?? []),
-    ].filter(Boolean).length
-      ? [...enrichmentWarnings, ...(backend.verification_warnings ?? [])]
-      : undefined,
+    enrichment_warnings: undefined,
     confidence: backend.confidence
       ? {
           score: backend.confidence,
@@ -504,7 +648,7 @@ function mergeBackendIntoBaseline(baseline: AskResponse, backend: BackendChatRes
           prompt,
         }))
       : baseline.follow_up_actions.slice(0, 3),
-  };
+  });
 }
 
 function extractEntityIdsFromHistory(
@@ -529,11 +673,12 @@ async function buildStructuredAnswer(
   filters: NonNullable<AskRequest["filters"]>,
   pageContext?: PageContext,
   displayQuestion = question,
+  chatHistory: ChatTurn[] = [],
 ): Promise<AskResponse> {
   const pageContextText = pageContextSearchText(pageContext);
   const words = tokenize(`${question} ${pageContextText}`);
   const themeId = inferTheme(`${question} ${pageContextText}`, filters.theme);
-  const objective = filters.objective ?? inferObjective(question);
+  const objective = resolveObjective(filters.objective, displayQuestion);
   const sections = planSections(question, objective);
   const intent = inferIntent(question, objective);
   const archetypes = normalizeArchetypes(filters.archetypes);
@@ -548,7 +693,16 @@ async function buildStructuredAnswer(
     geography: geographyToSession(filters.geography),
   };
 
-  const rankedExpertInputs = rankExpertsForSession(
+  const basketEntries = parseBasketContext(
+    displayQuestion,
+    pageContext,
+    chatHistory,
+    includeTowerBrookEmployees,
+  );
+  const pinnedExperts = resolveBasketExperts(basketEntries, includeTowerBrookEmployees);
+  const pinnedCompanies = resolveBasketCompanies(basketEntries, includeTowerBrookEmployees);
+
+  let rankedExpertInputs = rankExpertsForSession(
     filterTowerBrookEmployees(
       getExperts().filter((expert) => {
         if (themeId && !expert.themes.includes(themeId)) return false;
@@ -575,7 +729,20 @@ async function buildStructuredAnswer(
     .sort((a, b) => b.score - a.score)
     .slice(0, Math.max(sections.experts.limit, 3));
 
-  const rankedCompanyInputs = companiesWithLinks(themeId, includeTowerBrookEmployees)
+  if (pinnedExperts.length) {
+    rankedExpertInputs = pinnedExperts.map((expert, index) => ({
+      expert,
+      score: 120 - index,
+      breakdown: {
+        base: 100,
+        session_fit: 10,
+        objective_fit: 10,
+        keyword_boost: 0,
+      },
+    }));
+  }
+
+  let rankedCompanyInputs = companiesWithLinks(themeId, includeTowerBrookEmployees)
     .map((company) => ({
       company,
       score:
@@ -585,6 +752,18 @@ async function buildStructuredAnswer(
     }))
     .sort((a, b) => b.score - a.score)
     .slice(0, Math.max(sections.companies.limit, sections.companies.mode !== "hidden" ? 2 : 0));
+
+  if (pinnedCompanies.length) {
+    const linkedDirectory = companiesWithLinks(themeId, includeTowerBrookEmployees);
+    const linkedById = new Map(linkedDirectory.map((company) => [company.id, company]));
+    rankedCompanyInputs = pinnedCompanies
+      .map((company) => linkedById.get(company.id))
+      .filter((company): company is NonNullable<typeof company> => company !== undefined)
+      .map((company, index) => ({
+        company,
+        score: 120 - index,
+      }));
+  }
 
   const rankedDealInputs = (await listDeals())
     .filter((deal) => !themeId || deal.theme === themeId)
@@ -667,22 +846,14 @@ async function buildStructuredAnswer(
       ? ranked_companies_all.slice(0, sections.companies.limit || ranked_companies_all.length)
       : [];
 
-  const phases = ["Market orientation", "Operator diligence", "Transaction angle"];
   const callExperts = ranked_experts.length ? ranked_experts : ranked_experts_all;
   const call_sequence =
     sections.callSequence.mode !== "hidden"
-      ? phases
-          .map((phase, index) => {
-            const expert = callExperts[index] ?? callExperts[callExperts.length - 1];
-            if (!expert) return null;
-            return {
-              phase,
-              expert_ids: [expert.expert_id],
-              goal: callGoal(phase, expert, ranked_companies_all[0]?.name),
-              citations: expert.citations.slice(0, 2),
-            };
-          })
-          .filter((x): x is NonNullable<typeof x> => x !== null)
+      ? buildCallSequence(
+          callExperts,
+          ranked_companies_all[0]?.name,
+          pinnedExperts.length > 0,
+        )
       : [];
 
   const topTheme = theme?.name ?? "the selected market";
@@ -731,9 +902,47 @@ async function buildStructuredAnswer(
     ...rankedCompanyInputs.map((x) => x.company.confidence),
   ]);
 
-  return {
+  const outreachExpert = ranked_experts_all[0];
+  const outreach_draft =
+    (intent === "draft_outreach" || isOutreachQuestion(displayQuestion)) && outreachExpert
+      ? buildLocalOutreachDraft({
+          name: outreachExpert.name,
+          title: outreachExpert.title,
+          firm: outreachExpert.firm,
+          why: outreachExpert.why,
+          access: outreachExpert.access,
+          relatedCompanyNames: relatedCompanyNamesForExpert(outreachExpert.expert_id),
+          themeName: theme?.name ?? "the selected market",
+          basketCompanyNames: ranked_companies_all.map((company) => company.name),
+        })
+      : undefined;
+
+  const memoCallPlanSummary =
+    isMemoCallPlanQuestion(displayQuestion) && ranked_experts_all.length
+      ? buildMemoCallPlanSummary({
+          experts: ranked_experts_all,
+          companies: ranked_companies_all,
+          gaps,
+          call_sequence,
+          themeName: theme?.name,
+        })
+      : undefined;
+
+  const listenForSummary =
+    intent === "build_call_plan" &&
+    /listen for/i.test(displayQuestion) &&
+    what_to_listen_for.length
+      ? buildListenForSummary(ranked_experts_all, what_to_listen_for)
+      : undefined;
+
+  return sanitizeAnswerForDisplay({
     intent,
-    answer_summary: summaryFor(objective, ranked_experts_all, ranked_companies_all),
+    answer_summary: outreach_draft
+      ? `Outreach draft for ${outreachExpert!.name}. Review and personalise before sending.`
+      : memoCallPlanSummary ??
+        listenForSummary ??
+        summaryFor(objective, ranked_experts_all, ranked_companies_all, intent, call_sequence),
+    outreach_draft,
     generated_at: new Date().toISOString(),
     input_context: {
       question: displayQuestion,
@@ -779,13 +988,10 @@ async function buildStructuredAnswer(
       "Company rank is directional and driven by linked expert density plus record confidence.",
     ],
     vector_retrieval_failed: vectorRetrievalFailed,
-    enrichment_warnings: vectorRetrievalFailed
-      ? ["Deal vector retrieval failed (embedding dimension or API misconfiguration). Directory sources only."]
-      : undefined,
     follow_up_actions: buildFollowUpActions(intent, ranked_experts_all, ranked_companies_all, theme?.shortName),
     grounded: true,
     model: "deterministic-fallback",
-  };
+  });
 }
 
 function expertAccessLabel(expert: Expert) {
@@ -962,14 +1168,6 @@ function inferTheme(question: string, selected?: string): ThemeId | undefined {
   return matches[0]?.score ? matches[0].id : undefined;
 }
 
-function inferObjective(question: string): string {
-  const q = question.toLowerCase();
-  if (q.includes("company") || q.includes("target")) return "Map companies";
-  if (q.includes("risk") || q.includes("red") || q.includes("disconfirm")) return "Red-team thesis";
-  if (q.includes("call") || q.includes("prep")) return "Prepare calls";
-  return "Find experts";
-}
-
 function buildFollowUpActions(
   intent: string,
   experts: RankedExpert[],
@@ -1073,21 +1271,84 @@ function normalizeArchetypes(input?: string[]): ExpertType[] {
     .filter((item) => EXPERT_TYPES.has(item));
 }
 
+function relatedCompanyNamesForExpert(expertId: string): string[] {
+  const expert = getExperts().find((item) => item.id === expertId);
+  if (!expert) return [];
+
+  const byId = new Map(
+    companiesWithLinks(undefined, true).map((company) => [company.id, company.name]),
+  );
+  return expert.companies
+    .map((link) => byId.get(link.companyId))
+    .filter((name): name is string => Boolean(name))
+    .slice(0, 4);
+}
+
 function summaryFor(
   objective: string,
   experts: RankedExpert[],
   companies: RankedCompany[],
+  intent?: string,
+  callSequence?: AskResponse["call_sequence"],
 ): string {
   const expertNames = experts.slice(0, 3).map((expert) => expert.name).join(", ");
   const companyNames = companies.slice(0, 2).map((company) => company.name).join(" and ");
-  if (!experts.length) return "No strong expert matches in the current directory. Broaden the theme or archetype filters.";
+  if (!experts.length) {
+    return "No strong expert matches in the current directory. Broaden the theme or name experts explicitly.";
+  }
   if (objective === "Map companies") {
     return `Prioritize ${companyNames || "the top targets"}; use ${expertNames || "linked experts"} to validate access.`;
   }
   if (objective === "Red-team thesis") {
     return `Pressure-test with ${expertNames}${companyNames ? ` and check ${companyNames}` : ""}.`;
   }
-  return `Call ${expertNames} first for this question.`;
+  if (intent === "build_call_plan" || objective === "Prepare calls") {
+    if (callSequence?.length) {
+      const first = callSequence[0];
+      const lead = experts.find((expert) => first.expert_ids.includes(expert.expert_id)) ?? experts[0];
+      return `Call plan for ${lead.name}: ${first.goal}`;
+    }
+    if (experts.length === 1) {
+      return `Call plan for ${experts[0].name}: ${experts[0].why}`;
+    }
+    return `Suggested call order: ${expertNames}.`;
+  }
+  return `Start with ${expertNames} for this question.`;
+}
+
+function basketCallPhases(expertCount: number): string[] {
+  if (expertCount <= 1) return ["Call plan"];
+  if (expertCount === 2) return ["Market orientation", "Operator diligence"];
+  return ["Market orientation", "Operator diligence", "Transaction angle"].slice(0, expertCount);
+}
+
+function buildCallSequence(
+  callExperts: RankedExpert[],
+  topCompanyName: string | undefined,
+  fromBasket: boolean,
+) {
+  if (!callExperts.length) return [];
+
+  const phases = fromBasket
+    ? basketCallPhases(callExperts.length)
+    : ["Market orientation", "Operator diligence", "Transaction angle"];
+
+  return phases
+    .map((phase, index) => {
+      const expert = callExperts[index] ?? callExperts[callExperts.length - 1];
+      if (!expert) return null;
+      const goal =
+        fromBasket && callExperts.length === 1
+          ? `Objective for ${expert.name}: assess market dynamics, validate saved basket targets, and surface what would raise or reduce conviction.`
+          : callGoal(phase, expert, topCompanyName);
+      return {
+        phase,
+        expert_ids: [expert.expert_id],
+        goal,
+        citations: expert.citations.slice(0, 2),
+      };
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null);
 }
 
 function callGoal(phase: string, expert: RankedExpert, company?: string): string {

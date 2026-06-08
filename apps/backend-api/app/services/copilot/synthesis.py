@@ -11,10 +11,11 @@ from app.services.deepseek_extractor import extractor
 from app.services.deepseek_llm import llm
 
 
-def _trim_synthesis(synthesis: CopilotSynthesis) -> CopilotSynthesis:
+def _trim_synthesis(synthesis: CopilotSynthesis, intent: str = "") -> CopilotSynthesis:
     summary = synthesis.answer_summary.strip()
-    if len(summary) > 420:
-        summary = f"{summary[:417].rstrip()}..."
+    max_len = 1400 if intent == "draft_outreach" else 420
+    if len(summary) > max_len:
+        summary = f"{summary[: max_len - 3].rstrip()}..."
     return CopilotSynthesis(
         answer_summary=summary,
         key_findings=synthesis.key_findings[:2],
@@ -22,6 +23,33 @@ def _trim_synthesis(synthesis: CopilotSynthesis) -> CopilotSynthesis:
         risks=synthesis.risks[:1],
         follow_ups=synthesis.follow_ups[:3],
         uncertainty_notes=synthesis.uncertainty_notes[:200].strip(),
+    )
+
+
+def _parse_fallback_synthesis(raw: str) -> CopilotSynthesis | None:
+    text = raw.strip()
+    if not text.startswith("{"):
+        return None
+    start = text.find("{")
+    end = text.rfind("}")
+    if start < 0 or end <= start:
+        return None
+    try:
+        payload = json.loads(text[start : end + 1])
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(payload, dict):
+        return None
+    summary = payload.get("answer_summary")
+    if not isinstance(summary, str) or not summary.strip():
+        return None
+    return CopilotSynthesis(
+        answer_summary=summary.strip(),
+        key_findings=[str(item) for item in payload.get("key_findings") or [] if item][:2],
+        gaps=[str(item) for item in payload.get("gaps") or [] if item][:2],
+        risks=[str(item) for item in payload.get("risks") or [] if item][:1],
+        follow_ups=[str(item) for item in payload.get("follow_ups") or [] if item][:3],
+        uncertainty_notes=str(payload.get("uncertainty_notes") or "Fallback synthesis path used.")[:200],
     )
 
 
@@ -59,19 +87,24 @@ async def synthesize_answer(
             f"{SYNTHESIS_BASE}\n\n{instruction}",
             user_payload,
         )
-        synthesis = CopilotSynthesis(
-            answer_summary=prose[:420],
-            key_findings=[],
-            gaps=[],
-            risks=[],
-            follow_ups=[],
-            uncertainty_notes="Fallback synthesis path used.",
-        )
+        parsed = _parse_fallback_synthesis(prose)
+        if parsed is not None:
+            synthesis = parsed
+        else:
+            max_len = 1400 if intent == "draft_outreach" else 420
+            synthesis = CopilotSynthesis(
+                answer_summary=prose[:max_len],
+                key_findings=[],
+                gaps=[],
+                risks=[],
+                follow_ups=[],
+                uncertainty_notes="Fallback synthesis path used.",
+            )
 
-    synthesis = _trim_synthesis(synthesis)
+    synthesis = _trim_synthesis(synthesis, intent)
     verified, warnings = verify_synthesis(synthesis, citations)
     if warnings:
         verified.uncertainty_notes = (
             f"{verified.uncertainty_notes} {'; '.join(warnings[:3])}".strip()
         )
-    return _trim_synthesis(verified)
+    return _trim_synthesis(verified, intent)

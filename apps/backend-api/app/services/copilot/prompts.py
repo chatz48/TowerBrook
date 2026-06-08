@@ -53,8 +53,18 @@ INTENT_SYNTHESIS_PROMPTS: dict[str, str] = {
 {_CONCISE_SCHEMA}""",
     "deep_discovery": f"""State what was queued and the single biggest remaining gap.
 {_CONCISE_SCHEMA}""",
-    "draft_outreach": f"""Summarize the outreach angle and one open question before sending.
-{_CONCISE_SCHEMA}""",
+    "draft_outreach": """Write a complete outreach email in answer_summary.
+Start with "Subject: ..." on the first line, then a blank line, then the email body (Hi/Dear, 2-3 short paragraphs, sign-off).
+Do not wrap the email in extra JSON beyond the schema. Keep key_findings empty unless one send caveat is essential.
+JSON schema:
+{
+  "answer_summary": "Subject: ...\\n\\nHi Name,\\n\\n...",
+  "key_findings": [],
+  "gaps": [],
+  "risks": [],
+  "follow_ups": ["max 3 short next questions"],
+  "uncertainty_notes": ""
+}""",
     "generate_report": f"""Summarize memo outline in 1-2 sentences; no full report in chat.
 {_CONCISE_SCHEMA}""",
     "source_analysis": f"""Summarize the source and relevance to the question only.
