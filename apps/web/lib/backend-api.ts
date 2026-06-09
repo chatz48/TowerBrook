@@ -12,6 +12,11 @@ export function hasBackendApi() {
   return Boolean(resolveBackendApiUrl());
 }
 
+export function isBackendUnreachableError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  return /not reachable|fetch failed|ECONNREFUSED|ECONNRESET|ENOTFOUND/i.test(message);
+}
+
 function formatBackendApiError(data: Record<string, unknown>, status: number): string {
   const detail = data.error ?? data.detail;
   if (typeof detail === "string" && detail.trim()) {
@@ -50,16 +55,29 @@ export async function callBackendApi<T>(
   const baseUrl = resolveBackendApiUrl();
   if (!baseUrl) return null;
 
-  const response = await fetch(`${baseUrl.replace(/\/$/, "")}${path}`, {
-    ...init,
-    headers: {
-      ...(init?.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
-      ...(process.env.BACKEND_API_TOKEN
-        ? { Authorization: `Bearer ${process.env.BACKEND_API_TOKEN}` }
-        : {}),
-      ...(init?.headers ?? {}),
-    },
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${baseUrl.replace(/\/$/, "")}${path}`, {
+      ...init,
+      headers: {
+        ...(init?.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+        ...(process.env.BACKEND_API_TOKEN
+          ? { Authorization: `Bearer ${process.env.BACKEND_API_TOKEN}` }
+          : {}),
+        ...(init?.headers ?? {}),
+      },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "fetch failed";
+    if (/fetch failed|ECONNREFUSED|ECONNRESET|ENOTFOUND/i.test(message)) {
+      throw new Error(
+        process.env.NODE_ENV === "development"
+          ? "Backend API is not reachable. Run `pnpm api:dev` in another terminal, or remove BACKEND_API_URL to use local fallbacks."
+          : "Backend API is not reachable. Check BACKEND_API_URL on the web deployment.",
+      );
+    }
+    throw error;
+  }
   const raw = await response.text();
   let data: Record<string, unknown> = {};
   if (raw) {

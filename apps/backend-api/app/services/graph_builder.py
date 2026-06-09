@@ -17,6 +17,7 @@ async def persist_candidate_extraction(
     theme_id: str | None,
     job: ResearchJob,
 ) -> dict:
+    source_url = str(source.url) if source.url else None
     chunk_rows = [
         {
             "source_id": source.id,
@@ -60,7 +61,7 @@ async def persist_candidate_extraction(
                 "source": {
                     "id": source.id,
                     "title": source.title,
-                    "url": source.url,
+                    "url": source_url,
                     "publisher": source.publisher,
                 },
             }
@@ -69,7 +70,7 @@ async def persist_candidate_extraction(
             {
                 "external_id": stable_external_id(
                     "candidate-person",
-                    f"{person.name}:{source.url or source.id}",
+                    f"{person.name}:{source_url or source.id}",
                 ),
                 "candidate_type": "person",
                 "name": person.name,
@@ -97,7 +98,7 @@ async def persist_candidate_extraction(
                 "source": {
                     "id": source.id,
                     "title": source.title,
-                    "url": source.url,
+                    "url": source_url,
                     "publisher": source.publisher,
                 },
             }
@@ -106,7 +107,7 @@ async def persist_candidate_extraction(
             {
                 "external_id": stable_external_id(
                     "candidate-company",
-                    f"{company.name}:{source.url or source.id}",
+                    f"{company.name}:{source_url or source.id}",
                 ),
                 "candidate_type": "company",
                 "name": company.name,
@@ -128,7 +129,7 @@ async def persist_candidate_extraction(
                         f"{relationship.from_type}:{relationship.from_name}:"
                         f"{relationship.relationship_type}:"
                         f"{relationship.to_type}:{relationship.to_name}:"
-                        f"{source.url or source.id}"
+                        f"{source_url or source.id}"
                     ),
                 ),
                 "candidate_type": "relationship",
@@ -160,7 +161,7 @@ async def persist_candidate_extraction(
                     (
                         f"{fact.subject_type}:{fact.subject_name}:"
                         f"{fact.fact_type}:{fact.fact_value}:"
-                        f"{source.url or source.id}"
+                        f"{source_url or source.id}"
                     ),
                 ),
                 "candidate_type": "fact",
@@ -179,7 +180,7 @@ async def persist_candidate_extraction(
                     "source": {
                         "id": source.id,
                         "title": source.title,
-                        "url": source.url,
+                        "url": source_url,
                         "publisher": source.publisher,
                     },
                     "review_gated": True,

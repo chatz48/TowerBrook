@@ -46,20 +46,32 @@ async def _ingest_validated_source(
     )
     chunks = chunk_text(source_text)
     vectors = embeddings.embed_many(chunks)
-    extraction = await extractor.extract(source_text, source.title, source.url, theme_id)
+    extraction = await extractor.extract(
+        source_text,
+        source.title,
+        str(source.url) if source.url else None,
+        theme_id,
+    )
     job = repo.create_job(
         ResearchJobRequest(
-            job_type="ingest_review",
+            job_type="ingest_source",
             theme_id=theme_id,
             query=source.title,
             metadata={"source_id": source.id, "review_gated": True},
         )
     )
     persisted = await persist_candidate_extraction(extraction, source, chunks, vectors, theme_id, job)
+    persisted_summary = {
+        **persisted,
+        "people_created": persisted.get("people_candidates", 0),
+        "companies_created": persisted.get("company_candidates", 0),
+        "relationships_created": persisted.get("relationship_candidates", 0),
+        "facts_created": persisted.get("fact_candidates", 0),
+    }
     return {
-        "source": source.model_dump(),
-        "extraction": extraction.model_dump(),
-        "persisted": persisted,
+        "source": source.model_dump(mode="json"),
+        "extraction": extraction.model_dump(mode="json"),
+        "persisted": persisted_summary,
         "mutation": repo.enabled,
         "review_gated": True,
     }
@@ -80,6 +92,14 @@ async def ingest_source(
         fetched = await keiro.fetch_content(url)
         source_text = fetched.get("content", "")
         title = title or fetched.get("title")
+        if not source_text.strip():
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    "Could not fetch readable content from the supplied URL. "
+                    "Paste the article text directly or try a different source link."
+                ),
+            )
     source_text = _validate_source_text(source_text)
 
     return await _ingest_validated_source(

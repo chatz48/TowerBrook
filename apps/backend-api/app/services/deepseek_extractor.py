@@ -7,6 +7,7 @@ import re
 from typing import Any
 
 import httpx
+from pydantic import ValidationError
 
 from app.config import get_settings
 from app.schemas.domain import (
@@ -94,6 +95,7 @@ class DeepSeekExtractor:
         objective: str | None = None,
         target_context: dict[str, Any] | None = None,
     ) -> ExtractionResult:
+        url = self._coerce_url(url)
         if not self.settings.deepseek_api_key:
             return self._heuristic_extract(text, title, url, theme_id)
 
@@ -114,7 +116,7 @@ class DeepSeekExtractor:
                         "model": self.settings.deepseek_model,
                         "messages": [
                             {"role": "system", "content": SYSTEM_PROMPT},
-                            {"role": "user", "content": json.dumps(prompt)},
+                            {"role": "user", "content": json.dumps(prompt, default=str)},
                         ],
                         "response_format": {"type": "json_object"},
                     },
@@ -126,19 +128,17 @@ class DeepSeekExtractor:
         if not raw or not raw.strip():
             return self._heuristic_extract(text, title, url, theme_id)
         try:
-            result = ExtractionResult.model_validate_json(raw)
+            parsed = json.loads(raw)
+            if not isinstance(parsed, dict):
+                parsed = {}
+            result = ExtractionResult.model_validate(
+                self._normalize_extraction_payload(parsed, title, url, theme_id)
+            )
+            result = self._ensure_grounded_facts(result, text, title, url, theme_id)
             return self._apply_target_fact_context(result, target_context)
-        except (ValueError, TypeError) as exc:
-            logger.warning("Primary extraction parse failed: %s", exc, extra={"raw_preview": raw[:200]})
-            try:
-                parsed = json.loads(raw)
-                result = ExtractionResult.model_validate(
-                    self._normalize_extraction_payload(parsed, title, url, theme_id)
-                )
-                return self._apply_target_fact_context(result, target_context)
-            except (ValueError, TypeError, json.JSONDecodeError) as exc2:
-                logger.warning("Fallback extraction parse also failed: %s", exc2)
-                return self._heuristic_extract(text, title, url, theme_id)
+        except (ValidationError, ValueError, TypeError, json.JSONDecodeError) as exc:
+            logger.warning("Normalized extraction parse failed: %s", exc, extra={"raw_preview": raw[:200]})
+            return self._heuristic_extract(text, title, url, theme_id)
 
     async def synthesize(self, instruction: str, context: dict[str, Any]) -> str:
         if not self.settings.deepseek_api_key:
@@ -255,13 +255,101 @@ class DeepSeekExtractor:
                 )
             )
 
-        return ExtractionResult(
+        result = ExtractionResult(
             people=people,
             companies=companies,
             relationships=relationships,
             facts=facts,
             citations=[Citation(title=title or "Uploaded source", url=url, evidence=evidence)] if evidence else [],
         )
+        return self._ensure_grounded_facts(result, text, title, url, theme_id)
+
+    def _ensure_grounded_facts(
+        self,
+        result: ExtractionResult,
+        text: str,
+        title: str | None,
+        url: str | None,
+        theme_id: str | None,
+    ) -> ExtractionResult:
+        if result.facts:
+            return result
+
+        evidence = text[:400].strip()
+        facts: list[ExtractedFact] = []
+        if theme_id and evidence:
+            facts.append(
+                ExtractedFact(
+                    subject_name=title or "source",
+                    subject_type="theme",
+                    fact_type="source_signal",
+                    fact_value=evidence,
+                    evidence_text=evidence,
+                    theme_id=theme_id,  # type: ignore[arg-type]
+                    confidence=0.45,
+                )
+            )
+
+        ranked_companies = sorted(result.companies, key=lambda company: company.confidence, reverse=True)
+        for company in ranked_companies[:12]:
+            company_evidence = (company.description or evidence or title or company.name).strip()
+            if not company_evidence:
+                continue
+            facts.append(
+                ExtractedFact(
+                    subject_name=company.name,
+                    subject_type="company",
+                    fact_type="company_mentioned",
+                    fact_value=company.name,
+                    evidence_text=company_evidence[:400],
+                    theme_id=theme_id,  # type: ignore[arg-type]
+                    confidence=max(company.confidence, 0.45),
+                )
+            )
+
+        for person in result.people[:6]:
+            person_evidence = (person.summary or evidence or title or person.name).strip()
+            if not person_evidence:
+                continue
+            facts.append(
+                ExtractedFact(
+                    subject_name=person.name,
+                    subject_type="person",
+                    fact_type="person_mentioned",
+                    fact_value=person.name,
+                    evidence_text=person_evidence[:400],
+                    theme_id=theme_id,  # type: ignore[arg-type]
+                    confidence=max(person.confidence, 0.45),
+                )
+            )
+
+        if not facts and (title or url):
+            facts.append(
+                ExtractedFact(
+                    subject_name=title or url or "source",
+                    subject_type="source",
+                    fact_type="source_reference",
+                    fact_value=title or url or "source",
+                    evidence_text=evidence or title or url or "Submitted source",
+                    theme_id=theme_id,  # type: ignore[arg-type]
+                    confidence=0.35,
+                )
+            )
+
+        if not facts:
+            return result
+
+        citations = list(result.citations)
+        if not citations and (title or url or evidence):
+            citations.append(
+                Citation(
+                    title=title or "Submitted source",
+                    url=url,
+                    evidence=evidence or title or url or "",
+                )
+            )
+
+        return result.model_copy(update={"facts": facts, "citations": citations})
 
     def _normalize_extraction_payload(
         self,
@@ -372,34 +460,51 @@ class DeepSeekExtractor:
     def _normalize_relationship(self, value: Any, theme_id: str | None) -> dict[str, Any] | None:
         if not isinstance(value, dict):
             return None
-        from_name = self._first_text(
+        from_name = self._entity_label(
             value,
             "from_name",
             "from",
             "from_entity",
+            "from_company",
+            "from_organization",
+            "buyer",
+            "acquirer",
+            "seller",
+            "investor",
+            "owner",
+            "advisor",
             "person",
             "source",
             "organization",
+            "party_a",
         )
-        to_name = self._first_text(
+        to_name = self._entity_label(
             value,
             "to_name",
             "to",
             "to_entity",
-            "company",
+            "to_company",
+            "to_organization",
             "target",
+            "target_company",
+            "acquired_company",
+            "acquiree",
+            "company",
             "deal",
+            "advisee",
+            "party_b",
         )
         if not from_name or not to_name:
             return None
         return {
             "from_name": from_name,
-            "from_type": self._entity_type(value.get("from_type"), fallback="person" if value.get("person") else "organization"),
+            "from_type": self._infer_relationship_entity_type(value, "from"),
             "to_name": to_name,
-            "to_type": self._entity_type(value.get("to_type"), fallback="company" if value.get("company") else "organization"),
+            "to_type": self._infer_relationship_entity_type(value, "to"),
             "relationship_type": self._first_text(value, "relationship_type", "type", "role", "relationship") or "related_to",
             "theme_id": value.get("theme_id") or theme_id,
-            "evidence_text": self._first_text(value, "evidence_text", "evidence", "description", "source") or f"{from_name} is related to {to_name}.",
+            "evidence_text": self._first_text(value, "evidence_text", "evidence", "description", "text", "snippet")
+            or f"{from_name} is related to {to_name}.",
             "confidence": self._confidence(value),
         }
 
@@ -428,22 +533,61 @@ class DeepSeekExtractor:
             return {"title": title or value, "url": value if value.startswith("http") else url, "evidence": title or value}
         if not isinstance(value, dict):
             return None
-        evidence = self._first_text(value, "evidence", "text", "quote", "snippet") or title
+        evidence = self._first_text(
+            value,
+            "evidence",
+            "text",
+            "quote",
+            "snippet",
+            "content",
+            "body",
+            "source_text",
+            "extracted_text",
+            "excerpt",
+        ) or title
+        citation_title = self._first_text(value, "title", "source_title", "name") or title or "Source"
         return {
             "source_id": self._first_text(value, "source_id"),
-            "title": self._first_text(value, "title", "source_title", "name") or title or "Source",
+            "title": citation_title,
             "url": self._first_text(value, "url", "source_url") or url,
-            "evidence": evidence or "Source cited by extraction.",
+            "evidence": evidence or citation_title or "Source cited by extraction.",
         }
 
     def _as_list(self, value: Any) -> list[Any]:
         return value if isinstance(value, list) else []
+
+    def _coerce_url(self, url: Any) -> str | None:
+        if url is None:
+            return None
+        value = str(url).strip()
+        return value or None
 
     def _first_text(self, data: dict[str, Any], *keys: str) -> str | None:
         for key in keys:
             value = data.get(key)
             if isinstance(value, str) and value.strip():
                 return value.strip()
+        return None
+
+    def _entity_label(self, data: dict[str, Any], *keys: str) -> str | None:
+        for key in keys:
+            value = data.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+            if isinstance(value, dict):
+                label = self._first_text(
+                    value,
+                    "name",
+                    "entity",
+                    "company",
+                    "organization",
+                    "person",
+                    "label",
+                    "value",
+                    "title",
+                )
+                if label:
+                    return label
         return None
 
     def _theme_ids(self, data: dict[str, Any], theme_id: str | None) -> list[str]:
@@ -464,6 +608,44 @@ class DeepSeekExtractor:
     def _entity_type(self, value: Any, fallback: str) -> str:
         allowed = {"person", "company", "organization", "deal", "event", "theme", "relationship"}
         return value if isinstance(value, str) and value in allowed else fallback
+
+    def _infer_relationship_entity_type(self, value: dict[str, Any], side: str) -> str:
+        explicit = value.get(f"{side}_type")
+        if isinstance(explicit, str):
+            normalized = explicit.strip().lower()
+            if normalized in {"person", "company", "organization", "deal", "event", "theme"}:
+                return normalized
+        if side == "from":
+            if any(
+                value.get(key)
+                for key in (
+                    "from_company",
+                    "from_organization",
+                    "buyer",
+                    "acquirer",
+                    "seller",
+                    "investor",
+                    "owner",
+                )
+            ):
+                return "company"
+            if value.get("advisor") or value.get("from_person") or value.get("person"):
+                return "person"
+            return "organization"
+        if any(
+            value.get(key)
+            for key in (
+                "to_company",
+                "to_organization",
+                "target_company",
+                "acquired_company",
+                "acquiree",
+                "target",
+                "company",
+            )
+        ):
+            return "company"
+        return "organization"
 
     def _apply_target_fact_context(
         self,

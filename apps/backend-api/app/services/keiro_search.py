@@ -1,14 +1,19 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 from functools import lru_cache
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import httpx
 
 from app.config import get_settings
+
+logger = logging.getLogger("towerbrook.keiro")
 
 
 class KeiroSearchService:
@@ -124,46 +129,153 @@ class KeiroSearchService:
         ]
 
     async def fetch_content(self, url: str) -> dict[str, Any]:
-        if not self.settings.keirolabs_api_key:
-            local = self._local_source_by_url(url)
-            if local:
-                return {
-                    "url": url,
-                    "title": local.get("title") or url,
-                    "publisher": local.get("publisher"),
-                    "content": local.get("content") or local.get("snippet") or "",
-                    "metadata": {"provider": "local-public-source-index", "source": local},
-                }
+        normalized_url = url.strip()
+        if not normalized_url:
             return {"url": url, "title": url, "content": ""}
-        payload = {
+
+        local = self._local_source_by_url(normalized_url)
+        if local:
+            return {
+                "url": normalized_url,
+                "title": local.get("title") or normalized_url,
+                "publisher": local.get("publisher"),
+                "content": local.get("content") or local.get("snippet") or "",
+                "metadata": {"provider": "local-public-source-index", "source": local},
+            }
+
+        if self.settings.keirolabs_api_key:
+            fetched = await self._fetch_content_via_keiro(normalized_url)
+            if fetched.get("content"):
+                return fetched
+
+        direct = await self._fetch_content_direct(normalized_url)
+        if direct.get("content"):
+            return direct
+
+        return {
+            "url": normalized_url,
+            "title": normalized_url,
+            "content": "",
+            "metadata": {"provider": "unavailable", "url": normalized_url},
+        }
+
+    async def _fetch_content_via_keiro(self, url: str) -> dict[str, Any]:
+        base_url = self.settings.keirolabs_base_url.rstrip("/")
+        headers = {"Authorization": f"Bearer {self.settings.keirolabs_api_key}"}
+        v2_payload = {"query": url, "maxResults": 1, "mode": "deep"}
+        legacy_payload = {
             "apiKey": self.settings.keirolabs_api_key,
             "query": url,
             "maxResults": 1,
             "mode": "deep",
         }
         async with httpx.AsyncClient(timeout=45) as client:
-            response = await client.post(
-                f"{self.settings.keirolabs_base_url.rstrip('/')}/api/search",
-                json=payload,
-            )
-            response.raise_for_status()
-            data = response.json()
-        extracted = data.get("extracted_content") or []
-        results = data.get("search_results") or data.get("results") or []
-        first = extracted[0] if extracted else (results[0] if results else data)
+            for endpoint, payload in (
+                (f"{base_url}/api/v2/search/content", v2_payload),
+                (f"{base_url}/api/search", legacy_payload),
+            ):
+                try:
+                    response = await client.post(endpoint, json=payload, headers=headers)
+                    response.raise_for_status()
+                except httpx.HTTPError as exc:
+                    logger.warning("Keiro fetch failed for %s via %s: %s", url, endpoint, exc)
+                    continue
+                data = response.json()
+                first = self._first_keiro_content_item(data)
+                content = self._content_from_keiro_item(first)
+                if content:
+                    return {
+                        "url": url,
+                        "title": first.get("title") or url,
+                        "publisher": first.get("publisher") or first.get("domain"),
+                        "content": content,
+                        "metadata": {"provider": "keirolabs", "endpoint": endpoint, "source": first},
+                    }
+        return {"url": url, "title": url, "content": "", "metadata": {"provider": "keirolabs"}}
+
+    async def _fetch_content_direct(self, url: str) -> dict[str, Any]:
+        if not urlparse(url).scheme:
+            return {"url": url, "title": url, "content": ""}
+        try:
+            async with httpx.AsyncClient(
+                timeout=30,
+                follow_redirects=True,
+                headers={"User-Agent": "TowerBrook/1.0 (+https://towerbrook.local)"},
+            ) as client:
+                response = await client.get(url)
+                response.raise_for_status()
+        except httpx.HTTPError as exc:
+            logger.warning("Direct URL fetch failed for %s: %s", url, exc)
+            return {"url": url, "title": url, "content": ""}
+
+        content = self._extract_html_text(response.text)
+        title = self._extract_html_title(response.text) or url
+        publisher = urlparse(url).netloc or None
         return {
             "url": url,
-            "title": first.get("title") or url,
-            "publisher": first.get("publisher") or first.get("domain"),
-            "content": (
-                first.get("content")
-                or first.get("markdown_content")
-                or first.get("text")
-                or first.get("snippet")
-                or ""
-            ),
-            "metadata": first,
+            "title": title,
+            "publisher": publisher,
+            "content": content,
+            "metadata": {"provider": "direct-http", "status_code": response.status_code},
         }
+
+    def _first_keiro_content_item(self, data: Any) -> dict[str, Any]:
+        if not isinstance(data, dict):
+            return {}
+        extracted = data.get("extracted_content") or []
+        results = data.get("results") or data.get("search_results") or []
+        if extracted and isinstance(extracted[0], dict):
+            return extracted[0]
+        if results and isinstance(results[0], dict):
+            return results[0]
+        return data
+
+    def _content_from_keiro_item(self, item: dict[str, Any]) -> str:
+        if not item:
+            return ""
+        return (
+            item.get("content")
+            or item.get("markdown_content")
+            or item.get("text")
+            or item.get("snippet")
+            or ""
+        ).strip()
+
+    @staticmethod
+    def _extract_html_title(html: str) -> str | None:
+        match = re.search(r"<title[^>]*>(.*?)</title>", html, flags=re.IGNORECASE | re.DOTALL)
+        if not match:
+            return None
+        return re.sub(r"\s+", " ", match.group(1)).strip() or None
+
+    @staticmethod
+    def _extract_html_text(html: str) -> str:
+        class _TextExtractor(HTMLParser):
+            def __init__(self) -> None:
+                super().__init__()
+                self.parts: list[str] = []
+                self._skip_depth = 0
+
+            def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+                if tag in {"script", "style", "noscript"}:
+                    self._skip_depth += 1
+
+            def handle_endtag(self, tag: str) -> None:
+                if tag in {"script", "style", "noscript"} and self._skip_depth:
+                    self._skip_depth -= 1
+
+            def handle_data(self, data: str) -> None:
+                if self._skip_depth:
+                    return
+                text = data.strip()
+                if text:
+                    self.parts.append(text)
+
+        parser = _TextExtractor()
+        parser.feed(html)
+        text = "\n".join(parser.parts)
+        text = re.sub(r"\n{3,}", "\n\n", text)
+        return text.strip()
 
     async def linkedin_links(self, name: str, company: str | None, role: str | None) -> list[dict[str, Any]]:
         query = " ".join(part for part in [name, company, role, "LinkedIn profile"] if part)

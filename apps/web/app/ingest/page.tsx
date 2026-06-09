@@ -299,11 +299,12 @@ export default function IngestPage() {
 
             <section className="ee-panel rounded-lg p-5">
               <div className="ee-label text-ink">Extracted graph objects</div>
-              <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
                 {[
                   ["People", result.extraction?.people?.length ?? 0],
                   ["Companies", result.extraction?.companies?.length ?? 0],
                   ["Relationships", result.extraction?.relationships?.length ?? 0],
+                  ["Facts", result.extraction?.facts?.length ?? 0],
                   ["Citations", result.extraction?.citations?.length ?? 0],
                 ].map(([label, value]) => (
                   <div key={String(label)} className="rounded-md border border-line bg-paper p-4">
