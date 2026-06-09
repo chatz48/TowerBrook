@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { ConfidenceBars } from "@/app/components/ui";
 import { getTheme } from "@/lib/themes";
@@ -27,23 +27,68 @@ interface DraftDeal {
   investmentRelevance: string;
 }
 
+interface ExtractedPerson {
+  name: string;
+  headline?: string | null;
+  current_organization?: string | null;
+  expert_type?: string;
+  summary?: string | null;
+  confidence?: number;
+}
+
+interface ExtractedCompany {
+  name: string;
+  category?: string;
+  description?: string | null;
+  why_interesting?: string | null;
+  confidence?: number;
+}
+
+interface ExtractedRelationship {
+  from_name: string;
+  from_type: string;
+  relationship_type: string;
+  to_name: string;
+  to_type: string;
+  evidence_text?: string;
+  confidence?: number;
+}
+
+interface ExtractedFact {
+  subject_name: string;
+  subject_type: string;
+  fact_type: string;
+  fact_value: string;
+  evidence_text?: string;
+  confidence?: number;
+}
+
+interface ExtractedCitation {
+  title?: string;
+  url?: string;
+  evidence?: string;
+}
+
 interface IngestResult {
   deal?: DraftDeal;
   facts?: DraftFact[];
   reviewCandidates?: DraftFact[];
   relationshipCandidates?: string[];
   note?: string;
+  review_gated?: boolean;
   source?: {
     title: string;
     url?: string;
     source_type?: string;
+    raw_text?: string | null;
+    publisher?: string | null;
   };
   extraction?: {
-    people?: unknown[];
-    companies?: unknown[];
-    relationships?: unknown[];
-    facts?: unknown[];
-    citations?: unknown[];
+    people?: ExtractedPerson[];
+    companies?: ExtractedCompany[];
+    relationships?: ExtractedRelationship[];
+    facts?: ExtractedFact[];
+    citations?: ExtractedCitation[];
   };
   persisted?: {
     people_created?: number;
@@ -53,6 +98,8 @@ interface IngestResult {
     chunks_created?: number;
   };
 }
+
+const INITIAL_VISIBLE = 5;
 
 const SAMPLE_TEXT =
   "Badger Meter acquired SmartCover Systems from XPV Water Partners for $185m in 2025. Houlihan Lokey advised SmartCover Systems on the transaction.";
@@ -272,53 +319,282 @@ export default function IngestPage() {
             </section>
           </div>
         ) : (
-          <div className="space-y-5">
-            <section className="ee-panel rounded-lg p-5">
-              <div className="ee-label text-ink">Graph ingestion result</div>
-              <h2 className="mt-2 text-[22px] font-semibold">
-                {result.source?.title ?? "Submitted source"}
-              </h2>
-              {result.source?.url ? (
-                <a
-                  href={result.source.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ee-link mt-2 inline-flex text-[13px]"
-                >
-                  {result.source.url}
-                </a>
-              ) : null}
-              <div className="mt-5 grid gap-3 md:grid-cols-5">
-                <DraftMetric label="People" value={String(result.persisted?.people_created ?? 0)} />
-                <DraftMetric label="Companies" value={String(result.persisted?.companies_created ?? 0)} />
-                <DraftMetric label="Relationships" value={String(result.persisted?.relationships_created ?? 0)} />
-                <DraftMetric label="Facts" value={String(result.persisted?.facts_created ?? 0)} />
-                <DraftMetric label="Chunks" value={String(result.persisted?.chunks_created ?? 0)} />
-              </div>
-            </section>
-
-            <section className="ee-panel rounded-lg p-5">
-              <div className="ee-label text-ink">Extracted graph objects</div>
-              <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-                {[
-                  ["People", result.extraction?.people?.length ?? 0],
-                  ["Companies", result.extraction?.companies?.length ?? 0],
-                  ["Relationships", result.extraction?.relationships?.length ?? 0],
-                  ["Facts", result.extraction?.facts?.length ?? 0],
-                  ["Citations", result.extraction?.citations?.length ?? 0],
-                ].map(([label, value]) => (
-                  <div key={String(label)} className="rounded-md border border-line bg-paper p-4">
-                    <div className="text-[11px] uppercase tracking-[0.12em] text-ink-faint">{label}</div>
-                    <div className="mt-2 text-[22px] font-semibold tabular-nums">{value}</div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          </div>
+          <GraphIngestionResult result={result} />
         )}
       </main>
     </div>
   );
+}
+
+function GraphIngestionResult({ result }: { result: IngestResult }) {
+  const people = result.extraction?.people ?? [];
+  const companies = [...(result.extraction?.companies ?? [])].sort(
+    (left, right) => (right.confidence ?? 0) - (left.confidence ?? 0),
+  );
+  const relationships = [...(result.extraction?.relationships ?? [])].sort(
+    (left, right) => (right.confidence ?? 0) - (left.confidence ?? 0),
+  );
+  const facts = [...(result.extraction?.facts ?? [])]
+    .filter((fact) => !["source_signal", "source_reference"].includes(fact.fact_type))
+    .sort((left, right) => (right.confidence ?? 0) - (left.confidence ?? 0));
+  const summary = buildSourceSummary(result);
+
+  return (
+    <div className="space-y-5">
+      <section className="ee-panel rounded-lg p-5">
+        <div className="ee-label text-ink">Graph ingestion result</div>
+        <h2 className="mt-2 text-[22px] font-semibold">{result.source?.title ?? "Submitted source"}</h2>
+        {result.source?.url ? (
+          <a
+            href={result.source.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ee-link mt-2 inline-flex text-[13px]"
+          >
+            {result.source.url}
+          </a>
+        ) : null}
+        {result.source?.publisher ? (
+          <p className="mt-2 text-[12px] text-ink-faint">Publisher: {result.source.publisher}</p>
+        ) : null}
+        <div className="mt-5 grid gap-3 md:grid-cols-5">
+          <DraftMetric label="People" value={String(result.persisted?.people_created ?? people.length)} />
+          <DraftMetric label="Companies" value={String(result.persisted?.companies_created ?? companies.length)} />
+          <DraftMetric
+            label="Relationships"
+            value={String(result.persisted?.relationships_created ?? relationships.length)}
+          />
+          <DraftMetric label="Facts" value={String(result.persisted?.facts_created ?? facts.length)} />
+          <DraftMetric label="Chunks" value={String(result.persisted?.chunks_created ?? 0)} />
+        </div>
+      </section>
+
+      <section className="ee-panel rounded-lg p-5">
+        <div className="ee-label text-ink">Source summary</div>
+        <p className="mt-3 max-w-4xl text-[13px] leading-relaxed text-ink-soft">{summary}</p>
+        {result.review_gated ? (
+          <p className="mt-3 rounded-md border border-line bg-paper px-3 py-2 text-[12px] text-ink-soft">
+            Candidates are review-gated. Approve extracted people, companies, relationships and facts before they
+            enter the live graph.
+          </p>
+        ) : null}
+      </section>
+
+      <ExpandableSection
+        title="Facts uncovered"
+        count={facts.length}
+        items={facts}
+        emptyMessage="No discrete facts were extracted from this source."
+        renderItem={(fact) => (
+          <article className="rounded-md border border-line bg-paper px-3 py-3">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <div className="text-[13px] font-semibold text-ink">
+                  {formatLabel(fact.fact_type)} · {fact.subject_name}
+                </div>
+                <div className="mt-1 text-[12px] text-ink-soft">{fact.fact_value}</div>
+              </div>
+              <ConfidencePill value={fact.confidence ?? 0.5} />
+            </div>
+            {fact.evidence_text ? (
+              <p className="mt-2 text-[12px] leading-relaxed text-ink-faint">{truncateText(fact.evidence_text, 220)}</p>
+            ) : null}
+          </article>
+        )}
+      />
+
+      <ExpandableSection
+        title="Companies uncovered"
+        count={companies.length}
+        items={companies}
+        emptyMessage="No companies were extracted from this source."
+        renderItem={(company) => (
+          <article className="rounded-md border border-line bg-paper px-3 py-3">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <div className="text-[13px] font-semibold text-ink">{company.name}</div>
+                <div className="mt-1 text-[11px] uppercase tracking-[0.08em] text-ink-faint">
+                  {formatLabel(company.category ?? "company")}
+                </div>
+              </div>
+              <ConfidencePill value={company.confidence ?? 0.5} />
+            </div>
+            {company.description || company.why_interesting ? (
+              <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">
+                {truncateText(company.description ?? company.why_interesting ?? "", 240)}
+              </p>
+            ) : null}
+          </article>
+        )}
+      />
+
+      <ExpandableSection
+        title="Relationships uncovered"
+        count={relationships.length}
+        items={relationships}
+        emptyMessage="No relationships were extracted from this source."
+        renderItem={(relationship) => (
+          <article className="rounded-md border border-line bg-paper px-3 py-3">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div className="text-[13px] leading-relaxed text-ink">
+                <span className="font-semibold">{relationship.from_name}</span>
+                <span className="mx-1 text-ink-faint">({relationship.from_type})</span>
+                <span className="font-medium text-accent">{formatLabel(relationship.relationship_type)}</span>
+                <span className="mx-1 text-ink-faint">→</span>
+                <span className="font-semibold">{relationship.to_name}</span>
+                <span className="text-ink-faint"> ({relationship.to_type})</span>
+              </div>
+              <ConfidencePill value={relationship.confidence ?? 0.5} />
+            </div>
+            {relationship.evidence_text ? (
+              <p className="mt-2 text-[12px] leading-relaxed text-ink-faint">
+                {truncateText(relationship.evidence_text, 220)}
+              </p>
+            ) : null}
+          </article>
+        )}
+      />
+
+      {people.length ? (
+        <ExpandableSection
+          title="People uncovered"
+          count={people.length}
+          items={people}
+          emptyMessage="No people were extracted from this source."
+          renderItem={(person) => (
+            <article className="rounded-md border border-line bg-paper px-3 py-3">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <div className="text-[13px] font-semibold text-ink">{person.name}</div>
+                  <div className="mt-1 text-[12px] text-ink-soft">
+                    {[person.current_organization, formatLabel(person.expert_type ?? "expert")]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </div>
+                </div>
+                <ConfidencePill value={person.confidence ?? 0.5} />
+              </div>
+              {person.summary ? (
+                <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">{truncateText(person.summary, 240)}</p>
+              ) : null}
+            </article>
+          )}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function ExpandableSection<T>({
+  title,
+  count,
+  items,
+  renderItem,
+  emptyMessage,
+  initialCount = INITIAL_VISIBLE,
+}: {
+  title: string;
+  count: number;
+  items: T[];
+  renderItem: (item: T, index: number) => ReactNode;
+  emptyMessage: string;
+  initialCount?: number;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const visibleItems = expanded ? items : items.slice(0, initialCount);
+  const hiddenCount = Math.max(0, items.length - initialCount);
+
+  return (
+    <section className="ee-panel rounded-lg p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="ee-label text-ink">{title}</div>
+          <p className="mt-1 text-[12px] text-ink-faint">
+            {count} extracted {count === 1 ? "item" : "items"}
+            {hiddenCount && !expanded ? ` · showing ${Math.min(initialCount, items.length)}` : ""}
+          </p>
+        </div>
+        {hiddenCount ? (
+          <button
+            type="button"
+            onClick={() => setExpanded((value) => !value)}
+            className="ee-button ee-button-secondary min-h-8 px-3 text-[12px]"
+          >
+            {expanded ? "Show less" : `Show ${hiddenCount} more`}
+          </button>
+        ) : null}
+      </div>
+
+      <div className="mt-4 space-y-2">
+        {visibleItems.length
+          ? visibleItems.map((item, index) => <div key={`${title}-${index}`}>{renderItem(item, index)}</div>)
+          : (
+            <p className="rounded-md border border-line bg-paper px-3 py-3 text-[12px] text-ink-soft">
+              {emptyMessage}
+            </p>
+          )}
+        {!expanded && hiddenCount ? (
+          <p className="px-1 text-[12px] text-ink-faint">… and {hiddenCount} more</p>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+function ConfidencePill({ value }: { value: number }) {
+  return (
+    <div className="shrink-0 rounded-full border border-line bg-white px-2.5 py-1 text-[11px] font-semibold tabular-nums text-ink">
+      {(value * 100).toFixed(0)}%
+    </div>
+  );
+}
+
+function buildSourceSummary(result: IngestResult): string {
+  const facts = result.extraction?.facts ?? [];
+  const sourceSignal = facts.find((fact) => fact.fact_type === "source_signal");
+  if (sourceSignal?.fact_value) {
+    return truncateText(sourceSignal.fact_value, 420);
+  }
+
+  const citation = result.extraction?.citations?.[0];
+  if (citation?.evidence) {
+    return truncateText(citation.evidence, 420);
+  }
+
+  if (result.source?.raw_text?.trim()) {
+    return truncateText(result.source.raw_text.trim(), 420);
+  }
+
+  const companies = result.extraction?.companies ?? [];
+  const relationships = result.extraction?.relationships ?? [];
+  if (companies.length || relationships.length) {
+    const companyNames = companies.slice(0, 4).map((company) => company.name).join(", ");
+    const relationshipSample = relationships[0];
+    const relationshipHint = relationshipSample
+      ? `${relationshipSample.from_name} ${formatLabel(relationshipSample.relationship_type)} ${relationshipSample.to_name}`
+      : null;
+    return [
+      `Source parsed into ${companies.length} companies, ${relationships.length} relationships, and ${facts.length} facts.`,
+      companyNames ? `Notable entities include ${companyNames}${companies.length > 4 ? ", and others" : ""}.` : null,
+      relationshipHint ? `Example edge: ${relationshipHint}.` : null,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  return "Source ingested and parsed. Review extracted entities below before approving graph candidates.";
+}
+
+function formatLabel(value: string): string {
+  return value.replaceAll("_", " ").replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+function truncateText(value: string, maxLength: number): string {
+  const trimmed = value.trim();
+  if (trimmed.length <= maxLength) {
+    return trimmed;
+  }
+  return `${trimmed.slice(0, maxLength - 1).trimEnd()}…`;
 }
 
 function ReviewChecklist({ facts }: { facts: DraftFact[] }) {
