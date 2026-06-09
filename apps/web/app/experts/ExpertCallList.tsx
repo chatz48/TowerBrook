@@ -132,29 +132,30 @@ export default function ExpertCallList({
   );
 
   function updateExpert(expertId: string, patch: Partial<typeof DEFAULT_OUTREACH_STATE>) {
+    let next: OutreachPlanState | undefined;
     setPlanState((current) => {
-      const key = outreachItemKey(expertId);
-      const next = {
+      next = {
         ...current,
-        [key]: {
+        [outreachItemKey(expertId)]: {
           ...outreachRowState(current, expertId),
           ...patch,
         },
       };
-      writeOutreachState(storageKey, next);
-
-      const row = rows.find((item) => item.expert.id === expertId);
-      if (row && basketIds.has(expertId) && (patch.note !== undefined || patch.objective !== undefined)) {
-        updateWorkspaceItem(
-          { id: expertId, kind: "call" },
-          {
-            note: effectiveCallObjective(next, expertId, row.callObjective),
-          },
-        );
-      }
-
       return next;
     });
+
+    if (!next) return;
+    writeOutreachState(storageKey, next);
+
+    const row = rows.find((item) => item.expert.id === expertId);
+    if (row && basketIds.has(expertId) && (patch.note !== undefined || patch.objective !== undefined)) {
+      updateWorkspaceItem(
+        { id: expertId, kind: "call" },
+        {
+          note: effectiveCallObjective(next, expertId, row.callObjective),
+        },
+      );
+    }
   }
 
   function resetPlan() {

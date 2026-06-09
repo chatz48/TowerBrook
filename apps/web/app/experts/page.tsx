@@ -5,7 +5,8 @@ import { specialtiesForTheme, THEME_BY_ID } from "@/lib/themes";
 import { isThemeFocus, matchesThemeFocus, type ThemeFocus } from "@/lib/theme-focus";
 import { getPageScope } from "@/lib/page-scope";
 import { filterTowerBrookEmployees } from "@/lib/employee-scope";
-import ExpertFilters, { EXPERT_FILTER_TYPES } from "./ExpertFilters";
+import ExpertFilters from "./ExpertFilters";
+import { isExpertFilterType } from "@/lib/experts-url";
 import { expertReadiness, matchesActionableReadiness } from "@/lib/investment-readiness";
 import { callObjective, expertRoleDisplay } from "@/lib/expert-copy";
 import { outreachStorageKey } from "@/lib/outreach-plan";
@@ -30,10 +31,7 @@ export default async function ExpertsPage({
   const selectedTheme = singleParam(params.theme);
   const rawSelectedType = singleParam(params.type) ?? "all";
   const selectedType =
-    rawSelectedType === "all" ||
-    EXPERT_FILTER_TYPES.includes(rawSelectedType as (typeof EXPERT_FILTER_TYPES)[number])
-      ? rawSelectedType
-      : "all";
+    rawSelectedType === "all" || isExpertFilterType(rawSelectedType) ? rawSelectedType : "all";
   const selectedReadiness = singleParam(params.readiness) ?? "all";
   const query = (singleParam(params.q) ?? "").trim().toLowerCase();
   const activeTheme: ThemeFocus = isThemeFocus(selectedTheme) ? selectedTheme : themeFocus;

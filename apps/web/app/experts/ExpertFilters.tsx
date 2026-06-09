@@ -4,19 +4,9 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { EXPERT_TYPE_LABEL } from "@/lib/labels";
-import { expertsFilterHref } from "@/lib/experts-url";
+import { EXPERT_FILTER_TYPES, expertsFilterHref } from "@/lib/experts-url";
 import { specialtiesForTheme, THEMES } from "@/lib/themes";
-import type { ExpertType, ThemeId } from "@/lib/types";
-
-export const EXPERT_FILTER_TYPES: ExpertType[] = [
-  "ex-founder",
-  "operator",
-  "advisor",
-  "banker",
-  "lawyer",
-  "investor",
-  "technical-dd",
-];
+import type { ThemeId } from "@/lib/types";
 
 const SEARCH_DEBOUNCE_MS = 300;
 

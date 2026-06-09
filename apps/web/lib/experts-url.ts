@@ -1,3 +1,20 @@
+import type { ExpertType } from "./types";
+
+/** Expert types exposed in call-list filters — shared by server page and client filters. */
+export const EXPERT_FILTER_TYPES: ExpertType[] = [
+  "ex-founder",
+  "operator",
+  "advisor",
+  "banker",
+  "lawyer",
+  "investor",
+  "technical-dd",
+];
+
+export function isExpertFilterType(value: string): value is ExpertType {
+  return (EXPERT_FILTER_TYPES as readonly string[]).includes(value);
+}
+
 export type ExpertsFilterParams = {
   theme?: string;
   specialty?: string;

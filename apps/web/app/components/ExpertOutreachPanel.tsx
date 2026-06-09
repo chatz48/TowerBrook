@@ -45,23 +45,26 @@ export default function ExpertOutreachPanel({
   }, [storageKey]);
 
   function update(patch: Partial<typeof DEFAULT_OUTREACH_STATE>) {
+    let next: OutreachPlanState | undefined;
     setPlanState((previous) => {
-      const next = {
+      next = {
         ...previous,
         [outreachItemKey(expertId)]: {
           ...outreachRowState(previous, expertId),
           ...patch,
         },
       };
-      writeOutreachState(storageKey, next);
-      if (inBasket && (patch.note !== undefined || patch.objective !== undefined)) {
-        updateWorkspaceItem(
-          { id: expertId, kind: "call" },
-          { note: effectiveCallObjective(next, expertId, defaultObjective) },
-        );
-      }
       return next;
     });
+
+    if (!next) return;
+    writeOutreachState(storageKey, next);
+    if (inBasket && (patch.note !== undefined || patch.objective !== undefined)) {
+      updateWorkspaceItem(
+        { id: expertId, kind: "call" },
+        { note: effectiveCallObjective(next, expertId, defaultObjective) },
+      );
+    }
   }
 
   return (

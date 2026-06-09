@@ -76,7 +76,10 @@ export const OUTREACH_EVENT = "towerbrook-outreach-updated";
 
 export function writeOutreachState(storageKey: string, state: OutreachPlanState) {
   window.localStorage.setItem(storageKey, JSON.stringify(state));
-  window.dispatchEvent(new CustomEvent(OUTREACH_EVENT, { detail: { storageKey } }));
+  // Defer so subscribers do not call setState while a React updater is still running.
+  queueMicrotask(() => {
+    window.dispatchEvent(new CustomEvent(OUTREACH_EVENT, { detail: { storageKey } }));
+  });
 }
 
 export function subscribeOutreach(storageKey: string, onChange: () => void) {
