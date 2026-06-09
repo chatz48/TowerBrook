@@ -12,6 +12,37 @@ export function hasBackendApi() {
   return Boolean(resolveBackendApiUrl());
 }
 
+function formatBackendApiError(data: Record<string, unknown>, status: number): string {
+  const detail = data.error ?? data.detail;
+  if (typeof detail === "string" && detail.trim()) {
+    if (/^internal server error$/i.test(detail.trim())) {
+      return "Backend request failed. Check backend API logs for missing DeepSeek, Supabase, or embedding configuration.";
+    }
+    return detail;
+  }
+  if (Array.isArray(detail)) {
+    const messages = detail
+      .map((item) =>
+        typeof item === "object" && item !== null && "msg" in item
+          ? String((item as { msg?: unknown }).msg ?? "")
+          : "",
+      )
+      .filter(Boolean);
+    if (messages.length) return messages.join("; ");
+  }
+  if (typeof detail === "object" && detail !== null && "message" in detail) {
+    const message = String((detail as { message?: unknown }).message ?? "").trim();
+    if (message) return message;
+  }
+  if (status === 401) {
+    return "Backend API rejected the request. Check BACKEND_API_TOKEN matches the backend deployment.";
+  }
+  if (status === 503) {
+    return "Backend persistence is not configured. Check Supabase and model secrets on the backend API deployment.";
+  }
+  return `Backend API failed: ${status}`;
+}
+
 export async function callBackendApi<T>(
   path: string,
   init?: RequestInit,
@@ -43,13 +74,7 @@ export async function callBackendApi<T>(
     }
   }
   if (!response.ok) {
-    const detail = data.error ?? data.detail;
-    const message =
-      typeof detail === "string"
-        ? detail
-        : typeof detail === "object" && detail !== null && "message" in detail
-          ? String((detail as { message?: unknown }).message ?? response.status)
-          : `Backend API failed: ${response.status}`;
+    const message = formatBackendApiError(data, response.status);
     throw new Error(message);
   }
   return data as T;

@@ -1,16 +1,27 @@
 import { extractDealWithModel } from "@/lib/deal-ai";
 import { hasDealDatabase, persistDealIngestion } from "@/lib/deal-db";
 import { runDealEnrichment } from "@/lib/deal-enrichment";
-import { callBackendApi, hasBackendApi } from "@/lib/backend-api";
+import { callBackendApi } from "@/lib/backend-api";
 import { hasModel } from "@/lib/llm";
+import {
+  hasLocalDealDatabase,
+  persistenceUnavailableMessage,
+  shouldUseBackendPersistence,
+} from "@/lib/persistence-backend";
 
 const MAX_INGEST_TEXT_CHARS = 50_000;
 
 export async function POST(request: Request) {
   try {
-    if (hasBackendApi()) {
-      const graphResult = await forwardToIntelligenceApi(request.clone());
-      if (graphResult) return Response.json(graphResult);
+    if (shouldUseBackendPersistence()) {
+      const graphResult = await forwardToIntelligenceApi(request);
+      if (!graphResult) {
+        return Response.json(
+          { error: persistenceUnavailableMessage("Graph ingestion") },
+          { status: 503 },
+        );
+      }
+      return Response.json(graphResult);
     }
 
     const body = await readIngestRequest(request);
@@ -37,12 +48,11 @@ export async function POST(request: Request) {
       url: body.url,
     });
 
-    if (!hasDealDatabase()) {
+    if (!hasLocalDealDatabase()) {
       return Response.json({
         ...extraction,
         mutation: false,
-        note:
-          "Draft extraction only. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to persist into the deal intelligence database.",
+        note: `${persistenceUnavailableMessage("Graph ingestion")} Draft extraction shown below.`,
       });
     }
 
@@ -76,9 +86,17 @@ async function forwardToIntelligenceApi(request: Request) {
   const contentType = request.headers.get("content-type") ?? "";
   if (contentType.includes("multipart/form-data")) {
     const form = await request.formData();
+    const backendForm = new FormData();
+    for (const [key, value] of form.entries()) {
+      if (key === "themeId") {
+        backendForm.set("theme_id", value);
+        continue;
+      }
+      backendForm.set(key, value);
+    }
     return callBackendApi("/ingest/source", {
       method: "POST",
-      body: form,
+      body: backendForm,
     });
   }
   const body = await request.json();

@@ -6,7 +6,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import chat, discovery, ingest, jobs, linkedin, reports, search
+from app.api import chat, deals, discovery, ingest, jobs, linkedin, reports, search
 from app.api import embeddings as embeddings_api
 from app.config import get_settings
 from app.repositories.supabase_repo import repo
@@ -35,6 +35,7 @@ app.add_middleware(
 app.include_router(chat.router)
 app.include_router(embeddings_api.router)
 app.include_router(discovery.router)
+app.include_router(deals.router)
 app.include_router(ingest.router)
 app.include_router(jobs.router)
 app.include_router(linkedin.router)

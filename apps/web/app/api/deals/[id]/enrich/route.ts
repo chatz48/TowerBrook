@@ -1,19 +1,38 @@
+import { callBackendApi } from "@/lib/backend-api";
 import { runDealEnrichment } from "@/lib/deal-enrichment";
-import { hasDealDatabase } from "@/lib/deal-db";
+import {
+  hasLocalDealDatabase,
+  persistenceUnavailableMessage,
+  shouldUseBackendPersistence,
+} from "@/lib/persistence-backend";
 
 export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    if (!hasDealDatabase()) {
+    const { id } = await params;
+
+    if (shouldUseBackendPersistence()) {
+      const result = await callBackendApi<Record<string, unknown>>(`/deals/${id}/enrich`, {
+        method: "POST",
+      });
+      if (!result) {
+        return Response.json(
+          { error: persistenceUnavailableMessage("Deal enrichment") },
+          { status: 503 },
+        );
+      }
+      return Response.json(result);
+    }
+
+    if (!hasLocalDealDatabase()) {
       return Response.json(
-        { error: "Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY before enrichment." },
+        { error: persistenceUnavailableMessage("Deal enrichment") },
         { status: 503 },
       );
     }
 
-    const { id } = await params;
     const result = await runDealEnrichment(id);
     return Response.json(result);
   } catch (error) {
