@@ -18,6 +18,7 @@ const TOOLS_ITEMS = [
   { href: "/deals", label: "Deal evidence", match: "/deals" },
   { href: "/sources", label: "Sources", match: "/sources" },
   { href: "/ingest", label: "Add source text", match: "/ingest" },
+  { href: "/admin/traces", label: "Trace metrics", match: "/admin/traces" },
 ];
 
 export default function AppShellNav({ mobile = false }: { mobile?: boolean }) {
