@@ -131,9 +131,8 @@ class DeepSeekExtractor:
             parsed = json.loads(raw)
             if not isinstance(parsed, dict):
                 parsed = {}
-            result = ExtractionResult.model_validate(
-                self._normalize_extraction_payload(parsed, title, url, theme_id)
-            )
+            normalized = self._normalize_extraction_payload(parsed, title, url, theme_id)
+            result = self._build_extraction_result(normalized)
             result = self._ensure_grounded_facts(result, text, title, url, theme_id)
             return self._apply_target_fact_context(result, target_context)
         except (ValidationError, ValueError, TypeError, json.JSONDecodeError) as exc:
@@ -264,6 +263,47 @@ class DeepSeekExtractor:
         )
         return self._ensure_grounded_facts(result, text, title, url, theme_id)
 
+    def _build_extraction_result(self, payload: dict[str, Any]) -> ExtractionResult:
+        people: list[ExtractedPerson] = []
+        companies: list[ExtractedCompany] = []
+        relationships: list[ExtractedRelationship] = []
+        facts: list[ExtractedFact] = []
+        citations: list[Citation] = []
+
+        for item in self._as_list(payload.get("people")):
+            try:
+                people.append(ExtractedPerson.model_validate(item))
+            except ValidationError:
+                continue
+        for item in self._as_list(payload.get("companies")):
+            try:
+                companies.append(ExtractedCompany.model_validate(item))
+            except ValidationError:
+                continue
+        for item in self._as_list(payload.get("relationships")):
+            try:
+                relationships.append(ExtractedRelationship.model_validate(item))
+            except ValidationError:
+                continue
+        for item in self._as_list(payload.get("facts")):
+            try:
+                facts.append(ExtractedFact.model_validate(item))
+            except ValidationError:
+                continue
+        for item in self._as_list(payload.get("citations")):
+            try:
+                citations.append(Citation.model_validate(item))
+            except ValidationError:
+                continue
+
+        return ExtractionResult(
+            people=people,
+            companies=companies,
+            relationships=relationships,
+            facts=facts,
+            citations=citations,
+        )
+
     def _ensure_grounded_facts(
         self,
         result: ExtractionResult,
@@ -272,7 +312,8 @@ class DeepSeekExtractor:
         url: str | None,
         theme_id: str | None,
     ) -> ExtractionResult:
-        if result.facts:
+        synthetic_fact_types = {"source_signal", "source_reference"}
+        if any(fact.fact_type not in synthetic_fact_types for fact in result.facts):
             return result
 
         evidence = text[:400].strip()
@@ -327,7 +368,7 @@ class DeepSeekExtractor:
             facts.append(
                 ExtractedFact(
                     subject_name=title or url or "source",
-                    subject_type="source",
+                    subject_type="theme",
                     fact_type="source_reference",
                     fact_value=title or url or "source",
                     evidence_text=evidence or title or url or "Submitted source",
@@ -607,7 +648,20 @@ class DeepSeekExtractor:
 
     def _entity_type(self, value: Any, fallback: str) -> str:
         allowed = {"person", "company", "organization", "deal", "event", "theme", "relationship"}
-        return value if isinstance(value, str) and value in allowed else fallback
+        aliases = {
+            "source": "theme",
+            "article": "theme",
+            "document": "theme",
+            "url": "theme",
+            "webpage": "theme",
+        }
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in allowed:
+                return normalized
+            if normalized in aliases:
+                return aliases[normalized]
+        return fallback
 
     def _infer_relationship_entity_type(self, value: dict[str, Any], side: str) -> str:
         explicit = value.get(f"{side}_type")

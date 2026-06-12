@@ -51,6 +51,58 @@ def test_ensure_grounded_facts_creates_company_facts_when_model_omits_them():
     assert any(fact.fact_type == "person_mentioned" and fact.subject_name == "Saurabh Singh" for fact in enriched.facts)
 
 
+def test_build_extraction_result_keeps_entities_when_one_fact_is_normalized_from_source_type():
+    extractor = DeepSeekExtractor()
+    payload = extractor._normalize_extraction_payload(
+        {
+            "companies": [
+                {
+                    "name": "KKR",
+                    "category": "sponsor",
+                    "theme_ids": ["smart-water"],
+                    "confidence": 0.82,
+                }
+            ],
+            "facts": [
+                {
+                    "subject_name": "Private equity water",
+                    "subject_type": "source",
+                    "fact_type": "source_signal",
+                    "fact_value": "KKR remains a dominant force.",
+                    "evidence_text": "KKR remains a dominant force.",
+                    "theme_id": "smart-water",
+                    "confidence": 0.7,
+                }
+            ],
+        },
+        "Private equity water",
+        "https://example.com/article",
+        "smart-water",
+    )
+    result = extractor._build_extraction_result(payload)
+    assert len(result.companies) == 1
+    assert result.companies[0].name == "KKR"
+    assert len(result.facts) == 1
+    assert result.facts[0].subject_type == "theme"
+
+
+def test_normalize_fact_maps_source_subject_type_to_theme():
+    extractor = DeepSeekExtractor()
+    fact = extractor._normalize_fact(
+        {
+            "subject_name": "Article",
+            "subject_type": "source",
+            "fact_type": "source_signal",
+            "fact_value": "Water sector PE activity is rising.",
+            "evidence_text": "Water sector PE activity is rising.",
+        },
+        "Private equity water",
+        "smart-water",
+    )
+    assert fact is not None
+    assert fact["subject_type"] == "theme"
+
+
 def test_deepseek_extraction_normalizes_loose_model_json():
     extractor = DeepSeekExtractor()
 

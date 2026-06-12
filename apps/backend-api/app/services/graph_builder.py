@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from uuid import uuid4
+from urllib.parse import urlparse
 
 from app.repositories.supabase_repo import repo
 from app.schemas.domain import ExtractionResult, ResearchJob, SourceRecord
@@ -197,27 +198,46 @@ async def persist_candidate_extraction(
         if candidate["candidate_type"] == "person":
             matches = repo.find_people_by_name(candidate["name"])
             candidate_org = str(candidate.get("payload", {}).get("current_organization") or "")
+            candidate_linkedin = str(candidate.get("payload", {}).get("linkedin_url") or "")
+            candidate_domain = _domain(candidate.get("payload", {}).get("website") or candidate_linkedin)
             for match in matches:
                 match_org = str(match.get("current_organization") or "")
+                match_linkedin = str(match.get("linkedin_url") or "")
+                match_domain = _domain(match.get("website") or match_linkedin)
                 organization_match = bool(
                     candidate_org
                     and match_org
                     and candidate_org.casefold() == match_org.casefold()
                 )
+                linkedin_match = bool(candidate_linkedin and match_linkedin and candidate_linkedin == match_linkedin)
+                domain_match = bool(candidate_domain and match_domain and candidate_domain == match_domain)
+                match_method = "probable_name_match"
+                match_score = 0.9
+                if organization_match:
+                    match_method = "name_and_organization"
+                    match_score = 0.96
+                if domain_match:
+                    match_method = f"{match_method}_domain"
+                    match_score = max(match_score, 0.97)
+                if linkedin_match:
+                    match_method = "linkedin_exact"
+                    match_score = 0.995
                 match_candidates.append(
                     {
                         "discovery_candidate_id": candidate["id"],
                         "canonical_entity_type": "person",
                         "canonical_entity_id": match["id"],
-                        "match_method": "exact_name_and_organization"
-                        if organization_match
-                        else "exact_name",
-                        "match_score": 0.98 if organization_match else 0.9,
+                        "match_method": match_method,
+                        "match_score": match_score,
                         "evidence": {
                             "candidate_name": candidate["name"],
                             "candidate_organization": candidate_org,
+                            "candidate_linkedin": candidate_linkedin,
                             "canonical_name": match.get("name"),
                             "canonical_organization": match_org,
+                            "canonical_linkedin": match_linkedin,
+                            "domain_match": domain_match,
+                            "organization_match": organization_match,
                             "source_id": source.id,
                         },
                         "review_status": "needs_review",
@@ -258,6 +278,14 @@ async def persist_candidate_extraction(
         "entity_match_candidates": len(saved_matches),
         "chunks_created": len(chunk_rows),
     }
+
+
+def _domain(value: str | None) -> str | None:
+    if not value:
+        return None
+    parsed = urlparse(value if "://" in value else f"https://{value}")
+    host = parsed.netloc or parsed.path.split("/", 1)[0]
+    return host.removeprefix("www.").casefold() or None
 
 
 def _entity_profile(entity_type: str, row: dict) -> str:

@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any
+import asyncio
+import hashlib
 
 from app.config import Settings
 from app.repositories.supabase_repo import repo
-from app.schemas.domain import ResearchJob
+from app.schemas.domain import ExtractionResult, ResearchJob
 from app.services.chunker import chunk_text
 from app.services.deepseek_extractor import extractor
 from app.services.embeddings_bge import embeddings
@@ -74,6 +76,9 @@ async def persist_search_hit(
     round_index: int | None = None,
     profile_coverage: ProfileCoverage | None = None,
 ) -> dict[str, int]:
+    input_hash = hashlib.sha256(
+        f"{source_hash_basis(result, content)}:{job.theme_id}:{job.metadata.get('objective')}".encode("utf-8")
+    ).hexdigest()
     metadata = {
         "theme_id": job.theme_id,
         "query": query,
@@ -92,6 +97,7 @@ async def persist_search_hit(
             "publisher": result.get("publisher"),
             "source_type": "web_search",
             "raw_text": content,
+            "content_hash": hashlib.sha256(content.encode("utf-8")).hexdigest() if content else None,
             "metadata": metadata,
         }
     )
@@ -101,14 +107,19 @@ async def persist_search_hit(
         target_context["profile_coverage"] = profile_coverage.fields
         target_context["missing_profile_fields"] = profile_coverage.missing_fields
 
-    extraction = await extractor.extract(
-        content,
-        source.title,
-        source.url,
-        job.theme_id,
-        objective=job.metadata.get("objective"),
-        target_context=target_context,
-    )
+    cached = repo.get_cached_extraction(source.id, input_hash)
+    if cached:
+        extraction = ExtractionResult.model_validate(cached)
+    else:
+        extraction = await extractor.extract(
+            content,
+            source.title,
+            source.url,
+            job.theme_id,
+            objective=job.metadata.get("objective"),
+            target_context=target_context,
+        )
+        repo.cache_extraction(source.id, input_hash, extraction.model_dump(mode="json"))
     if profile_coverage is not None:
         update_profile_coverage(profile_coverage, extraction, source)
 
@@ -120,6 +131,10 @@ async def persist_search_hit(
         job.theme_id,
         job,
     )
+
+
+def source_hash_basis(result: dict[str, Any], content: str) -> str:
+    return str(result.get("url") or result.get("title") or content[:1000])
 
 
 async def run_discovery_queries(
@@ -165,6 +180,7 @@ async def run_profile_completion_queries(
     batch = QueryBatchResult()
     executed: set[str] = set()
     queries = list(initial_queries)
+    semaphore = asyncio.Semaphore(max(1, settings.profile_completion_concurrency))
     repo.update_job(job.id, {"progress_total": max_queries})
 
     for round_index in range(max_rounds):
@@ -193,26 +209,42 @@ async def run_profile_completion_queries(
             batch.totals.sources += len(results)
             fallback_fetches = 0
 
-            for result in results:
+            async def persist_result(result: dict[str, Any], allow_fetch: bool) -> tuple[dict[str, int] | None, int]:
                 url = result.get("url")
                 if url and url in coverage.seen_urls:
-                    continue
+                    return None, 0
 
-                content, batch.requests_used, fallback_fetches = await enrich_search_result(
-                    result,
-                    settings,
-                    batch.requests_used,
-                    fallback_fetches,
-                )
-                persisted = await persist_search_hit(
-                    job,
-                    query,
-                    result,
-                    content,
-                    round_index=round_index,
-                    profile_coverage=coverage,
-                )
-                batch.totals.absorb(persisted)
+                async with semaphore:
+                    content, _requests_used, _fallback_fetches = await enrich_search_result(
+                        result,
+                        settings,
+                        0,
+                        0 if allow_fetch else settings.keirolabs_fetches_per_query,
+                    )
+                    persisted = await persist_search_hit(
+                        job,
+                        query,
+                        result,
+                        content,
+                        round_index=round_index,
+                        profile_coverage=coverage,
+                    )
+                    return persisted, _requests_used
+
+            persisted_results = await asyncio.gather(
+                *[
+                    persist_result(result, index < settings.keirolabs_fetches_per_query)
+                    for index, result in enumerate(results)
+                ],
+                return_exceptions=True,
+            )
+            for item in persisted_results:
+                if isinstance(item, tuple):
+                    persisted, fetch_requests = item
+                    batch.requests_used += fetch_requests
+                    fallback_fetches += fetch_requests
+                    if isinstance(persisted, dict):
+                        batch.totals.absorb(persisted)
 
             repo.update_job(job.id, {"progress_completed": len(executed)})
 

@@ -74,6 +74,11 @@ async def _ingest_validated_source(
         "persisted": persisted_summary,
         "mutation": repo.enabled,
         "review_gated": True,
+        "ingest_meta": {
+            "source_text_chars": len(source_text),
+            "chunks_created": len(chunks),
+            "embedding_mode": "semantic" if embeddings.semantic_search_available else "hash",
+        },
     }
 
 

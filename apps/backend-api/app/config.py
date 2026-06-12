@@ -54,6 +54,7 @@ class Settings:
     keirolabs_search_results: int = int(getenv("KEIROLABS_SEARCH_RESULTS", "5"))
     keirolabs_fetches_per_query: int = int(getenv("KEIROLABS_FETCHES_PER_QUERY", "1"))
     keirolabs_max_requests_per_job: int = int(getenv("KEIROLABS_MAX_REQUESTS_PER_JOB", "12"))
+    profile_completion_concurrency: int = int(getenv("PROFILE_COMPLETION_CONCURRENCY", "3"))
     bge_model: str = getenv("BGE_MODEL", "BAAI/bge-small-en-v1.5")
     bge_vector_dimensions: int = int(getenv("BGE_VECTOR_DIMENSIONS", "384"))
     cors_allowed_origins: str | None = getenv("CORS_ALLOWED_ORIGINS")

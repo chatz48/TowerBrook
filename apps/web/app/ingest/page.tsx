@@ -76,6 +76,11 @@ interface IngestResult {
   relationshipCandidates?: string[];
   note?: string;
   review_gated?: boolean;
+  ingest_meta?: {
+    source_text_chars?: number;
+    chunks_created?: number;
+    embedding_mode?: "semantic" | "hash";
+  };
   source?: {
     title: string;
     url?: string;
@@ -372,6 +377,19 @@ function GraphIngestionResult({ result }: { result: IngestResult }) {
       <section className="ee-panel rounded-lg p-5">
         <div className="ee-label text-ink">Source summary</div>
         <p className="mt-3 max-w-4xl text-[13px] leading-relaxed text-ink-soft">{summary}</p>
+        {result.ingest_meta ? (
+          <p className="mt-3 text-[12px] text-ink-faint">
+            Parsed {result.ingest_meta.source_text_chars ?? 0} characters into{" "}
+            {result.ingest_meta.chunks_created ?? 0} chunks
+            {result.ingest_meta.embedding_mode ? ` · ${result.ingest_meta.embedding_mode} embeddings` : ""}.
+          </p>
+        ) : null}
+        {(result.ingest_meta?.source_text_chars ?? 1) === 0 ? (
+          <p className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-900">
+            No article text was fetched from the URL on this runtime. Paste the source text manually or confirm
+            KEIROLABS_API_KEY is set on the deployed backend API.
+          </p>
+        ) : null}
         {result.review_gated ? (
           <p className="mt-3 rounded-md border border-line bg-paper px-3 py-2 text-[12px] text-ink-soft">
             Candidates are review-gated. Approve extracted people, companies, relationships and facts before they

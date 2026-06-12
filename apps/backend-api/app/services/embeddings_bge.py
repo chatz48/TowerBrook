@@ -45,6 +45,17 @@ def _clear_fastembed_cache(cache_dir: Path) -> None:
     cache_dir.mkdir(parents=True, exist_ok=True)
 
 
+def _cache_dir_writable(cache_dir: Path) -> bool:
+    try:
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        probe = cache_dir / ".write_probe"
+        probe.write_text("ok", encoding="utf-8")
+        probe.unlink(missing_ok=True)
+        return True
+    except OSError:
+        return False
+
+
 class BgeEmbeddingService:
     """BGE-small-en-v1.5 @ 384-d for pgvector. Uses fastembed when available."""
 
@@ -63,6 +74,12 @@ class BgeEmbeddingService:
             return
 
         cache_dir = _resolve_fastembed_cache_dir()
+        if not _cache_dir_writable(cache_dir):
+            logger.warning(
+                "fastembed cache path is not writable (%s); using hash fallback on this runtime.",
+                cache_dir,
+            )
+            return
         for attempt in range(2):
             try:
                 from fastembed import TextEmbedding

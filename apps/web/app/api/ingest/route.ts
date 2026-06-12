@@ -1,5 +1,5 @@
 import { extractDealWithModel } from "@/lib/deal-ai";
-import { hasDealDatabase, persistDealIngestion } from "@/lib/deal-db";
+import { persistDealIngestion } from "@/lib/deal-db";
 import { runDealEnrichment } from "@/lib/deal-enrichment";
 import { callBackendApi } from "@/lib/backend-api";
 import { hasModel } from "@/lib/llm";
