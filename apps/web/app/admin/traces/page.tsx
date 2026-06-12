@@ -1,10 +1,18 @@
 import { loadTraceDashboard, type TraceGroup } from "@/lib/trace-dashboard";
+import { headers } from "next/headers";
+import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 const numberFormat = new Intl.NumberFormat("en-GB");
 
 export default async function TraceMetricsPage() {
+  const requestHeaders = await headers();
+  const host = requestHeaders.get("host") ?? "";
+  if (!isLocalRequestHost(host)) {
+    notFound();
+  }
+
   const dashboard = await loadTraceDashboard();
   const summaryTiles = [
     { label: "Requests", value: dashboard.totalGroups },
@@ -216,4 +224,11 @@ function formatDate(value: string): string {
 
 function formatValue(value: string | number): string {
   return typeof value === "number" ? numberFormat.format(value) : value;
+}
+
+function isLocalRequestHost(host: string): boolean {
+  const normalized = host.toLowerCase();
+  if (normalized.startsWith("[::1]")) return true;
+  const hostname = normalized.split(":")[0];
+  return hostname === "localhost" || hostname === "127.0.0.1";
 }

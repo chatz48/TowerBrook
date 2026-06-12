@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home", shortLabel: "Home", match: "/" },
@@ -70,7 +70,15 @@ function NavLink({
 
 function ToolsDropdown({ pathname, mobile }: { pathname: string; mobile: boolean }) {
   const detailsRef = useRef<HTMLDetailsElement>(null);
-  const active = TOOLS_ITEMS.some(
+  const showLocalTraces = useSyncExternalStore(
+    subscribeToHostChanges,
+    getLocalTraceVisibility,
+    () => false,
+  );
+  const toolItems = showLocalTraces
+    ? TOOLS_ITEMS
+    : TOOLS_ITEMS.filter((item) => item.href !== "/admin/traces");
+  const active = toolItems.some(
     (item) => pathname === item.href || pathname.startsWith(item.match),
   );
 
@@ -104,7 +112,7 @@ function ToolsDropdown({ pathname, mobile }: { pathname: string; mobile: boolean
           mobile ? "left-2" : "right-0"
         }`}
       >
-        {TOOLS_ITEMS.map((item) => {
+        {toolItems.map((item) => {
           const itemActive = pathname === item.href || pathname.startsWith(item.match);
           return (
             <Link
@@ -121,4 +129,16 @@ function ToolsDropdown({ pathname, mobile }: { pathname: string; mobile: boolean
       </div>
     </details>
   );
+}
+
+function subscribeToHostChanges(): () => void {
+  return () => {};
+}
+
+function getLocalTraceVisibility(): boolean {
+  return isLocalBrowserHost(window.location.hostname);
+}
+
+function isLocalBrowserHost(hostname: string): boolean {
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname === "[::1]";
 }
