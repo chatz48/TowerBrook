@@ -18,6 +18,8 @@
     "government-investment:census": "node scripts/build-government-investment-census.mjs",
     "db:seed": "node scripts/seed-supabase.mjs",
     "db:seed:graph": "node scripts/seed-people-graph.mjs",
+    "db:verify:retrieval": "node scripts/verify-retrieval-migration.mjs",
+    "db:backfill:retrieval": "node scripts/verify-retrieval-migration.mjs --backfill",
     "product:score": "node scripts/score-product-readiness.mjs",
     "test:unit": "node --experimental-strip-types --test tests/*.test.mjs tests/*.test.ts",
     "test:e2e": "playwright install chromium && playwright test",
