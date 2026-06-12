@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 
 from app.config import get_settings
 from app.main import app
+from app.repositories.supabase_repo import repo
 
 
 client = TestClient(app)
@@ -68,6 +69,40 @@ def test_create_expert_profile_completion_job():
 
     assert response.status_code == 200
     assert response.json()["job_type"] == "expert_profile_completion"
+
+
+def test_list_and_review_discovery_candidate_api():
+    repo.memory_discovery_candidates.clear()
+    repo.upsert_discovery_candidates(
+        [
+            {
+                "external_id": "candidate-company:new-grid-co",
+                "candidate_type": "company",
+                "name": "New Grid Co",
+                "theme_ids": ["grid-infrastructure"],
+                "priority": 88,
+                "review_status": "needs_review",
+                "source_ids": [],
+                "payload": {
+                    "external_id": "company:new-grid-co",
+                    "name": "New Grid Co",
+                    "theme_ids": ["grid-infrastructure"],
+                },
+            }
+        ]
+    )
+
+    listed = client.get("/discovery/candidates")
+    assert listed.status_code == 200
+    candidates = listed.json()["candidates"]
+    assert len(candidates) == 1
+
+    reviewed = client.post(
+        f"/discovery/candidates/{candidates[0]['id']}/review",
+        json={"action": "reject", "note": "duplicate"},
+    )
+    assert reviewed.status_code == 200
+    assert reviewed.json()["candidate"]["review_status"] == "rejected"
 
 
 def test_process_next_cron_requires_authorization():

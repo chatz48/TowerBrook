@@ -28,6 +28,7 @@ import DiscoverSidebar from "./DiscoverSidebar";
 import { CompanyDetail, ExpertDetail, GapDetail } from "./DiscoverLeadDetails";
 import ExpertQueue from "./ExpertQueue";
 import GapQueue from "./GapQueue";
+import LiveCandidateReview from "./LiveCandidateReview";
 
 export default function DiscoverPage() {
   return (
@@ -326,6 +327,7 @@ function DiscoverPageContent() {
                 {view === "gaps" ? <GapDetail gap={selectedGap} /> : null}
               </div>
             </section>
+            <LiveCandidateReview />
           </main>
         </div>
     </PageShell>
