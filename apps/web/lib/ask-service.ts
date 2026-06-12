@@ -62,6 +62,11 @@ type AskRequest = {
   question?: string;
   chatHistory?: ChatTurn[];
   conversationSummary?: string;
+  retrievalOptions?: {
+    baseline?: boolean;
+    hybrid?: boolean;
+    reranking?: boolean;
+  };
   filters?: {
     objective?: string;
     theme?: string;
@@ -128,7 +133,7 @@ export async function handleAskRequest(request: Request) {
     trace = new AskTraceCollector(
       requestId,
       prepared.question,
-      prepared.filters as Record<string, unknown>,
+      { ...(prepared.filters as Record<string, unknown>), retrievalOptions: prepared.retrievalOptions },
       false,
     );
     trace.markBaseline();
@@ -138,6 +143,7 @@ export async function handleAskRequest(request: Request) {
       prepared.baseline,
       prepared.pageContext,
       prepared.chatHistory,
+      prepared.retrievalOptions,
     )
       ? { result: null as BackendChatResult | null, error: undefined }
       : await maybeAskIntelligenceApi(
@@ -147,6 +153,7 @@ export async function handleAskRequest(request: Request) {
           prepared.chatHistory,
           prepared.baseline,
           prepared.chatMemory,
+          prepared.retrievalOptions,
           requestId,
         );
 
@@ -227,7 +234,7 @@ async function handleAskStream(request: Request): Promise<Response> {
         trace = new AskTraceCollector(
           requestId,
           prepared.question,
-          prepared.filters as Record<string, unknown>,
+          { ...(prepared.filters as Record<string, unknown>), retrievalOptions: prepared.retrievalOptions },
           true,
         );
         trace.markBaseline();
@@ -240,6 +247,7 @@ async function handleAskStream(request: Request): Promise<Response> {
             prepared.baseline,
             prepared.pageContext,
             prepared.chatHistory,
+            prepared.retrievalOptions,
           )
         ) {
           finalPayload = { ...prepared.baseline, request_id: requestId };
@@ -267,6 +275,7 @@ async function handleAskStream(request: Request): Promise<Response> {
               content: turn.content ?? "",
             })),
           },
+          prepared.retrievalOptions,
         );
 
         const backendRes = await fetchBackendStream(external.message, external.theme_id, requestId);
@@ -347,6 +356,7 @@ async function prepareAskContext(body: AskRequest): Promise<
       pageContext?: PageContext;
       chatHistory: ChatTurn[];
       chatMemory: ResolvedChatMemory;
+      retrievalOptions: NonNullable<AskRequest["retrievalOptions"]>;
       baseline: AskResponse;
     }
   | { error: string }
@@ -358,6 +368,7 @@ async function prepareAskContext(body: AskRequest): Promise<
   const chatMemory = await resolveChatMemory(chatHistory, body.conversationSummary);
   const pageContext = normalizePageContext(body.pageContext);
   const filters = body.filters ?? {};
+  const retrievalOptions = normalizeRetrievalOptions(body.retrievalOptions);
   const objective = resolveObjective(filters.objective, question);
 
   if (inferIntent(question, objective) === "chitchat") {
@@ -371,6 +382,7 @@ async function prepareAskContext(body: AskRequest): Promise<
     return {
       question,
       filters,
+      retrievalOptions,
       pageContext,
       chatHistory,
       chatMemory,
@@ -399,6 +411,7 @@ async function prepareAskContext(body: AskRequest): Promise<
   return {
     question,
     filters: body.filters ?? {},
+    retrievalOptions,
     pageContext,
     chatHistory,
     chatMemory,
@@ -478,6 +491,7 @@ async function maybeAskIntelligenceApi(
   chatHistory: ChatTurn[] = [],
   baseline?: AskResponse,
   chatMemory?: ResolvedChatMemory,
+  retrievalOptions?: NonNullable<AskRequest["retrievalOptions"]>,
   requestId?: string,
 ): Promise<{ result: BackendChatResult | null; error?: string }> {
   if (!hasBackendApi()) return { result: null };
@@ -504,6 +518,7 @@ async function maybeAskIntelligenceApi(
             })),
           }
         : undefined,
+      retrievalOptions,
     );
     const result = await callBackendApi<BackendChatResult>("/chat", {
       method: "POST",
@@ -535,13 +550,25 @@ function asksForLiveResearch(question: string): boolean {
   );
 }
 
+function normalizeRetrievalOptions(
+  value?: AskRequest["retrievalOptions"],
+): NonNullable<AskRequest["retrievalOptions"]> {
+  return {
+    baseline: Boolean(value?.baseline),
+    hybrid: value?.hybrid !== false,
+    reranking: Boolean(value?.reranking),
+  };
+}
+
 /** Directory baseline already answers these — skip slow backend synthesis. */
 function shouldSkipBackendEnrichment(
   question: string,
   baseline: AskResponse,
   pageContext?: PageContext,
   chatHistory?: ChatTurn[],
+  retrievalOptions?: NonNullable<AskRequest["retrievalOptions"]>,
 ): boolean {
+  if (retrievalOptions?.baseline) return true;
   if (baseline.intent === "chitchat") return true;
   if (!baseline.grounded) return false;
   if (asksForLiveResearch(question)) return false;

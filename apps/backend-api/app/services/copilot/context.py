@@ -21,6 +21,9 @@ class CopilotContext:
     ranked_company_names: list[str] = field(default_factory=list)
     conversation_summary: str | None = None
     recent_turns: list[dict[str, str]] = field(default_factory=list)
+    retrieval_options: dict[str, bool] = field(
+        default_factory=lambda: {"baseline": False, "hybrid": True, "reranking": False}
+    )
     raw_message: str = ""
 
     def to_prompt_block(self) -> str:
@@ -49,6 +52,7 @@ class CopilotContext:
                 "Recent turns: "
                 + json.dumps(self.recent_turns[: VERBATIM_TURN_LIMIT], ensure_ascii=True)
             )
+        lines.append(f"Retrieval options: {json.dumps(self.retrieval_options, ensure_ascii=True)}")
         return "\n".join(lines)
 
     def search_query(self) -> str:
@@ -73,6 +77,7 @@ def parse_message(message: str, theme_id: str | None = None) -> CopilotContext:
                 ranked_company_names=_as_str_list(payload.get("ranked_company_names")),
                 conversation_summary=_as_optional_str(payload.get("conversation_summary")),
                 recent_turns=_as_recent_turns(payload.get("recent_turns")),
+                retrieval_options=_as_retrieval_options(payload.get("retrieval_options")),
                 raw_message=raw,
             )
     except json.JSONDecodeError:
@@ -138,3 +143,13 @@ def _as_entity_ids(value: Any) -> dict[str, list[str]]:
         if isinstance(items, list):
             result[key] = [str(item) for item in items if item]
     return result
+
+
+def _as_retrieval_options(value: Any) -> dict[str, bool]:
+    if not isinstance(value, dict):
+        return {"baseline": False, "hybrid": True, "reranking": False}
+    return {
+        "baseline": bool(value.get("baseline")),
+        "hybrid": value.get("hybrid") is not False,
+        "reranking": bool(value.get("reranking")),
+    }

@@ -12,7 +12,7 @@ import {
   type WorkspaceItem,
 } from "@/lib/workspace";
 import { CopilotConversation, CopilotConversationInput } from "./CopilotConversation";
-import type { AskResponse, CopilotFilters, SourceRecord } from "./types";
+import type { AskResponse, CopilotFilters, CopilotRetrievalOptions, SourceRecord } from "./types";
 import { readSkipBasketAutoRun } from "@/lib/copilot-preferences";
 import {
   clearConversationSummary,
@@ -35,6 +35,12 @@ import {
 } from "./utils";
 
 type CopilotTab = "ask" | "notes";
+
+const DEFAULT_RETRIEVAL_OPTIONS: CopilotRetrievalOptions = {
+  baseline: false,
+  hybrid: true,
+  reranking: false,
+};
 
 export default function ResearchWorkspace({
   initialTheme,
@@ -66,6 +72,9 @@ export default function ResearchWorkspace({
   const [loadingQuestion, setLoadingQuestion] = useState(startingQuestion);
   const [progressStep, setProgressStep] = useState(0);
   const [error, setError] = useState("");
+  const [retrievalOptions, setRetrievalOptions] = useState<CopilotRetrievalOptions>(
+    DEFAULT_RETRIEVAL_OPTIONS,
+  );
   const activeRequest = useRef<AbortController | null>(null);
   const basketBootstrapped = useRef(false);
   const workspaceItems = useWorkspaceItems();
@@ -108,6 +117,7 @@ export default function ResearchWorkspace({
           chatHistory,
           conversationSummary,
           pageContext: pageContextFor(nextFilters),
+          retrievalOptions,
         },
         {
           onBaseline: (data) => {
@@ -224,6 +234,7 @@ export default function ResearchWorkspace({
                 ),
               ),
             ),
+            retrievalOptions: DEFAULT_RETRIEVAL_OPTIONS,
           },
           {
             onBaseline: (data) => {
@@ -374,6 +385,13 @@ export default function ResearchWorkspace({
                 Open Discover ({discoveryQueueCount})
               </Link>
             </div>
+            {tab === "ask" ? (
+              <RetrievalOptionControls
+                value={retrievalOptions}
+                disabled={loading}
+                onChange={setRetrievalOptions}
+              />
+            ) : null}
 
             {tab === "ask" ? (
               <CopilotConversationInput
@@ -414,6 +432,68 @@ export default function ResearchWorkspace({
           onSourceSelect={setSelectedSourceId}
         />
       </div>
+    </div>
+  );
+}
+
+function RetrievalOptionControls({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: CopilotRetrievalOptions;
+  disabled: boolean;
+  onChange: (value: CopilotRetrievalOptions) => void;
+}) {
+  const options: Array<{
+    key: keyof CopilotRetrievalOptions;
+    label: string;
+    title: string;
+  }> = [
+    {
+      key: "baseline",
+      label: "Baseline only",
+      title: "Use the deterministic directory answer and skip backend enrichment.",
+    },
+    {
+      key: "hybrid",
+      label: "Hybrid",
+      title: "Use vector plus text retrieval for source evidence.",
+    },
+    {
+      key: "reranking",
+      label: "Rerank",
+      title: "Reorder retrieved evidence before synthesis.",
+    },
+  ];
+
+  function toggle(key: keyof CopilotRetrievalOptions) {
+    onChange({ ...value, [key]: !value[key] });
+  }
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]" data-testid="copilot-retrieval-options">
+      <span className="font-semibold uppercase tracking-[0.12em] text-ink-faint">Retrieval</span>
+      {options.map((option) => (
+        <label
+          key={option.key}
+          title={option.title}
+          className={`inline-flex min-h-8 items-center gap-1.5 rounded border px-2.5 py-1.5 ${
+            value[option.key]
+              ? "border-accent bg-[#f4f8ff] text-accent"
+              : "border-line bg-white text-ink-soft"
+          } ${disabled ? "opacity-55" : "cursor-pointer hover:border-accent"}`}
+        >
+          <input
+            type="checkbox"
+            checked={value[option.key]}
+            disabled={disabled}
+            onChange={() => toggle(option.key)}
+            className="accent-accent"
+          />
+          <span className="font-medium">{option.label}</span>
+        </label>
+      ))}
     </div>
   );
 }

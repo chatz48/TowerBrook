@@ -14,3 +14,9 @@ export type CopilotFilters = {
   sourceScope: string;
   includeTowerBrookEmployees: boolean;
 };
+
+export type CopilotRetrievalOptions = {
+  baseline: boolean;
+  hybrid: boolean;
+  reranking: boolean;
+};

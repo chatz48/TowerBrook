@@ -59,6 +59,11 @@ export type ExternalChatPayload = {
   prior_entity_ids?: { expert_ids: string[]; company_ids: string[] };
   conversation_summary?: string;
   recent_turns?: Array<{ role: string; content: string }>;
+  retrieval_options?: {
+    baseline?: boolean;
+    hybrid?: boolean;
+    reranking?: boolean;
+  };
 };
 
 /** Structured backend payload for LangGraph intent router + Keiro research. */
@@ -80,6 +85,11 @@ export function buildExternalChatPayload(
   memory?: {
     conversation_summary?: string;
     recent_turns?: Array<{ role: string; content: string }>;
+  },
+  retrievalOptions?: {
+    baseline?: boolean;
+    hybrid?: boolean;
+    reranking?: boolean;
   },
 ): { message: string; theme_id?: string } {
   const safe = sanitizePageContextForExternal(pageContext);
@@ -107,6 +117,7 @@ export function buildExternalChatPayload(
     ...(entityIds ? { prior_entity_ids: entityIds } : {}),
     ...(memory?.conversation_summary ? { conversation_summary: memory.conversation_summary } : {}),
     ...(memory?.recent_turns?.length ? { recent_turns: memory.recent_turns.slice(0, 4) } : {}),
+    ...(retrievalOptions ? { retrieval_options: retrievalOptions } : {}),
   };
   return {
     message: JSON.stringify(payload),

@@ -14,13 +14,13 @@ from app.services.url_safety import is_safe_fetch_url
 
 # Intent → minimal directory-first pipeline. Live web search is opt-in only (see resolve_tools).
 INTENT_TOOL_PIPELINES: dict[str, list[str]] = {
-    "find_experts": ["rag_search_entities", "rag_search_sources"],
-    "map_companies": ["rag_search_entities", "rag_search_sources"],
-    "red_team": ["rag_search_sources", "rag_search_entities"],
-    "build_call_plan": ["rag_search_entities", "rag_search_sources"],
+    "find_experts": ["rag_search_entities", "rag_search_relationships", "rag_search_sources"],
+    "map_companies": ["rag_search_entities", "rag_search_relationships", "rag_search_sources"],
+    "red_team": ["rag_search_sources", "rag_search_relationships", "rag_search_entities"],
+    "build_call_plan": ["rag_search_entities", "rag_search_relationships", "rag_search_sources"],
     "market_research": ["rag_search_sources"],
     "deep_discovery": ["run_deep_discovery", "rag_search_sources"],
-    "draft_outreach": ["rag_search_entities", "draft_email"],
+    "draft_outreach": ["rag_search_entities", "rag_search_relationships", "draft_email"],
     "generate_report": ["rag_search_sources", "generate_report"],
     "source_analysis": ["fetch_source", "rag_search_sources"],
 }
@@ -63,6 +63,8 @@ def resolve_tools(
     ctx: CopilotContext,
     tools_hint: list[str] | None = None,
 ) -> list[str]:
+    if ctx.retrieval_options.get("baseline"):
+        return []
     if tools_hint:
         return list(dict.fromkeys(tools_hint))
 
@@ -90,6 +92,8 @@ async def run_tool(
         return await _rag_search_sources(ctx, citations, search_query)
     if tool_name == "rag_search_entities":
         return await _rag_search_entities(ctx, citations, search_query)
+    if tool_name == "rag_search_relationships":
+        return await _rag_search_relationships(ctx, citations, search_query)
     if tool_name == "web_search":
         return await _web_search(ctx, citations, search_query)
     if tool_name == "fetch_source":
@@ -113,7 +117,7 @@ async def run_pipeline(
     citations: list[Citation] = []
     traces: list[ToolTrace] = []
     # Run independent retrieval tools in parallel for latency.
-    retrieval = [t for t in tools if t in {"rag_search_sources", "rag_search_entities", "web_search"}]
+    retrieval = [t for t in tools if t in {"rag_search_sources", "rag_search_entities", "rag_search_relationships", "web_search"}]
     sequential = [t for t in tools if t not in retrieval]
 
     if retrieval:
@@ -149,7 +153,16 @@ async def _rag_search_sources(ctx: CopilotContext, citations: list[Citation], qu
             output={"count": 0},
             status="skipped",
         )
-    rows = repo.search_sources(embeddings.embed(query), ctx.theme_id, limit=6)
+    query_embedding = embeddings.embed(query)
+    use_hybrid = ctx.retrieval_options.get("hybrid", True)
+    use_reranking = ctx.retrieval_options.get("reranking", False)
+    rows = (
+        repo.hybrid_search_sources(query, query_embedding, ctx.theme_id, limit=12 if use_reranking else 8)
+        if use_hybrid
+        else repo.search_sources(query_embedding, ctx.theme_id, limit=12 if use_reranking else 8)
+    )
+    if use_reranking:
+        rows = _rerank_rows(query, rows)[:8]
     for row in rows:
         citations.append(
             Citation(
@@ -161,8 +174,25 @@ async def _rag_search_sources(ctx: CopilotContext, citations: list[Citation], qu
         )
     return ToolTrace(
         tool_name="rag_search_sources",
-        input={"theme_id": ctx.theme_id, "query": query},
-        output={"count": len(rows)},
+        input={
+            "theme_id": ctx.theme_id,
+            "query": query,
+            "retrieval_options": ctx.retrieval_options,
+        },
+        output={
+            "count": len(rows),
+            "mode": "hybrid_vector_text" if use_hybrid else "vector_only",
+            "reranked": use_reranking,
+            "top_scores": [
+                {
+                    "title": row.get("title"),
+                    "hybrid_score": row.get("hybrid_score"),
+                    "vector_similarity": row.get("vector_similarity") or row.get("similarity"),
+                    "text_rank": row.get("text_rank"),
+                }
+                for row in rows[:5]
+            ],
+        },
     )
 
 
@@ -187,8 +217,74 @@ async def _rag_search_entities(ctx: CopilotContext, citations: list[Citation], q
     return ToolTrace(
         tool_name="rag_search_entities",
         input={"query": query},
-        output={"count": len(rows), "entities": rows[:3]},
+        output={
+            "count": len(rows),
+            "mode": "vector_entity_profile",
+            "entities": rows[:3],
+            "top_scores": [
+                {
+                    "entity_id": row.get("entity_id"),
+                    "entity_type": row.get("entity_type"),
+                    "similarity": row.get("similarity"),
+                }
+                for row in rows[:5]
+            ],
+        },
     )
+
+
+async def _rag_search_relationships(ctx: CopilotContext, citations: list[Citation], query: str) -> ToolTrace:
+    if not embeddings.semantic_search_available:
+        return ToolTrace(
+            tool_name="rag_search_relationships",
+            input={"skipped": "hash embeddings"},
+            output={"count": 0},
+            status="skipped",
+        )
+    rows = repo.search_relationships(embeddings.embed(query), ctx.theme_id, limit=6)
+    for row in rows:
+        metadata = row.get("metadata") if isinstance(row.get("metadata"), dict) else {}
+        citations.append(
+            Citation(
+                source_id=str(row.get("relationship_id") or row.get("embedding_id") or ""),
+                title=metadata.get("title") or metadata.get("relationship_type") or "Relationship match",
+                url=metadata.get("url"),
+                evidence=str(row.get("profile_text") or "")[:500],
+            )
+        )
+    return ToolTrace(
+        tool_name="rag_search_relationships",
+        input={"theme_id": ctx.theme_id, "query": query, "retrieval_options": ctx.retrieval_options},
+        output={
+            "count": len(rows),
+            "mode": "vector_relationship_profile",
+            "top_scores": [
+                {
+                    "relationship_id": row.get("relationship_id"),
+                    "similarity": row.get("similarity"),
+                }
+                for row in rows[:5]
+            ],
+        },
+    )
+
+
+def _rerank_rows(query: str, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    terms = {term.casefold() for term in query.split() if len(term) > 2}
+    if not terms:
+        return rows
+
+    def score(row: dict[str, Any]) -> tuple[float, float]:
+        content = " ".join(
+            str(row.get(key) or "")
+            for key in ("title", "content", "profile_text")
+        ).casefold()
+        lexical = sum(1 for term in terms if term in content) / max(len(terms), 1)
+        base = float(row.get("hybrid_score") or row.get("similarity") or row.get("vector_similarity") or 0)
+        row["rerank_score"] = round((0.65 * lexical) + (0.35 * base), 6)
+        return float(row["rerank_score"]), base
+
+    return sorted(rows, key=score, reverse=True)
 
 
 async def _web_search(ctx: CopilotContext, citations: list[Citation], query: str) -> ToolTrace:

@@ -8,6 +8,7 @@ ThemeId = Literal["clean-energy-advisory", "grid-infrastructure", "smart-water"]
 ToolName = Literal[
     "rag_search_sources",
     "rag_search_entities",
+    "rag_search_relationships",
     "web_search",
     "fetch_source",
     "generate_report",
@@ -19,6 +20,7 @@ ToolName = Literal[
 ALLOWED_TOOLS = {
     "rag_search_sources",
     "rag_search_entities",
+    "rag_search_relationships",
     "web_search",
     "fetch_source",
     "generate_report",
